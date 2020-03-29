@@ -1,0 +1,12 @@
+SWOTDA
+     -src
+     -out
+     -data
+     -local_patch
+     -img_code
+
+     out
+         -experiment_name
+             -assim_out
+             -cama_out
+             -cama_in
