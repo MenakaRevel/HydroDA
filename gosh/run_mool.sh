@@ -10,7 +10,7 @@
 #PBS -V
 #PBS -N SWOTDA_1.08
 
-source ~/.bashrc
+#source ~/.bashrc
 
 export OMP_NUM_THREADS=20
 
@@ -18,7 +18,7 @@ export OMP_NUM_THREADS=20
 HydroDA="/cluster/data6/menaka/HydroDA"
 
 #--
-cd $SWOTDA
+cd $HydroDA
 #cd $PBS_O_WORKDIR
 #cd $swotda
 
@@ -26,6 +26,16 @@ cd $SWOTDA
 EXP="E2O_womc"
 IFACTOR="1.08"
 
+mkdir $HydroDA"/out"
+mkdir $HydroDA"/out/"$EXP
+
+# copy params.py 
+cp -r "$HydroDA/gosh/params.py" "$HydroDA/out/$EXP/params.py"
+cp -r "$HydroDA/gosh/params.py" "$HydroDA/src/params.py"
+
+ln -sf $HydroDA"/src/"run.py $HydroDA"/out/"$EXP"/"run.py
+#ln -sf $HydroDA"/src/"main_code.py $HydroDA"/out/"$EXP"/"main_code.py
 # run the main code using virtual environment
-/home/menaka/miniconda3/envs/pydef/bin/python2.7 HydroDA"/src/"PBS_run.py $EXP $IFACTOR
-#python HydroDA"/src/"PBS_run.py $EXP $IFACTOR
+#/home/menaka/miniconda3/envs/pydef/bin/python2.7 $HydroDA"/src/"PBS_run.py $EXP $IFACTOR
+cd $HydroDA"/out/"$EXP
+python run.py

@@ -12,11 +12,11 @@
 import sys
 import main_code
 
-exp=sys.argv[1]
-ifact=sys.argv[2]
+#exp=sys.argv[1]
+#ifact=sys.argv[2]
 
 try:
-  main_code.main_act(exp,ifact)
+  main_code.main_act()#exp,ifact)
 except Exception as e:
   print e
 

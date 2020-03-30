@@ -19,7 +19,7 @@ def endtime():
                       # *note: this date is not included
 
 def ens_mem():
-    return 20
+    return 18
     #runoff_mem()*manning_mem() #20 # number of ensemble members
 
 def max_lat():
@@ -94,10 +94,10 @@ def mode():
     # 1: Earth2Obs, 2: ERA20CM, 3: -25% baised (ELSE_KIM2009/E2O/ERA20CM)
 
 def experiment():
-    return "ECMWF_womc_biased_if_fixed1.08"
+    return "E2O_wmc"
 
 def rivman_error():
-    return 0
+    return 1
     #define the experiment with or without rivman error
     # 0 : with out manning error
     # 1 : with manning error
@@ -137,8 +137,8 @@ def CaMa_dir():
     # directory of CaMa-Flood
     # indicate the directory of ./map or ./src and other folders
 
-def SWOT_dir():
-    return "/cluster/data6/menaka/SWOTDA_sensivity"
+def DA_dir():
+    return "/cluster/data6/menaka/HydroDA"
     # directory od SWOTDA
     # where src, data, out exsits
 
