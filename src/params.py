@@ -89,7 +89,7 @@ def err_expansion():
     # works well with 0.04
 
 def mode():
-    return 3
+    return 1
     # parameter to change assimilation mode
     # 1: Earth2Obs, 2: ERA20CM, 3: -25% baised (ELSE_KIM2009/E2O/ERA20CM)
 

@@ -844,7 +844,7 @@ def cal_monthly_mean_ens(ens_num): #start_year,end_year,ens_num,months=24):
             yyyy='%04d' % (running_dt.year)
             mm='%02d' % (running_dt.month)
             dd='%02d' % (running_dt.day)
-            roff=np.fromfile("./CaMa_in/"+runname+"/Roff/Roff__"+str(yyyy)+str(mm)+str(dd)+ens_char+".one",np.float32).reshape([ny,nx])
+            roff=np.fromfile(pm.DA_dir()+"/inp/"+runname+"/Roff/Roff__"+str(yyyy)+str(mm)+str(dd)+ens_char+".one",np.float32).reshape([ny,nx])
             roff_mon=roff_mon+roff*(roff>threshold)
             count=count+(roff>threshold)
         roff_mean=roff_mon/(count+1e-20)
@@ -1099,11 +1099,12 @@ def prepare_input():
         p.map(copy_runoff,inputlist)
         p.terminate()
 
+        #print "L1102"
         # calculate mothly mean
         # do parallel
-        p=Pool(pm.para_nums())
-        p.map(cal_monthly_mean_ens,np.arange(1,7+1))
-        p.terminate()
+        #p=Pool(pm.para_nums())
+        #p.map(cal_monthly_mean_ens,np.arange(1,7+1))
+        #p.terminate()
 
         # calculate monthly total
 
@@ -1137,6 +1138,7 @@ def prepare_input():
             #print distopen_range
         #distopen_ranges=np.array(distopen_ranges)
         f.close()
+        print "L1141"
         inputlist=[]
         for day in np.arange(start,last):
             target_dt=start_dt+datetime.timedelta(days=day)
@@ -1145,10 +1147,10 @@ def prepare_input():
             dd='%02d' % (target_dt.day)
             ens_num=1
             for runens in open_list: #np.arange(1,7+1):
-                #print runens
+                print runens
                 #if runens!=true_run:
                 run_num="%03d"%(runens)
-                iname="./CaMa_in/"+runname+"/Roff/Roff__"+yyyy+mm+dd+run_num+".one"
+                iname=pm.DA_dir()+"/inp/"+runname+"/Roff/Roff__"+yyyy+mm+dd+run_num+".one"
                 ifile=np.fromfile("./CaMa_in/"+runname+"/Roff/Roff__"+yyyy+mm+dd+run_num+".one",np.float32).reshape(720,1440)
                 roff_mean=np.fromfile("./CaMa_in/"+runname+"/mean_month/mean_"+yyyy+mm+run_num+".bin",np.float32).reshape(720,1440)
                 #roff_total=np.fromfile("./CaMa_in/E2O/total_month/total_"+yyyy+mm+".bin",np.float32).reshape(180,360)
@@ -1200,7 +1202,7 @@ def prepare_input():
             dd='%02d' % (target_dt.day)
             ens_char="T000"
             true_char="%03d"%(true_run)
-            iname="./CaMa_in/"+runname+"/Roff/Roff__"+yyyy+mm+dd+true_char+".one"
+            iname=pm.DA_dir()+"/inp/"+runname+"/Roff/Roff__"+yyyy+mm+dd+true_char+".one"
             oname="./CaMa_in/"+runname+"/Roff_TRUE/Roff__"+yyyy+mm+dd+ens_char+".one"
             inputlist.append([iname,oname,"1.00"])
 
@@ -1251,7 +1253,7 @@ def prepare_input():
             ens_num=1
             for runens in open_list: #np.arange(1,10+1):
                 run_num="%03d"%(runens)
-                iname="./CaMa_in/"+runname+"/Roff/Roff__"+yyyy+mm+dd+run_num+".one"
+                iname=pm.DA_dir()+"/inp/"+runname+"/Roff/Roff__"+yyyy+mm+dd+run_num+".one"
                 ifile=np.fromfile("./CaMa_in/"+runname+"/Roff/Roff__"+yyyy+mm+dd+run_num+".one",np.float32).reshape(180,360)
                 roff_mean=np.fromfile("./CaMa_in/"+runname+"/mean_month/mean_"+yyyy+mm+run_num+".bin",np.float32).reshape(180,360)
                 #roff_total=np.fromfile("./CaMa_in/"+runname+"/total_month/total_"+yyyy+mm+".bin",np.float32).reshape(180,360)
@@ -1307,7 +1309,7 @@ def prepare_input():
                 nx,ny=360,180
                 prefix="Roff__"
                 suffix="%03d.one"%(true_run)
-            iname="./CaMa_in/"+runname+"/Roff/"+prefix+yyyy+mm+dd+suffix
+            iname=pm.DA_dir()+"/inp/"+runname+"/Roff/"+prefix+yyyy+mm+dd+suffix
             oname="./CaMa_in/"+runname+"/Roff_TRUE/Roff__"+yyyy+mm+dd+ens_char+".one"
             inputlist.append([iname,oname,"1.00"])
 
@@ -1384,7 +1386,7 @@ def prepare_input():
             mm='%02d' % (target_dt.month)
             dd='%02d' % (target_dt.day)
             ens_char="T000"
-            iname="./CaMa_in/"+runname+"/Roff/Roff____"+yyyy+mm+dd+".one"
+            iname=pm.DA_dir()+"/inp/"+runname+"/Roff/Roff____"+yyyy+mm+dd+".one"
             oname="./CaMa_in/"+runname+"/Roff_TRUE/Roff__"+yyyy+mm+dd+ens_char+".one"
             inputlist.append([iname,oname,"1.00"])
 
