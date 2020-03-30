@@ -15,7 +15,7 @@ source ~/.bashrc
 export OMP_NUM_THREADS=20
 
 # got to working dirctory
-SWOTDA="/cluster/data6/menaka/SWOTDA_sensivity"
+HydroDA="/cluster/data6/menaka/HydroDA"
 
 #--
 cd $SWOTDA
@@ -23,8 +23,9 @@ cd $SWOTDA
 #cd $swotda
 
 # experiment
-EXP="ECMWF_womc_biased_if_fixed1.08"
+EXP="E2O_womc"
 IFACTOR="1.08"
 
 # run the main code using virtual environment
-/home/menaka/miniconda3/envs/pydef/bin/python2.7 PBS_run.py $EXP $IFACTOR
+/home/menaka/miniconda3/envs/pydef/bin/python2.7 HydroDA"/src/"PBS_run.py $EXP $IFACTOR
+#python HydroDA"/src/"PBS_run.py $EXP $IFACTOR
