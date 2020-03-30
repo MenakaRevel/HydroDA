@@ -1,0 +1,239 @@
+v4.0.0 (updated 2019-11-14): Errors in Runoff, Manning Coeff
+E2O
+initial
+prepare input
+-25% biased runoff experiment 3 E2O
+3
+make manning's coefficent
+make intial inflation
+spin up simulation
+0
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+006  at spinup.sh
+005  at spinup.sh
+006
+005
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+002  at spinup.sh
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+002
+004  at spinup.sh
+001  at spinup.sh
+004
+000  at spinup.sh
+001
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+000
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+007  at spinup.sh
+008  at spinup.sh
+007
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+003  at spinup.sh
+008
+003
+009  at spinup.sh
+009
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanTRUE.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+
+real	67m25.355s
+user	66m25.056s
+sys	0m22.013s
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+010  at spinup.sh
+010
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+
+real	67m53.308s
+user	67m1.011s
+sys	0m19.793s
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+011  at spinup.sh
+011
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+
+real	70m23.330s
+user	69m38.137s
+sys	0m10.585s
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+012  at spinup.sh
+012
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+
+real	70m24.585s
+user	69m35.872s
+sys	0m19.204s
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+013  at spinup.sh
+013
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+
+real	72m13.566s
+user	71m18.237s
+sys	0m24.401s
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+014  at spinup.sh
+014
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+
+real	73m9.879s
+user	72m22.991s
+sys	0m12.727s
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+015  at spinup.sh
+015
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+
+real	73m48.358s
+user	73m12.410s
+sys	0m21.924s
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+016  at spinup.sh
+016
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+
+real	74m13.277s
+user	73m31.420s
+sys	0m10.639s
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+017  at spinup.sh
+017
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+
+real	74m51.348s
+user	73m53.368s
+sys	0m24.974s
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+018  at spinup.sh
+018
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+
+real	75m24.783s
+user	74m43.244s
+sys	0m11.388s
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+019  at spinup.sh
+019
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+
+real	69m0.407s
+user	68m5.548s
+sys	0m12.819s
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+020  at spinup.sh
+020
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+
+real	70m38.979s
+user	69m45.171s
+sys	0m12.966s
+
+real	68m8.642s
+user	67m18.189s
+sys	0m13.129s
+
+real	66m40.331s
+user	65m52.681s
+sys	0m8.312s
+
+real	67m30.468s
+user	66m43.450s
+sys	0m8.372s
+
+real	70m47.411s
+user	69m49.953s
+sys	0m14.850s
+
+real	70m36.804s
+user	69m41.294s
+sys	0m15.920s
+
+real	76m16.401s
+user	75m23.161s
+sys	0m10.597s
+
+real	73m1.418s
+user	72m8.567s
+sys	0m11.536s
+
+real	75m49.272s
+user	74m52.019s
+sys	0m15.566s
+
+real	63m30.152s
+user	62m34.879s
+sys	0m14.802s
+open for 003
+open for 011
+open for 009
+open for 013
+open for 006
+open for 014
+open for 007
+open for 015
+open for 002
+open for 012
+true for 000
+open for 016
+open for 004
+open for 019
+======================= end spinup ==========================
+make intial restart
+cp ./CaMa_out/20031231T000/restart20040101.bin ./CaMa_in/restart/true/restart20040101T000.bin
+Estimate Observation Error
+[Errno 2] No such file or directory: '/cluster/data6/menaka/SWOTDA_sensivity/out/ECMWF_womc_biased_if_fixed1.09/data/obs_err.bin'
