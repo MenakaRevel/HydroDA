@@ -502,7 +502,7 @@ def compile_func(): #used
 #    os.system("ifort src/make_nonassim_init.f90 -o src/make_nonassim_init -O2 -assume byterecl")
 #    os.system("ifort src/make_nonassim.f90 -o src/make_nonassim -O2 -assume byterecl")
 #    os.system("ifort src/copy_out.f90 -o src/copy_out -O2 -assume byterecl")
-    os.system("ifort ../../src/make_restart.f90 -o ../../src/make_restart -O2 -assume byterecl -heap-arrays -nogen-interfaces -free -g -traceback  -lpthread -parallel")
+    os.system("ifort "+pm.DA_dir()+"/src/make_restart.f90 -o "+pm.DA_dir()+"/src/make_restart -O2 -assume byterecl -heap-arrays -nogen-interfaces -free -g -traceback  -lpthread -parallel")
     #os.system("ifort src/calc_stoerr.f90 -o src/calc_stoerr -O2 -assume byterecl")
 #    os.system("ifort src/make_rivout.f90 -o src/make_rivout -O2 -assume byterecl") 
     print "compile data assimilation codes..."
@@ -510,11 +510,11 @@ def compile_func(): #used
 #    os.system("ifort  src/make_corrupt_rivhgt.f90 -o src/make_corrupt_rivhgt -O3 -assume byterecl -heap-arrays -nogen-interfaces -free -mkl -mcmodel=large -shared-intel")
 #    os.system("ifort  src/data_assim_localpatch.f90 -o src/data_assim -O3 -assume byterecl -heap-arrays -nogen-interfaces -free -mkl=parallel -check bounds -g -fp-stack-check -g -traceback -lpthread -parallel") #-openmp")
 #    os.system("ifort  src/data_assim_ifsensivity.f90 -o src/data_assim -O3 -assume byterecl -heap-arrays -nogen-interfaces -free -mkl=parallel -check bounds -g -fp-stack-check -g -traceback -lpthread -parallel") #-openmp")
-    os.system("ifort  ../../src/data_assim.f90 -o ../../src/data_assim -O3 -assume byterecl -heap-arrays -nogen-interfaces -free -mkl=parallel -g -traceback  -lpthread -parallel") #-openmp
+    os.system("ifort "+pm.DA_dir()+"/src/data_assim.f90 -o "+pm.DA_dir()+"/src/data_assim -O3 -assume byterecl -heap-arrays -nogen-interfaces -free -mkl=parallel -g -traceback  -lpthread -parallel") #-openmp
 #    os.system("ifort  src/data_assim_bathy_fld.f90 -o src/data_assim_fld -O3 -assume byterecl -heap-arrays -nogen-interfaces -free -mkl -traceback -qopenmp")
 #    os.system("ifort  src/make_covariance.f90 -o src/make_covariance -O3 -assume byterecl -heap-arrays -nogen-interfaces -free -g -traceback -check bounds")
     if pm.patch_size()==0:
-         os.system("ifort  ../../src/data_assim_0.f90 -o ../../src/data_assim -O3 -assume byterecl -heap-arrays -nogen-interfaces -free -mkl -g -traceback  -lpthread -parallel")
+         os.system("ifort "+pm.DA_dir()+"/src/data_assim_0.f90 -o "+pm.DA_dir()+"/src/data_assim -O3 -assume byterecl -heap-arrays -nogen-interfaces -free -mkl -g -traceback  -lpthread -parallel")
     return 0
 ###########################
 def store_out(yyyy,mm,dd):
@@ -1090,7 +1090,7 @@ def prepare_input():
             dd='%02d' % (target_dt.day)
             ens_char="T000"
             true_char="%03d"%(true_run)
-            iname="./CaMa_in/"+runname+"/Roff/Roff__"+yyyy+mm+dd+true_char+".one" #  as true
+            iname=pm.DA_dir()+"/inp/"+runname+"/Roff/Roff__"+yyyy+mm+dd+true_char+".one" #  as true
             oname="./CaMa_in/"+runname+"/Roff_TRUE/Roff__"+yyyy+mm+dd+ens_char+".one"
             inputlist.append([iname,oname,"1.00"])
 
