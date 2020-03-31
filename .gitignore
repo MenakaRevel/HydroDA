@@ -3,6 +3,10 @@ inp
 out
 dat
 
+#params file
+*/params.py
+*params.py
+
 #binary files
 *.one
 *.bin
