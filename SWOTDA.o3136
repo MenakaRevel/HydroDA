@@ -1,6 +1,0 @@
-Traceback (most recent call last):
-  File "run.py", line 12, in <module>
-    import main_code
-  File "/cluster/data6/menaka/SWOTDA_sensivity/main_code.py", line 39
-    def main_act(exp,ifactor):
-SyntaxError: name 'ifactor' is local and global
