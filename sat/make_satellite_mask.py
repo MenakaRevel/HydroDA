@@ -67,12 +67,12 @@ def calc_dis(latlonlist):
 
     dis=math.sqrt(mer_dis**2+eqa_dis**2) #distance
     if lat%10==0 and lon%10==0:
-        print lat,lon,dis
+        print lat,lon#,dis
     return dis
 
 
 
-f = open('../data/SWOT_Science_sept2015_Nadir.kml')
+f = open('./SWOT_Science_sept2015_Nadir.kml')
 data=f.readlines()
 f.close()
 
@@ -117,7 +117,7 @@ for day in np.arange(1,22,1):
     outmesh=p.map(calc_dis,latlonlist)
 
     day_p="%02d"%day
-    wfile="../data/mesh_day"+day_p+".bin"
+    wfile="./mesh_day"+day_p+".bin"
 
     outmesh=np.asarray(outmesh)
     outmesh=outmesh.astype(np.float32)
