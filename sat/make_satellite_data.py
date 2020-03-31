@@ -6,7 +6,7 @@ import math
 import itertools
 from multiprocessing import Pool
 from multiprocessing import Process
-
+############################################
 def calc_dis(latlonlist):
     lat=latlonlist[0]
     lon=latlonlist[1]
@@ -69,9 +69,30 @@ def calc_dis(latlonlist):
     if lat%10==0 and lon%10==0:
         print lat,lon#,dis
     return dis
-
-
-
+###################################################################
+def observation_error():
+    """observation error of WSE depending on the L*W of each pixel
+    used sigma*(1/l)*(1/w) l=k*L, w=q*W  Rodrigaz et al 2017:
+    According to CaMa k=0.25, q=0.85"""
+    k=1.00 # assume nearest part to the unit catchment
+    q=1.00 # used 1.0 -> river width variability is 30%
+    rivlen=np.fromfile(pm.CaMa_dir()+"/map/glb_15min/rivlen.bin",np.float32).reshape(720,1440)
+    rivwth=np.fromfile(pm.CaMa_dir()+"/map/glb_15min/rivwth_gwdlr.bin",np.float32).reshape(720,1440)
+    nextx=(np.fromfile(pm.CaMa_dir()+"/map/glb_15min/nextxy.bin",np.int32).reshape(2,720,1440)[0]!=-9999)*1.0
+    rivlen=1.0 #rivlen*1.0e-3 #used as one kilmeter
+    rivwth=rivwth*1.0e-3
+    area=(k*rivlen)*(q*rivwth)
+    obs_err=pm.ovs_err()*(1/(k*rivlen+1.0e-20))*(1/(q*rivwth+1.0e-20))*nextx
+    #obs_err=pm.ovs_err()*(1/(area+1.0e-20))*nextx
+    # if water area < 1.0 km2 -> 0.25
+    obs_err=obs_err*(area>=1.0)*1.0+0.25*(1/(k*rivlen+1.0e-20))*(1/(q*rivwth+1.0e-20))*nextx*(area<1.0)*1.0
+    obs_err=ma.masked_where(area<0.625,obs_err).filled(0.25) # 25cm for < 1km^2 water area
+    obs_err=obs_err*nextx
+    obs_err=obs_err.astype(np.float32)
+    obs_err.tofile("./obs_err.bin")
+    return 0
+#####################################################################
+# main code
 f = open('./SWOT_Science_sept2015_Nadir.kml')
 data=f.readlines()
 f.close()
@@ -138,3 +159,6 @@ for day in np.arange(1,22,1):
 #        diff.append(sqrt((i-lat)**2+(j-lon)**2))
 #
 #min(diff)
+
+#make observation error variance
+observation_error()
