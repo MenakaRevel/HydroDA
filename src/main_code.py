@@ -532,14 +532,14 @@ def store_out(yyyy,mm,dd):
     # storing rivdph
     #shutil.copy("./CaMa_out/"+yyyy+mm+dd+"T"+numch+"/rivdph"+yyyy+".bin","assim_out/rivdph/"+looptype+"/rivdph"+yyyy+mm+dd+".bin")
 
-    # storing fldout
-    shutil.copy("./CaMa_out/"+yyyy+mm+dd+"T"+numch+"/fldout"+yyyy+".bin","assim_out/fldout/"+looptype+"/fldout"+yyyy+mm+dd+".bin")
-
-    # storing flddph
-    shutil.copy("./CaMa_out/"+yyyy+mm+dd+"T"+numch+"/flddph"+yyyy+".bin","assim_out/flddph/"+looptype+"/flddph"+yyyy+mm+dd+".bin")
-
-    # storing fldarea
-    shutil.copy("./CaMa_out/"+yyyy+mm+dd+"T"+numch+"/fldare"+yyyy+".bin","assim_out/fldarea/"+looptype+"/fldarea"+yyyy+mm+dd+".bin")
+#    # storing fldout
+#    shutil.copy("./CaMa_out/"+yyyy+mm+dd+"T"+numch+"/fldout"+yyyy+".bin","assim_out/fldout/"+looptype+"/fldout"+yyyy+mm+dd+".bin")
+#
+#    # storing flddph
+#    shutil.copy("./CaMa_out/"+yyyy+mm+dd+"T"+numch+"/flddph"+yyyy+".bin","assim_out/flddph/"+looptype+"/flddph"+yyyy+mm+dd+".bin")
+#
+#    # storing fldarea
+#    shutil.copy("./CaMa_out/"+yyyy+mm+dd+"T"+numch+"/fldare"+yyyy+".bin","assim_out/fldarea/"+looptype+"/fldarea"+yyyy+mm+dd+".bin")
 
 
     for CA in ["C","A"]:
@@ -559,20 +559,20 @@ def store_out(yyyy,mm,dd):
             numch = '%03d' % num 
             shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/rivout"+yyyy+".bin","assim_out/rivout/"+looptype+"/rivout"+yyyy+mm+dd+"_"+numch+".bin")
 
-        # storing fldout
-        for num in np.arange(1,pm.ens_mem()+1):
-            numch = '%03d' % num 
-            shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/fldout"+yyyy+".bin","assim_out/fldout/"+looptype+"/fldout"+yyyy+mm+dd+"_"+numch+".bin")
-
-        # storing flddph
-        for num in np.arange(1,pm.ens_mem()+1):
-            numch = '%03d' % num 
-            shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/flddph"+yyyy+".bin","assim_out/flddph/"+looptype+"/flddph"+yyyy+mm+dd+"_"+numch+".bin")
-
-        # storing fldarea
-        for num in np.arange(1,pm.ens_mem()+1):
-            numch = '%03d' % num 
-            shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/fldare"+yyyy+".bin","assim_out/fldarea/"+looptype+"/fldarea"+yyyy+mm+dd+"_"+numch+".bin")
+#        # storing fldout
+#        for num in np.arange(1,pm.ens_mem()+1):
+#            numch = '%03d' % num 
+#            shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/fldout"+yyyy+".bin","assim_out/fldout/"+looptype+"/fldout"+yyyy+mm+dd+"_"+numch+".bin")
+#
+#        # storing flddph
+#        for num in np.arange(1,pm.ens_mem()+1):
+#            numch = '%03d' % num 
+#            shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/flddph"+yyyy+".bin","assim_out/flddph/"+looptype+"/flddph"+yyyy+mm+dd+"_"+numch+".bin")
+#
+#        # storing fldarea
+#        for num in np.arange(1,pm.ens_mem()+1):
+#            numch = '%03d' % num 
+#            shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/fldare"+yyyy+".bin","assim_out/fldarea/"+looptype+"/fldarea"+yyyy+mm+dd+"_"+numch+".bin")
 
     return 0
 ###########################    
