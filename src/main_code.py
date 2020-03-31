@@ -968,12 +968,12 @@ def make_rivman():
         rivwth=np.fromfile(rivwth,np.float32).reshape(720,1440)
 
         # rivnum
-        rivnum="./data/rivnum.bin"
+        rivnum=pm.DA_dir()+"/dat/rivnum.bin"
         rivnum=np.fromfile(rivnum,np.int32).reshape(720,1440)
 
         # river mouth pixel
         rivmth={}
-        fname="./data/rivmth.txt"
+        fname=pm.DA_dir()+"/dat/rivmth.txt"
         f = open(fname,"r")
         lines = f.readlines()
         f.close()
