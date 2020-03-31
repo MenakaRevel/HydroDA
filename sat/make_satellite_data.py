@@ -2,10 +2,16 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import sys
+import os
 import math
+from numpy import ma
 import itertools
 from multiprocessing import Pool
 from multiprocessing import Process
+
+#link params.py
+os.system("ln -sf ../gosh/params.py params.py")
+import params as pm
 ############################################
 def calc_dis(latlonlist):
     lat=latlonlist[0]
@@ -143,8 +149,8 @@ for day in np.arange(1,22,1):
     outmesh=np.asarray(outmesh)
     outmesh=outmesh.astype(np.float32)
     outmesh.tofile(wfile)
-
-    print outmesh
+#
+#    print outmesh
 
 #
 #

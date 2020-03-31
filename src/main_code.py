@@ -86,32 +86,32 @@ def main_act():
 #    # make observation error depend on L* W
 #    print "Estimate Observation Error"
 #    observation_error()
-#
-#    start_dt=datetime.date(start_year,start_month,start_date)
-#    #start_dt=datetime.date(2008,8,1)#5,29)
-#    end_dt=datetime.date(end_year,end_month,end_date)
-#    days_count=(end_dt-start_dt).days
-#    #days_count=(end_dt-datetime.date(1991,1,1)).days 
-#
-#    # run daily simulations
-#    for day in np.arange(days_count):
-#
-#        running_dt=start_dt+datetime.timedelta(days=day)
-#        yyyy='%04d' % (running_dt.year)
-#        mm='%02d' % (running_dt.month)
-#        dd='%02d' % (running_dt.day)
-#
-#        if dd=="01" and pm.slack_notification()==1:
-#            os.system("source src/sendslack.sh python_notification DA in progress "+yyyy+" "+mm+" "+dd)
-#
-#        one_day_loop(yyyy,mm,dd,day)
-#
-#    # clean all intermediate files
-#    if pm.output_er()==1:
-#        os.system("rm -Rf ./CaMa_out/"+yyyy+"*")
-#
-#    # move assim_out folder
-##    os.system("mv assim_out assim_out_"+pm.experiment())
+
+    start_dt=datetime.date(start_year,start_month,start_date)
+    #start_dt=datetime.date(2008,8,1)#5,29)
+    end_dt=datetime.date(end_year,end_month,end_date)
+    days_count=(end_dt-start_dt).days
+    #days_count=(end_dt-datetime.date(1991,1,1)).days 
+
+    # run daily simulations
+    for day in np.arange(days_count):
+
+        running_dt=start_dt+datetime.timedelta(days=day)
+        yyyy='%04d' % (running_dt.year)
+        mm='%02d' % (running_dt.month)
+        dd='%02d' % (running_dt.day)
+
+        if dd=="01" and pm.slack_notification()==1:
+            os.system("source src/sendslack.sh python_notification DA in progress "+yyyy+" "+mm+" "+dd)
+
+        one_day_loop(yyyy,mm,dd,day)
+
+    # clean all intermediate files
+    if pm.output_er()==1:
+        os.system("rm -Rf ./CaMa_out/"+yyyy+"*")
+
+    # move assim_out folder
+#    os.system("mv assim_out assim_out_"+pm.experiment())
 ################
 ## single loop program
 ################
