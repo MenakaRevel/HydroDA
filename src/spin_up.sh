@@ -40,6 +40,7 @@ runname=$6
 EXP_DIR=$7
 #================================================
 echo $CAMADIR
+echo $EXP_DIR
 echo $ens_num " at spinup.sh"
 echo $ens_num
 orgDIR=`pwd`

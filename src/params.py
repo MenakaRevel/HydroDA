@@ -94,7 +94,7 @@ def mode():
     # 1: Earth2Obs, 2: ERA20CM, 3: -25% baised (ELSE_KIM2009/E2O/ERA20CM)
 
 def experiment():
-    return "E2O_wmc"
+    return "E2O_womc"
 
 def rivman_error():
     return 1

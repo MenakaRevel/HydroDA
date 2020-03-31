@@ -73,15 +73,15 @@ def main_act():
     timestep=pm.timestep() #time step for assimilation
     start_year,start_month,start_date=pm.starttime() # Start year month date
     end_year,end_month,end_date=pm.endtime() # End year month date
-#
-#    # Spin-up Simulation
-#    print "spin up simulation"
-#    spin_up()
-#
-#    # make initial restart
-#    print "make intial restart"
-#    make_initial_restart()
-#    #make_initial_restart_one()
+
+    # Spin-up Simulation
+    print "spin up simulation"
+    spin_up()
+
+    # make initial restart
+    print "make intial restart"
+    make_initial_restart()
+    #make_initial_restart_one()
 #
 #    # make observation error depend on L* W
 #    print "Estimate Observation Error"
@@ -268,8 +268,9 @@ def spinup_loop(inputlist):
     cpunums=pm.cpu_nums()
     mode=pm.mode()
     run_name=pm.runname(mode)
+    exp_dir=pm.DA_dir()+"/out/"+pm.experiment()
     print  "%s for %03d"%(loop,int(ens_num))
-    os.system("source src/spin_up.sh "+str(yyyy)+" "+str(loop)+" "+ens_num+" "+dir2+" "+str(cpunums)+" "+str(run_name))
+    os.system("source "+pm.DA_dir()+"/src/spin_up.sh "+str(yyyy)+" "+str(loop)+" "+ens_num+" "+dir2+" "+str(cpunums)+" "+str(run_name)+" "+str(exp_dir))
     return 0
 ###########################
 def one_day_sim(inputlist):
@@ -297,7 +298,8 @@ def one_day_sim(inputlist):
 
     print yyyy+" "+mm+" "+dd+" "+ens_num+" "+dir2+" "+looptype
     cpunums = pm.cpu_nums()
-    os.system("source src/oneday_sim.sh "+yyyy+" "+mm+" "+dd+" "+ens_num+" "+dir2+" "+looptype+" "+str(cpunums)+" "+str(run_name))
+    exp_dir=pm.DA_dir()+"/out/"+pm.experiment()
+    os.system("source "+pm.DA_dir()+"/src/oneday_sim.sh "+yyyy+" "+mm+" "+dd+" "+ens_num+" "+dir2+" "+looptype+" "+str(cpunums)+" "+str(run_name)+" "+str(exp_dir))
 
     if looptype=="true":
         # copying "restart file" to ./CaMa_in/
@@ -350,7 +352,7 @@ def assim_at_fort(yyyy,mm,dd,day): #previous --> used
     dir1=pm.CaMa_dir()+"/"
     thisday=datetime.date(int(yyyy),int(mm),int(dd))
     nxt_day=thisday+datetime.timedelta(days=1)
-    os.system("src/data_assim "+str(pm.assimN())+" "+str(pm.assimS())+" "+str(pm.assimW())+" "+str(pm.assimE())+" "+yyyy+mm+dd+" "+str('%02d'%SWOT_day(yyyy,mm,dd))+" "+str(pm.patch_size())+" "+str(pm.ens_mem())+" "+str(day)+" "+str('%04d'%(nxt_day.year)+'%02d'%(nxt_day.month)+'%02d'%(nxt_day.day))+" "+str(pm.err_expansion())+" "+dir1)
+    os.system(pm.DA_dir()+"/src/data_assim "+str(pm.assimN())+" "+str(pm.assimS())+" "+str(pm.assimW())+" "+str(pm.assimE())+" "+yyyy+mm+dd+" "+str('%02d'%SWOT_day(yyyy,mm,dd))+" "+str(pm.patch_size())+" "+str(pm.ens_mem())+" "+str(day)+" "+str('%04d'%(nxt_day.year)+'%02d'%(nxt_day.month)+'%02d'%(nxt_day.day))+" "+str(pm.err_expansion())+" "+dir1)
     return 0
 ###########################
 def data_assim(yyyy,mm,dd,day): # new data assimilation function (2017-06-30)
@@ -360,7 +362,7 @@ def data_assim(yyyy,mm,dd,day): # new data assimilation function (2017-06-30)
     thisday=datetime.date(int(yyyy),int(mm),int(dd))
     nxt_day=thisday+datetime.timedelta(days=1)
     print '%02d'%(nxt_day.day)
-    os.system("src/data_assim "+str(pm.assimN())+" "+str(pm.assimS())+" "+str(pm.assimW())+" "+str(pm.assimE())+" "+yyyy+mm+dd+" "+str('%02d'%SWOT_day(yyyy,mm,dd))+" "+str(pm.patch_size())+" "+str(pm.ens_mem())+" "+str(day)+" "+str('%04d'%(nxt_day.year)+'%02d'%(nxt_day.month)+'%02d'%(nxt_day.day))+" "+str(pm.err_expansion())+" "+dir1+" "+str(errrand)+" "+str(pm.ovs_err())+" "+str(pm.thersold()))
+    os.system(pm.DA_dir()+"/src/data_assim "+str(pm.assimN())+" "+str(pm.assimS())+" "+str(pm.assimW())+" "+str(pm.assimE())+" "+yyyy+mm+dd+" "+str('%02d'%SWOT_day(yyyy,mm,dd))+" "+str(pm.patch_size())+" "+str(pm.ens_mem())+" "+str(day)+" "+str('%04d'%(nxt_day.year)+'%02d'%(nxt_day.month)+'%02d'%(nxt_day.day))+" "+str(pm.err_expansion())+" "+dir1+" "+str(errrand)+" "+str(pm.ovs_err())+" "+str(pm.thersold()))
 #    os.system("src/data_assim "+str(pm.assimN())+" "+str(pm.assimS())+" "+str(pm.assimW())+" "+str(pm.assimE())+" "+yyyy+mm+dd+" "+str('%02d'%SWOT_day(yyyy,mm,dd))+" "+str(pm.patch_size())+" "+str(pm.ens_mem())+" "+str(day)+" "+str('%04d'%(nxt_day.year)+'%02d'%(nxt_day.month)+'%02d'%(nxt_day.day))+" "+str(pm.err_expansion())+" "+dir1+" "+str(errrand)+" "+str(pm.ovs_err()))
 #    os.system("src/data_assim_fld "+str(pm.assimN())+" "+str(pm.assimS())+" "+str(pm.assimW())+" "+str(pm.assimE())+" "+yyyy+mm+dd+" "+str('%02d'%SWOT_day(yyyy,mm,dd))+" "+str(pm.patch_size())+" "+str(pm.ens_mem())+" "+str(day)+" "+str('%04d'%(nxt_day.year)+'%02d'%(nxt_day.month)+'%02d'%(nxt_day.day))+" "+str(pm.err_expansion())+" "+dir1+" "+str(errrand)+" "+str(pm.ovs_err()))
     return 0
@@ -619,7 +621,7 @@ def make_restart(inputlist):
     # calculate other variables from water storage
     dir1=pm.CaMa_dir()+"/"
     print "dir1",dir1
-    os.system("./src/make_restart "+yyyy+mm+dd+" "+yyyy_b+mm_b+dd_b+" "+yyyy_n+mm_n+dd_n+" "+loop+" "+dir1+" "+str(pm.ens_mem())+" "+numch)
+    os.system(pm.DA_dir()+"/src/make_restart "+yyyy+mm+dd+" "+yyyy_b+mm_b+dd_b+" "+yyyy_n+mm_n+dd_n+" "+loop+" "+dir1+" "+str(pm.ens_mem())+" "+numch)
 
     print "finish restarting",numch
 ###########################

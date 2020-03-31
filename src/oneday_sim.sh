@@ -49,6 +49,7 @@ echo "looptype" $looptype
 #ens_num=$(printf '%03d' $(($runens*$manens)))
 pwd
 echo ${CAMADIR}
+echo $EXP_DIR
 # years,months,dates in arranged digit
 ar_year=$in_year
 ar_month=$in_month
