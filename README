@@ -3,6 +3,7 @@ HydroDA
      -sat
      -out
      -inp
+     -dat
 
      src : source codes
 
@@ -18,3 +19,5 @@ HydroDA
      inp
          -data name
              -Roff
+
+     dat  : river realted data
