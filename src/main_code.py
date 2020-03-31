@@ -1147,12 +1147,13 @@ def prepare_input():
             dd='%02d' % (target_dt.day)
             ens_num=1
             for runens in open_list: #np.arange(1,7+1):
-                print runens
+                #print runens
                 #if runens!=true_run:
                 run_num="%03d"%(runens)
                 iname=pm.DA_dir()+"/inp/"+runname+"/Roff/Roff__"+yyyy+mm+dd+run_num+".one"
-                ifile=np.fromfile("./CaMa_in/"+runname+"/Roff/Roff__"+yyyy+mm+dd+run_num+".one",np.float32).reshape(720,1440)
-                roff_mean=np.fromfile("./CaMa_in/"+runname+"/mean_month/mean_"+yyyy+mm+run_num+".bin",np.float32).reshape(720,1440)
+                #print "L1154"
+                #ifile=np.fromfile(pm.DA_dir()+"/inp/"+runname+"/Roff/Roff__"+yyyy+mm+dd+run_num+".one",np.float32).reshape(720,1440)
+                #roff_mean=np.fromfile("./CaMa_in/"+runname+"/mean_month/mean_"+yyyy+mm+run_num+".bin",np.float32).reshape(720,1440)
                 #roff_total=np.fromfile("./CaMa_in/E2O/total_month/total_"+yyyy+mm+".bin",np.float32).reshape(180,360)
                 #distopen_range=rd.normal(1,diststd,3)
                 #if runens==3:
@@ -1213,9 +1214,9 @@ def prepare_input():
 
         # calculate mothly mean
         # do parallel
-        p=Pool(pm.para_nums())
-        p.map(cal_monthly_mean_ens,np.arange(1,10+1))
-        p.terminate()
+        #p=Pool(pm.para_nums())
+        #p.map(cal_monthly_mean_ens,np.arange(1,10+1))
+        #p.terminate()
 
         # calculate monthly total
 
@@ -1234,8 +1235,8 @@ def prepare_input():
         for runens in open_list:
             ens_char="%03d"%(runens)
             diststd_num=2
-            if runens in random_runs: #==2 or runens==4:
-                diststd_num=3
+            #if runens in random_runs: #==2 or runens==4:
+            #    diststd_num=3
             #if runens != true_run:
             distopen_range=rd.normal(1,diststd,diststd_num)
             distopen_range=np.sort(distopen_range)
@@ -1254,8 +1255,8 @@ def prepare_input():
             for runens in open_list: #np.arange(1,10+1):
                 run_num="%03d"%(runens)
                 iname=pm.DA_dir()+"/inp/"+runname+"/Roff/Roff__"+yyyy+mm+dd+run_num+".one"
-                ifile=np.fromfile("./CaMa_in/"+runname+"/Roff/Roff__"+yyyy+mm+dd+run_num+".one",np.float32).reshape(180,360)
-                roff_mean=np.fromfile("./CaMa_in/"+runname+"/mean_month/mean_"+yyyy+mm+run_num+".bin",np.float32).reshape(180,360)
+                #ifile=np.fromfile("./CaMa_in/"+runname+"/Roff/Roff__"+yyyy+mm+dd+run_num+".one",np.float32).reshape(180,360)
+                #roff_mean=np.fromfile("./CaMa_in/"+runname+"/mean_month/mean_"+yyyy+mm+run_num+".bin",np.float32).reshape(180,360)
                 #roff_total=np.fromfile("./CaMa_in/"+runname+"/total_month/total_"+yyyy+mm+".bin",np.float32).reshape(180,360)
                 #distopen_range=rd.normal(0,diststd,2)
                 #distopen_range=distopen_range.astype(np.float32)
