@@ -1,5 +1,15 @@
+#folders
+inp
+out
+dat
+
 #binary files
 *.one
 *.bin
-inp
-out
+
+#fortan excutbles
+make_restart
+data_assim
+
+#.pyc files
+*.pyc
