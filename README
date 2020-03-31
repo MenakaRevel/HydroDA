@@ -1,12 +1,20 @@
 HydroDA
      -src
+     -sat
      -out
-     -data
-     -local_patch
-     -img_code
+     -inp
+
+     src : source codes
+
+     sat : satellite data
+         -python codes to make satellite mask
 
      out
          -experiment_name
              -assim_out
              -cama_out
              -cama_in
+
+     inp
+         -data neme
+             -Roff
