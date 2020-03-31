@@ -97,7 +97,7 @@ def experiment():
     return "E2O_womc"
 
 def rivman_error():
-    return 1
+    return 0
     #define the experiment with or without rivman error
     # 0 : with out manning error
     # 1 : with manning error
@@ -143,13 +143,13 @@ def DA_dir():
     # where src, data, out exsits
 
 def patch_dir():
-    return "/cluster/data6/menaka/covariance"
+    return "/cluster/data6/menaka/covariance/local_patch"
 
 def patch_id():
     return "0.60"
 
 def spinup_mode():
-    return 0
+    return 3
     # 0: do spinup simulation for both (corrupted and true) simulation
     # 1: do spin up only at corrupted simulation
     # 2: do spin up only at true simulation
@@ -179,6 +179,10 @@ def thersold():
 def initial_infl():
     return 1.08
     # initial inflation parameter
+
+def sigma_b():
+    return 0.0400000
+    # bacground variance of iflation 
 
 def MKLdir():
     return "/opt/intel/compilers_and_libraries_2016.3.170/mac/mkl"
@@ -251,7 +255,7 @@ def non_hgt():
     # nominal water height
 
 def cpu_nums():
-    return 1
+    return 2
     # number of cpus used
 
 def version():

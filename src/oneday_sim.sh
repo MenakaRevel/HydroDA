@@ -334,9 +334,9 @@ SMON=$in_month
 SDAY=$in_date
 SHOUR=0
 
-EYEAR=`python ${orgDIR}/src/calc_end_date.py $in_year $in_month $in_date "year"`
-EMON=`python ${orgDIR}/src/calc_end_date.py $in_year $in_month $in_date "month"`
-EDAY=`python ${orgDIR}/src/calc_end_date.py $in_year $in_month $in_date "date"`
+EYEAR=`python ${orgDIR}/../../src/calc_end_date.py $in_year $in_month $in_date "year"`
+EMON=`python ${orgDIR}/../../src/calc_end_date.py $in_year $in_month $in_date "month"`
+EDAY=`python ${orgDIR}/../../src/calc_end_date.py $in_year $in_month $in_date "date"`
 EHOUR=0
 
 ln -sf $PROG $EXE

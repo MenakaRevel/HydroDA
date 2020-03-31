@@ -54,7 +54,7 @@ def main_act():
 
     # prepare input runoff files for simulations
     print "prepare input"
-    prepare_input()
+    #prepare_input()
 
     # make rivman file
     print "make manning's coefficent"
@@ -125,7 +125,7 @@ def one_day_loop(yyyy,mm,dd,day):
     # Corrupted Simulation (Open Loop) ###################################################
     if pm.run_flag() == 0 or pm.run_flag() == 1:
         ODM_inputlist=[]
-        randlist=np.fromfile("./CaMa_out/randlist.bin",np.float32)
+        #randlist=np.fromfile("./CaMa_out/randlist.bin",np.float32)
 
         # set for ensemble simulations
         ens_num=1
@@ -163,7 +163,7 @@ def one_day_loop(yyyy,mm,dd,day):
 
     # Assimilated Simulation #############################################################
     ODM_inputlist=[]
-    randlist=np.fromfile("./CaMa_out/randlist.bin",np.float32)
+    #randlist=np.fromfile("./CaMa_out/randlist.bin",np.float32)
 
     # set for ensemble simulations
     for ens_num in np.arange(1,pm.ens_mem()+1):
@@ -313,7 +313,7 @@ def one_day_sim(inputlist):
         # copying "WSE" as "xa_m" in ./assim_out
         oldfname="CaMa_out/"+yyyy+mm+dd+"T"+ens_num+"/sfcelv"+yyyy+".bin"
         newfname="assim_out/xa_m/"+looptype+"/"+yyyy+mm+dd+"_xam.bin"
-        os.system("cp "+oldfname+" "+newfname
+        os.system("cp "+oldfname+" "+newfname)
 
     return 0
 ########################### # modified to run paralle @Menaka 
@@ -362,9 +362,11 @@ def data_assim(yyyy,mm,dd,day): # new data assimilation function (2017-06-30)
     thisday=datetime.date(int(yyyy),int(mm),int(dd))
     nxt_day=thisday+datetime.timedelta(days=1)
     print '%02d'%(nxt_day.day)
-    os.system(pm.DA_dir()+"/src/data_assim "+str(pm.assimN())+" "+str(pm.assimS())+" "+str(pm.assimW())+" "+str(pm.assimE())+" "+yyyy+mm+dd+" "+str('%02d'%SWOT_day(yyyy,mm,dd))+" "+str(pm.patch_size())+" "+str(pm.ens_mem())+" "+str(day)+" "+str('%04d'%(nxt_day.year)+'%02d'%(nxt_day.month)+'%02d'%(nxt_day.day))+" "+str(pm.err_expansion())+" "+dir1+" "+str(errrand)+" "+str(pm.ovs_err())+" "+str(pm.thersold()))
+    exp_dir=pm.DA_dir()+"/out/"+pm.experiment()
+    #os.system(pm.DA_dir()+"/src/data_assim "+str(pm.assimN())+" "+str(pm.assimS())+" "+str(pm.assimW())+" "+str(pm.assimE())+" "+yyyy+mm+dd+" "+str('%02d'%SWOT_day(yyyy,mm,dd))+" "+str(pm.patch_size())+" "+str(pm.ens_mem())+" "+str(day)+" "+str('%04d'%(nxt_day.year)+'%02d'%(nxt_day.month)+'%02d'%(nxt_day.day))+" "+str(pm.err_expansion())+" "+dir1+" "+str(errrand)+" "+str(pm.ovs_err())+" "+str(pm.thersold()))
 #    os.system("src/data_assim "+str(pm.assimN())+" "+str(pm.assimS())+" "+str(pm.assimW())+" "+str(pm.assimE())+" "+yyyy+mm+dd+" "+str('%02d'%SWOT_day(yyyy,mm,dd))+" "+str(pm.patch_size())+" "+str(pm.ens_mem())+" "+str(day)+" "+str('%04d'%(nxt_day.year)+'%02d'%(nxt_day.month)+'%02d'%(nxt_day.day))+" "+str(pm.err_expansion())+" "+dir1+" "+str(errrand)+" "+str(pm.ovs_err()))
 #    os.system("src/data_assim_fld "+str(pm.assimN())+" "+str(pm.assimS())+" "+str(pm.assimW())+" "+str(pm.assimE())+" "+yyyy+mm+dd+" "+str('%02d'%SWOT_day(yyyy,mm,dd))+" "+str(pm.patch_size())+" "+str(pm.ens_mem())+" "+str(day)+" "+str('%04d'%(nxt_day.year)+'%02d'%(nxt_day.month)+'%02d'%(nxt_day.day))+" "+str(pm.err_expansion())+" "+dir1+" "+str(errrand)+" "+str(pm.ovs_err()))
+    os.system(pm.DA_dir()+"/src/data_assim "+str(pm.assimN())+" "+str(pm.assimS())+" "+str(pm.assimW())+" "+str(pm.assimE())+" "+yyyy+mm+dd+" "+str('%02d'%SWOT_day(yyyy,mm,dd))+" "+str(pm.patch_size())+" "+str(pm.ens_mem())+" "+str(day)+" "+str('%04d'%(nxt_day.year)+'%02d'%(nxt_day.month)+'%02d'%(nxt_day.day))+" "+str(pm.err_expansion())+" "+dir1+" "+str(errrand)+" "+str(pm.ovs_err())+" "+str(pm.thersold())+" "+exp_dir+" "+pm.DA_dir()+" "+pm.patch_dir()+" "+pm.patch_id()+" "+str(pm.sigma_b()))
     return 0
 ###########################
 def make_init_storge():

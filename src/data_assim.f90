@@ -231,7 +231,7 @@ close(34)
 ! read SWOT observation distance data
 allocate(swot_obs(1440,640))
 swot_obs=0
-fname=trim(adjustl(expdir))//"/data/mesh_day"//swot_day//".bin"
+fname=trim(adjustl(swotdir))//"/sat/mesh_day"//swot_day//".bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*lonpx*640,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) swot_obs
@@ -242,15 +242,15 @@ close(34)
 
 ! obs_mask is a mask for considering if there is observation in local patch at that date
 allocate(obs_mask(lonpx,latpx))
-obs_mask=0 ! 0 means no observations in local patch
-fname=trim(adjustl(swotdir))//"/ava_obs/obs"//swot_day//".bin"
-open(34,file=fname,form="unformatted",access="direct",recl=4*lonpx*latpx,status="old",iostat=ios)
-if(ios==0)then
-    read(34,rec=1) obs_mask
-else
-    write(*,*) "no obs_mask"
-end if
-close(34)
+!obs_mask=0 ! 0 means no observations in local patch
+!fname=trim(adjustl(swotdir))//"/ava_obs/obs"//swot_day//".bin"
+!open(34,file=fname,form="unformatted",access="direct",recl=4*lonpx*latpx,status="old",iostat=ios)
+!if(ios==0)then
+!    read(34,rec=1) obs_mask
+!else
+!    write(*,*) "no obs_mask"
+!end if
+!close(34)
 
 ! inflation parameter
 fname=trim(adjustl(expdir))//"/inflation/parm_infl"//yyyymmdd//".bin"
@@ -292,13 +292,13 @@ close(34)
 ! read countnum
 !fname=trim(adjustl(expdir))//"/local_patch/countnum.bin"
 !fname="../covariance/local_patch_0.90/countnum.bin"
-fname=trim(adjustl(patchdir))//"/local_patch_"//trim(adjustl(patchid))//"/countnum.bin"
+fname=trim(adjustl(patchdir))//"/countnum.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) countp
     read(34,rec=2) targetp
 else
-    write(*,*) "no true"
+    write(*,*) "countp , tsrget"
 end if
 close(34)
 
@@ -314,17 +314,17 @@ close(34)
 ! make randomlist
 allocate(randlist(ens_num*366))
 randlist=0
-fname=trim(adjustl(expdir))//"/CaMa_out/randlist.bin"
-open(34,file=fname,form="unformatted",access="direct",recl=4*366*ens_num,status="old",iostat=ios)
-if(ios==0)then
-    read(34,rec=1) randlist
-else
-    write(*,*) "no randlist"
-end if
-close(34)
+!fname=trim(adjustl(expdir))//"/CaMa_out/randlist.bin"
+!open(34,file=fname,form="unformatted",access="direct",recl=4*366*ens_num,status="old",iostat=ios)
+!if(ios==0)then
+!    read(34,rec=1) randlist
+!else
+!    write(*,*) "no randlist"
+!end if
+!close(34)
 
 ! observation error 0.1*(1/L)*(1/W)
-fname=trim(adjustl(expdir))//"/data/obs_err.bin"
+fname=trim(adjustl(swotdir))//"/dat/obs_err.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) obs_err
@@ -410,7 +410,7 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
         write(llat,'(i4.4)') lat_cent
         !fname="./local_patch/patch"//trim(llon)//trim(llat)//".txt"
         !fname="../covariance/local_patch_0.90/patch"//trim(llon)//trim(llat)//".txt"
-        fname=trim(adjustl(patchdir))//"/local_patch_"//trim(adjustl(patchid))//"/patch"//trim(llon)//trim(llat)//".txt"
+        fname=trim(adjustl(patchdir))//"/patch"//trim(llon)//trim(llat)//".txt"
         !write(*,*) fname
         open(34,file=fname,status='old',access='sequential',form='formatted',action='read')!
         do i=1, countnum
