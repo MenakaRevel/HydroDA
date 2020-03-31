@@ -313,7 +313,7 @@ def one_day_sim(inputlist):
         # copying "WSE" as "xa_m" in ./assim_out
         oldfname="CaMa_out/"+yyyy+mm+dd+"T"+ens_num+"/sfcelv"+yyyy+".bin"
         newfname="assim_out/xa_m/"+looptype+"/"+yyyy+mm+dd+"_xam.bin"
-        os.system("cp "+oldfname+" "+newfname)
+        os.system("cp "+oldfname+" "+newfname
 
     return 0
 ########################### # modified to run paralle @Menaka 
@@ -1043,7 +1043,7 @@ def observation_error():
 #####################################################################
 def err_rand():
     """make random values to add to true values"""
-    obs_err=np.fromfile("data/obs_err.bin",np.float32).reshape(720,1440)
+    obs_err=np.fromfile(pm.DA_dir()+"/sat/obs_err.bin",np.float32).reshape(720,1440)
     obs_err=obs_err*((obs_err<=0.25)*1.0) + 0.25*((obs_err>0.25)*1.0)
     #zeros=np.zeros([720,1440],np.float32)
     obs_err=obs_err.flatten()
