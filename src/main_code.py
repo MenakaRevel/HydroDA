@@ -605,9 +605,9 @@ def make_restart(inputlist):
     print "press enter"
 
     # get the date of one day before
-    bef_y=odb.calc_odb(yyyy,mm,dd,"year")
-    bef_m=odb.calc_odb(yyyy,mm,dd,"month")
-    bef_d=odb.calc_odb(yyyy,mm,dd,"date")
+    bef_y=calc_odb(yyyy,mm,dd,"year")
+    bef_m=calc_odb(yyyy,mm,dd,"month")
+    bef_d=calc_odb(yyyy,mm,dd,"date")
 
     yyyy_b="%04d"%bef_y
     mm_b="%02d"%bef_m
@@ -619,11 +619,12 @@ def make_restart(inputlist):
     yyyy_n="%04d"%nextdate.year
     mm_n="%02d"%nextdate.month
     dd_n="%02d"%nextdate.day
-    
+
     # calculate other variables from water storage
     dir1=pm.CaMa_dir()+"/"
     print "dir1",dir1
-    os.system(pm.DA_dir()+"/src/make_restart "+yyyy+mm+dd+" "+yyyy_b+mm_b+dd_b+" "+yyyy_n+mm_n+dd_n+" "+loop+" "+dir1+" "+str(pm.ens_mem())+" "+numch)
+    exp_dir=pm.DA_dir()+"/out/"+pm.experiment()
+    os.system(pm.DA_dir()+"/src/make_restart "+yyyy+mm+dd+" "+yyyy_b+mm_b+dd_b+" "+yyyy_n+mm_n+dd_n+" "+loop+" "+dir1+" "+str(pm.ens_mem())+" "+numch+" "+exp_dir)
 
     print "finish restarting",numch
 ###########################
@@ -1444,4 +1445,65 @@ def prepare_input():
         #p.terminate()
     return 0
 ###########################
+def calc_odb(year,month,date,obj):
+    year=int(year)
+    month=int(month)
+    date=int(date)
+    #calc bef date
+    if date-1<1:
+        if month-1<1:
+            bef_m=12
+            bef_y=year-1
+        else:
+            bef_m=month-1
+            bef_y=year
+
+        #calc leap year
+        leap_y=0 #0:not 1:leap year
+        if bef_y%4==0:
+            if bef_y%100==0 and bef_y%400!=0:
+                leap_y=0
+            else:
+                leap_y=1
+
+        #calc last day of the month
+        if bef_m==1:
+            last_d=31
+        if bef_m==2:
+            if leap_y==1:
+                last_d=29
+            else:
+                last_d=28
+        if bef_m==3:
+            last_d=31
+        if bef_m==4:
+            last_d=30
+        if bef_m==5:
+            last_d=31
+        if bef_m==6:
+            last_d=30
+        if bef_m==7:
+            last_d=31
+        if bef_m==8:
+            last_d=31
+        if bef_m==9:
+            last_d=30
+        if bef_m==10:
+            last_d=31
+        if bef_m==11:
+            last_d=30
+        if bef_m==12:
+            last_d=31
+        bef_d=last_d
+    else:
+        bef_y=year
+        bef_m=month
+        bef_d=date-1
+
+    if obj=="year":
+        return bef_y
+    if obj=="month":
+        return bef_m
+    if  obj=="date":
+        return bef_d
 ###########################
