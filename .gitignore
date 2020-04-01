@@ -17,3 +17,7 @@ data_assim
 
 #.pyc files
 *.pyc
+
+#figures
+*.png
+*.jpg

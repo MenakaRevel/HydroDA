@@ -24,8 +24,9 @@ import cal_stat as stat
 
 #argvs = sys.argv
 
-#assim_out="assim_out_E2O_womc"
-assim_out="assim_out_E2O_wmc"
+assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
+print assim_out
+#assim_out="assim_out_E2O_wmc"
 #assim_out="assim_out_E2O_womc_0"
 #assim_out="assim_out_ECMWF_womc_baised_0"
 #assim_out="assim_out_ECMWF_womc_baised"
@@ -58,8 +59,8 @@ def mk_dir(sdir):
   except:
     pass
 #----
-mk_dir("../"+assim_out+"/img")
-mk_dir("../"+assim_out+"/img/disgraph")
+mk_dir(assim_out+"/fig")
+mk_dir(assim_out+"/fig/disgraph")
 #----
 year=2004#1991
 month=1
@@ -85,34 +86,37 @@ xlist=[]
 ylist=[]
 river=[]
 #--
-#rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZONAS","INDUS"] #["AMAZONAS"]#["CONGO"]#
-rivernames = grdc.grdc_river_name()
-for rivername in rivernames:
-  station_loc,x_list,y_list = grdc.get_grdc_loc(rivername,"b")
-  #print rivername, station_loc
-  for station in station_loc:
-    gid=grdc.get_id(station)
-    if gid== -9999:
-      continue
-    path = "../"+assim_out+"/img/disgraph/%s"%(rivername)
-    #print path
-    mk_dir(path)
-    ix, iy = grdc.get_loc_v394(gid)
-    print station,gid, ix ,iy
-    river.append(rivername)
-    pname.append(station)
-    xlist.append(ix)
-    ylist.append(iy)
+rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZON","MEKONG","IRRAWADDY","VOLGA", "NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
+#rivernames = grdc.grdc_river_name_v396()
+#rivernames = grdc.grdc_river_name()
 #for rivername in rivernames:
-#  path = "../assim_out/img/disgraph/%s"%(rivername)
-#  print path
-#  mk_dir(path)
-#  station_loc,x_list,y_list = grdc.get_grdc_loc(rivername,"b")
-#  print rivername, station_loc
-#  river.append([rivername]*len(station_loc))
-#  pname.append(station_loc)
-#  xlist.append(x_list)
-#  ylist.append(y_list)
+#  #station_loc,x_list,y_list = grdc.get_grdc_loc(rivername,"b")
+#  station_loc,x_list,y_list = grdc.get_grdc_station_v396(rivername)
+#  #print rivername, station_loc
+#  for station in station_loc:
+#    gid=grdc.get_id(station)
+#    if gid== -9999:
+#      continue
+#    path = "../"+assim_out+"/fig/disgraph/%s"%(rivername)
+#    #print path
+#    mk_dir(path)
+#    ix, iy = grdc.get_loc_v394(gid)
+#    print station,gid, ix ,iy
+#    river.append(rivername)
+#    pname.append(station)
+#    xlist.append(ix)
+#    ylist.append(iy)
+for rivername in rivernames:
+  path = assim_out+"/fig/disgraph/%s"%(rivername)
+  print path
+  mk_dir(path)
+  #station_loc,x_list,y_list = grdc.get_grdc_loc(rivername,"b")
+  station_loc,x_list,y_list = grdc.get_grdc_loc_v396(rivername)
+  print rivername, station_loc
+  river.append([rivername]*len(station_loc))
+  pname.append(station_loc)
+  xlist.append(x_list)
+  ylist.append(y_list)
 #--
 #for rivername in ["LENA","NIGER","INDUS","CONGO","OB","MISSISSIPPI","MEKONG","AMAZONAS"]:
 #for rivername in ["MEKONG","AMAZONAS"]:
@@ -162,11 +166,11 @@ for rivername in rivernames:
 #    xlist.append([813,834,772,784,789,809,821,824,802,794,808,806])
 #    ylist.append([353,397,383,372,363,343,359,376,379,342,351,351])
 
-#river=([flatten for inner in river for flatten in inner])
-#pname=([flatten for inner in pname for flatten in inner])
+river=([flatten for inner in river for flatten in inner])
+pname=([flatten for inner in pname for flatten in inner])
 print len(pname), len(xlist)
-#xlist=([flatten for inner in xlist for flatten in inner])
-#ylist=([flatten for inner in ylist for flatten in inner])
+xlist=([flatten for inner in xlist for flatten in inner])
+ylist=([flatten for inner in ylist for flatten in inner])
 
 
 pnum=len(pname)
@@ -191,13 +195,13 @@ for day in np.arange(start,last):
 #    mesh=(mesh_in>=10)*(mesh_in<=60)
 #    meshP=mesh-1000*(mesh<0.1)
 
-    fname="../data/observation_day%02d.bin"%(SWOT_day(yyyy,mm,dd))
+    fname="../sat/observation_day%02d.bin"%(SWOT_day(yyyy,mm,dd))
     meshP=np.fromfile(fname,np.int32).reshape([720,1440])
     #meshP=(meshP>=1)*1
 
 
     # make org
-    fname="../"+assim_out+"/rivout/true/rivout"+yyyy+mm+dd+".bin"
+    fname=assim_out+"/rivout/true/rivout"+yyyy+mm+dd+".bin"
     orgfile=np.fromfile(fname,np.float32).reshape([720,1440])
 
     org_frag=[]
@@ -222,11 +226,11 @@ for day in np.arange(start,last):
     for num in np.arange(1,pm.ens_mem()+1):
         numch='%03d'%num
 
-        fname="../"+assim_out+"/rivout/open/rivout"+yyyy+mm+dd+"_"+numch+".bin"
+        fname=assim_out+"/rivout/open/rivout"+yyyy+mm+dd+"_"+numch+".bin"
         #fname="../CaMa_out/"+yyyy+mm+dd+"C"+numch+"/rivout"+yyyy+".bin"
         opnfile=np.fromfile(fname,np.float32).reshape([720,1440])
 
-        fname="../"+assim_out+"/rivout/assim/rivout"+yyyy+mm+dd+"_"+numch+".bin"
+        fname=assim_out+"/rivout/assim/rivout"+yyyy+mm+dd+"_"+numch+".bin"
         #fname="../CaMa_out/"+yyyy+mm+dd+"A"+numch+"/rivout"+yyyy+".bin"
         asmfile=np.fromfile(fname,np.float32).reshape([720,1440])
 
@@ -389,7 +393,7 @@ def make_fig(point):
     ax2.set_xlim(xmin=0,xmax=last+1)
 #    print swt[point]
     print 'save',river[point],pname[point]
-    plt.savefig("../"+assim_out+"/img/disgraph/"+river[point]+"/"+pname[point]+".png",dpi=500)
+    plt.savefig(assim_out+"/fig/disgraph/"+river[point]+"/"+pname[point]+".png",dpi=500)
     return 0
 
 
@@ -407,7 +411,7 @@ def make_fig(point):
 #plt.plot([],[],label="corrupted",color=colors["corrupted"],linewidth=1,alpha=0.5)
 #plt.plot([],[],label="assimilated",color=colors["assimilated"],linewidth=1,alpha=0.5)
 #plt.legend(loc=10,ncol=3)
-#plt.savefig("../assim_out/img/disgraph/legend.png",dpi=500)
+#plt.savefig("../assim_out/fig/disgraph/legend.png",dpi=500)
 
 
 
