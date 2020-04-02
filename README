@@ -21,3 +21,13 @@ HydroDA
              -Roff
 
      dat  : river realted data
+
+********************
+simple steps for global run
+1. prepare satellite orbit in HydroDa/sat folder
+    run make_satellite_data.py
+2. prepare runoff data in HydroDA/inp folder
+3. check river related data at HydroDA/dat folder
+4. Edit the settings at params.py and run_mool.sh at HydroDA/gosh 
+5. Run run_mool.sh
+
