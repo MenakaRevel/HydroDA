@@ -382,18 +382,19 @@ def make_initial_restart(): # updated the name
     yyyy="%04d"%(start_year)
     mm="%02d"%(start_month)
     dd="%02d"%(start_date)
+    exp_dir=pm.DA_dir()+"/out/"+pm.experiment()
     spinup_true="%04d%2d%02dT000"%(pm.spinup_end_year(),pm.spinup_end_month(),pm.spinup_end_date()) 
     #os.system("cp ./CaMa_out/"+spinup_true+"/restart"+yyyy+mm+dd+".bin ./CaMa_in/restart/true/restart"+yyyy+mm+dd+"T000.bin")
-    copy_stoonly("./CaMa_out/"+spinup_true+"/restart"+yyyy+mm+dd+".bin","./CaMa_in/restart/true/restart"+yyyy+mm+dd+"T000.bin")
+    copy_stoonly(exp_dir+"/CaMa_out/"+spinup_true+"/restart"+yyyy+mm+dd+".bin",exp_dir+"/CaMa_in/restart/true/restart"+yyyy+mm+dd+"T000.bin")
 
-    print "cp ./CaMa_out/"+spinup_true+"/restart"+yyyy+mm+dd+".bin ./CaMa_in/restart/true/restart"+yyyy+mm+dd+"T000.bin"
+    print "cp "+exp_dir+"/CaMa_out/"+spinup_true+"/restart"+yyyy+mm+dd+".bin  "+exp_dir+"/CaMa_in/restart/true/restart"+yyyy+mm+dd+"T000.bin"
     for num in np.arange(1,pm.ens_mem()+1):
         numch='%03d'%num
         spinup_open="%04d%2d%02dC%03d"%(pm.spinup_end_year(),pm.spinup_end_month(),pm.spinup_end_date(),num) 
         #os.system("cp ./CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin ./CaMa_in/restart/open/restart"+yyyy+mm+dd+"C"+numch+".bin")
         #os.system("cp ./CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin ./CaMa_in/restart/assim/restart"+yyyy+mm+dd+"A"+numch+".bin")
-        copy_stoonly("./CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin","./CaMa_in/restart/open/restart"+yyyy+mm+dd+"C"+numch+".bin")
-        copy_stoonly("./CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin","./CaMa_in/restart/assim/restart"+yyyy+mm+dd+"A"+numch+".bin")
+        copy_stoonly(exp_dir+"/CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin",exp_dir+"/CaMa_in/restart/open/restart"+yyyy+mm+dd+"C"+numch+".bin")
+        copy_stoonly(exp_dir+"/CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin",exp_dir+"/CaMa_in/restart/assim/restart"+yyyy+mm+dd+"A"+numch+".bin")
 ###########################
 def make_initial_restart_one(): # updated the name
     # copy restartyyyymmddC001 as restart for all simulations 
