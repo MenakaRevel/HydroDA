@@ -54,7 +54,7 @@ def main_act():
 
     # prepare input runoff files for simulations
     print "prepare input"
-    #prepare_input()
+    prepare_input()
 
     # make rivman file
     print "make manning's coefficent"
