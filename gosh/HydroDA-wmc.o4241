@@ -1,0 +1,435 @@
+mkdir: cannot create directory ‘/cluster/data6/menaka/HydroDA/out’: File exists
+v4.0.0 (updated 2019-11-14): Errors in Runoff, Manning Coeff
+E2O
+compile data assimilation codes...
+initial
+prepare input
+make manning's coefficent
+make intial inflation
+spin up simulation
+1
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/HydroDA/out/E2O_wmc
+001  at spinup.sh
+001
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/HydroDA/out/E2O_wmc
+003  at spinup.sh
+003
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/HydroDA/out/E2O_wmc
+005  at spinup.sh
+005
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/HydroDA/out/E2O_wmc
+004  at spinup.sh
+004
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/HydroDA/out/E2O_wmc
+006  at spinup.sh
+006
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/HydroDA/out/E2O_wmc
+/cluster/data6/menaka/HydroDA/out/E2O_wmc
+/cluster/data6/menaka/HydroDA/out/E2O_wmc
+/cluster/data6/menaka/HydroDA/out/E2O_wmc
+007  at spinup.sh
+008  at spinup.sh
+010  at spinup.sh
+007
+008
+010
+009  at spinup.sh
+009
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/HydroDA/out/E2O_wmc
+002  at spinup.sh
+002
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+forrtl: No such file or directory
+forrtl: No such file or directory
+forrtl: No such file or directory
+forrtl: No such file or directory
+forrtl: No such file or directory
+forrtl: No such file or directory
+forrtl: No such file or directory
+forrtl: No such file or directory
+forrtl: No such file or directory
+forrtl: No such file or directory
+forrtl: severe (29): file not found, unit 16, file /cluster/data6/menaka/HydroDA/out/E2O_wmc/CaMa_in/E2O/Roff_CORR/Roff__20030101C007.one
+Image              PC                Routine            Line        Source             
+MAIN_cmf           000000000046936B  for__io_return        Unknown  Unknown
+MAIN_cmf           000000000047FA10  for_open              Unknown  Unknown
+MAIN_cmf           0000000000426BD4  Unknown               Unknown  Unknown
+MAIN_cmf           0000000000426318  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040B14D  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040AF22  Unknown               Unknown  Unknown
+libc-2.17.so       00002AAAABBC23D5  __libc_start_main     Unknown  Unknown
+MAIN_cmf           000000000040AE29  Unknown               Unknown  Unknown
+forrtl: severe (29): file not found, unit 16, file /cluster/data6/menaka/HydroDA/out/E2O_wmc/CaMa_in/E2O/Roff_CORR/Roff__20030101C003.one
+Image              PC                Routine            Line        Source             
+MAIN_cmf           000000000046936B  for__io_return        Unknown  Unknown
+MAIN_cmf           000000000047FA10  for_open              Unknown  Unknown
+MAIN_cmf           0000000000426BD4  Unknown               Unknown  Unknown
+MAIN_cmf           0000000000426318  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040B14D  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040AF22  Unknown               Unknown  Unknown
+libc-2.17.so       00002AAAABBC23D5  __libc_start_main     Unknown  Unknown
+MAIN_cmf           000000000040AE29  Unknown               Unknown  Unknown
+forrtl: severe (29): file not found, unit 16, file /cluster/data6/menaka/HydroDA/out/E2O_wmc/CaMa_in/E2O/Roff_CORR/Roff__20030101C006.one
+Image              PC                Routine            Line        Source             
+MAIN_cmf           000000000046936B  for__io_return        Unknown  Unknown
+MAIN_cmf           000000000047FA10  for_open              Unknown  Unknown
+MAIN_cmf           0000000000426BD4  Unknown               Unknown  Unknown
+MAIN_cmf           0000000000426318  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040B14D  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040AF22  Unknown               Unknown  Unknown
+libc-2.17.so       00002AAAABBC23D5  __libc_start_main     Unknown  Unknown
+MAIN_cmf           000000000040AE29  Unknown               Unknown  Unknown
+forrtl: severe (29): file not found, unit 16, file /cluster/data6/menaka/HydroDA/out/E2O_wmc/CaMa_in/E2O/Roff_CORR/Roff__20030101C009.one
+Image              PC                Routine            Line        Source             
+MAIN_cmf           000000000046936B  for__io_return        Unknown  Unknown
+MAIN_cmf           000000000047FA10  for_open              Unknown  Unknown
+MAIN_cmf           0000000000426BD4  Unknown               Unknown  Unknown
+MAIN_cmf           0000000000426318  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040B14D  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040AF22  Unknown               Unknown  Unknown
+libc-2.17.so       00002AAAABBC23D5  __libc_start_main     Unknown  Unknown
+MAIN_cmf           000000000040AE29  Unknown               Unknown  Unknown
+forrtl: severe (29): file not found, unit 16, file /cluster/data6/menaka/HydroDA/out/E2O_wmc/CaMa_in/E2O/Roff_CORR/Roff__20030101C004.one
+Image              PC                Routine            Line        Source             
+MAIN_cmf           000000000046936B  for__io_return        Unknown  Unknown
+MAIN_cmf           000000000047FA10  for_open              Unknown  Unknown
+MAIN_cmf           0000000000426BD4  Unknown               Unknown  Unknown
+MAIN_cmf           0000000000426318  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040B14D  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040AF22  Unknown               Unknown  Unknown
+libc-2.17.so       00002AAAABBC23D5  __libc_start_main     Unknown  Unknown
+MAIN_cmf           000000000040AE29  Unknown               Unknown  Unknown
+forrtl: severe (29): file not found, unit 16, file /cluster/data6/menaka/HydroDA/out/E2O_wmc/CaMa_in/E2O/Roff_CORR/Roff__20030101C008.one
+Image              PC                Routine            Line        Source             
+MAIN_cmf           000000000046936B  for__io_return        Unknown  Unknown
+MAIN_cmf           000000000047FA10  for_open              Unknown  Unknown
+MAIN_cmf           0000000000426BD4  Unknown               Unknown  Unknown
+MAIN_cmf           0000000000426318  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040B14D  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040AF22  Unknown               Unknown  Unknown
+libc-2.17.so       00002AAAABBC23D5  __libc_start_main     Unknown  Unknown
+MAIN_cmf           000000000040AE29  Unknown               Unknown  Unknown
+forrtl: severe (29): file not found, unit 16, file /cluster/data6/menaka/HydroDA/out/E2O_wmc/CaMa_in/E2O/Roff_CORR/Roff__20030101C010.one
+Image              PC                Routine            Line        Source             
+MAIN_cmf           000000000046936B  for__io_return        Unknown  Unknown
+MAIN_cmf           000000000047FA10  for_open              Unknown  Unknown
+MAIN_cmf           0000000000426BD4  Unknown               Unknown  Unknown
+MAIN_cmf           0000000000426318  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040B14D  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040AF22  Unknown               Unknown  Unknown
+libc-2.17.so       00002AAAABBC23D5  __libc_start_main     Unknown  Unknown
+MAIN_cmf           000000000040AE29  Unknown               Unknown  Unknown
+forrtl: severe (29): file not found, unit 16, file /cluster/data6/menaka/HydroDA/out/E2O_wmc/CaMa_in/E2O/Roff_CORR/Roff__20030101C001.one
+Image              PC                Routine            Line        Source             
+MAIN_cmf           000000000046936B  for__io_return        Unknown  Unknown
+MAIN_cmf           000000000047FA10  for_open              Unknown  Unknown
+MAIN_cmf           0000000000426BD4  Unknown               Unknown  Unknown
+MAIN_cmf           0000000000426318  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040B14D  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040AF22  Unknown               Unknown  Unknown
+libc-2.17.so       00002AAAABBC23D5  __libc_start_main     Unknown  Unknown
+MAIN_cmf           000000000040AE29  Unknown               Unknown  Unknown
+forrtl: severe (29): file not found, unit 16, file /cluster/data6/menaka/HydroDA/out/E2O_wmc/CaMa_in/E2O/Roff_CORR/Roff__20030101C002.one
+Image              PC                Routine            Line        Source             
+MAIN_cmf           000000000046936B  for__io_return        Unknown  Unknown
+MAIN_cmf           000000000047FA10  for_open              Unknown  Unknown
+MAIN_cmf           0000000000426BD4  Unknown               Unknown  Unknown
+MAIN_cmf           0000000000426318  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040B14D  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040AF22  Unknown               Unknown  Unknown
+libc-2.17.so       00002AAAABBC23D5  __libc_start_main     Unknown  Unknown
+MAIN_cmf           000000000040AE29  Unknown               Unknown  Unknown
+forrtl: severe (29): file not found, unit 16, file /cluster/data6/menaka/HydroDA/out/E2O_wmc/CaMa_in/E2O/Roff_CORR/Roff__20030101C005.one
+Image              PC                Routine            Line        Source             
+MAIN_cmf           000000000046936B  for__io_return        Unknown  Unknown
+MAIN_cmf           000000000047FA10  for_open              Unknown  Unknown
+MAIN_cmf           0000000000426BD4  Unknown               Unknown  Unknown
+MAIN_cmf           0000000000426318  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040B14D  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040AF22  Unknown               Unknown  Unknown
+libc-2.17.so       00002AAAABBC23D5  __libc_start_main     Unknown  Unknown
+MAIN_cmf           000000000040AE29  Unknown               Unknown  Unknown
+
+real	0m1.338s
+user	0m0.857s
+sys	0m0.316s
+
+real	0m1.170s
+user	0m0.860s
+sys	0m0.310s
+
+real	0m1.038s
+user	0m0.876s
+sys	0m0.305s
+
+real	0m1.162s
+user	0m0.882s
+sys	0m0.328s
+
+real	0m1.296s
+user	0m0.908s
+sys	0m0.309s
+
+real	0m1.082s
+user	0m0.905s
+sys	0m0.297s
+
+
+real	0m1.142s
+real	0m1.095s
+user	0m0.886s
+user	0m0.905s
+sys	0m0.314s
+
+sys	0m0.302s
+real	0m1.256s
+user	0m0.891s
+sys	0m0.325s
+
+real	0m1.222s
+user	0m0.897s
+sys	0m0.307s
+cp: cp: cannot stat ‘restart2004010100.bin’cannot stat ‘restart2004010100.bin’: No such file or directory: No such file or directory
+
+cp: cannot stat ‘restart2004010100.bin’: No such file or directory
+cp: cannot stat ‘restart2004010100.bin’cp: cannot stat ‘restart2004010100.bin’: No such file or directory
+: No such file or directory
+cp: cannot stat ‘restart2004010100.bin’: No such file or directory
+cp: cannot stat ‘restart2004010100.bin’: No such file or directory
+cp: cannot stat ‘restart2004010100.bin’cp: cannot stat ‘restart2004010100.bin’: No such file or directory
+: No such file or directory
+cp: cannot stat ‘restart2004010100.bin’: No such file or directory
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/HydroDA/out/E2O_wmc
+/cluster/data6/menaka/HydroDA/out/E2O_wmc
+012  at spinup.sh
+012
+011  at spinup.sh
+011
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/HydroDA/out/E2O_wmc
+013  at spinup.sh
+013
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/HydroDA/out/E2O_wmc
+018  at spinup.sh
+018
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/HydroDA/out/E2O_wmc
+/cluster/data6/menaka/HydroDA/out/E2O_wmc
+014  at spinup.sh
+015  at spinup.sh
+014
+015
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/HydroDA/out/E2O_wmc
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+017  at spinup.sh
+017
+/cluster/data6/menaka/HydroDA/out/E2O_wmc
+016  at spinup.sh
+016
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/diminfo_test-15min.txt /cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/inpmat_test-15min.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+/cluster/data6/menaka/CaMa-Flood_v396_20191225/map/glb_15min/rivmanCORR.bin
+forrtl: No such file or directory
+forrtl: severe (29): file not found, unit 16, file /cluster/data6/menaka/HydroDA/out/E2O_wmc/CaMa_in/E2O/Roff_CORR/Roff__20030101C012.one
+Image              PC                Routine            Line        Source             
+MAIN_cmf           000000000046936B  for__io_return        Unknown  Unknown
+MAIN_cmf           000000000047FA10  for_open              Unknown  Unknown
+MAIN_cmf           0000000000426BD4  Unknown               Unknown  Unknown
+MAIN_cmf           0000000000426318  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040B14D  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040AF22  Unknown               Unknown  Unknown
+libc-2.17.so       00002AAAABBC23D5  __libc_start_main     Unknown  Unknown
+MAIN_cmf           000000000040AE29  Unknown               Unknown  Unknown
+
+real	0m0.731s
+user	0m0.704s
+sys	0m0.241s
+cp: cannot stat ‘restart2004010100.bin’: No such file or directory
+forrtl: No such file or directory
+forrtl: severe (29): file not found, unit 16, file /cluster/data6/menaka/HydroDA/out/E2O_wmc/CaMa_in/E2O/Roff_CORR/Roff__20030101C011.one
+Image              PC                Routine            Line        Source             
+MAIN_cmf           000000000046936B  for__io_return        Unknown  Unknown
+MAIN_cmf           000000000047FA10  for_open              Unknown  Unknown
+MAIN_cmf           0000000000426BD4  Unknown               Unknown  Unknown
+MAIN_cmf           0000000000426318  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040B14D  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040AF22  Unknown               Unknown  Unknown
+libc-2.17.so       00002AAAABBC23D5  __libc_start_main     Unknown  Unknown
+MAIN_cmf           000000000040AE29  Unknown               Unknown  Unknown
+
+real	0m0.734s
+user	0m0.718s
+sys	0m0.237s
+cp: cannot stat ‘restart2004010100.bin’: No such file or directory
+forrtl: No such file or directory
+forrtl: severe (29): file not found, unit 16, file /cluster/data6/menaka/HydroDA/out/E2O_wmc/CaMa_in/E2O/Roff_CORR/Roff__20030101C013.one
+Image              PC                Routine            Line        Source             
+MAIN_cmf           000000000046936B  for__io_return        Unknown  Unknown
+MAIN_cmf           000000000047FA10  for_open              Unknown  Unknown
+MAIN_cmf           0000000000426BD4  Unknown               Unknown  Unknown
+MAIN_cmf           0000000000426318  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040B14D  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040AF22  Unknown               Unknown  Unknown
+libc-2.17.so       00002AAAABBC23D5  __libc_start_main     Unknown  Unknown
+MAIN_cmf           000000000040AE29  Unknown               Unknown  Unknown
+
+real	0m0.737s
+user	0m0.717s
+sys	0m0.241s
+cp: cannot stat ‘restart2004010100.bin’: No such file or directory
+forrtl: No such file or directory
+forrtl: severe (29): file not found, unit 16, file /cluster/data6/menaka/HydroDA/out/E2O_wmc/CaMa_in/E2O/Roff_CORR/Roff__20030101C018.one
+Image              PC                Routine            Line        Source             
+MAIN_cmf           000000000046936B  for__io_return        Unknown  Unknown
+MAIN_cmf           000000000047FA10  for_open              Unknown  Unknown
+MAIN_cmf           0000000000426BD4  Unknown               Unknown  Unknown
+MAIN_cmf           0000000000426318  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040B14D  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040AF22  Unknown               Unknown  Unknown
+libc-2.17.so       00002AAAABBC23D5  __libc_start_main     Unknown  Unknown
+MAIN_cmf           000000000040AE29  Unknown               Unknown  Unknown
+
+real	0m0.737s
+user	0m0.718s
+sys	0m0.242s
+cp: cannot stat ‘restart2004010100.bin’: No such file or directory
+forrtl: No such file or directory
+forrtl: severe (29): file not found, unit 16, file /cluster/data6/menaka/HydroDA/out/E2O_wmc/CaMa_in/E2O/Roff_CORR/Roff__20030101C014.one
+Image              PC                Routine            Line        Source             
+MAIN_cmf           000000000046936B  for__io_return        Unknown  Unknown
+MAIN_cmf           000000000047FA10  for_open              Unknown  Unknown
+MAIN_cmf           0000000000426BD4  Unknown               Unknown  Unknown
+MAIN_cmf           0000000000426318  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040B14D  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040AF22  Unknown               Unknown  Unknown
+libc-2.17.so       00002AAAABBC23D5  __libc_start_main     Unknown  Unknown
+MAIN_cmf           000000000040AE29  Unknown               Unknown  Unknown
+
+real	0m0.744s
+user	0m0.724s
+sys	0m0.242s
+cp: cannot stat ‘restart2004010100.bin’: No such file or directory
+forrtl: No such file or directory
+forrtl: severe (29): file not found, unit 16, file /cluster/data6/menaka/HydroDA/out/E2O_wmc/CaMa_in/E2O/Roff_CORR/Roff__20030101C017.one
+Image              PC                Routine            Line        Source             
+MAIN_cmf           000000000046936B  for__io_return        Unknown  Unknown
+MAIN_cmf           000000000047FA10  for_open              Unknown  Unknown
+MAIN_cmf           0000000000426BD4  Unknown               Unknown  Unknown
+MAIN_cmf           0000000000426318  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040B14D  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040AF22  Unknown               Unknown  Unknown
+libc-2.17.so       00002AAAABBC23D5  __libc_start_main     Unknown  Unknown
+MAIN_cmf           000000000040AE29  Unknown               Unknown  Unknown
+
+real	0m0.744s
+user	0m0.730s
+sys	0m0.239s
+cp: cannot stat ‘restart2004010100.bin’: No such file or directory
+forrtl: No such file or directory
+forrtl: severe (29): file not found, unit 16, file /cluster/data6/menaka/HydroDA/out/E2O_wmc/CaMa_in/E2O/Roff_CORR/Roff__20030101C015.one
+Image              PC                Routine            Line        Source             
+MAIN_cmf           000000000046936B  for__io_return        Unknown  Unknown
+MAIN_cmf           000000000047FA10  for_open              Unknown  Unknown
+MAIN_cmf           0000000000426BD4  Unknown               Unknown  Unknown
+MAIN_cmf           0000000000426318  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040B14D  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040AF22  Unknown               Unknown  Unknown
+libc-2.17.so       00002AAAABBC23D5  __libc_start_main     Unknown  Unknown
+MAIN_cmf           000000000040AE29  Unknown               Unknown  Unknown
+
+real	0m0.749s
+user	0m0.731s
+sys	0m0.243s
+forrtl: No such file or directory
+forrtl: severe (29): file not found, unit 16, file /cluster/data6/menaka/HydroDA/out/E2O_wmc/CaMa_in/E2O/Roff_CORR/Roff__20030101C016.one
+Image              PC                Routine            Line        Source             
+MAIN_cmf           000000000046936B  for__io_return        Unknown  Unknown
+MAIN_cmf           000000000047FA10  for_open              Unknown  Unknown
+MAIN_cmf           0000000000426BD4  Unknown               Unknown  Unknown
+MAIN_cmf           0000000000426318  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040B14D  Unknown               Unknown  Unknown
+MAIN_cmf           000000000040AF22  Unknown               Unknown  Unknown
+libc-2.17.so       00002AAAABBC23D5  __libc_start_main     Unknown  Unknown
+MAIN_cmf           000000000040AE29  Unknown               Unknown  Unknown
+cp: cannot stat ‘restart2004010100.bin’: No such file or directory
+
+real	0m0.742s
+user	0m0.713s
+sys	0m0.251s
+cp: cannot stat ‘restart2004010100.bin’: No such file or directory
+open for 003
+open for 004
+open for 001
+open for 012
+open for 005
+open for 011
+open for 010
+open for 016
+======================= end spinup ==========================
+make intial restart
+[Errno 2] No such file or directory: './CaMa_out/20031231T000/restart20040101.bin'

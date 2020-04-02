@@ -94,10 +94,10 @@ def mode():
     # 1: Earth2Obs, 2: ERA20CM, 3: -25% baised (ELSE_KIM2009/E2O/ERA20CM)
 
 def experiment():
-    return "E2O_womc"
+    return "E2O_wmc"
 
 def rivman_error():
-    return 0
+    return 1
     #define the experiment with or without rivman error
     # 0 : with out manning error
     # 1 : with manning error
@@ -149,7 +149,7 @@ def patch_id():
     return "0.60"
 
 def spinup_mode():
-    return 3
+    return 1
     # 0: do spinup simulation for both (corrupted and true) simulation
     # 1: do spin up only at corrupted simulation
     # 2: do spin up only at true simulation
