@@ -1,14 +1,14 @@
 #!/bin/bash
 
 ### SET "mool PBS" @ IIS U-Tokyo
-#PBS -q E10
-#PBS -l select=1:ncpus=10:mem=40gb
+#PBS -q E20
+#PBS -l select=1:ncpus=20:mem=40gb
 #PBS -l place=scatter
 #PBS -j oe
 #PBS -m ea
 #PBS -M menaka@rainbow.iis.u-tokyo.ac.jp
 #PBS -V
-#PBS -N SWOTDA_1.08
+#PBS -N HydroDA-wmc
 
 #source ~/.bashrc
 
@@ -22,8 +22,9 @@ cd $HydroDA
 #cd $PBS_O_WORKDIR
 #cd $swotda
 
-# experiment
-EXP="E2O_womc"
+# experiment : edit the experiment name in here and params.py experiment()
+# before running run_mool.sh , please edit the nessary experimental settings in params.py
+EXP="E2O_wmc"
 IFACTOR="1.08"
 
 mkdir $HydroDA"/out"
