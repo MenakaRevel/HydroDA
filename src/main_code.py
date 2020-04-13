@@ -964,18 +964,24 @@ def direct_insert(yyyy,mm,dd,day):
         assim.tofile("assim_out/ens_xa/assim/"+yyyy+mm+dd+"_"+ens_char+"_xa.bin")
 #################################################################################
 def make_rivman():
-    if pm.rivman_error()==1:
+    nx=1440
+    ny=720
+    if pm.rivman_error()==0:
+        # copy rivman.bin for both rivmanTRUE.bin and rivmanCORR.bin
+        os.system("cp "+pm.CaMa_dir()+"/map/glb_15min/rivman.bin "+pm.CaMa_dir()+"/map/glb_15min/rivmanTRUE.bin")
+        os.system("cp "+pm.CaMa_dir()+"/map/glb_15min/rivman.bin "+pm.CaMa_dir()+"/map/glb_15min/rivmanCORR.bin")
+    elif pm.rivman_error()==1:
         # for rivwth depend calculation Pedonetti et al 2014
         base_man=pm.rivman_base()
         nmin=pm.rivman_min()#0.025
         nmax=pm.rivman_max()#0.035
         #---
         rivwth=pm.CaMa_dir()+"/map/glb_15min/rivwth_gwdlr.bin"
-        rivwth=np.fromfile(rivwth,np.float32).reshape(720,1440)
+        rivwth=np.fromfile(rivwth,np.float32).reshape(ny,nx)
 
         # rivnum
         rivnum=pm.DA_dir()+"/dat/rivnum.bin"
-        rivnum=np.fromfile(rivnum,np.int32).reshape(720,1440)
+        rivnum=np.fromfile(rivnum,np.int32).reshape(ny,nx)
 
         # river mouth pixel
         rivmth={}
@@ -993,7 +999,7 @@ def make_rivman():
             rivmth[riverid]=[lon,lat,uparea2]
 
         # rivman
-        rivman=np.ones([720,1440],np.float32)*base_man
+        rivman=np.ones([ny,nx],np.float32)*base_man
         #print np.amax(rivnum)
         for riv in np.arange(1,1000+1): #np.amax(rivnum)+1):
             #print riv
@@ -1018,10 +1024,76 @@ def make_rivman():
         rivman.tofile(pm.CaMa_dir()+"/map/glb_15min/rivmanTRUE.bin")
         # copy rivman.bin as rivmanCORR.bin
         os.system("cp "+pm.CaMa_dir()+"/map/glb_15min/rivman.bin "+pm.CaMa_dir()+"/map/glb_15min/rivmanCORR.bin")
-    else:
-        # copy rivman.bin for both rivmanTRUE.bin and rivmanCORR.bin
-        os.system("cp "+pm.CaMa_dir()+"/map/glb_15min/rivman.bin "+pm.CaMa_dir()+"/map/glb_15min/rivmanTRUE.bin")
+    elif pm.rivman_error()==2:
+        # rivman calculation considering the spatial covariance
+        nx=1440
+        ny=720
+        base_man=pm.rivman_base()
+        nmin=pm.rivman_min()#0.025
+        nmax=pm.rivman_max()#0.035
+        man=0.003
+        method='cholesky'
+        # subbasin
+        subbasin="../dat/subbasin.bin"
+        subbasin=np.rint(np.fromfile(subbasin,np.float32).reshape(ny,nx)*1.0e3)
+        subbasin=subbasin.astype(int)
+        # rivnum
+        rivnum="../dat/rivnum.bin"
+        rivnum=np.fromfile(rivnum,np.int32).reshape(ny,nx)#*1e3
+        # rivman
+        rivman=np.ones([ny,nx],np.float32)*base_man
+        rivman1=np.ones([ny,nx],np.float32)*base_man
+        print np.amax(rivnum)
+        for riv in np.arange(1,np.amax(rivnum)+1):
+            #print riv
+            num=float(riv)
+            river=ma.masked_where(rivnum!=riv,subbasin).filled(-9999.0)
+            #print np.amax(river)#-int(round(num*1.0e3)) #int(round(np.amax(river)*1000.0)),int(round(num*1000.0)),int(round(np.amax(river)*1000.0))-int(round(num*1000.0))
+            if np.amax(river) < 0:
+                subs=1
+            else:
+                subs=np.amax(river)-int(round(num*1.0e3)) + 1
+            print subs
+            rdlist=np.random.normal(1.0,0.25,subs)
+            #print rdlist
+            for i in np.arange(0,subs):
+                basin=int(round(num*1.0e3)+int(i))
+                print basin 
+                index=np.where(subbasin==basin)
+                rivman=ma.masked_where(subbasin==basin,rivman).filled(rdlist[i])
+                rivman1=ma.masked_where(subbasin==basin,rivman1).filled(rdlist[i])
+                if len(index[0]) != 0:
+                    #print "zero pixel"
+                    #continue
+                    #print index[0],index[1],len(index[0])
+                    #x=np.abs(norm.rvs(size=(len(index[0])))+1)
+                    #x=np.random.normal(rdlist[i],0.1,len(index[0]))
+                    x=np.ones([len(index[0])],np.float32)#*100.0#*rdlist[i]
+                    print len(x)
+                    C=cov(index[0],index[1])#,0.01)
+                    #print C
+        #            try: #if method== 'cholesky':
+        #                # cholesky decomposition
+        #                c=cholesky(C,lower=True)
+        #            except: #else:
+        #                print "eigon values"
+        #                # eigenvalues and eigenvectors 
+        #                evals, evecs = eigh(C)
+        #                c=np.dot(evecs, np.diag(np.sqrt(np.ma.masked_less(evals,0.0).filled(0.0))))
+        #                c=np.nan_to_num(c)
+                    #---
+                    # eigenvalues and eigenvectors 
+                    evals, evecs = eigh(C)
+                    c=np.dot(evecs, np.diag(np.sqrt(np.ma.masked_less(evals,0.0).filled(0.0))))
+                    c=np.nan_to_num(c)
+                    print rdlist[i], np.mean(np.abs(np.dot(c,x)*man*rdlist[i]))
+                    rivman[index[0],index[1]]=np.abs(np.dot(c,x)*man)
+        #--save rivman
+        rivman.tofile(pm.CaMa_dir()+"/map/glb_15min/rivmanTRUE.bin")
+        # copy rivman.bin as rivmanCORR.bin
         os.system("cp "+pm.CaMa_dir()+"/map/glb_15min/rivman.bin "+pm.CaMa_dir()+"/map/glb_15min/rivmanCORR.bin")
+        #rivman.tofile("rivman.bin")
+        #rivman1
 ###################################################################
 def observation_error():
     """observation error of WSE depending on the L*W of each pixel
