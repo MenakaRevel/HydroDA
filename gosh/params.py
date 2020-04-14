@@ -100,7 +100,9 @@ def rivman_error():
     return 1
     #define the experiment with or without rivman error
     # 0 : with out manning error
-    # 1 : with manning error
+    # 1 : with manning error: Manning's n depend on river width
+    # 2 : with manning error: Manning's n depend spatial covarience
+    # 3 : with manning error: Manning's n randomly distributed
 
 def run_flag():
     return 0
@@ -140,16 +142,17 @@ def CaMa_dir():
 def DA_dir():
     return "/cluster/data6/menaka/HydroDA"
     # directory od SWOTDA
-    # where src, data, out exsits
+    # where src, dat, sat, out exsits
 
 def patch_dir():
-    return "/cluster/data6/menaka/covariance/local_patch"
+    #return "/cluster/data6/menaka/covariance/local_patch"
+    return "/cluster/data6/menaka/covariance/local_patchMS"
 
 def patch_id():
     return "0.60"
 
 def spinup_mode():
-    return 1
+    return 0
     # 0: do spinup simulation for both (corrupted and true) simulation
     # 1: do spin up only at corrupted simulation
     # 2: do spin up only at true simulation
