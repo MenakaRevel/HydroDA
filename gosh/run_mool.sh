@@ -8,7 +8,7 @@
 #PBS -m ea
 #PBS -M menaka@rainbow.iis.u-tokyo.ac.jp
 #PBS -V
-#PBS -N HydroDA-wmc
+#PBS -N HydroDA
 
 #source ~/.bashrc
 
@@ -24,18 +24,19 @@ cd $HydroDA
 
 # experiment : edit the experiment name in here and params.py experiment()
 # before running run_mool.sh , please edit the nessary experimental settings in params.py
-EXP="E2O_wmc"
+EXP="E2O_wmc_MS"
 IFACTOR="1.08"
 
 mkdir $HydroDA"/out"
 mkdir $HydroDA"/out/"$EXP
 
-# copy params.py 
+# copy params.py
 cp -r "$HydroDA/gosh/params.py" "$HydroDA/out/$EXP/params.py"
 cp -r "$HydroDA/gosh/params.py" "$HydroDA/src/params.py"
 
 ln -sf $HydroDA"/src/"run.py $HydroDA"/out/"$EXP"/"run.py
 #ln -sf $HydroDA"/src/"main_code.py $HydroDA"/out/"$EXP"/"main_code.py
+
 # run the main code using virtual environment
 #/home/menaka/miniconda3/envs/pydef/bin/python2.7 $HydroDA"/src/"PBS_run.py $EXP $IFACTOR
 cd $HydroDA"/out/"$EXP
