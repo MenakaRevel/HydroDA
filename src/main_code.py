@@ -1026,8 +1026,8 @@ def make_rivman():
         os.system("cp "+pm.CaMa_dir()+"/map/glb_15min/rivman.bin "+pm.CaMa_dir()+"/map/glb_15min/rivmanCORR.bin")
     elif pm.rivman_error()==2:
         # rivman calculation considering the spatial covariance
-        nx=1440
-        ny=720
+        #nx=1440
+        #ny=720
         base_man=pm.rivman_base()
         nmin=pm.rivman_min()#0.025
         nmax=pm.rivman_max()#0.035
@@ -1086,8 +1086,8 @@ def make_rivman():
                     evals, evecs = eigh(C)
                     c=np.dot(evecs, np.diag(np.sqrt(np.ma.masked_less(evals,0.0).filled(0.0))))
                     c=np.nan_to_num(c)
-                    print rdlist[i], np.mean(np.abs(np.dot(c,x)*man*rdlist[i]))
-                    rivman[index[0],index[1]]=np.abs(np.dot(c,x)*man)
+                    print rdlist[i], np.mean(np.abs(np.dot(c,x)*base_man*rdlist[i]))
+                    rivman[index[0],index[1]]=np.abs(np.dot(c,x)*base_man)
         #--save rivman
         rivman.tofile(pm.CaMa_dir()+"/map/glb_15min/rivmanTRUE.bin")
         # copy rivman.bin as rivmanCORR.bin

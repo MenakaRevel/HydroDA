@@ -94,10 +94,10 @@ def mode():
     # 1: Earth2Obs, 2: ERA20CM, 3: -25% baised (ELSE_KIM2009/E2O/ERA20CM)
 
 def experiment():
-    return "E2O_wmc_MS"
+    return "E2O_womc_MS"
 
 def rivman_error():
-    return 1
+    return 0
     #define the experiment with or without rivman error
     # 0 : with out manning error
     # 1 : with manning error: Manning's n depend on river width

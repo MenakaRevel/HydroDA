@@ -164,6 +164,8 @@ open(73,file=fname,status='replace')
 fname=trim(adjustl(expdir))//"/logout/ensembles_"//yyyymmdd//".log"
 open(74,file=fname,status='replace')
 
+fname=trim(adjustl(expdir))//"/logout/error_"//yyyymmdd//".log"
+open(82,file=fname,status='replace')
 
 ! read storage (for making ocean mask)
 !allocate(ocean(lonpx,latpx))
@@ -502,7 +504,7 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
             !xa=xf
             errflg=1
             !write(*,*) "error",errflg
-            write(36,*) lat,lon,"error",errflg
+            write(82,*) lat,lon,"error",errflg
             goto 9999
         end if
         !------------------------------------------------------------
@@ -690,7 +692,7 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
                 errflg=3
                 !xa=xf
                 write(*,*) "====== ERROR cannot unpack Dsqr======",errflg
-                write(36,*) lat,lon,"error",errflg
+                write(82,*) lat,lon,"error",errflg
                 goto 9999
             end if
             !write(78,*) "Dsqr",Dsqr
@@ -714,7 +716,7 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
             write(*,*) "NG INFO"
             W=0
             errflg=4
-            write(36,*) lat,lon,"error",errflg,"info:",info
+            write(82,*) lat,lon,"error",errflg,"info:",info
             goto 9999
         end if
 
@@ -882,7 +884,7 @@ end if
 close(35)
 
 
-write(*,*) "L.531"
+!write(*,*) "L.531"
 
 close(78)
 close(79)
@@ -890,6 +892,7 @@ close(84)
 close(72)
 close(73)
 close(74)
+close(82)
 deallocate(global_xa,swot_obs,globalx,globaltrue,ens_xa,global_null,obs_mask)
 
 end program data_assim
