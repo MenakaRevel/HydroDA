@@ -1,5 +1,10 @@
 program data_assim
 !$ use omp_lib
+!**************************
+! Data Assimilation using LETKF and empircal local patches [Revel et al,. (2019)]
+! created by Ikeshima & Menaka
+! Menaka@IIS 2020
+!**************************
 implicit none
 character*128                   :: fname,buf,camadir,expdir,swotdir,patchdir
 character*8                     :: yyyymmdd,nxtyyyymmdd
