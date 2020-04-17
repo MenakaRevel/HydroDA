@@ -1094,6 +1094,102 @@ def make_rivman():
         os.system("cp "+pm.CaMa_dir()+"/map/glb_15min/rivman.bin "+pm.CaMa_dir()+"/map/glb_15min/rivmanCORR.bin")
         #rivman.tofile("rivman.bin")
         #rivman1
+    elif pm.rivman_error()==3:
+        # rivman calculation considering the subbasins simple random error
+        #nx=1440
+        #ny=720
+        base_man=pm.rivman_base()
+        nmin=pm.rivman_min()#0.025
+        nmax=pm.rivman_max()#0.035
+        man=0.003
+        method='cholesky'
+        # subbasin
+        subbasin="../dat/subbasin.bin"
+        subbasin=np.rint(np.fromfile(subbasin,np.float32).reshape(ny,nx)*1.0e3)
+        subbasin=subbasin.astype(int)
+        # rivnum
+        rivnum="../dat/rivnum.bin"
+        rivnum=np.fromfile(rivnum,np.int32).reshape(ny,nx)#*1e3
+        # rivman
+        rivman=np.ones([ny,nx],np.float32)*base_man
+        rivman1=np.ones([ny,nx],np.float32)*base_man
+        print np.amax(rivnum)
+        for riv in np.arange(1,np.amax(rivnum)+1):
+            #print riv
+            num=float(riv)
+            river=ma.masked_where(rivnum!=riv,subbasin).filled(-9999.0)
+            #print np.amax(river)#-int(round(num*1.0e3)) #int(round(np.amax(river)*1000.0)),int(round(num*1000.0)),int(round(np.amax(river)*1000.0))-int(round(num*1000.0))
+            if np.amax(river) < 0:
+                subs=1
+            else:
+                subs=np.amax(river)-int(round(num*1.0e3)) + 1
+            print subs
+            rdlist=np.random.normal(1.0,0.25,subs)
+            #print rdlist
+            for i in np.arange(0,subs):
+                basin=int(round(num*1.0e3)+int(i))
+                print basin 
+                index=np.where(subbasin==basin)
+                rivman=ma.masked_where(subbasin==basin,rivman).filled(rdlist[i])
+                rivman1=ma.masked_where(subbasin==basin,rivman1).filled(rdlist[i])
+                if len(index[0]) != 0:
+                    #print "zero pixel"
+                    #continue
+                    #print index[0],index[1],len(index[0])
+                    #x=np.abs(norm.rvs(size=(len(index[0])))+1)
+                    #x=np.random.normal(rdlist[i],0.1,len(index[0]))
+                    x=np.ones([len(index[0])],np.float32)#*100.0#*rdlist[i]
+                    print len(x)
+                    C=cov(index[0],index[1])#,0.01)
+                    #print C
+        #            try: #if method== 'cholesky':
+        #                # cholesky decomposition
+        #                c=cholesky(C,lower=True)
+        #            except: #else:
+        #                print "eigon values"
+        #                # eigenvalues and eigenvectors 
+        #                evals, evecs = eigh(C)
+        #                c=np.dot(evecs, np.diag(np.sqrt(np.ma.masked_less(evals,0.0).filled(0.0))))
+        #                c=np.nan_to_num(c)
+                    #---
+                    # eigenvalues and eigenvectors 
+                    evals, evecs = eigh(C)
+                    c=np.dot(evecs, np.diag(np.sqrt(np.ma.masked_less(evals,0.0).filled(0.0))))
+                    c=np.nan_to_num(c)
+                    print rdlist[i], np.mean(np.abs(np.dot(c,x)*base_man*rdlist[i]))
+                    rivman[index[0],index[1]]=np.abs(np.dot(c,x)*base_man)
+        #--save rivman
+        rivman.tofile(pm.CaMa_dir()+"/map/glb_15min/rivmanTRUE.bin")
+        # copy rivman.bin as rivmanCORR.bin
+        os.system("cp "+pm.CaMa_dir()+"/map/glb_15min/rivman.bin "+pm.CaMa_dir()+"/map/glb_15min/rivmanCORR.bin")
+    elif pm.rivman_error()==4:
+        #simple random normal distribution
+        base_man=pm.rivman_base()
+        nmin=pm.rivman_min()#0.025
+        nmax=pm.rivman_max()#0.035
+        # random values
+        # considering the 3-sigma==99.7% of the range
+        sigma=(nmax-base_man)/3.0
+        rivman=np.random.normal(base_man,sigma,nx*ny).reshape(ny,nx)
+        rivman=rivman.as_type(np.float32)
+        #--save rivman
+        rivman.tofile(pm.CaMa_dir()+"/map/glb_15min/rivmanTRUE.bin")
+        # copy rivman.bin as rivmanCORR.bin
+        os.system("cp "+pm.CaMa_dir()+"/map/glb_15min/rivman.bin "+pm.CaMa_dir()+"/map/glb_15min/rivmanCORR.bin")
+###################################################################
+def cov(ylist,xlist,sigma=1.0):
+    """covsriacne depend on the catesian distance"""
+    T=10.0
+    C=np.zeros([len(xlist),len(xlist)],np.float32)
+    for i in range(len(xlist)):
+        ix=xlist[i]
+        iy=ylist[i]
+        for j in range(len(xlist)):
+            iix=xlist[j]
+            iiy=ylist[j]
+            r=math.sqrt((ix-iix)**2+(iy-iiy)**2)
+            C[i,j]=abs(sigma*math.exp((-r**2)/T))
+    return C
 ###################################################################
 def observation_error():
     """observation error of WSE depending on the L*W of each pixel
