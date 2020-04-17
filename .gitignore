@@ -19,7 +19,8 @@ data_assim
 *.pyc
 
 #PBS oe files
-HydroDA-*.o*
+HydroDA*.o*
+HydroDA.o*
 
 #figures
 *.png
