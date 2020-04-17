@@ -24,11 +24,14 @@ cd $HydroDA
 
 # experiment : edit the experiment name in here and params.py experiment()
 # before running run_mool.sh , please edit the nessary experimental settings in params.py
-EXP="E2O_womc_MS"
+EXP="E2O_wmc_04"
 IFACTOR="1.08"
 
 mkdir $HydroDA"/out"
 mkdir $HydroDA"/out/"$EXP
+
+#write experiment name
+echo $EXP > $HydroDA"/out/"$EXP"/exp.txt"
 
 # copy params.py
 cp -r "$HydroDA/gosh/params.py" "$HydroDA/out/$EXP/params.py"
