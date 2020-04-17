@@ -25,3 +25,6 @@ HydroDA.o*
 #figures
 *.png
 *.jpg
+
+#temporary opened files
+*.swp
