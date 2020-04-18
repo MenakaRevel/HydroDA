@@ -41,7 +41,10 @@ def main_act():
     print pm.version()
     print pm.runname(pm.mode())
 
+    #compile fortrun codes
+    print "compile Fortran"
     compile_func()
+
     # make necessary directories
     print "initial"
     initial()
@@ -1171,15 +1174,68 @@ def make_rivman():
         # considering the 3-sigma==99.7% of the range
         sigma=(nmax-base_man)/3.0
         rivman=np.random.normal(base_man,sigma,nx*ny).reshape(ny,nx)
-        rivman=rivman.as_type(np.float32)
+        rivman=rivman.astype(np.float32)
         #--save rivman
         rivman.tofile(pm.CaMa_dir()+"/map/glb_15min/rivmanTRUE.bin")
         # copy rivman.bin as rivmanCORR.bin
         os.system("cp "+pm.CaMa_dir()+"/map/glb_15min/rivman.bin "+pm.CaMa_dir()+"/map/glb_15min/rivmanCORR.bin")
+    elif pm.rivman_error()==5:
+        # rivman calcaulation according to rivseq
+        base_man=pm.rivman_base()
+        nmin=pm.rivman_min()#0.025
+        nmax=pm.rivman_max()#0.035
+        #---
+        rivseq=pm.CaMa_dir()+"/map/glb_15min/rivseq.bin"
+        rivseq=np.fromfile(rivseq,np.int32).reshape(ny,nx)
+
+        # rivnum
+        rivnum=pm.DA_dir()+"/dat/rivnum.bin"
+        rivnum=np.fromfile(rivnum,np.int32).reshape(ny,nx)
+
+        # river mouth pixel
+        rivmth={}
+        fname=pm.DA_dir()+"/dat/rivmth.txt"
+        f = open(fname,"r")
+        lines = f.readlines()
+        f.close()
+        #---
+        for line in lines[1::]:
+            line    = filter(None, re.split(" ",line))
+            riverid = float(line[0])
+            lon     = int(line[1])
+            lat     = int(line[2])
+            uparea2 = float(line[3])/1000000.0 # km^2
+            rivmth[riverid]=[lon,lat,uparea2]
+
+        # rivman
+        rivman=np.ones([ny,nx],np.float32)*base_man
+        #print np.amax(rivnum)
+        for riv in np.arange(1,1000+1): #np.amax(rivnum)+1):
+            #print riv
+            num=float(riv)
+            #river=ma.masked_where(rivnum!=riv,subbasin).filled(-9999.0)
+            seq=ma.masked_where(rivnum!=riv,rivseq).compressed()
+            smax=np.amax(seq)
+            smin=np.amin(seq)
+            # get river mouth
+            ix=rivmth[riv][0]-1
+            iy=rivmth[riv][1]-1
+            smax=rivseq[iy,ix]
+            #print wmin, wmax
+            if smin == smax:
+                continue
+            index=np.where(rivnum==riv)
+            for i in np.arange(len(index[0])):
+                ix=index[1][i]
+                iy=index[0][i]
+                s=rivseq[iy,ix]
+                rivman[iy,ix]=max(nmin+(nmax-nmin)*((smax-s)/((smax-smin)+1.0e-20)),nmin)
+        rivman.tofile(pm.CaMa_dir()+"/map/glb_15min/rivmanTRUE.bin")
+        # copy rivman.bin as rivmanCORR.bin
+        os.system("cp "+pm.CaMa_dir()+"/map/glb_15min/rivman.bin "+pm.CaMa_dir()+"/map/glb_15min/rivmanCORR.bin")
 ###################################################################
-def cov(ylist,xlist,sigma=1.0):
-    """covsriacne depend on the catesian distance"""
-    T=10.0
+def cov(ylist,xlist,sigma=1.0,T=1000.0):
+    """covsriacne depend on the catersian distance"""
     C=np.zeros([len(xlist),len(xlist)],np.float32)
     for i in range(len(xlist)):
         ix=xlist[i]
@@ -1241,14 +1297,14 @@ def prepare_input():
     #--------------
     # E2O
     if pm.mode()==1: # Earth2Observe
-        print "E2O"
+        #print "E2O"
         distopen=pm.distopen(1)
         diststd=pm.diststd(1)
         true_run=pm.true_run(1) # for true ensemble
         runname=pm.runname(1) # get runoff name
         # copy for TRUE simulation
         if(len(glob.glob("./CaMa_in/"+runname+"/Roff_TRUE/Roff*"))!=0):
-            print "TRUE available"
+            #print "TRUE available"
             pass
         # true input file is not ready
         # need preparation
@@ -1256,7 +1312,7 @@ def prepare_input():
         mkdir("./CaMa_in/E2O/Roff_TRUE")
         #print "E2O/Roff_TRUE"
         inputlist=[]
-        print "prepare true"
+        #print "prepare true"
         for day in np.arange(start,last):
             target_dt=start_dt+datetime.timedelta(days=day)
             yyyy='%04d' % (target_dt.year)
@@ -1284,7 +1340,7 @@ def prepare_input():
 
         # make courrpted runoff
         if(len(glob.glob("./CaMa_in/"+runname+"/Roff_CORR/Roff*"))!=0):
-            print "Roff_CORR available"
+            #print "Roff_CORR available"
             pass
         # corrupted input file is not ready
         # need preparation
@@ -1312,7 +1368,7 @@ def prepare_input():
             #print distopen_range
         #distopen_ranges=np.array(distopen_ranges)
         f.close()
-        print "L1141"
+        #print "L1141"
         inputlist=[]
         for day in np.arange(start,last):
             target_dt=start_dt+datetime.timedelta(days=day)
@@ -1343,7 +1399,7 @@ def prepare_input():
                     #if runens == 3 and dist == 1.0:
                     #    pass
                     ens_char="C%03d"%(ens_num)
-                    print run_num, ens_char, dist
+                    #print run_num, ens_char, dist
                     #ofile=ifile + roff_mean*dist
                     #ofile.tofile("./CaMa_in/E2O/Roff_CORR/Roff__"+yyyy+mm+dd+ens_char+".one")
                     oname="./CaMa_in/"+runname+"/Roff_CORR/Roff__"+yyyy+mm+dd+ens_char+".one"
@@ -1451,7 +1507,7 @@ def prepare_input():
     #--------------
     # -25% biased runoff experiment
     if pm.mode()==3: # ELSE Kim 2009/E2O/ERA20CM
-        print "-25% biased runoff experiment", pm.true_run(3), pm.runname(3)
+        #print "-25% biased runoff experiment", pm.true_run(3), pm.runname(3)
         distopen=pm.distopen(3)
         diststd=pm.diststd(3)
         true_run=pm.true_run(3) # for true ensemble
@@ -1463,7 +1519,7 @@ def prepare_input():
         # need preparation
         # make directories
         mkdir("./CaMa_in/"+runname+"/Roff_TRUE")
-        print true_run
+        #print true_run
         inputlist=[]
         for day in np.arange(start,last):
             target_dt=start_dt+datetime.timedelta(days=day)
