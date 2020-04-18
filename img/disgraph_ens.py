@@ -25,7 +25,9 @@ import cal_stat as stat
 
 #argvs = sys.argv
 
-assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
+experiment="E2O_wmc_04"
+#assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
+assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 print assim_out
 #assim_out="assim_out_E2O_wmc"
 #assim_out="assim_out_E2O_womc_0"
