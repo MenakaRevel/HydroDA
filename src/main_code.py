@@ -1289,7 +1289,7 @@ def make_rivman():
         os.system("cp "+pm.CaMa_dir()+"/map/glb_15min/rivman.bin "+pm.CaMa_dir()+"/map/glb_15min/rivmanCORR.bin")
     # rivman to assim_out/rivman
     mkdir("./assim_out/rivman")
-    rivman.tofile("./assim_out/rivman")
+    rivman.tofile("./assim_out/rivman/rivman.bin")
 ###################################################################
 def cov(ylist,xlist,sigma=1.0,T=1000.0):
     """covsriacne depend on the catersian distance"""
