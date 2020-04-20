@@ -1233,6 +1233,63 @@ def make_rivman():
         rivman.tofile(pm.CaMa_dir()+"/map/glb_15min/rivmanTRUE.bin")
         # copy rivman.bin as rivmanCORR.bin
         os.system("cp "+pm.CaMa_dir()+"/map/glb_15min/rivman.bin "+pm.CaMa_dir()+"/map/glb_15min/rivmanCORR.bin")
+    elif pm.rivman_error()==6:
+        # rivman calcaulation according to uparea
+        base_man=pm.rivman_base()
+        nmin=pm.rivman_min()#0.025
+        nmax=pm.rivman_max()#0.035
+        #---
+        uparea=pm.CaMa_dir()+"/map/glb_15min/uparea.bin"
+        uparea=np.fromfile(uparea,np.floatt32).reshape(ny,nx)
+
+        # rivnum
+        rivnum=pm.DA_dir()+"/dat/rivnum.bin"
+        rivnum=np.fromfile(rivnum,np.int32).reshape(ny,nx)
+
+        # river mouth pixel
+        rivmth={}
+        fname=pm.DA_dir()+"/dat/rivmth.txt"
+        f = open(fname,"r")
+        lines = f.readlines()
+        f.close()
+        #---
+        for line in lines[1::]:
+            line    = filter(None, re.split(" ",line))
+            riverid = float(line[0])
+            lon     = int(line[1])
+            lat     = int(line[2])
+            uparea2 = float(line[3])/1000000.0 # km^2
+            rivmth[riverid]=[lon,lat,uparea2]
+
+        # rivman
+        rivman=np.ones([ny,nx],np.float32)*base_man
+        #print np.amax(rivnum)
+        for riv in np.arange(1,1000+1): #np.amax(rivnum)+1):
+            #print riv
+            num=float(riv)
+            #river=ma.masked_where(rivnum!=riv,subbasin).filled(-9999.0)
+            upa=ma.masked_where(rivnum!=riv,uparea).compressed()
+            umax=np.amax(upa)
+            umin=np.amin(upa)
+            # get river mouth
+            ix=rivmth[riv][0]-1
+            iy=rivmth[riv][1]-1
+            umax=uparea[iy,ix]
+            #print wmin, wmax
+            if smin == smax:
+                continue
+            index=np.where(rivnum==riv)
+            for i in np.arange(len(index[0])):
+                ix=index[1][i]
+                iy=index[0][i]
+                u=uparea[iy,ix]
+                rivman[iy,ix]=max(nmin+(nmax-nmin)*((umax-u)/((umax-umin)+1.0e-20)),nmin)
+        rivman.tofile(pm.CaMa_dir()+"/map/glb_15min/rivmanTRUE.bin")
+        # copy rivman.bin as rivmanCORR.bin
+        os.system("cp "+pm.CaMa_dir()+"/map/glb_15min/rivman.bin "+pm.CaMa_dir()+"/map/glb_15min/rivmanCORR.bin")
+    # rivman to assim_out/rivman
+    mkdir("./assim_out/rivman")
+    rivman.tofile("./assim_out/rivman")
 ###################################################################
 def cov(ylist,xlist,sigma=1.0,T=1000.0):
     """covsriacne depend on the catersian distance"""
