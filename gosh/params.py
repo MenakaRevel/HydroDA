@@ -101,12 +101,16 @@ def experiment():
     return exp
 
 def rivman_error():
-    return 0
+    return 5
     #define the experiment with or without rivman error
     # 0 : with out manning error
     # 1 : with manning error: Manning's n depend on river width
     # 2 : with manning error: Manning's n depend spatial covarience
-    # 3 : with manning error: Manning's n randomly distributed
+    # 3 : with manning error: Manning's n randomly distributed subbasin
+    # 4 : with manning error: Manning's n randomly distributed
+    # 5 : with manning error: Manning's n depend on rivseq
+    # 6 : with manning error: Manning's n depend on uparea
+    # 7 : with manning error: Manning's n depend on 
 
 def run_flag():
     return 0
@@ -149,8 +153,8 @@ def DA_dir():
     # where src, dat, sat, out exsits
 
 def patch_dir():
-    #return "/cluster/data6/menaka/covariance/local_patch"
-    return "/cluster/data6/menaka/covariance/local_patchMS"
+    return "/cluster/data6/menaka/covariance/local_patch"
+    #return "/cluster/data6/menaka/covariance/local_patchMS"
 
 def patch_id():
     return "0.60"
