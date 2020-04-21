@@ -101,7 +101,7 @@ def experiment():
     return exp
 
 def rivman_error():
-    return 5
+    return 6
     #define the experiment with or without rivman error
     # 0 : with out manning error
     # 1 : with manning error: Manning's n depend on river width
