@@ -1240,7 +1240,7 @@ def make_rivman():
         nmax=pm.rivman_max()#0.035
         #---
         uparea=pm.CaMa_dir()+"/map/glb_15min/uparea.bin"
-        uparea=np.fromfile(uparea,np.floatt32).reshape(ny,nx)
+        uparea=np.fromfile(uparea,np.float32).reshape(ny,nx)
 
         # rivnum
         rivnum=pm.DA_dir()+"/dat/rivnum.bin"
