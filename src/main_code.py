@@ -1276,7 +1276,7 @@ def make_rivman():
             iy=rivmth[riv][1]-1
             umax=uparea[iy,ix]
             #print wmin, wmax
-            if smin == smax:
+            if umin == umax:
                 continue
             index=np.where(rivnum==riv)
             for i in np.arange(len(index[0])):
