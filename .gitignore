@@ -3,9 +3,8 @@ inp
 out
 dat
 
-#params file
-*/params.py
-*params.py
+#params file at out folder
+out/*/params.py
 
 #binary files
 *.one
@@ -28,3 +27,4 @@ HydroDA.o*
 
 #temporary opened files
 *.swp
+*.swo

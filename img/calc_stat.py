@@ -42,7 +42,7 @@ slink("../gosh/params.py", "params.py")
 import params as pm
 # define values
 N=366 #2004
-exp="E2O_womc"
+exp="E2O_wmc_06"
 outdir=pm.DA_dir()+"/out/"+exp
 # mkdir stat
 mk_dir(outdir+"/assim_out/stat")
