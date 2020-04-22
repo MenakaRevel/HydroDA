@@ -1,27 +1,29 @@
 HydroDA
-     -src
-     -sat
-     -out
-     -inp
-     -dat
+    -src
+    -sat
+    -out
+    -inp
+    -dat
+    -img
 
-     src : source codes
+    src : source codes
 
-     sat : satellite data
-         -python codes to make satellite mask
+    sat : satellite data
+        -python codes to make satellite mask
 
-     out
-         -experiment_name
-             -assim_out
-             -cama_out
-             -cama_in
+    out
+        -experiment_name
+            -assim_out
+            -cama_out
+            -cama_in
 
-     inp
-         -data name
-             -Roff
+    inp
+        -data name
+            -Roff
 
-     dat  : river realted data
+    dat : river realted data
 
+    img : codes for preapring images
 ********************
 simple steps for global run
 1. prepare satellite orbit in HydroDa/sat folder
