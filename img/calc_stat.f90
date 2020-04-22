@@ -25,19 +25,16 @@ call getarg(2,buf)
 read(buf,*) m  !number of ensembles
 
 call getarg(3,buf)
-read(buf,"(A)") assim_out
-
-call getarg(4,buf)
 read(buf,"(A)") outdir
 write(*,*) outdir
 
-call getarg(5,buf)
+call getarg(4,buf)
 read(buf,"(A)") camadir
 write(*,*) camadir
 
 ! read next grid information
 ! read nextX and nextY
-fname=trim(adjustl(camadir))//"map/glb_15min/nextxy.bin"
+fname=trim(adjustl(camadir))//"/map/glb_15min/nextxy.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) nextX
@@ -70,7 +67,7 @@ do day=1,N
     write(yyyymmdd,'(i8.0)') days(day)
     write(*,*) yyyymmdd !day,, days(day)
     ! true river dischrge
-    fname=trim(adjustl(outdir))//trim(adjustl(assim_out))//"/rivout/true/rivout"//yyyymmdd//".bin"
+    fname=trim(adjustl(outdir))//"/assim_out/rivout/true/rivout"//yyyymmdd//".bin"
     open(34,file=fname,form="unformatted",access="direct",recl=4*lonpx*latpx,status="old",iostat=ios)
     if(ios==0)then
         read(34,rec=1) org(day,:,:)
@@ -81,7 +78,7 @@ do day=1,N
     do i=1,m
         write(numch,'(i3.3)') i
         ! corrpted river discharge
-        fname=trim(adjustl(outdir))//trim(adjustl(assim_out))//"/rivout/open/rivout"//yyyymmdd//"_"//numch//".bin"
+        fname=trim(adjustl(outdir))//"/assim_out/rivout/open/rivout"//yyyymmdd//"_"//numch//".bin"
         open(34,file=fname,form="unformatted",access="direct",recl=4*lonpx*latpx,status="old",iostat=ios)
         if(ios==0)then
             read(34,rec=1) opn(day,i,:,:)
@@ -90,7 +87,7 @@ do day=1,N
         end if
         close(34)
         ! assimilated river discharge
-        fname=trim(adjustl(outdir))//trim(adjustl(assim_out))//"/rivout/assim/rivout"//yyyymmdd//"_"//numch//".bin"
+        fname=trim(adjustl(outdir))//"/assim_out/rivout/assim/rivout"//yyyymmdd//"_"//numch//".bin"
         open(34,file=fname,form="unformatted",access="direct",recl=4*lonpx*latpx,status="old",iostat=ios)
         if(ios==0)then
             read(34,rec=1) asm(day,i,:,:)
@@ -195,7 +192,7 @@ deallocate(opn_max,opn_min,asm_max,asm_min)
 
 
 ! Assimilation Index
-fname=trim(adjustl(outdir))//trim(adjustl(assim_out))//"/img/AImap/annualmeanAI.bin"
+fname=trim(adjustl(outdir))//"/assim_out/stat/annualmeanAI.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*lonpx*latpx,status="replace",iostat=ios)
 if(ios==0)then
     write(34,rec=1) AI
@@ -205,7 +202,7 @@ end if
 close(34)
 
 ! Ensemble Spread
-fname=trim(adjustl(outdir))//trim(adjustl(assim_out))//"/img/AImap/annualmeanENSPR.bin"
+fname=trim(adjustl(outdir))//"/assim_out/stat/annualmeanENSPR.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*lonpx*latpx,status="replace",iostat=ios)
 if(ios==0)then
     write(34,rec=1)ENSPR
@@ -215,7 +212,7 @@ end if
 close(34)
 
 ! RMSE
-fname=trim(adjustl(outdir))//trim(adjustl(assim_out))//"/img/AImap/annualmeanRMSE.bin"
+fname=trim(adjustl(outdir))//"/assim_out/stat/RMSEasm.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*lonpx*latpx,status="replace",iostat=ios)
 if(ios==0)then
     write(34,rec=1) RMSE
@@ -225,7 +222,7 @@ end if
 close(34)
 
 ! rRMSE
-fname=trim(adjustl(outdir))//trim(adjustl(assim_out))//"/img/AImap/annualmeanrRMSE.bin"
+fname=trim(adjustl(outdir))//"/assim_out/stat/rRMSEasm.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*lonpx*latpx,status="replace",iostat=ios)
 if(ios==0)then
     write(34,rec=1) rRMSE
@@ -235,7 +232,7 @@ end if
 close(34)
 
 ! NRMSE
-fname=trim(adjustl(outdir))//trim(adjustl(assim_out))//"/img/AImap/annualmeanNRMSEasm.bin"
+fname=trim(adjustl(outdir))//"/assim_out/stat/NRMSEasm.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*lonpx*latpx,status="replace",iostat=ios)
 if(ios==0)then
     write(34,rec=1) NRMSEasm
@@ -244,7 +241,7 @@ else
 end if
 close(34)
 
-fname=trim(adjustl(outdir))//trim(adjustl(assim_out))//"/img/AImap/annualmeanNRMSEopn.bin"
+fname=trim(adjustl(outdir))//"/assim_out/stat/NRMSEopn.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*lonpx*latpx,status="replace",iostat=ios)
 if(ios==0)then
     write(34,rec=1) NRMSEopn
@@ -254,7 +251,7 @@ end if
 close(34)
 
 ! VEasm
-fname=trim(adjustl(outdir))//trim(adjustl(assim_out))//"/img/AImap/VEasm.bin"
+fname=trim(adjustl(outdir))//"/assim_out/stat/VEasm.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*lonpx*latpx,status="replace",iostat=ios)
 if(ios==0)then
     write(34,rec=1) VEasm
@@ -264,7 +261,7 @@ end if
 close(34)
 
 ! VE
-fname=trim(adjustl(outdir))//trim(adjustl(assim_out))//"/img/AImap/VEopn.bin"
+fname=trim(adjustl(outdir))//"/assim_out/stat/VEopn.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*lonpx*latpx,status="replace",iostat=ios)
 if(ios==0)then
     write(34,rec=1) VEopn
@@ -274,8 +271,8 @@ end if
 close(34)
 
 
-! NSA
-fname=trim(adjustl(outdir))//trim(adjustl(assim_out))//"/img/AImap/NSA.bin"
+! NSEasm
+fname=trim(adjustl(outdir))//"/assim_out/stat/NSEasm.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*lonpx*latpx,status="replace",iostat=ios)
 if(ios==0)then
     write(34,rec=1) NSA
@@ -284,8 +281,8 @@ else
 end if
 close(34)
 
-! NSC
-fname=trim(adjustl(outdir))//trim(adjustl(assim_out))//"/img/AImap/NSC.bin"
+! NSEopn
+fname=trim(adjustl(outdir))//"/assim_out/stat/NSEopn.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*lonpx*latpx,status="replace",iostat=ios)
 if(ios==0)then
     write(34,rec=1) NSC
@@ -294,8 +291,8 @@ else
 end if
 close(34)
 
-! NSE
-fname=trim(adjustl(outdir))//trim(adjustl(assim_out))//"/img/AImap/NSE.bin"
+! NSEAI
+fname=trim(adjustl(outdir))//"/assim_out/stat/NSEAI.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*lonpx*latpx,status="replace",iostat=ios)
 if(ios==0)then
     write(34,rec=1) NSE
@@ -305,7 +302,7 @@ end if
 close(34)
 
 ! PDRI
-fname=trim(adjustl(outdir))//trim(adjustl(assim_out))//"/img/AImap/annualPDRI.bin"
+fname=trim(adjustl(outdir))//"/assim_out/stat/annualPDRI.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*lonpx*latpx,status="replace",iostat=ios)
 if(ios==0)then
     write(34,rec=1) PDRI
@@ -315,7 +312,7 @@ end if
 close(34)
 
 ! PTRI
-fname=trim(adjustl(outdir))//trim(adjustl(assim_out))//"/img/AImap/annualPTRI.bin"
+fname=trim(adjustl(outdir))//"/assim_out/stat/annualPTRI.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*lonpx*latpx,status="replace",iostat=ios)
 if(ios==0)then
     write(34,rec=1) PTRI
@@ -325,7 +322,7 @@ end if
 close(34)
 
 ! pBias assimilated
-fname=trim(adjustl(outdir))//trim(adjustl(assim_out))//"/img/AImap/pBIASasm.bin"
+fname=trim(adjustl(outdir))//"/assim_out/stat/pBIASasm.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*lonpx*latpx,status="replace",iostat=ios)
 if(ios==0)then
     write(34,rec=1) PBIASasm
@@ -335,7 +332,7 @@ end if
 close(34)
 
 ! pBias corrupted
-fname=trim(adjustl(outdir))//trim(adjustl(assim_out))//"/img/AImap/pBIASopn.bin"
+fname=trim(adjustl(outdir))//"/assim_out/stat/pBIASopn.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*lonpx*latpx,status="replace",iostat=ios)
 if(ios==0)then
     write(34,rec=1) PBIASopn
@@ -345,7 +342,7 @@ end if
 close(34)
 
 ! KGE corrupted
-fname=trim(adjustl(outdir))//trim(adjustl(assim_out))//"/img/AImap/KGEopn.bin"
+fname=trim(adjustl(outdir))//"/assim_out/stat/KGEopn.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*lonpx*latpx,status="replace",iostat=ios)
 if(ios==0)then
     write(34,rec=1) KGEopn
@@ -355,7 +352,7 @@ end if
 close(34)
 
 ! KGE assimilated
-fname=trim(adjustl(outdir))//trim(adjustl(assim_out))//"/img/AImap/KGEasm.bin"
+fname=trim(adjustl(outdir))//"/assim_out/stat/KGEasm.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*lonpx*latpx,status="replace",iostat=ios)
 if(ios==0)then
     write(34,rec=1) KGEasm
