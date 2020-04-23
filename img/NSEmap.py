@@ -27,7 +27,7 @@ import my_colorbar as mbar
 os.system("ln -sf ../gosh/params.py params.py")
 import params as pm
 
-experiment="E2O_wmc_06"
+experiment="E2O_womc_MS"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 print assim_out
