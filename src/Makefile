@@ -1,7 +1,9 @@
 #=========
 include ../gosh/Mkinclude
 #=========
-TARGETS=calc_stat
+TARGETS=\
+data_assim\
+make_restart
 
 # Suffix
 .SUFFIXES : .f90
