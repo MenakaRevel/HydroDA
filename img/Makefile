@@ -1,0 +1,19 @@
+# Fortran Compiler
+FC  = ifort
+
+# Compiler options
+#FFLAGS = -O3 -warn all -assume byterecl -heap-arrays -nogen-interfaces
+FFLAGS = -O3 -assume byterecl -heap-arrays -nogen-interfaces -mcmodel=large -fPIC -shared-intel -g -traceback -lpthread -mkl -parallel
+
+TARGETS=calc_stat
+
+# Suffix
+.SUFFIXES : .f90
+.f90:
+	$(FC) ${FFLAGS} $^ -o $@
+
+# commands
+all: $(TARGETS)
+# clean
+clean:
+	rm -rf  $(TARGETS)
