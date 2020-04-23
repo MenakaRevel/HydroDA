@@ -12,18 +12,13 @@ from mpl_toolkits.basemap import Basemap
 import os
 from numpy import ma
 import calendar
-import my_colorbar as mbar
 
 #assim_out="assim_out_E2O_womc"
-#assim_out="assim_out_E2O_wmc"
+assim_out="assim_out_E2O_wmc"
 #assim_out="assim_out_ECMWF_womc_baised_0"
-#assim_out="assim_out_ECMWF_womc_baised"
-#assim_out="assim_out_ECMWF_womc_baised_if"
 #assim_out="assim_out_ECMWF_womc_baised_if_fixed1.10"
-#assim_out="assim_out_ECMWF_womc_baised_if_adaptive"
 #assim_out="assim_out"
 #assim_out="assim_out_biased_womc"
-##sys.path.append('../' +assim_out+'/')
 os.system("ln -sf ../gosh/params.py params.py")
 import params as pm
 
@@ -39,10 +34,8 @@ def mk_dir(sdir):
     pass
 #----
 mk_dir(assim_out+"/fig")
-mk_dir(assim_out+"/fig/NSE")
+mk_dir(assim_out+"/fig/KGE")
 #----
-
-#argvs = sys.argv
 
 year=2004
 month=1
@@ -74,65 +67,68 @@ else:
    lastday=365
 N=lastday
 
-ratio=np.zeros((spix-npix)*(epix-wpix)).reshape([spix-npix,epix-wpix])
-count=np.zeros((spix-npix)*(epix-wpix)).reshape([spix-npix,epix-wpix])
-a2ones=np.ones((spix-npix)*(epix-wpix)).reshape([spix-npix,epix-wpix])
-
-org=np.zeros([N,720,1440],np.float32)
-asm=np.zeros([N,720,1440],np.float32)
 #--
-#fname = pm.CaMa_dir()+"/map/global_15min/rivout.bin"
-#fname = pm.CaMa_dir()+"/map/glb_15min/outclm.bin"
 fname = "../dat/mean_rivout_1960-2013.bin"
-#fname="subriver.bin"
 trueforo = np.fromfile(fname,np.float32).reshape([720,1440])
-#trueforo = np.fromfile(fname,np.float32).reshape([2,720,1440])[0]
-# ocean [ 0:ocean, 1:not ocean ]
-#ocean = (trueforo[0,npix:spix,wpix:epix]<1e18) * 1
 #----
 rivnum="../dat/rivnum.bin"
 rivnum = np.fromfile(rivnum,np.int32).reshape(720,1440)
 #--
 # river [ 0:not river, 1:river ]
-river = (trueforo>100.)*(rivnum>0)*1.0
-#river = (trueforo>0.)  * 1.0
-#river = (trueforo[0,npix:spix,wpix:epix]>500.)  * 1
+river = (trueforo>100.)*(rivnum>0)*(rivnum<=1000)*1.0
+
 # run  calc_stat.py to create NSEasm.bin, NSEopn.bin, and NSEAI
-NSEs=["NSEopn","NSEasm","NSEAI"]
-for NSE in NSEs:
-    fname=assim_out+"/stat/"+NSE+".bin"
-    NS=np.fromfile(fname,np.float32).reshape(720,1440)
-    #--
+#*******************************************************
+KGEs=["KGEopn","KGEasm"]
+#if os.path.exists("../"+assim_out+"/img/AImap/"+KGE+".bin"):
+for KGE in KGEs:
+    KG=np.fromfile(assim_out+"/stat/"+KGE+".bin",np.float32).reshape(720,1440)
+    print KGE
+    KG=KG*river
+    #print KG, np.shape(KG)
+    # assim/true
     plt.close()
     #cmap=cm.viridis_r
-    if NSE=="NSEAI":
-        cmap=mbar.colormap("H01")
-    else:
-        cmap=mbar.colormap("H02")
-    #cmap=cm.rainbow_r
+    cmap=cm.rainbow_r
     #cmap.set_under("w",alpha=0)
-    NS=NS*river
-    print NSE
-    #print NS, np.shape(NS)
-
     resol=1
     plt.figure(figsize=(7*resol,3*resol))
     m = Basemap(projection='cyl',llcrnrlat=south,urcrnrlat=north,llcrnrlon=west,urcrnrlon=east, lat_ts=0,resolution='c')
-    #m.drawcoastlines( linewidth=0.1, color='k' )
+    #m.drawcoastlines( linewidth=0.3, color='k' )
     m.fillcontinents(color=land,lake_color=water)
     m.drawmapboundary(fill_color=water)
     m.drawparallels(np.arange(south,north+0.1,20), labels = [1,0,0,0], fontsize=10,linewidth=0.1)
     m.drawmeridians(np.arange(west,east+0.1,40), labels = [0,0,0,1], fontsize=10,linewidth=0.1)
     #im = m.imshow(np.flipud(ratio),vmin=1e-20, vmax=1,interpolation="nearest",cmap=cmap,zorder=100)
-    data=NS[npix:spix,wpix:epix]
-    #im = m.imshow(np.flipud(ma.masked_where(river[npix:spix,wpix:epix]!=1,data)),interpolation="nearest",vmin=1.0e-20, vmax=1,cmap=cmap,zorder=100)#
-    im = m.imshow(np.flipud(ma.masked_less_equal(data,1.0e-20)),vmin=0.0, vmax=1,interpolation="nearest",cmap=cmap,zorder=100)
+    data=KG[npix:spix,wpix:epix]
+    im = m.imshow(np.flipud(ma.masked_where(river[npix:spix,wpix:epix]<=0,data)),vmin=0, vmax=1,interpolation="nearest",cmap=cmap,zorder=100)#
     cbar=m.colorbar(im,"right",size="2%")
-    if NSE == "NSEAI":
-        cbar.set_label("NSEAI")
-        stitle="Nash-Sutcliff Efficency based Assimilation Index"
-    else:
-        cbar.set_label("NSE")
-        stitle="Nash-Sutcliff Efficency"
-    plt.title(stitle)
-    plt.savefig(assim_out+"/fig/NSE/"+NSE+"_map.png",dpi=300,bbox_inches="tight", pad_inches=0.05)
+    cbar.set_label("KGE")
+    plt.title("Kling Gupta Efficiency")#+yyyy+"-"+mm+"-"+dd)
+    plt.savefig(assim_out+"/fig/KGE/"+KGE+"_map.png",dpi=300,bbox_inches="tight", pad_inches=0.05)
+
+
+KGEasm=np.fromfile(assim_out+"/stat/KGEasm.bin",np.float32).reshape(720,1440)
+KGEopn=np.fromfile(assim_out+"/stat/KGEopn.bin",np.float32).reshape(720,1440)
+
+# KGE differnce 
+plt.close()
+#cmap=cm.viridis_r
+cmap=cm.bwr_r
+#cmap.set_under("w",alpha=0)
+
+resol=1
+plt.figure(figsize=(7*resol,3*resol))
+m = Basemap(projection='cyl',llcrnrlat=south,urcrnrlat=north,llcrnrlon=west,urcrnrlon=east, lat_ts=0,resolution='c')
+#m.drawcoastlines( linewidth=0.3, color='k' )
+m.fillcontinents(color=land,lake_color=water)
+m.drawmapboundary(fill_color=water)
+m.drawparallels(np.arange(south,north+0.1,20), labels = [1,0,0,0], fontsize=10,linewidth=0.1)
+m.drawmeridians(np.arange(west,east+0.1,40), labels = [0,0,0,1], fontsize=10,linewidth=0.1)
+#im = m.imshow(np.flipud(ratio),vmin=1e-20, vmax=1,interpolation="nearest",cmap=cmap,zorder=100)
+data=KGEasm[npix:spix,wpix:epix]-KGEopn[npix:spix,wpix:epix]
+im = m.imshow(np.flipud(ma.masked_where(river[npix:spix,wpix:epix]<=0,data)),vmin=-0.5, vmax=0.5,interpolation="nearest",cmap=cmap,zorder=100)#
+cbar=m.colorbar(im,"right",size="2%",extend="both",ticks=np.arange(-0.5,0.5+0.1,0.25))
+cbar.set_label("KGE differnce")
+plt.title("Kling Gupta Efficiency")#+yyyy+"-"+mm+"-"+dd)
+plt.savefig(assim_out+"/fig/KGE/KGEdiff_map.png",dpi=300,bbox_inches="tight", pad_inches=0.05)
