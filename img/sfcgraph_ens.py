@@ -43,8 +43,8 @@ print assim_out
 #assim_out="assim_out_biased_wmc"
 
 
-#os.system("mkdir ../assim_out/img")
-#os.system("mkdir ../assim_out/img/sfcelv")
+os.system("mkdir ../assim_out/img")
+os.system("mkdir ../assim_out/img/sfcelv")
 #----
 def SWOT_day(yyyy,mm,dd):
   st_year,st_month,st_date=pm.starttime()
@@ -99,7 +99,7 @@ river=[]
 #--
 rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZON","MEKONG","IRRAWADDY","VOLGA", "NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
 for rivername in rivernames:
-  path = assim_out+"/fig/scfelv/%s"%(rivername)
+  path = assim_out+"/fig/sfcelv/%s"%(rivername)
   print path
   mk_dir(path)
   #station_loc,x_list,y_list = grdc.get_grdc_loc(rivername,"b")
