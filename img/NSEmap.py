@@ -74,29 +74,16 @@ else:
    lastday=365
 N=lastday
 
-ratio=np.zeros((spix-npix)*(epix-wpix)).reshape([spix-npix,epix-wpix])
-count=np.zeros((spix-npix)*(epix-wpix)).reshape([spix-npix,epix-wpix])
-a2ones=np.ones((spix-npix)*(epix-wpix)).reshape([spix-npix,epix-wpix])
-
-org=np.zeros([N,720,1440],np.float32)
-asm=np.zeros([N,720,1440],np.float32)
 #--
-#fname = pm.CaMa_dir()+"/map/global_15min/rivout.bin"
-#fname = pm.CaMa_dir()+"/map/glb_15min/outclm.bin"
 fname = "../dat/mean_rivout_1960-2013.bin"
-#fname="subriver.bin"
 trueforo = np.fromfile(fname,np.float32).reshape([720,1440])
-#trueforo = np.fromfile(fname,np.float32).reshape([2,720,1440])[0]
-# ocean [ 0:ocean, 1:not ocean ]
-#ocean = (trueforo[0,npix:spix,wpix:epix]<1e18) * 1
 #----
 rivnum="../dat/rivnum.bin"
 rivnum = np.fromfile(rivnum,np.int32).reshape(720,1440)
 #--
 # river [ 0:not river, 1:river ]
 river = (trueforo>100.)*(rivnum>0)*1.0
-#river = (trueforo>0.)  * 1.0
-#river = (trueforo[0,npix:spix,wpix:epix]>500.)  * 1
+
 # run  calc_stat.py to create NSEasm.bin, NSEopn.bin, and NSEAI
 NSEs=["NSEopn","NSEasm","NSEAI"]
 for NSE in NSEs:
