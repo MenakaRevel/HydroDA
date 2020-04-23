@@ -26,10 +26,12 @@ HydroDA
     img : codes for preapring images
 ********************
 simple steps for global run
-1. prepare satellite orbit in HydroDa/sat folder
+1. Download and compile CaMa-Flood (Yamazaki et al 2011) model
+2. prepare satellite orbit in HydroDa/sat folder
     run make_satellite_data.py
-2. prepare runoff data in HydroDA/inp folder
-3. check river related data at HydroDA/dat folder
-4. Edit the settings at params.py and run_mool.sh at HydroDA/gosh 
-5. Run run_mool.sh
+3. prepare runoff data in HydroDA/inp folder
+4. check river related data at HydroDA/dat folder
+5. Edit the settings at params.py and run_mool.sh at HydroDA/gosh
+6. Compile HydroDA fortran codes using compile.sh
+7. Run run_mool.sh
 
