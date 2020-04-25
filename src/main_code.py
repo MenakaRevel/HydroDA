@@ -20,6 +20,7 @@ import scipy.linalg as spla
 from numpy import ma
 import random
 import re
+import calendar
 #external python codes
 import params as pm
 #import src.letkf_lib as lb
@@ -1789,3 +1790,47 @@ def calc_odb(year,month,date,obj):
     if  obj=="date":
         return bef_d
 ###########################
+def sfcelv_mean(ens):
+    # calculate yearly mean WSE
+    year=pm.spinup_end_year()
+    mon =pm.spinup_end_month()
+    day =pm.spinup_end_day()
+    ens =str(ens) # T000 or C0XX
+    #--
+    dz=days_year(year)
+    nx=1440
+    ny=720
+    #create filename
+    yyyy="%04d"%(year)
+    mm="%2d"%(mon)
+    dd="%2d"%(day)
+    sfcelv=pm.DA_dir()+"/out/"+pm.experiment()+"/CaMa_out/"+yyyy+mm+dd+ens+"/sfcelv"+yyyy+".bin"
+    sfcelv=np.fromfile(sfcelv,np.float32).reshape(dz,ny,nx)
+    sf_mean=np.mean(sfcelv,axis=0)
+    mk_dir(pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out/mean_sfcelv")
+    fname=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out/mean_sfcelv/meansfcelv"+yyyy+ens+".bin"
+    sf_mean.tofile(fname)
+    return 0
+##########################
+def days_year(year):
+    year=int(year)
+    days=365
+    if calendar.isleap(year):
+        days=366
+    return days
+##########################
+def calc_mean():
+    # paralle code for mean calculation
+    inputlist=["T000"]
+    for mem in np.arange(1,pm.ens_mem()+1,1):
+        inputlist.append("C%03d"%(mem))
+    #--
+    p=Pool(pm.para_nums())
+    p.map(sfcelv,inputlist)
+    p.terminate()
+    return 0
+##########################
+
+
+
+
