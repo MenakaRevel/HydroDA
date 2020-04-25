@@ -84,7 +84,7 @@ def main_act():
     spin_up()
 
     # Calculate mean for anomaly assimilation ### NEW
-    print "calculate mean of "+pm.spinup_end_year()
+    print "calculate mean of %04d"%(pm.spinup_end_year())
     calc_mean()
 
     # make initial restart
