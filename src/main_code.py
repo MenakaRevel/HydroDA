@@ -1798,7 +1798,7 @@ def sfcelv_mean(ens):
     # calculate yearly mean WSE
     year=pm.spinup_end_year()
     mon =pm.spinup_end_month()
-    day =pm.spinup_end_day()
+    day =pm.spinup_end_date()
     ens =str(ens) # T000 or C0XX
     #--
     dz=days_year(year)
