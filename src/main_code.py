@@ -82,6 +82,10 @@ def main_act():
     print "spin up simulation"
     spin_up()
 
+    # Calculate mean for anomaly assimilation ### NEW
+    print "calculate mean of "+pm.spinup_end_year()
+    calc_mean()
+
     # make initial restart
     print "make intial restart"
     make_initial_restart()
@@ -1830,7 +1834,3 @@ def calc_mean():
     p.terminate()
     return 0
 ##########################
-
-
-
-
