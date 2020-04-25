@@ -1830,7 +1830,7 @@ def calc_mean():
         inputlist.append("C%03d"%(mem))
     #--
     p=Pool(pm.para_nums())
-    p.map(sfcelv,inputlist)
+    p.map(sfcelv_mean,inputlist)
     p.terminate()
     return 0
 ##########################
