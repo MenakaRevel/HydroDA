@@ -1811,7 +1811,7 @@ def sfcelv_mean(ens):
     sfcelv=pm.DA_dir()+"/out/"+pm.experiment()+"/CaMa_out/"+yyyy+mm+dd+ens+"/sfcelv"+yyyy+".bin"
     sfcelv=np.fromfile(sfcelv,np.float32).reshape(dz,ny,nx)
     sf_mean=np.mean(sfcelv,axis=0)
-    mk_dir(pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out/mean_sfcelv")
+    mkdir(pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out/mean_sfcelv")
     fname=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out/mean_sfcelv/meansfcelv"+yyyy+ens+".bin"
     sf_mean.tofile(fname)
     return 0
