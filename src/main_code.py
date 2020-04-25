@@ -43,8 +43,9 @@ def main_act():
     print pm.runname(pm.mode())
 
     #compile fortrun codes
-    print "compile Fortran"
-    compile_func()
+    #print "compile Fortran"
+    # global comilation added
+    #compile_func()
 
     # make necessary directories
     print "initial"
