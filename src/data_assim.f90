@@ -16,6 +16,7 @@ integer*4                       :: lon_cent,lat_cent,patch_size,patch_side,i,j,k
 !integer*4                       :: S_lon_cent,S_lat_cent
 integer,allocatable             :: local_obs(:),iwork(:),ifail(:),H(:,:)!,localx(:,:,:)
 real,allocatable                :: xf_m(:),xf(:,:),globalx(:,:,:),xa(:,:)!,H(:,:)!xa_m(:),,localx_line(:)
+real,allocatable                :: meanglobalx(:,:,:),meanglobaltrue(:,:)
 integer                         :: ens_num,num,ios,ovs,info,info2,errflg,m
 character*3                     :: numch
 real,allocatable                :: globaltrue(:,:),xt(:),R(:,:),Rdiag(:)!
@@ -269,6 +270,33 @@ else
 end if
 close(34)
 
+! read mean sfelv forcast
+allocate(meanglobalx(lonpx,latpx,ens_num))
+meanglobalx=0
+do num=1,ens_num
+    write(numch,'(i3.3)') num
+    fname=trim(adjustl(expdir))//"/assim_out/meansfcelv"//yyyymmdd(1:4)//"C"//numch//".bin"
+    open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+    if(ios==0)then
+        read(34,rec=1) meanglobalx(:,:,num)
+    else
+        write(*,*) "no mean x"
+    end if
+    close(34)
+end do
+
+! read mean WSE true
+allocate(meanglobaltrue(lonpx,latpx))
+meanglobaltrue=0
+fname=trim(adjustl(expdir))//"/assim_out/meansfcelv"//yyyymmdd(1:4)//"T000.bin"
+open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+if(ios==0)then
+    read(34,rec=1) meanglobaltrue
+else
+    write(*,*) "no true"
+end if
+close(34)
+
 ! read WSE from all model
 allocate(globalx(lonpx,latpx,ens_num))
 globalx=0
@@ -283,6 +311,8 @@ do num=1,ens_num
     end if
     close(34)
 end do
+! update globalx
+globalx=globalx-meanglobalx
 
 ! read true WSE
 allocate(globaltrue(lonpx,latpx))
@@ -295,6 +325,8 @@ else
     write(*,*) "no true"
 end if
 close(34)
+! update globalture
+globaltrue=globaltrue-meanglobaltrue
 
 ! read countnum
 !fname=trim(adjustl(expdir))//"/local_patch/countnum.bin"
@@ -871,7 +903,7 @@ do num=1,ens_num
     write(*,*)fname
     open(35,file=fname,form="unformatted",access="direct",recl=4*lonpx*latpx,status="replace",iostat=ios)
     if(ios==0)then
-        write(35,rec=1) ens_xa(:,:,num)
+        write(35,rec=1) ens_xa(:,:,num)+meanglobalx(:,:,num)
     else
         write(*,*) "not created", fname
     end if
@@ -899,7 +931,7 @@ close(73)
 close(74)
 close(82)
 deallocate(global_xa,swot_obs,globalx,globaltrue,ens_xa,global_null,obs_mask)
-
+deallocate(meanglobalx,meanglobaltrue)
 end program data_assim
 !*****************************************************************
 subroutine lag_distance(i,j,x,y,nx,ny,nextX,nextY,nextdst,lag_dist)
