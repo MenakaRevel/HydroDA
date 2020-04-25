@@ -275,7 +275,7 @@ allocate(meanglobalx(lonpx,latpx,ens_num))
 meanglobalx=0
 do num=1,ens_num
     write(numch,'(i3.3)') num
-    fname=trim(adjustl(expdir))//"/assim_out/meansfcelv"//yyyymmdd(1:4)//"C"//numch//".bin"
+    fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/meansfcelvC"//numch//".bin"
     open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
     if(ios==0)then
         read(34,rec=1) meanglobalx(:,:,num)
@@ -288,7 +288,7 @@ end do
 ! read mean WSE true
 allocate(meanglobaltrue(lonpx,latpx))
 meanglobaltrue=0
-fname=trim(adjustl(expdir))//"/assim_out/meansfcelv"//yyyymmdd(1:4)//"T000.bin"
+fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/meansfcelvT000.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) meanglobaltrue
@@ -363,7 +363,7 @@ randlist=0
 !close(34)
 
 ! observation error 0.1*(1/L)*(1/W)
-fname=trim(adjustl(swotdir))//"/dat/obs_err.bin"
+fname=trim(adjustl(swotdir))//"/sat/obs_err.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) obs_err
