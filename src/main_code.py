@@ -979,6 +979,8 @@ def make_rivman():
         # copy rivman.bin for both rivmanTRUE.bin and rivmanCORR.bin
         os.system("cp "+pm.CaMa_dir()+"/map/glb_15min/rivman.bin "+pm.CaMa_dir()+"/map/glb_15min/rivmanTRUE.bin")
         os.system("cp "+pm.CaMa_dir()+"/map/glb_15min/rivman.bin "+pm.CaMa_dir()+"/map/glb_15min/rivmanCORR.bin")
+        # rivman
+        rivman=np.fromfile(pm.CaMa_dir()+"/map/glb_15min/rivman.bin",np.float32).reshape(ny,nx)
     elif pm.rivman_error()==1:
         # for rivwth depend calculation Pedonetti et al 2014
         base_man=pm.rivman_base()
