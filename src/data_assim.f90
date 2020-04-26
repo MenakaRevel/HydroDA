@@ -882,7 +882,7 @@ fname=trim(adjustl(expdir))//"/logout/usedwhat_"//yyyymmdd//".log"
 ! make ensemble output (WSE)
 allocate(ens_xa(lonpx,latpx,ens_num))
 do num=1,ens_num
-    ens_xa(:,:,num) = global_xa(:,:,num)*(global_null) + globalx(:,:,num)*(1-global_null)
+    ens_xa(:,:,num) = global_xa(:,:,num)*(global_null) + globalx(:,:,num)*(1-global_null) + meanglobalx(:,:,num)
 end do
 
 !fname="./logout/OutSfcLog_"//yyyymmdd//".log"
@@ -903,7 +903,7 @@ do num=1,ens_num
     write(*,*)fname
     open(35,file=fname,form="unformatted",access="direct",recl=4*lonpx*latpx,status="replace",iostat=ios)
     if(ios==0)then
-        write(35,rec=1) ens_xa(:,:,num)+meanglobalx(:,:,num)
+        write(35,rec=1) ens_xa(:,:,num)
     else
         write(*,*) "not created", fname
     end if
