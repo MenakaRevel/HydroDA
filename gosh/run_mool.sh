@@ -12,7 +12,7 @@
 
 #source ~/.bashrc
 
-export OMP_NUM_THREADS=40
+export OMP_NUM_THREADS=20
 
 # got to working dirctory
 HydroDA="/cluster/data6/menaka/HydroDA"
@@ -24,7 +24,7 @@ cd $HydroDA
 
 # experiment : edit the experiment name in here and params.py experiment()
 # before running run_mool.sh , please edit the nessary experimental settings in params.py
-EXP="E2O_womc_anomalyDA"
+EXP="E2O_wmc_01_anomalyDA"
 #IFACTOR="1.08"
 
 mkdir $HydroDA"/out"
