@@ -331,7 +331,7 @@ randlist=0
 !close(34)
 
 ! observation error 0.1*(1/L)*(1/W)
-fname=trim(adjustl(swotdir))//"/dat/obs_err.bin"
+fname=trim(adjustl(swotdir))//"/sat/obs_err.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) obs_err
