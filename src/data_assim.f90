@@ -43,8 +43,8 @@ real                            :: rho,rho_fixed ! covariance inflation paramete
 real                            :: thresold ! weightage thresold , 0.2
 real,allocatable                :: dep(:),HEf(:,:),HEfR(:,:),HPH(:,:)
 real,dimension(4)               :: parm
-real                            :: sigma_o,gain
-real,parameter                  :: sigma_b=0.04d0,rho_min=1.0d0
+real                            :: sigma_o,gain,sigma_b ! background variance
+real,parameter                  :: rho_min=1.0d0
 
 !real,allocatable                :: storage(:,:)
 real,allocatable                :: global_null(:,:)!,globals_count(:,:)
@@ -118,11 +118,11 @@ read(buf,"(A)") swotdir
 call getarg(18,buf)
 read(buf,"(A)") patchdir
 
-call getarg(18,buf)
-read(buf,"(A)") patchid
-
 call getarg(19,buf)
 read(buf,*) rho_fixed
+
+call getarg(20,buf)
+read(buf,*) sigma_b
 
 
 allocate(usedwhat(3))
@@ -555,7 +555,11 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
         write(78,*) "local obs",local_obs
 
         ! inflation parameter
-        rho=parm_infl(lon_cent,lat_cent)
+        if (rho_fixed==-1.0) then
+            rho=parm_infl(lon_cent,lat_cent)
+        else
+            rho=rho_fixed
+        endif
         if (rho<rho_min) rho=rho_min
         write(*,*)rho
 

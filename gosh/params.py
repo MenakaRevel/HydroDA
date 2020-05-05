@@ -191,9 +191,14 @@ def initial_infl():
     return 1.08
     # initial inflation parameter
 
+def rho():
+    return 2.00
+    # -1.0 : adaptive inflation will be used Myoshi et al (2011)
+    # positive : fixed inflation parameter will be used
+
 def sigma_b():
     return 0.0400000
-    # bacground variance of iflation 
+    # bacground variance of iflation for adaptive inflation Myoshi et al (2011)
 
 def MKLdir():
     return "/opt/intel/compilers_and_libraries_2016.3.170/mac/mkl"
