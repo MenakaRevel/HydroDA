@@ -1296,7 +1296,7 @@ def make_rivman():
         # copy rivman.bin as rivmanCORR.bin
         os.system("cp "+pm.CaMa_dir()+"/map/glb_15min/rivman.bin "+pm.CaMa_dir()+"/map/glb_15min/rivmanCORR.bin")
     # rivman to assim_out/rivman
-    exp_dir=pm.DA_dir()+"/out/"+pm.experment()
+    exp_dir=pm.DA_dir()+"/out/"+pm.experiment()
     mkdir(exp_dir+"./assim_out/rivman")
     # rivman courrpted
     os.system("cp "+pm.CaMa_dir()+"/map/glb_15min/rivman.bin "+exp_dir+"/assim_out/rivman/rivmanCORR.bin")
