@@ -43,8 +43,8 @@ print assim_out
 #assim_out="assim_out_biased_wmc"
 
 
-os.system("mkdir ../assim_out/img")
-os.system("mkdir ../assim_out/img/sfcelv")
+#os.system("mkdir ../assim_out/fig")
+#os.system("mkdir ../assim_out/fig/anomaly")
 #----
 def SWOT_day(yyyy,mm,dd):
   st_year,st_month,st_date=pm.starttime()
@@ -61,7 +61,7 @@ def mk_dir(sdir):
     pass
 #----
 mk_dir(assim_out+"/fig")
-mk_dir(assim_out+"/fig/sfcelv")
+mk_dir(assim_out+"/fig/anomaly")
 #---
 year=2004
 month=1
@@ -99,7 +99,7 @@ river=[]
 #--
 rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZON","MEKONG","IRRAWADDY","VOLGA", "NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
 for rivername in rivernames:
-  path = assim_out+"/fig/sfcelv/%s"%(rivername)
+  path = assim_out+"/fig/anomaly/%s"%(rivername)
   print path
   mk_dir(path)
   #station_loc,x_list,y_list = grdc.get_grdc_loc(rivername,"b")
@@ -231,7 +231,7 @@ for day in np.arange(start,last):
     for point in np.arange(pnum):
         xpoint=xlist[point]
         ypoint=ylist[point]
-        org_frag.append(orgfile[ypoint,xpoint])
+        org_frag.append(orgfile[ypoint,xpoint]-mean_true[ypoint,xpoint])
         bathy_frag.append(elevtn[ypoint,xpoint] -bathyfile[ypoint,xpoint])
         ele_frag.append(elevtn[ypoint,xpoint])
         m_sf_frag.append(mean_true[ypoint,xpoint])
@@ -278,7 +278,7 @@ for day in np.arange(start,last):
         for point in np.arange(pnum):
             xpoint=xlist[point]
             ypoint=ylist[point]
-            opn_frag.append(opnfile[ypoint,xpoint])
+            opn_frag.append(opnfile[ypoint,xpoint]-mean_corr[ypoint,xpoint])
             asm_frag.append(asmfile[ypoint,xpoint])
             hgt_frag.append(rhgtfile[ypoint,xpoint])
             #print asmfile[ypoint,xpoint],elevtn[ypoint,xpoint] - rhgtfile[ypoint,xpoint],rhgtfile[ypoint,xpoint]
@@ -337,7 +337,7 @@ def make_fig(point):
     fig, ax1 = plt.subplots()
     #ax1.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7,zorder=101,marker = "o",markevery=swt[point])
     ax1.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7,zorder=101)
-    ax1.plot(np.arange(start,last),m_sf[:,point],label="mean sfcelv",color="black",linewidth=0.7,linestyle="--",zorder=107)
+#    ax1.plot(np.arange(start,last),m_sf[:,point],label="mean sfcelv",color="black",linewidth=0.7,linestyle="--",zorder=107)
 #    plt.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7)
 
     for num in np.arange(0,int(pm.ens_mem())):
@@ -348,7 +348,7 @@ def make_fig(point):
 #        plt.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.3,alpha=0.5)
     ax1.plot(np.arange(start,last),np.mean(opn[:,:,point],axis=1),label="corrupted",color="blue",linewidth=0.8,alpha=0.8,zorder=102)
     ax1.plot(np.arange(start,last),np.mean(asm[:,:,point],axis=1),label="assimilated",color="red",linewidth=0.8,alpha=0.8,zorder=103)
-    ax1.plot(np.arange(start,last),np.mean(em_sf[:,:,point],axis=1),label="mean sfelv",color="blue",linewidth=0.5,linestyle="--",alpha=0.5,zorder=103)
+#    ax1.plot(np.arange(start,last),np.mean(em_sf[:,:,point],axis=1),label="mean sfelv",color="blue",linewidth=0.5,linestyle="--",alpha=0.5,zorder=103)
 #    plt.ylim(ymin=)
     # Make the y-axis label, ticks and tick labels match the line color.
     ax1.set_ylabel('WSE (m)', color='k')
@@ -382,7 +382,7 @@ def make_fig(point):
     ax2.tick_params('y', colors='green')
     ax2.set_ylim(ymin=0.,ymax=1.)
     print 'save',river[point]
-    plt.savefig(assim_out+"/fig/sfcelv/"+river[point]+"/"+pname[point]+".png",dpi=300)
+    plt.savefig(assim_out+"/fig/anomaly/"+river[point]+"/"+pname[point]+".png",dpi=300)
     return 0
 #
 para_flag=1
