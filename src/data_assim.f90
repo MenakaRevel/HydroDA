@@ -6,7 +6,7 @@ program data_assim
 ! Menaka@IIS 2020
 !**************************
 implicit none
-character*128                   :: fname,buf,camadir,expdir,swotdir,patchdir
+character*128                   :: fname,buf,camadir,expdir,DAdir,patchdir
 character*8                     :: yyyymmdd,nxtyyyymmdd
 real                            :: assimN,assimS,assimW,assimE,lat,lon
 character*2                     :: swot_day
@@ -113,7 +113,7 @@ call getarg(16,buf)
 read(buf,"(A)") expdir
 
 call getarg(17,buf)
-read(buf,"(A)") swotdir
+read(buf,"(A)") DAdir
 
 call getarg(18,buf)
 read(buf,"(A)") patchdir
@@ -239,7 +239,7 @@ close(34)
 ! read SWOT observation distance data
 allocate(swot_obs(1440,640))
 swot_obs=0
-fname=trim(adjustl(swotdir))//"/sat/mesh_day"//swot_day//".bin"
+fname=trim(adjustl(DAdir))//"/sat/mesh_day"//swot_day//".bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*lonpx*640,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) swot_obs
@@ -251,7 +251,7 @@ close(34)
 ! obs_mask is a mask for considering if there is observation in local patch at that date
 allocate(obs_mask(lonpx,latpx))
 !obs_mask=0 ! 0 means no observations in local patch
-!fname=trim(adjustl(swotdir))//"/ava_obs/obs"//swot_day//".bin"
+!fname=trim(adjustl(DAdir))//"/ava_obs/obs"//swot_day//".bin"
 !open(34,file=fname,form="unformatted",access="direct",recl=4*lonpx*latpx,status="old",iostat=ios)
 !if(ios==0)then
 !    read(34,rec=1) obs_mask
@@ -368,7 +368,7 @@ randlist=0
 !close(34)
 
 ! observation error 0.1*(1/L)*(1/W)
-fname=trim(adjustl(swotdir))//"/sat/obs_err.bin"
+fname=trim(adjustl(DAdir))//"/sat/obs_err.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) obs_err
