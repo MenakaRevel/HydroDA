@@ -678,12 +678,12 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
         isuppz=0
 
         ! calculate VDVT
-        if (rho_fixed/=-1.0) then
-            VDVT=real(ens_num-1.)*UNI/rho_fixed+HETRHE
-        else
-            VDVT=real(ens_num-1.)*UNI/rho+HETRHE
-        end if
-
+        !if (rho_fixed/=-1.0) then
+        !    VDVT=real(ens_num-1.)*UNI/rho_fixed+HETRHE
+        !else
+        !    VDVT=real(ens_num-1.)*UNI/rho+HETRHE
+        !end if
+        VDVT=real(ens_num-1.)*UNI/rho+HETRHE
         !   ! modify VDVT
         !   do i=1,ens_num
         !       do j=1,ens_num
