@@ -279,7 +279,7 @@ for day in np.arange(start,last):
             xpoint=xlist[point]
             ypoint=ylist[point]
             opn_frag.append(opnfile[ypoint,xpoint]-mean_corr[ypoint,xpoint])
-            asm_frag.append(asmfile[ypoint,xpoint])
+            asm_frag.append(asmfile[ypoint,xpoint]-mean_corr[ypoint,xpoint])
             hgt_frag.append(rhgtfile[ypoint,xpoint])
             #print asmfile[ypoint,xpoint],elevtn[ypoint,xpoint] - rhgtfile[ypoint,xpoint],rhgtfile[ypoint,xpoint]
             em_sf_frag.append(mean_corr[ypoint,xpoint])
