@@ -313,7 +313,7 @@ do num=1,ens_num
 end do
 
 ! update globalx
-globalx=globalx-meanglobalx
+!globalx=globalx-meanglobalx
 
 ! mean of ensembles
 !do num=1,ens_num
@@ -892,7 +892,7 @@ fname=trim(adjustl(expdir))//"/logout/usedwhat_"//yyyymmdd//".log"
 ! make ensemble output (WSE)
 allocate(ens_xa(lonpx,latpx,ens_num))
 do num=1,ens_num
-    ens_xa(:,:,num) = global_xa(:,:,num)*(global_null) + globalx(:,:,num)*(1-global_null) + meanglobalx(:,:,num) !+ (sum(meanglobalx(:,:,:),dim=3)/real(ens_num)) !
+    ens_xa(:,:,num) = global_xa(:,:,num)*(global_null) + globalx(:,:,num)*(1-global_null) !+ meanglobalx(:,:,num) !+ (sum(meanglobalx(:,:,:),dim=3)/real(ens_num)) !
 end do
 
 !fname="./logout/OutSfcLog_"//yyyymmdd//".log"
