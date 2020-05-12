@@ -271,7 +271,7 @@ def non_hgt():
     # nominal water height
 
 def cpu_nums():
-    return 2
+    return 4
     # number of cpus used
 
 def version():
