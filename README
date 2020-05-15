@@ -10,6 +10,7 @@ HydroDA
 
     sat : satellite data
         -python codes to make satellite mask
+        -may not need but needed for visualization
 
     out
         -experiment_name
@@ -22,13 +23,14 @@ HydroDA
             -Roff
 
     dat : river realted data
+        -river basin
+        -HydroWeb station data
 
     img : codes for preapring images
 ********************
 simple steps for global run
 1. Download and compile CaMa-Flood (Yamazaki et al 2011) model
-2. prepare satellite orbit in HydroDa/sat folder
-    run make_satellite_data.py
+2. prepare observation data (HydroWeb) : add the path to params file
 3. prepare runoff data in HydroDA/inp folder
 4. check river related data at HydroDA/dat folder
 5. Edit the settings at params.py and run_mool.sh at HydroDA/gosh
