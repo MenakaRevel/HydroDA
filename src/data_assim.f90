@@ -1,12 +1,12 @@
 program data_assim
 !$ use omp_lib
 !**************************
-! Data Assimilation using LETKF and empircal local patches [Revel et al,. (2019)]
+! Data Assimilation using LETKF and empircal local patches [Revel et al,. (2019,2020)]
 ! created by Ikeshima & Menaka
 ! Menaka@IIS 2020
 !**************************
 implicit none
-character*128                   :: fname,buf,camadir,expdir,DAdir,patchdir
+character*128                   :: fname,buf,camadir,expdir,DAdir,patchdir,hydrowebdir,mapname
 character*8                     :: yyyymmdd,nxtyyyymmdd
 real                            :: assimN,assimS,assimW,assimE,lat,lon
 character*2                     :: swot_day
@@ -31,10 +31,12 @@ real,allocatable                :: K_(:,:)
 
 integer,allocatable             :: obs_mask(:,:) ! NEW v.1.1.0
 real,allocatable                :: ens_xa(:,:,:)
-
-integer,parameter               :: latpx=720,lonpx=1440
-real,dimension(lonpx,latpx)     :: rivwth,rivlen,nextdst,weightage,storage,parm_infl
-integer,dimension(lonpx,latpx)  :: nextX,nextY,ocean,countp,targetp
+real                            :: gsize               ! grid size, as input
+real                            ::  west, north, east, south ! map boundries
+integer                         :: latpx,lonpx,nflp    ! pixel size, calculated
+real,allocatable                :: rivwth(:,:),rivlen(:,:),nextdst(:,:),lons(:,:),lats(:,:)
+real,allocatable                :: weightage(:,:),storage(:,:),parm_infl(:,:)
+integer,allocatable             :: nextX(:,:),nextY(:,:),ocean(:,:),countp(:,:),targetp(:,:)
 
 integer,allocatable             :: usedwhat(:)
 real                            :: errrand,errfix
@@ -46,6 +48,8 @@ real,dimension(4)               :: parm
 real                            :: sigma_o,gain,sigma_b ! background variance
 real,parameter                  :: rho_min=1.0d0
 
+! for HydroWeb data
+character*128,allocatable       :: VSrefer(:,:)
 !real,allocatable                :: storage(:,:)
 real,allocatable                :: global_null(:,:)!,globals_count(:,:)
 real,allocatable                :: Wvec(:),lag(:),local_lag(:)!global_sum_xam(:,:),
@@ -75,55 +79,79 @@ call getarg(4,buf)
 read(buf,*) assimE
 
 call getarg(5,buf)
-read(buf,*) yyyymmdd
+read(buf,*) mapname ! name of the map
 
 call getarg(6,buf)
-read(buf,*) swot_day
+read(buf,*) yyyymmdd
 
 call getarg(7,buf)
-read(buf,*) patch_size ! radius
+read(buf,*) swot_day
 
 call getarg(8,buf)
-read(buf,*) ens_num ! number of ensemble
+read(buf,*) patch_size ! radius
 
 call getarg(9,buf)
-read(buf,*) day ! number of date; start from 0
+read(buf,*) ens_num ! number of ensemble
 
 call getarg(10,buf)
-read(buf,*) nxtyyyymmdd
+read(buf,*) day ! number of date; start from 0
 
 call getarg(11,buf)
-read(buf,*) errexp
+read(buf,*) nxtyyyymmdd
 
 call getarg(12,buf)
+read(buf,*) errexp
+
+call getarg(13,buf)
 read(buf,"(A)") camadir
 write(*,*) camadir
 
-call getarg(13,buf)
+call getarg(14,buf)
 read(buf,*) errrand
 write(*,*) errrand
 
-call getarg(14,buf)
+call getarg(15,buf)
 read(buf,*) errfix
 
-call getarg(15,buf)
+call getarg(16,buf)
 read(buf,*) thresold
 
-call getarg(16,buf)
+call getarg(17,buf)
 read(buf,"(A)") expdir
 
-call getarg(17,buf)
+call getarg(18,buf)
 read(buf,"(A)") DAdir
 
-call getarg(18,buf)
+call getarg(19,buf)
 read(buf,"(A)") patchdir
 
-call getarg(19,buf)
+call getarg(20,buf)
+read(buf,"(A)") hydrowebdir
+
+call getarg(21,buf)
 read(buf,*) rho_fixed
 
-call getarg(20,buf)
+call getarg(22,buf)
 read(buf,*) sigma_b
 
+!==
+fname=trim(camadir)//"/map/"//trim(mapname)//"/params.txt"
+open(11,file=fname,form='formatted')
+read(11,*) lonpx
+read(11,*) latpx
+read(11,*) nflp
+read(11,*) gsize
+read(11,*) west
+read(11,*) east
+read(11,*) south
+read(11,*) north
+close(11)
+!-------
+! format 
+20 format(i4.4,2x,i4.4,2x,f8.4,2x,f8.4,2x,f8.4)
+21 format(i4.4,2x,i4.4,2x,f12.7,2x,f12.7,2x,f12.7)
+22 format(a4,2x,a4,2x,a8,2x,a8,2x,a8)
+23 format(i4.4,2x,i4.4,2x,f10.7)
 
 allocate(usedwhat(3))
 usedwhat=0
@@ -149,11 +177,6 @@ open(78,file=fname,status='replace')
 fname=trim(adjustl(expdir))//"/logout/KLog_"//yyyymmdd//".log"
 open(84,file=fname,status='replace')
 
-20 format(i4.4,2x,i4.4,2x,f8.4,2x,f8.4,2x,f8.4)
-21 format(i4.4,2x,i4.4,2x,f12.7,2x,f12.7,2x,f12.7)
-22 format(a4,2x,a4,2x,a8,2x,a8,2x,a8)
-23 format(i4.4,2x,i4.4,2x,f10.7)
-
 fname=trim(adjustl(expdir))//"/logout/testLog"//yyyymmdd//".log"
 open(72,file=fname,status='replace')
 write(72,22)"lon","lat","true","forcast","assim"
@@ -173,6 +196,9 @@ open(74,file=fname,status='replace')
 fname=trim(adjustl(expdir))//"/logout/error_"//yyyymmdd//".log"
 open(82,file=fname,status='replace')
 
+allocate(rivwth(lonpx,latpx),rivlen(lonpx,latpx),nextdst(lonpx,latpx),lons(lonpx,latpx),lats(lonpx,latpx),weightage(lonpx,latpx),storage(lonpx,latpx),parm_infl(lonpx,latpx))
+allocate(nextX(lonpx,latpx),nextY(lonpx,latpx),ocean(lonpx,latpx),countp(lonpx,latpx),targetp(lonpx,latpx))
+
 ! read storage (for making ocean mask)
 !allocate(ocean(lonpx,latpx))
 fname=trim(adjustl(expdir))//"/CaMa_out/"//yyyymmdd//"T000/storge"//yyyymmdd(1:4)//".bin"
@@ -190,7 +216,7 @@ write(*,*) "read storage"
 !ocean = (storage>1e18) * (-1)
 
 ! read river width
-fname=trim(adjustl(camadir))//"map/glb_15min/rivwth_gwdlr.bin"
+fname=trim(adjustl(camadir))//"map/"//trim(mapname)//"/rivwth_gwdlr.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) rivwth
@@ -202,7 +228,7 @@ close(34)
 
 ! read next grid information
 ! read nextX and nextY
-fname=trim(adjustl(camadir))//"map/glb_15min/nextxy.bin"
+fname=trim(adjustl(camadir))//"map/"//trim(mapname)//"/nextxy.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) nextX
@@ -212,11 +238,22 @@ else
 end if
 close(34)
 
+! read lons and lats
+fname=trim(adjustl(camadir))//"map/"//trim(mapname)//"/lonlat.bin"
+open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+if(ios==0)then
+    read(34,rec=1) lons
+    read(34,rec=2) lats
+else
+    write(*,*) "no file nextXY at:",fname
+end if
+close(34)
+
 ! make ocean mask from nextx (1 is ocean; 0 is not ocean)
 ocean = (nextX==-9999) * (-1)
 
 ! read river length
-fname=trim(adjustl(camadir))//"map/glb_15min/rivlen.bin"
+fname=trim(adjustl(camadir))//"map/"//trim(mapname)//"/rivlen.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) rivlen
@@ -227,7 +264,7 @@ end if
 close(34)
 
 ! read distance to next grid
-fname=trim(adjustl(camadir))//"map/glb_15min/nxtdst.bin"
+fname=trim(adjustl(camadir))//"map/"//trim(mapname)//"/nxtdst.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) nextdst
@@ -238,15 +275,15 @@ close(34)
 !--
 ! read SWOT observation distance data
 allocate(swot_obs(1440,640))
-swot_obs=0
-fname=trim(adjustl(DAdir))//"/sat/mesh_day"//swot_day//".bin"
-open(34,file=fname,form="unformatted",access="direct",recl=4*lonpx*640,status="old",iostat=ios)
-if(ios==0)then
-    read(34,rec=1) swot_obs
-else
-    write(*,*) "no swot"
-end if
-close(34)
+!swot_obs=0
+!fname=trim(adjustl(DAdir))//"/sat/mesh_day"//swot_day//".bin"
+!open(34,file=fname,form="unformatted",access="direct",recl=4*lonpx*640,status="old",iostat=ios)
+!if(ios==0)then
+!    read(34,rec=1) swot_obs
+!else
+!    write(*,*) "no swot"
+!end if
+!close(34)
 
 ! obs_mask is a mask for considering if there is observation in local patch at that date
 allocate(obs_mask(lonpx,latpx))
@@ -322,17 +359,17 @@ end do
 
 ! read true WSE
 allocate(globaltrue(lonpx,latpx))
-globaltrue=0
-fname=trim(adjustl(expdir))//"/CaMa_out/"//yyyymmdd//"T000/sfcelv"//yyyymmdd(1:4)//".bin"
-open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
-if(ios==0)then
-    read(34,rec=1) globaltrue
-else
-    write(*,*) "no true"
-end if
-close(34)
+!globaltrue=0
+!fname=trim(adjustl(expdir))//"/CaMa_out/"//yyyymmdd//"T000/sfcelv"//yyyymmdd(1:4)//".bin"
+!open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+!if(ios==0)then
+!    read(34,rec=1) globaltrue
+!else
+!    write(*,*) "no true"
+!end if
+!close(34)
 ! update globalture
-globaltrue=globaltrue-meanglobaltrue+(sum(meanglobalx(:,:,:),dim=3)/real(ens_num))
+!globaltrue=globaltrue-meanglobaltrue+(sum(meanglobalx(:,:,:),dim=3)/real(ens_num))
 
 ! read countnum
 !fname=trim(adjustl(expdir))//"/local_patch/countnum.bin"
@@ -358,7 +395,7 @@ close(34)
 
 ! make randomlist
 allocate(randlist(ens_num*366))
-randlist=0
+!randlist=0
 !fname=trim(adjustl(expdir))//"/CaMa_out/randlist.bin"
 !open(34,file=fname,form="unformatted",access="direct",recl=4*366*ens_num,status="old",iostat=ios)
 !if(ios==0)then
@@ -369,14 +406,14 @@ randlist=0
 !close(34)
 
 ! observation error 0.1*(1/L)*(1/W)
-fname=trim(adjustl(DAdir))//"/sat/obs_err.bin"
-open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
-if(ios==0)then
-    read(34,rec=1) obs_err
-else
-    write(*,*) "no obs error", fname
-end if
-close(34)
+!fname=trim(adjustl(DAdir))//"/sat/obs_err.bin"
+!open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+!if(ios==0)then
+!    read(34,rec=1) obs_err
+!else
+!    write(*,*) "no obs error", fname
+!end if
+!close(34)
 
 ! observation error random value 
 fname=trim(adjustl(expdir))//"/CaMa_out/errrand.bin"
@@ -394,7 +431,7 @@ global_xa = 0
 global_null = 0.0
 
 ! add ERROR to Observation
-globaltrue=globaltrue+errrand
+!globaltrue=globaltrue+errrand
 !globaltrue=globaltrue+obserrrand
 
 ! obs_mask is a mask for considering if there is observation at that date
@@ -402,7 +439,9 @@ globaltrue=globaltrue+errrand
 !obs_mask=0 ! 0 means no observatioin
 
 !write(72,*) "L211"
-
+!=======
+! !HydroWeb data refer
+!!allocate(VSrefer(lonpx,latpx))
 
 ! parallel calculation
 
@@ -419,9 +458,8 @@ globaltrue=globaltrue+errrand
 !$omp do
 do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
   do lat_cent = int((90-assimN)*4+1),int((90-assimS)*4+1),1
-        lat = 90.0-(lat_cent-1.0)/4.0
-        lon = (lon_cent-1.0)/4.0-180.0
-        !write(*,*)"================",lat,lon!,omp_get_num_threads(),"================="
+        lat = lats(lon_cent,lat_cent) !90.0-(lat_cent-1.0)/4.0
+        lon = lons(lon_cent,lat_cent) !(lon_cent-1.0)/4.0-180.0
         ! not connected to longtitude direction; no calculation available near lon=-180,180 or lat=-80,80
         !remove ocean
         if (ocean(lon_cent,lat_cent)==1) then
@@ -432,23 +470,11 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
         if (rivwth(lon_cent,lat_cent) <=0.0) then
             cycle
         end if
-        ! observation available in local patch
-!        if (obs_mask(lon_cent,lat_cent)==0) then
-!            cycle
-!        end if
-        !write(*,*)"===",lat,lon,"==="!$,omp_get_num_threads(),omp_get_thread_num(),"==="
-        !write(78,*)lat,lon
-        ! make xt =======================================
-        !write(*,*) "allocate lag"
-        !allocate(lag(patch_nums))!localRW_line(patch_nums))
-        !write(*,*) "allocate xlist ylist"
+
         ! countnum and target pixel
         countnum=countp(lon_cent,lat_cent)
         target_pixel=targetp(lon_cent,lat_cent)
 
-!25 format(countnum*(i4.4,2x,i4.4,2x,f10.7))
-
-        !write(*,*)countnum, target_pixel
         ! open emperical local patch
         allocate(lag(patch_nums),xlist(countnum),ylist(countnum),wgt(countnum))
         write(llon,'(i4.4)') lon_cent
@@ -465,6 +491,11 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
         !write(*,23) xlist,ylist,wgt
         close(34)
         !--
+        ! read local SWOT distances
+        allocate(local_swot(countnum),local_err(countnum))
+        local_swot=-9999.0
+        local_err=-9999.0
+        !--
         allocate(xt(countnum),local_ocean(countnum),local_river(countnum),local_lag(countnum),local_wgt(countnum))
         !--
         !local_lag=lag(1:countnum)
@@ -472,34 +503,45 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
         !--
         !write(*,*) xlist !"make xt"
         ! creating local ocean and river pixels
-        xt=0
+        xt=-9999.0
         local_ocean=0
         local_river=0.0
         do i=1,countnum
             i_m=xlist(i)
             j_m=ylist(i)
-            xt(i)=globaltrue(i_m,j_m)
-            local_ocean(i)=ocean(i_m,j_m)
-            local_river(i)=rivwth(i_m,j_m)
-        end do
-        !--
-        ! read local SWOT distances
-        allocate(local_swot(countnum),local_err(countnum))
-        local_swot=0.0
-        local_err=0.0
-        !--
-        do i=1,countnum
-            i_m=xlist(i)
-            j_m=ylist(i)
-            local_err(i)=obs_err(i_m,j_m)
-            if (j_m<=40) then
-                local_swot(i)=-9999.
-            elseif (j_m>680) then
-                local_swot(i)=-9999.
-            else
-                local_swot(i)=swot_obs(i_m,j_m-40)
+            ! get the VS for (i_m,j_m)
+            call get_virtualstation(i_m,j_m,yyyymmdd,10.0,hydrowebdir,station,flag)
+            if (flag==1) then
+                call read_HydroWeb(station,yyyymmdd,hydrowebdir,wse,std,flag)
+                if (flag==1) then
+                    local_swot(i)=1
+                    xt(i)=wse
+                    local_err(i)=std
+                end if
             end if
+            !xt(i)=-9999.0
+            !xt(i)=globaltrue(i_m,j_m)
+            !local_ocean(i)=ocean(i_m,j_m)
+            !local_river(i)=rivwth(i_m,j_m)
         end do
+        !--
+!        ! read local SWOT distances
+!        allocate(local_swot(countnum),local_err(countnum))
+!        local_swot=0.0
+!        local_err=0.0
+!        !--
+!        do i=1,countnum
+!            i_m=xlist(i)
+!            j_m=ylist(i)
+!            local_err(i)=obs_err(i_m,j_m)
+!            if (j_m<=40) then
+!                local_swot(i)=-9999.
+!            elseif (j_m>680) then
+!                local_swot(i)=-9999.
+!            else
+!                local_swot(i)=swot_obs(i_m,j_m-40)
+!            end if
+!        end do
 
         !local_swot_line=local_swot!reshape(local_swot,(/patch_nums/))
         !deallocate(local_swot)
@@ -508,14 +550,14 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
         local_obs=0
 
         ! SWOT
-        local_obs=(local_swot<=60. .and. local_swot>=10.)*(-1) ! .true.=1 of .false.=0
+        local_obs=(local_swot/=-9999.0)*(-1) ! .true.=1 of .false.=0
         !write(72,*) lat,lon,local_obs
 
         ! ocean is excluded
-        local_obs=local_obs*(local_ocean==0)*(-1)
+        !local_obs=local_obs*(local_ocean==0)*(-1)
 
         ! river width<=50 is excluded
-        local_obs=local_obs*(local_river>50)*(-1)
+        !local_obs=local_obs*(local_river>50)*(-1)
 
 
         ! make xf =====================================
@@ -940,6 +982,10 @@ close(72)
 close(73)
 close(74)
 close(82)
+
+deallocate (rivwth,rivlen,nextdst,lons,lats,weightage,storage,parm_infl)
+deallocate (nextX,nextY,ocean,countp,targetp)
+
 deallocate(global_xa,swot_obs,globalx,globaltrue,ens_xa,global_null,obs_mask)
 deallocate(meanglobalx,meanglobaltrue)
 end program data_assim
@@ -1093,4 +1139,88 @@ else
 end if
 return
 end subroutine ixy2iixy
-!*****************************************************************        
+!*****************************************************************
+subroutine get_virtualstation(ix,iy,yyyymmdd,threshold,hydrowebdir,station,flag)
+implicit none
+! for input-----------------------
+interger                   :: ix,iy
+real                       :: threshold
+character*8                :: yyyymmdd
+character*128              :: hydrowebdir
+! for output----------------------
+character*128              :: station
+integer                    :: flag
+!--
+character*128              :: rfile,sta,sat
+character*8                :: stime,etime
+real                       :: lon0,lat0,ele_diff
+integer                    :: id
+flag=0
+! read HydroWeb list
+    rfile=trim(hydrowebdir)//"/HydroWeb_alloc_"//trim(mapname)//".txt"
+    open(11, file=rfile, form='formatted')
+    read(11,*)
+1000 continue
+    read(11,*,end=1090)id, sta, lon0,&
+    & lat0,ixx,iiy,ele_diff,stime,etime, sat
+    !--
+    if (ix==iix .and. iy==iiy) then
+        !staion=sta
+        if ((int(stime)<=int(yyyymmdd)) .and. (int(yyyymmdd)<=int(etime))) then
+            if (abs(ele_diff) <= threshold) then
+                staion=sta
+                flag=1
+                goto 1090
+            end if
+        end if
+    end if
+    goto 1000
+1090 continue
+    close(11)
+return
+end subroutine get_virtualstation
+!*********************************************************************
+subroutine read_HydroWeb(station,yyyymmdd,hydrowebdir,wse,std,flag)
+implicit none
+! for input--------------------------
+character*128              :: station,hydrowebdir
+character*8                :: yyyymmdd
+! for output-------------------------
+real                       :: wse,std
+!--
+integer                    :: ryear,rmon,rday,i
+character*128              :: rfile
+character*10               :: date
+character*5                :: time
+!--
+ryear=int(yyyymmdd(1:4))
+rmon =int(yyyymmdd(5:6))
+rday =int(yyyymmdd(7:8))
+wse=-9999.0
+std=-9999.0
+flag=0
+! read HydroWeb list
+    rfile=trim(hydrowebdir)//"/data/hydroprd_"//trim(station)//".txt"
+    open(11, file=rfile, form='formatted')
+    ! read headers
+    do i=1,33
+        read(11,*)
+    end do
+1000 continue
+    read(11,*,end=1090) date, time, rwse, rstd
+    ! get date
+    nyear=date(1:4)
+    nmon =date(6:7)
+    nday =date(9:10)
+    if ((nyear==ryear) .and. (nmon=rmon) .and. (nday==rday)) then
+        wse=rwse
+        std=rstd
+        flag=1
+        goto 1090
+    end if
+    goto 1000
+1090 continue
+    close(11)
+return
+end subroutine read_HydroWeb
+!*****************************
