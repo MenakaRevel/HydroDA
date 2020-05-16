@@ -9,7 +9,7 @@ implicit none
 character(len=128)              :: fname,buf,camadir,expdir,DAdir,patchdir,hydrowebdir,mapname
 character(len=8)                :: yyyymmdd,nxtyyyymmdd
 real                            :: assimN,assimS,assimW,assimE,lat,lon
-character(len=2)                :: swot_day
+!character(len=2)                :: swot_day
 !character(len=4)                :: patchid
 real,allocatable                :: global_xa(:,:,:) !swot_obs(:,:),
 integer(kind=4)                 :: lon_cent,lat_cent,patch_size,patch_side,i,j,k,countnum,patch_nums,countR
@@ -290,7 +290,7 @@ close(34)
 !close(34)
 
 ! obs_mask is a mask for considering if there is observation in local patch at that date
-allocate(obs_mask(lonpx,latpx))
+!allocate(obs_mask(lonpx,latpx))
 !obs_mask=0 ! 0 means no observations in local patch
 !fname=trim(adjustl(DAdir))//"/ava_obs/obs"//swot_day//".bin"
 !open(34,file=fname,form="unformatted",access="direct",recl=4*lonpx*latpx,status="old",iostat=ios)
@@ -362,7 +362,7 @@ end do
 !end do
 
 ! read true WSE
-allocate(globaltrue(lonpx,latpx))
+!allocate(globaltrue(lonpx,latpx))
 !globaltrue=0
 !fname=trim(adjustl(expdir))//"/CaMa_out/"//yyyymmdd//"T000/sfcelv"//yyyymmdd(1:4)//".bin"
 !open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
@@ -936,7 +936,7 @@ close(82)
 deallocate (rivwth,rivlen,nextdst,lons,lats,weightage,storage,parm_infl)
 deallocate (nextX,nextY,ocean,countp,targetp)
 
-deallocate(global_xa,globalx,globaltrue,ens_xa,global_null,obs_mask)
+deallocate(global_xa,globalx,ens_xa,global_null,obs_mask)
 deallocate(meanglobalx,meanglobaltrue)
 end program data_assim
 !*****************************************************************
