@@ -50,6 +50,10 @@ real,parameter                  :: rho_min=1.0d0
 
 ! for HydroWeb data
 character*128,allocatable       :: VSrefer(:,:)
+character*128                   :: station            ! VS name
+integer                         :: flag
+real                            :: wse,std            ! observed wse and std
+
 !real,allocatable                :: storage(:,:)
 real,allocatable                :: global_null(:,:)!,globals_count(:,:)
 real,allocatable                :: Wvec(:),lag(:),local_lag(:)!global_sum_xam(:,:),
@@ -63,7 +67,7 @@ integer*4                       :: i_m,j_m
 integer,allocatable             :: xlist(:),ylist(:)
 integer*4                       :: target_pixel,fn
 character*8                     :: llon,llat
-real,dimension(lonpx,latpx)     :: obs_err, obserrrand
+real,allocatable                :: obs_err(:,:), obserrrand(:,:)
 
 write(*,*) "data_assim"
 call getarg(1,buf)
@@ -201,16 +205,16 @@ allocate(nextX(lonpx,latpx),nextY(lonpx,latpx),ocean(lonpx,latpx),countp(lonpx,l
 
 ! read storage (for making ocean mask)
 !allocate(ocean(lonpx,latpx))
-fname=trim(adjustl(expdir))//"/CaMa_out/"//yyyymmdd//"T000/storge"//yyyymmdd(1:4)//".bin"
-open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
-if(ios==0)then
-    read(34,rec=1) storage
-else
-    write(*,*) "no file storage"
-end if
-close(34)
-
-write(*,*) "read storage"
+!fname=trim(adjustl(expdir))//"/CaMa_out/"//yyyymmdd//"T000/storge"//yyyymmdd(1:4)//".bin"
+!open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+!if(ios==0)then
+!    read(34,rec=1) storage
+!else
+!    write(*,*) "no file storage"
+!end if
+!close(34)
+!
+!write(*,*) "read storage"
 
 ! make ocean mask from storage data (1 is ocean; 0 is not ocean)
 !ocean = (storage>1e18) * (-1)
@@ -416,14 +420,14 @@ allocate(randlist(ens_num*366))
 !close(34)
 
 ! observation error random value 
-fname=trim(adjustl(expdir))//"/CaMa_out/errrand.bin"
-open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
-if(ios==0)then
-    read(34,rec=1) obserrrand
-else
-    write(*,*) "no obs error rand", fname
-end if
-close(34)
+!fname=trim(adjustl(expdir))//"/CaMa_out/errrand.bin"
+!open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+!if(ios==0)then
+!    read(34,rec=1) obserrrand
+!else
+!    write(*,*) "no obs error rand", fname
+!end if
+!close(34)
 
 allocate(global_xa(lonpx,latpx,ens_num),global_null(lonpx,latpx))!,global_count(lonpx,latpx)
 global_xa = 0
@@ -479,8 +483,6 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
         allocate(lag(patch_nums),xlist(countnum),ylist(countnum),wgt(countnum))
         write(llon,'(i4.4)') lon_cent
         write(llat,'(i4.4)') lat_cent
-        !fname="./local_patch/patch"//trim(llon)//trim(llat)//".txt"
-        !fname="../covariance/local_patch_0.90/patch"//trim(llon)//trim(llat)//".txt"
         fname=trim(adjustl(patchdir))//"/patch"//trim(llon)//trim(llat)//".txt"
         !write(*,*) fname
         open(34,file=fname,status='old',access='sequential',form='formatted',action='read')!
@@ -510,7 +512,7 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
             i_m=xlist(i)
             j_m=ylist(i)
             ! get the VS for (i_m,j_m)
-            call get_virtualstation(i_m,j_m,yyyymmdd,10.0,hydrowebdir,station,flag)
+            call get_virtualstation(i_m,j_m,yyyymmdd,10.0,hydrowebdir,mapname,station,flag)
             if (flag==1) then
                 call read_HydroWeb(station,yyyymmdd,hydrowebdir,wse,std,flag)
                 if (flag==1) then
@@ -826,7 +828,7 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
         !write(78,*) "xa:",xa
         !write(*,*) "xa:",xa
         ! check center pixel ====================================
-        write(*,*) "errfix:", errfix, obserrrand(lon_cent,lat_cent)
+        !write(*,*) "errfix:", errfix, obserrrand(lon_cent,lat_cent)
         write(*,*) "true   :",xt(target_pixel)
         write(*,*) "forcast:",sum(xf(target_pixel,:))/(ens_num+1e-20)
         write(*,*) "assimil:",sum(xa(target_pixel,:))/(ens_num+1e-20)
@@ -1140,13 +1142,13 @@ end if
 return
 end subroutine ixy2iixy
 !*****************************************************************
-subroutine get_virtualstation(ix,iy,yyyymmdd,threshold,hydrowebdir,station,flag)
+subroutine get_virtualstation(ix,iy,yyyymmdd,threshold,hydrowebdir,mapname,station,flag)
 implicit none
 ! for input-----------------------
-interger                   :: ix,iy
+integer                    :: ix,iy
 real                       :: threshold
 character*8                :: yyyymmdd
-character*128              :: hydrowebdir
+character*128              :: hydrowebdir,mapname
 ! for output----------------------
 character*128              :: station
 integer                    :: flag
@@ -1154,7 +1156,7 @@ integer                    :: flag
 character*128              :: rfile,sta,sat
 character*8                :: stime,etime
 real                       :: lon0,lat0,ele_diff
-integer                    :: id
+integer                    :: id,iix,iiy,str2int
 flag=0
 ! read HydroWeb list
     rfile=trim(hydrowebdir)//"/HydroWeb_alloc_"//trim(mapname)//".txt"
@@ -1162,13 +1164,13 @@ flag=0
     read(11,*)
 1000 continue
     read(11,*,end=1090)id, sta, lon0,&
-    & lat0,ixx,iiy,ele_diff,stime,etime, sat
+    & lat0,iix,iiy,ele_diff,stime,etime, sat
     !--
     if (ix==iix .and. iy==iiy) then
         !staion=sta
-        if ((int(stime)<=int(yyyymmdd)) .and. (int(yyyymmdd)<=int(etime))) then
+        if ((str2int(stime)<=str2int(yyyymmdd)) .and. (str2int(yyyymmdd)<=str2int(etime))) then
             if (abs(ele_diff) <= threshold) then
-                staion=sta
+                station=sta
                 flag=1
                 goto 1090
             end if
@@ -1188,14 +1190,16 @@ character*8                :: yyyymmdd
 ! for output-------------------------
 real                       :: wse,std
 !--
-integer                    :: ryear,rmon,rday,i
-character*128              :: rfile
+integer                    :: ryear,rmon,rday,i,str2int,flag
+integer                    :: nyear,nmon,nday
+real                       :: rwse,rstd
+character(len=128)         :: rfile
 character*10               :: date
 character*5                :: time
 !--
-ryear=int(yyyymmdd(1:4))
-rmon =int(yyyymmdd(5:6))
-rday =int(yyyymmdd(7:8))
+ryear=str2int(yyyymmdd(1:4))
+rmon =str2int(yyyymmdd(5:6))
+rday =str2int(yyyymmdd(7:8))
 wse=-9999.0
 std=-9999.0
 flag=0
@@ -1209,10 +1213,10 @@ flag=0
 1000 continue
     read(11,*,end=1090) date, time, rwse, rstd
     ! get date
-    nyear=date(1:4)
-    nmon =date(6:7)
-    nday =date(9:10)
-    if ((nyear==ryear) .and. (nmon=rmon) .and. (nday==rday)) then
+    nyear=str2int(date(1:4))
+    nmon =str2int(date(6:7))
+    nday =str2int(date(9:10))
+    if ((nyear==ryear) .and. (nmon==rmon) .and. (nday==rday)) then
         wse=rwse
         std=rstd
         flag=1
@@ -1223,4 +1227,18 @@ flag=0
     close(11)
 return
 end subroutine read_HydroWeb
+!*****************************
+function str2int(str)
+implicit none
+! for input
+character(len=*)            str
+! for output
+integer                     str2int
+!-
+integer                     stat
+!---
+read(str,*,iostat=stat)  str2int
+if (stat/=0) str2int=-9999
+return
+end function str2int
 !*****************************
