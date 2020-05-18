@@ -337,8 +337,9 @@ def assim_at_fort(yyyy,mm,dd,day): #previous --> used
     return 0
 ###########################
 def data_assim(yyyy,mm,dd,day): # new data assimilation function (2020/05/18)
-    print '%02d'%(nxt_day.day)
+    #print '%02d'%(nxt_day.day)
     exp_dir=pm.DA_dir()+"/out/"+pm.experiment()
+    print pm.ens_mem()
     os.system(pm.DA_dir()+"/src/data_assim "+str(pm.assimN())+" "+str(pm.assimS())+" "+str(pm.assimW())+" "+str(pm.assimE())+" "+pm.mapname()+" "+yyyy+mm+dd+" "+str(pm.patch_size())+" "+str(pm.ens_mem())+" "+pm.CaMa_dir()+" "+str(pm.thersold())+" "+exp_dir+" "+pm.DA_dir()+" "+pm.patch_dir()+" "+pm.HydroWeb_dir()+" "+str(pm.rho())+" "+str(pm.sigma_b()))
     return 0
 ###########################
@@ -356,11 +357,11 @@ def make_initial_restart(): # updated the name
     mm="%02d"%(start_month)
     dd="%02d"%(start_date)
     exp_dir=pm.DA_dir()+"/out/"+pm.experiment()
-    spinup_true="%04d%2d%02dT000"%(pm.spinup_end_year(),pm.spinup_end_month(),pm.spinup_end_date()) 
+    #spinup_true="%04d%2d%02dT000"%(pm.spinup_end_year(),pm.spinup_end_month(),pm.spinup_end_date()) 
     #os.system("cp ./CaMa_out/"+spinup_true+"/restart"+yyyy+mm+dd+".bin ./CaMa_in/restart/true/restart"+yyyy+mm+dd+"T000.bin")
-    copy_stoonly(exp_dir+"/CaMa_out/"+spinup_true+"/restart"+yyyy+mm+dd+".bin",exp_dir+"/CaMa_in/restart/true/restart"+yyyy+mm+dd+"T000.bin")
+    #copy_stoonly(exp_dir+"/CaMa_out/"+spinup_true+"/restart"+yyyy+mm+dd+".bin",exp_dir+"/CaMa_in/restart/true/restart"+yyyy+mm+dd+"T000.bin")
 
-    print "cp "+exp_dir+"/CaMa_out/"+spinup_true+"/restart"+yyyy+mm+dd+".bin  "+exp_dir+"/CaMa_in/restart/true/restart"+yyyy+mm+dd+"T000.bin"
+    #print "cp "+exp_dir+"/CaMa_out/"+spinup_true+"/restart"+yyyy+mm+dd+".bin  "+exp_dir+"/CaMa_in/restart/true/restart"+yyyy+mm+dd+"T000.bin"
     for num in np.arange(1,pm.ens_mem()+1):
         numch='%03d'%num
         spinup_open="%04d%2d%02dC%03d"%(pm.spinup_end_year(),pm.spinup_end_month(),pm.spinup_end_date(),num) 
@@ -1695,7 +1696,7 @@ def days_year(year):
 ##########################
 def calc_mean():
     # paralle code for mean calculation
-    inputlist=["T000"]
+    inputlist=[]
     for mem in np.arange(1,pm.ens_mem()+1,1):
         inputlist.append("C%03d"%(mem))
     #--
