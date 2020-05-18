@@ -160,7 +160,8 @@ close(11)
 allocate(usedwhat(3))
 usedwhat=0
 
-write(*,*) errfix
+!write(*,*) errfix
+print *, "ensemble number", ens_num
 
 patch_side=patch_size*2+1
 patch_nums=patch_side**2
@@ -188,7 +189,7 @@ write(72,22)"lon","lat","true","forcast","assim"
 fname=trim(adjustl(expdir))//"/logout/pixelLog_"//yyyymmdd//".log"
 open(79,file=fname,status='replace')
 write(79,*) "lat","lon","valid pixels in emperical patch"
-write(*,*) "lat","lon","valid pixels in emperical patch"
+write(*,*) "lat ","lon ","valid pixels in emperical patch"
 
 !$ write(*,*)"omp threads",omp_get_num_threads()
 fname=trim(adjustl(expdir))//"/logout/inflation_"//yyyymmdd//".log"
@@ -221,6 +222,7 @@ allocate(nextX(lonpx,latpx),nextY(lonpx,latpx),ocean(lonpx,latpx),countp(lonpx,l
 
 ! read river width
 fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivwth_gwdlr.bin"
+print *, fname
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) rivwth
@@ -233,6 +235,7 @@ close(34)
 ! read next grid information
 ! read nextX and nextY
 fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/nextxy.bin"
+print *, fname
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) nextX
@@ -244,6 +247,7 @@ close(34)
 
 ! read lons and lats
 fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/lonlat.bin"
+print *, fname
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) lons
@@ -258,6 +262,7 @@ ocean = (nextX==-9999) * (-1)
 
 ! read river length
 fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivlen.bin"
+print *, fname
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) rivlen
@@ -269,6 +274,7 @@ close(34)
 
 ! read distance to next grid
 fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/nxtdst.bin"
+print *, fname
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) nextdst
@@ -303,6 +309,7 @@ close(34)
 
 ! inflation parameter
 fname=trim(adjustl(expdir))//"/inflation/parm_infl"//yyyymmdd//".bin"
+print *, fname
 open(34,file=fname,form="unformatted",access="direct",recl=4*lonpx*latpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) parm_infl
@@ -317,6 +324,7 @@ meanglobalx=0
 do num=1,ens_num
     write(numch,'(i3.3)') num
     fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/meansfcelvC"//numch//".bin"
+    print *, fname
     open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
     if(ios==0)then
         read(34,rec=1) meanglobalx(:,:,num)
@@ -329,14 +337,14 @@ end do
 ! read mean WSE true
 allocate(meanglobaltrue(lonpx,latpx))
 meanglobaltrue=0
-fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/meansfcelvT000.bin"
-open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
-if(ios==0)then
-    read(34,rec=1) meanglobaltrue
-else
-    write(*,*) "no true"
-end if
-close(34)
+!fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/meansfcelvT000.bin"
+!open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+!if(ios==0)then
+!    read(34,rec=1) meanglobaltrue
+!else
+!    write(*,*) "no true"
+!end if
+!close(34)
 
 ! read WSE from all model
 allocate(globalx(lonpx,latpx,ens_num))
@@ -344,6 +352,7 @@ globalx=0
 do num=1,ens_num
     write(numch,'(i3.3)') num
     fname=trim(adjustl(expdir))//"/CaMa_out/"//yyyymmdd//"A"//numch//"/sfcelv"//yyyymmdd(1:4)//".bin"
+    print *, fname
     open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
     if(ios==0)then
         read(34,rec=1) globalx(:,:,num)
@@ -379,6 +388,7 @@ end do
 !fname=trim(adjustl(expdir))//"/local_patch/countnum.bin"
 !fname="../covariance/local_patch_0.90/countnum.bin"
 fname=trim(adjustl(patchdir))//"/countnum.bin"
+print *, fname
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) countp
@@ -442,7 +452,8 @@ global_null = 0.0
 !allocate(obs_mask(lonpx,latpx))
 !obs_mask=0 ! 0 means no observatioin
 
-!write(72,*) "L211"
+!write(72,*) "L445"
+print *, "L456"
 !=======
 ! !HydroWeb data refer
 !!allocate(VSrefer(lonpx,latpx))
@@ -504,14 +515,11 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
             i_m=xlist(i)
             j_m=ylist(i)
             ! get the VS for (i_m,j_m)
-            call get_virtualstation(i_m,j_m,yyyymmdd,10.0,hydrowebdir,mapname,station,flag)
+            call get_virtualstation(i_m,j_m,yyyymmdd,10.0,hydrowebdir,mapname,station,wse,std,flag)
             if (flag==1) then
-                call read_HydroWeb(station,yyyymmdd,hydrowebdir,wse,std,flag)
-                if (flag==1) then
-                    local_sat(i)=1
-                    xt(i)=wse
-                    local_err(i)=std
-                end if
+                local_sat(i)=1
+                xt(i)=wse
+                local_err(i)=std
             end if
         end do
         !---
@@ -1090,7 +1098,7 @@ end if
 return
 end subroutine ixy2iixy
 !*****************************************************************
-subroutine get_virtualstation(ix,iy,yyyymmdd,threshold,hydrowebdir,mapname,station,flag)
+subroutine get_virtualstation(ix,iy,yyyymmdd,threshold,hydrowebdir,mapname,station,wse,std,flag)
 implicit none
 ! for input-----------------------
 integer                    :: ix,iy
@@ -1104,10 +1112,12 @@ integer                    :: flag
 character*128              :: rfile,sta,sat
 character*8                :: stime,etime
 real                       :: lon0,lat0,ele_diff
-integer                    :: id,iix,iiy,str2int
+integer                    :: id,iix,iiy,str2int,rflag
+real                       :: rwse,wse,rstd,std
 flag=0
 ! read HydroWeb list
     rfile=trim(hydrowebdir)//"/HydroWeb_alloc_"//trim(mapname)//".txt"
+    !print *,rfile
     open(11, file=rfile, form='formatted')
     read(11,*)
 1000 continue
@@ -1115,10 +1125,12 @@ flag=0
     & lat0,iix,iiy,ele_diff,stime,etime, sat
     !--
     if (ix==iix .and. iy==iiy) then
-        !staion=sta
-        if ((str2int(stime)<=str2int(yyyymmdd)) .and. (str2int(yyyymmdd)<=str2int(etime))) then
-            if (abs(ele_diff) <= threshold) then
+        if (abs(ele_diff) <= threshold) then
+            call read_HydroWeb(sta,yyyymmdd,hydrowebdir,rwse,rstd,rflag)
+            if (rflag==1) then
                 station=sta
+                wse=rwse
+                std=rstd
                 flag=1
                 goto 1090
             end if
@@ -1153,13 +1165,13 @@ std=-9999.0
 flag=0
 ! read HydroWeb list
     rfile=trim(hydrowebdir)//"/data/hydroprd_"//trim(station)//".txt"
-    open(11, file=rfile, form='formatted')
+    open(12, file=rfile, form='formatted')
     ! read headers
     do i=1,33
-        read(11,*)
+        read(12,*)
     end do
 1000 continue
-    read(11,*,end=1090) date, time, rwse, rstd
+    read(12,*,end=1090) date, time, rwse, rstd
     ! get date
     nyear=str2int(date(1:4))
     nmon =str2int(date(6:7))
@@ -1172,7 +1184,7 @@ flag=0
     end if
     goto 1000
 1090 continue
-    close(11)
+    close(12)
 return
 end subroutine read_HydroWeb
 !*****************************
