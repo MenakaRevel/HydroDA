@@ -42,11 +42,6 @@ def main_act():
     print pm.version()
     print pm.runname(pm.mode())
 
-    #compile fortrun codes
-    #print "compile Fortran"
-    # global comilation added
-    #compile_func()
-
     # make necessary directories
     print "initial"
     initial()
@@ -60,15 +55,6 @@ def main_act():
     # prepare input runoff files for simulations
     print "prepare input"
     prepare_input()
-
-    # make rivman file
-    print "make manning's coefficent"
-    make_rivman()
-    #make_corrupt_man()
-    #make_corrupt_man_simple()
-
-    # make random numbers
-    #make_rand()
 
     # initial inflation parameter rho for assimilation 2018/11/15@Menaka
     print "make intial inflation"
@@ -91,10 +77,6 @@ def main_act():
     print "make intial restart"
     make_initial_restart()
     #make_initial_restart_one()
-#
-#    # make observation error depend on L* W
-#    print "Estimate Observation Error"
-#    observation_error()
 
     start_dt=datetime.date(start_year,start_month,start_date)
     #start_dt=datetime.date(2008,8,1)#5,29)
@@ -119,8 +101,6 @@ def main_act():
     if pm.output_er()==1:
         os.system("rm -Rf ./CaMa_out/"+yyyy+"*")
 
-    # move assim_out folder
-#    os.system("mv assim_out assim_out_"+pm.experiment())
 ################
 ## single loop program
 ################
@@ -128,8 +108,8 @@ def one_day_loop(yyyy,mm,dd,day):
     print "================================ start loop of "+yyyy+" "+mm+" "+dd+" ========================================"
     #
 #    # True Simulation ####################################################################
-    if pm.run_flag() == 0 or pm.run_flag() == 2:
-        one_day_sim([yyyy,mm,dd,"000","true"])
+#    if pm.run_flag() == 0 or pm.run_flag() == 2:
+#        one_day_sim([yyyy,mm,dd,"000","true"])
 
     # Corrupted Simulation (Open Loop) ###################################################
     if pm.run_flag() == 0 or pm.run_flag() == 1:
@@ -234,30 +214,22 @@ def spin_up(): #used
     # one simulation for true
     # ensmble simulation for open
 
-#    if loop=="open":
-#        if pm.spinup_mode()==2 or pm.spinup_mode()==3:
-#            return 0
-#
-#    if loop=="true":
-#        if pm.spinup_mode()==1 or pm.spinup_mode()==3:
-#            return 0
-
     dir2=pm.CaMa_dir()
     cpunums = pm.cpu_nums()
     yyyy = "%04d"%(pm.spinup_end_year())
     print pm.spinup_mode()
     if pm.spinup_mode()==3:
-      return 0
+        return 0
 
-    inputlist=[] 
+    inputlist=[]
 
-    if pm.spinup_mode()==0 or pm.spinup_mode()==2:
-        inputlist.append([yyyy,"true",'000'])
-        #spinup_loop(inputlist)
+#    if pm.spinup_mode()==0 or pm.spinup_mode()==2:
+#        inputlist.append([yyyy,"true",'000'])
+#        #spinup_loop(inputlist)
 
     if pm.spinup_mode()==0 or pm.spinup_mode()==1:
         for ens_num in np.arange(1,pm.ens_mem()+1):
-             inputlist.append([yyyy,"open",'%03d'%ens_num])
+            inputlist.append([yyyy,"open",'%03d'%ens_num])
 
     # Run spinup simulations
     p=Pool(pm.para_nums())
@@ -310,19 +282,19 @@ def one_day_sim(inputlist):
     exp_dir=pm.DA_dir()+"/out/"+pm.experiment()
     os.system("source "+pm.DA_dir()+"/src/oneday_sim.sh "+yyyy+" "+mm+" "+dd+" "+ens_num+" "+dir2+" "+looptype+" "+str(cpunums)+" "+str(run_name)+" "+str(exp_dir))
 
-    if looptype=="true":
-        # copying "restart file" to ./CaMa_in/
-        thisday=datetime.date(int(yyyy),int(mm),int(dd))
-        nxt_day=thisday+datetime.timedelta(days=1)
-        orgrestf="CaMa_out/"+yyyy+mm+dd+"T"+ens_num+"/restart"+'%04d'%(nxt_day.year)+'%02d'%(nxt_day.month)+'%02d'%(nxt_day.day)+".bin"
-        newrestf="CaMa_in/restart/"+looptype+"/restart"+'%04d'%(nxt_day.year)+'%02d'%(nxt_day.month)+'%02d'%(nxt_day.day)+"T000.bin"
-        #os.system("cp "+orgrestf+" "+newrestf)
-        copy_stoonly(orgrestf,newrestf)
-
-        # copying "WSE" as "xa_m" in ./assim_out
-        oldfname="CaMa_out/"+yyyy+mm+dd+"T"+ens_num+"/sfcelv"+yyyy+".bin"
-        newfname="assim_out/xa_m/"+looptype+"/"+yyyy+mm+dd+"_xam.bin"
-        os.system("cp "+oldfname+" "+newfname)
+#    if looptype=="true":
+#        # copying "restart file" to ./CaMa_in/
+#        thisday=datetime.date(int(yyyy),int(mm),int(dd))
+#        nxt_day=thisday+datetime.timedelta(days=1)
+#        orgrestf="CaMa_out/"+yyyy+mm+dd+"T"+ens_num+"/restart"+'%04d'%(nxt_day.year)+'%02d'%(nxt_day.month)+'%02d'%(nxt_day.day)+".bin"
+#        newrestf="CaMa_in/restart/"+looptype+"/restart"+'%04d'%(nxt_day.year)+'%02d'%(nxt_day.month)+'%02d'%(nxt_day.day)+"T000.bin"
+#        #os.system("cp "+orgrestf+" "+newrestf)
+#        copy_stoonly(orgrestf,newrestf)
+#
+#        # copying "WSE" as "xa_m" in ./assim_out
+#        oldfname="CaMa_out/"+yyyy+mm+dd+"T"+ens_num+"/sfcelv"+yyyy+".bin"
+#        newfname="assim_out/xa_m/"+looptype+"/"+yyyy+mm+dd+"_xam.bin"
+#        os.system("cp "+oldfname+" "+newfname)
 
     return 0
 ########################### # modified to run paralle @Menaka 
@@ -364,18 +336,10 @@ def assim_at_fort(yyyy,mm,dd,day): #previous --> used
     os.system(pm.DA_dir()+"/src/data_assim "+str(pm.assimN())+" "+str(pm.assimS())+" "+str(pm.assimW())+" "+str(pm.assimE())+" "+yyyy+mm+dd+" "+str('%02d'%SWOT_day(yyyy,mm,dd))+" "+str(pm.patch_size())+" "+str(pm.ens_mem())+" "+str(day)+" "+str('%04d'%(nxt_day.year)+'%02d'%(nxt_day.month)+'%02d'%(nxt_day.day))+" "+str(pm.err_expansion())+" "+dir1)
     return 0
 ###########################
-def data_assim(yyyy,mm,dd,day): # new data assimilation function (2017-06-30)
-    errrand=np.random.normal(0,pm.ovs_err())
-    err_rand() # make white noise for observation
-    dir1=pm.CaMa_dir()+"/"
-    thisday=datetime.date(int(yyyy),int(mm),int(dd))
-    nxt_day=thisday+datetime.timedelta(days=1)
+def data_assim(yyyy,mm,dd,day): # new data assimilation function (2020/05/18)
     print '%02d'%(nxt_day.day)
     exp_dir=pm.DA_dir()+"/out/"+pm.experiment()
-    #os.system(pm.DA_dir()+"/src/data_assim "+str(pm.assimN())+" "+str(pm.assimS())+" "+str(pm.assimW())+" "+str(pm.assimE())+" "+yyyy+mm+dd+" "+str('%02d'%SWOT_day(yyyy,mm,dd))+" "+str(pm.patch_size())+" "+str(pm.ens_mem())+" "+str(day)+" "+str('%04d'%(nxt_day.year)+'%02d'%(nxt_day.month)+'%02d'%(nxt_day.day))+" "+str(pm.err_expansion())+" "+dir1+" "+str(errrand)+" "+str(pm.ovs_err())+" "+str(pm.thersold()))
-#    os.system("src/data_assim "+str(pm.assimN())+" "+str(pm.assimS())+" "+str(pm.assimW())+" "+str(pm.assimE())+" "+yyyy+mm+dd+" "+str('%02d'%SWOT_day(yyyy,mm,dd))+" "+str(pm.patch_size())+" "+str(pm.ens_mem())+" "+str(day)+" "+str('%04d'%(nxt_day.year)+'%02d'%(nxt_day.month)+'%02d'%(nxt_day.day))+" "+str(pm.err_expansion())+" "+dir1+" "+str(errrand)+" "+str(pm.ovs_err()))
-#    os.system("src/data_assim_fld "+str(pm.assimN())+" "+str(pm.assimS())+" "+str(pm.assimW())+" "+str(pm.assimE())+" "+yyyy+mm+dd+" "+str('%02d'%SWOT_day(yyyy,mm,dd))+" "+str(pm.patch_size())+" "+str(pm.ens_mem())+" "+str(day)+" "+str('%04d'%(nxt_day.year)+'%02d'%(nxt_day.month)+'%02d'%(nxt_day.day))+" "+str(pm.err_expansion())+" "+dir1+" "+str(errrand)+" "+str(pm.ovs_err()))
-    os.system(pm.DA_dir()+"/src/data_assim "+str(pm.assimN())+" "+str(pm.assimS())+" "+str(pm.assimW())+" "+str(pm.assimE())+" "+yyyy+mm+dd+" "+str('%02d'%SWOT_day(yyyy,mm,dd))+" "+str(pm.patch_size())+" "+str(pm.ens_mem())+" "+str(day)+" "+str('%04d'%(nxt_day.year)+'%02d'%(nxt_day.month)+'%02d'%(nxt_day.day))+" "+str(pm.err_expansion())+" "+dir1+" "+str(errrand)+" "+str(pm.ovs_err())+" "+str(pm.thersold())+" "+exp_dir+" "+pm.DA_dir()+" "+pm.patch_dir()+" "+str(pm.rho())+" "+str(pm.sigma_b()))
+    os.system(pm.DA_dir()+"/src/data_assim "+str(pm.assimN())+" "+str(pm.assimS())+" "+str(pm.assimW())+" "+str(pm.assimE())+" "+pm.mapname()+" "+yyyy+mm+dd+" "+str(pm.patch_size())+" "+str(pm.ens_mem())+" "pm.CaMa_dir()+" "+str(pm.thersold())+" "+exp_dir+" "+pm.DA_dir()+" "+pm.patch_dir()+" "+pm.HydroWeb_dir()+" "+str(pm.rho())+" "+str(pm.sigma_b()))
     return 0
 ###########################
 def make_init_storge():
@@ -1360,54 +1324,19 @@ def prepare_input():
     #start_year=pm.start_year()
     #end_year=pm.end_year()
     start_dt=datetime.date(start_year,1,1)
-    last_dt=datetime.date(end_year,12,31)
+    last_dt=datetime.date(end_year,end_month,end_date)
     start=0
     last=int((last_dt-start_dt).days)+1
     #--------------
     # E2O
-    if pm.mode()==1: # Earth2Observe
+    if pm.input()=="E2O": # Earth2Observe
         #print "E2O"
         distopen=pm.distopen(1)
         diststd=pm.diststd(1)
         true_run=pm.true_run(1) # for true ensemble
         runname=pm.runname(1) # get runoff name
-        # copy for TRUE simulation
-        if(len(glob.glob("./CaMa_in/"+runname+"/Roff_TRUE/Roff*"))!=0):
-            #print "TRUE available"
-            pass
-        # true input file is not ready
-        # need preparation
-        # make directories
-        mkdir("./CaMa_in/E2O/Roff_TRUE")
-        #print "E2O/Roff_TRUE"
-        inputlist=[]
-        #print "prepare true"
-        for day in np.arange(start,last):
-            target_dt=start_dt+datetime.timedelta(days=day)
-            yyyy='%04d' % (target_dt.year)
-            mm='%02d' % (target_dt.month)
-            dd='%02d' % (target_dt.day)
-            ens_char="T000"
-            true_char="%03d"%(true_run)
-            iname=pm.DA_dir()+"/inp/"+runname+"/Roff/Roff__"+yyyy+mm+dd+true_char+".one" #  as true
-            oname="./CaMa_in/"+runname+"/Roff_TRUE/Roff__"+yyyy+mm+dd+ens_char+".one"
-            inputlist.append([iname,oname,"1.00"])
 
-        # do parallel
-        p=Pool(pm.para_nums())
-        p.map(copy_runoff,inputlist)
-        p.terminate()
-
-        #print "L1102"
-        # calculate mothly mean
-        # do parallel
-        #p=Pool(pm.para_nums())
-        #p.map(cal_monthly_mean_ens,np.arange(1,7+1))
-        #p.terminate()
-
-        # calculate monthly total
-
-        # make courrpted runoff
+        # make courrpted/assimilated runoff
         if(len(glob.glob("./CaMa_in/"+runname+"/Roff_CORR/Roff*"))!=0):
             #print "Roff_CORR available"
             pass
@@ -1418,7 +1347,8 @@ def prepare_input():
         #print "E2O/Roff"
         # dist std for ensembles
         distopen_ranges={}
-        open_list=np.setdiff1d(np.arange(1,7+1),[true_run])
+        #open_list=np.setdiff1d(np.arange(1,7+1),[true_run])
+        open_list=np.arange(1,7+1)
         random_runs=random.sample(open_list,k=2)
         mkdir("./assim_out/runoff_error")
         f=open("./assim_out/runoff_error/ensemble.txt","w")
@@ -1434,8 +1364,6 @@ def prepare_input():
             distopen_ranges[ens_char]=distopen_range#[0.25,1.00,1.25]
             line="%s  %3.2f  %3.2f  %3.2f\n"%(ens_char,distopen_range[0],distopen_range[1],distopen_range[2])
             f.write(line)
-            #print distopen_range
-        #distopen_ranges=np.array(distopen_ranges)
         f.close()
         #print "L1141"
         inputlist=[]
@@ -1450,78 +1378,26 @@ def prepare_input():
                 #if runens!=true_run:
                 run_num="%03d"%(runens)
                 iname=pm.DA_dir()+"/inp/"+runname+"/Roff/Roff__"+yyyy+mm+dd+run_num+".one"
-                #print "L1154"
-                #ifile=np.fromfile(pm.DA_dir()+"/inp/"+runname+"/Roff/Roff__"+yyyy+mm+dd+run_num+".one",np.float32).reshape(720,1440)
-                #roff_mean=np.fromfile("./CaMa_in/"+runname+"/mean_month/mean_"+yyyy+mm+run_num+".bin",np.float32).reshape(720,1440)
-                #roff_total=np.fromfile("./CaMa_in/E2O/total_month/total_"+yyyy+mm+".bin",np.float32).reshape(180,360)
-                #distopen_range=rd.normal(1,diststd,3)
-                #if runens==3:
-                #    distopen_range=rd.normal(1,diststd,2)
-                #distopen_range=distopen_range.astype(np.float32)
-                #distopen_range=np.sort(distopen_range)
-                ##distopen_range=[0.25,1.00,1.25]
-                #print distopen_range
                 distopens=distopen_ranges[run_num]
-                #if runens==2:
-                #    distopens=[distopen_ranges[runens-1,0],distopen_ranges[runens-1,-1]]
                 for dist in distopens:
-                    #if runens == 3 and dist == 1.0:
-                    #    pass
                     ens_char="C%03d"%(ens_num)
-                    #print run_num, ens_char, dist
-                    #ofile=ifile + roff_mean*dist
-                    #ofile.tofile("./CaMa_in/E2O/Roff_CORR/Roff__"+yyyy+mm+dd+ens_char+".one")
                     oname="./CaMa_in/"+runname+"/Roff_CORR/Roff__"+yyyy+mm+dd+ens_char+".one"
                     inputlist.append([iname,oname,str(abs(dist))])
                     ens_num=ens_num+1
-
         # do parallel
         p=Pool(pm.para_nums())
         p.map(copy_runoff,inputlist)
         p.terminate()
     #---------
     # ERA20CM
-    if pm.mode()==2: #ECMWF ERA20CM
-        distopen=pm.distopen(1)
+    if pm.input()=="ERA20CM": #ECMWF ERA20CM
+        distopen=pm.distopen(2)
         diststd=pm.diststd(2)
         true_run=pm.true_run(2) # for true ensemble
         runname=pm.runname(2) # get runoff name
-        # copy for TRUE simulation
-        if(len(glob.glob("./CaMa_in/"+runname+"/Roff_TRUE/Roff*"))!=0):
-            pass
-        # true input file is not ready
-        # need preparation
-        # make directory
-        mkdir("./CaMa_in/"+runname+"/Roff_TRUE")
-
-        inputlist=[]
-        for day in np.arange(start,last):
-            target_dt=start_dt+datetime.timedelta(days=day)
-            yyyy='%04d' % (target_dt.year)
-            mm='%02d' % (target_dt.month)
-            dd='%02d' % (target_dt.day)
-            ens_char="T000"
-            true_char="%03d"%(true_run)
-            iname=pm.DA_dir()+"/inp/"+runname+"/Roff/Roff__"+yyyy+mm+dd+true_char+".one"
-            oname="./CaMa_in/"+runname+"/Roff_TRUE/Roff__"+yyyy+mm+dd+ens_char+".one"
-            inputlist.append([iname,oname,"1.00"])
-
-        # do parallel
-        p=Pool(pm.para_nums())
-        p.map(copy_runoff,inputlist)
-        p.terminate()
-
-        # calculate mothly mean
-        # do parallel
-        #p=Pool(pm.para_nums())
-        #p.map(cal_monthly_mean_ens,np.arange(1,10+1))
-        #p.terminate()
-
-        # calculate monthly total
-
         # make courrpted runoff
-        #if(len(glob.glob("./CaMa_in/"+runname+"/Roff_CORR/Roff*"))!=0):
-        #    pass
+        if(len(glob.glob("./CaMa_in/"+runname+"/Roff_CORR/Roff*"))!=0):
+            pass
         # corrupted input file is not ready
         # need preparation
         # make directories
@@ -1529,20 +1405,16 @@ def prepare_input():
         #--
         # dist std for ensembles
         distopen_ranges={}
-        open_list=np.setdiff1d(np.arange(1,10+1),[true_run])
+        #open_list=np.setdiff1d(np.arange(1,10+1),[true_run])
+        open_list=np.arange(1,10+1)
         random_runs=random.sample(open_list,k=2)
         for runens in open_list:
             ens_char="%03d"%(runens)
             diststd_num=2
-            #if runens in random_runs: #==2 or runens==4:
-            #    diststd_num=3
-            #if runens != true_run:
             distopen_range=rd.normal(1,diststd,diststd_num)
             distopen_range=np.sort(distopen_range)
             distopen_range=distopen_range.astype(np.float32)
             distopen_ranges[ens_char]=distopen_range#[0.25,1.00,1.25]
-            #print distopen_range
-        #distopen_ranges=np.array(distopen_ranges)
         #
         inputlist=[]
         for day in np.arange(start,last):
@@ -1554,21 +1426,12 @@ def prepare_input():
             for runens in open_list: #np.arange(1,10+1):
                 run_num="%03d"%(runens)
                 iname=pm.DA_dir()+"/inp/"+runname+"/Roff/Roff__"+yyyy+mm+dd+run_num+".one"
-                #ifile=np.fromfile("./CaMa_in/"+runname+"/Roff/Roff__"+yyyy+mm+dd+run_num+".one",np.float32).reshape(180,360)
-                #roff_mean=np.fromfile("./CaMa_in/"+runname+"/mean_month/mean_"+yyyy+mm+run_num+".bin",np.float32).reshape(180,360)
-                #roff_total=np.fromfile("./CaMa_in/"+runname+"/total_month/total_"+yyyy+mm+".bin",np.float32).reshape(180,360)
-                #distopen_range=rd.normal(0,diststd,2)
-                #distopen_range=distopen_range.astype(np.float32)
-                #distopen_range=[0.75,1.25]
                 distopens=distopen_ranges[run_num]
                 for dist in distopens:
                     ens_char="C%03d"%(ens_num)
-                    #ofile=ifile + roff_mean*dist
-                    #ofile.tofile("./CaMa_in/"+runname+"/Roff_CORR/Roff__"+yyyy+mm+dd+ens_char+".one")
                     oname="./CaMa_in/"+runname+"/Roff_CORR/Roff__"+yyyy+mm+dd+ens_char+".one"
                     inputlist.append([iname,oname,str(dist)])
                     ens_num=ens_num+1
-
         # do parallel
         p=Pool(pm.para_nums())
         p.map(copy_runoff,inputlist)

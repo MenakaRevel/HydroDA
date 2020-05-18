@@ -225,13 +225,13 @@ CFLDHGT="${FMAP}/fldhgt.bin"                # floodplain elevation profile (heig
 CRIVWTH="${FMAP}/rivwth_gwdlr.bin"          # channel width [m] (GWD-LR + filled with empirical)
 CRIVHGT="${FMAP}/rivhgt.bin"                # channel depth [m] (empirical power-low)
 CRIVMAN="${FMAP}/rivman.bin"                # manning coefficient river (The one in flood plain is a global parameter; set $PMANFLD below.)
-if [ $looptype = "true" ] ; then
-    CRIVMAN="${INBASE}/assim_out/rivman/rivmanTRUE.bin"
-    #CRIVMAN="${FMAP}/rivmanTRUE.bin"
-else
-    CRIVMAN="${INBASE}/assim_out/rivman/rivmanCORR.bin"
-    #CRIVMAN="${FMAP}/rivmanCORR.bin"
-fi
+#if [ $looptype = "true" ] ; then
+#    CRIVMAN="${INBASE}/assim_out/rivman/rivmanTRUE.bin"
+#    #CRIVMAN="${FMAP}/rivmanTRUE.bin"
+#else
+#    CRIVMAN="${INBASE}/assim_out/rivman/rivmanCORR.bin"
+#    #CRIVMAN="${FMAP}/rivmanCORR.bin"
+#fi
 echo $CRIVMAN
 
 #** bifurcation channel info

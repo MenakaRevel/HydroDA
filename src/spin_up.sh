@@ -209,13 +209,13 @@ CFLDHGT="${FMAP}/fldhgt.bin"                # floodplain elevation profile (heig
 CRIVWTH="${FMAP}/rivwth_gwdlr.bin"          # channel width [m] (GWD-LR + filled with empirical)
 CRIVHGT="${FMAP}/rivhgt.bin"                # channel depth [m] (empirical power-low)
 CRIVMAN="${FMAP}/rivman.bin"                # manning coefficient river (The one in flood plain is a global parameter; set $PMANFLD below.)
-if [ $acttype = "true" ];then
-    CRIVMAN="${INBASE}/assim_out/rivman/rivmanTRUE.bin"
-    #CRIVMAN="${FMAP}/rivmanTRUE.bin"
-else
-    CRIVMAN="${INBASE}/assim_out/rivman/rivmanCORR.bin"
-    #CRIVMAN="${FMAP}/rivmanCORR.bin"
-fi
+#if [ $acttype = "true" ];then
+#    CRIVMAN="${INBASE}/assim_out/rivman/rivmanTRUE.bin"
+#    #CRIVMAN="${FMAP}/rivmanTRUE.bin"
+#else
+#    CRIVMAN="${INBASE}/assim_out/rivman/rivmanCORR.bin"
+#    #CRIVMAN="${FMAP}/rivmanCORR.bin"
+#fi
 echo $CRIVMAN
 
 #** bifurcation channel info
@@ -262,7 +262,7 @@ COUTDIR="./"                                # output directory
 #CVARSOUT="outflw,storge,fldfrc,maxdph,flddph" # list output variable (comma separated)
 #CVARSOUT="rivout,rivsto,rivdph,rivvel,fldout,fldsto,flddph,fldfrc,fldare,sfcelv,outflw,storge,pthflw,pthout,maxsto,maxflw,maxdph" # list output variable (comma separated)
 #CVARSOUT="rivout,rivsto,rivdph,fldout,fldsto,flddph,fldfrc,fldare,sfcelv,outflw,storge,maxsto,maxflw,maxdph" # list output variable (comma separated)
-CVARSOUT="rivout,rivsto,sfcelv,outflw,storge" # list output variable (comma separated)
+CVARSOUT="rivout,rivsto,sfcelv,outflw,storge,fldout,fldsto" # list output variable (comma separated)
 COUTTAG=""  # see (3) set each year         #   output tag $(COUTDIR)/$(VARNAME)$(OUTTAG).bin
 
 ##### Model Parameters ################

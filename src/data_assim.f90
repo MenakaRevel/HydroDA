@@ -88,54 +88,54 @@ read(buf,*) mapname ! name of the map
 call getarg(6,buf)
 read(buf,*) yyyymmdd
 
-call getarg(7,buf)
-read(buf,*) swot_day
+!call getarg(7,buf)
+!read(buf,*) swot_day
 
-call getarg(8,buf)
+call getarg(7,buf)
 read(buf,*) patch_size ! radius
 
-call getarg(9,buf)
+call getarg(8,buf)
 read(buf,*) ens_num ! number of ensemble
 
-call getarg(10,buf)
-read(buf,*) day ! number of date; start from 0
+!call getarg(10,buf)
+!read(buf,*) day ! number of date; start from 0
 
-call getarg(11,buf)
-read(buf,*) nxtyyyymmdd
+!call getarg(9,buf)
+!read(buf,*) nxtyyyymmdd
 
-call getarg(12,buf)
-read(buf,*) errexp
+!call getarg(9,buf)
+!read(buf,*) errexp
 
-call getarg(13,buf)
+call getarg(9,buf)
 read(buf,"(A)") camadir
 write(*,*) camadir
 
-call getarg(14,buf)
-read(buf,*) errrand
-write(*,*) errrand
+!call getarg(12,buf)
+!read(buf,*) errrand
+!write(*,*) errrand
 
-call getarg(15,buf)
-read(buf,*) errfix
+!call getarg(10,buf)
+!read(buf,*) errfix
 
-call getarg(16,buf)
+call getarg(10,buf)
 read(buf,*) thresold
 
-call getarg(17,buf)
+call getarg(11,buf)
 read(buf,"(A)") expdir
 
-call getarg(18,buf)
+call getarg(12,buf)
 read(buf,"(A)") DAdir
 
-call getarg(19,buf)
+call getarg(13,buf)
 read(buf,"(A)") patchdir
 
-call getarg(20,buf)
+call getarg(14,buf)
 read(buf,"(A)") hydrowebdir
 
-call getarg(21,buf)
+call getarg(15,buf)
 read(buf,*) rho_fixed
 
-call getarg(22,buf)
+call getarg(16,buf)
 read(buf,*) sigma_b
 
 !==
@@ -220,7 +220,7 @@ allocate(nextX(lonpx,latpx),nextY(lonpx,latpx),ocean(lonpx,latpx),countp(lonpx,l
 !ocean = (storage>1e18) * (-1)
 
 ! read river width
-fname=trim(adjustl(camadir))//"map/"//trim(mapname)//"/rivwth_gwdlr.bin"
+fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivwth_gwdlr.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) rivwth
@@ -232,7 +232,7 @@ close(34)
 
 ! read next grid information
 ! read nextX and nextY
-fname=trim(adjustl(camadir))//"map/"//trim(mapname)//"/nextxy.bin"
+fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/nextxy.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) nextX
@@ -243,7 +243,7 @@ end if
 close(34)
 
 ! read lons and lats
-fname=trim(adjustl(camadir))//"map/"//trim(mapname)//"/lonlat.bin"
+fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/lonlat.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) lons
@@ -257,7 +257,7 @@ close(34)
 ocean = (nextX==-9999) * (-1)
 
 ! read river length
-fname=trim(adjustl(camadir))//"map/"//trim(mapname)//"/rivlen.bin"
+fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivlen.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) rivlen
@@ -268,7 +268,7 @@ end if
 close(34)
 
 ! read distance to next grid
-fname=trim(adjustl(camadir))//"map/"//trim(mapname)//"/nxtdst.bin"
+fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/nxtdst.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) nextdst
