@@ -19,8 +19,8 @@ def endtime():
                       # *note: this date is not included
 
 def ens_mem():
-    return 18
-    #runoff_mem()*manning_mem() #20 # number of ensemble members
+    return 21
+    # number of ensemble members
 
 def max_lat():
     return 80. # maximum latitude of assimilation
@@ -93,6 +93,10 @@ def mode():
     # parameter to change assimilation mode
     # 1: Earth2Obs, 2: ERA20CM, 3: -25% baised (ELSE_KIM2009/E2O/ERA20CM)
 
+def input():
+    return "E2O"
+    # E2O/ERA20CM
+
 def experiment():
     f=open("./exp.txt","r")
     line=f.readline()
@@ -146,6 +150,9 @@ def CaMa_dir():
     #return "/cluster/data6/menaka/CaMa-Flood_v395b_20191030"
     # directory of CaMa-Flood
     # indicate the directory of ./map or ./src and other folders
+
+def mapname():
+    return "glb_15min"
 
 def DA_dir():
     return "/cluster/data6/menaka/HydroDA"
@@ -212,6 +219,9 @@ def output_er():
     # setting for saving or deleting intermediate files
     # 0 for saving & 1 for deleting
     # those files may be more than 400GB, so erasing is recommended if not necessary
+
+def HydroWeb_dir():
+    return "/cluster/data6/menaka/HydroWeb"
 
 def make_log():
     return 1
