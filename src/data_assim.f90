@@ -25,11 +25,11 @@ real                            :: VDVTmax!,xf_m55,xa_m55,xt_m55,xf_err,xa_err,d
 real,allocatable                :: work(:),la(:),U(:,:),Dinv(:,:),VDVT(:,:),Dsqr(:,:),yo(:),Ef(:,:),la_p(:),U_p(:,:)
 integer,allocatable             :: isuppz(:)
 integer                         :: day!,E_retry
-real,allocatable                :: randlist(:)
+!real,allocatable                :: randlist(:)
 real                            :: errexp
 real,allocatable                :: K_(:,:)
 
-integer,allocatable             :: obs_mask(:,:) ! NEW v.1.1.0
+!integer,allocatable             :: obs_mask(:,:) ! NEW v.1.1.0
 real,allocatable                :: ens_xa(:,:,:)
 !-map variables
 real                            :: gsize,west, north, east, south ! map boundries
@@ -67,7 +67,7 @@ integer(kind=4)                 :: i_m,j_m
 integer,allocatable             :: xlist(:),ylist(:)
 integer(kind=4)                 :: target_pixel !,fn
 character(len=4)                :: llon,llat
-!real,allocatable                :: obs_err(:,:), obserrrand(:,:)
+real,allocatable                :: obs(:,:),obs_err(:,:)!, obserrrand(:,:)
 
 write(*,*) "data_assim"
 call getarg(1,buf)
@@ -222,7 +222,7 @@ allocate(nextX(lonpx,latpx),nextY(lonpx,latpx),ocean(lonpx,latpx),countp(lonpx,l
 
 ! read river width
 fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivwth_gwdlr.bin"
-print *, fname
+!print *, fname
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) rivwth
@@ -235,7 +235,7 @@ close(34)
 ! read next grid information
 ! read nextX and nextY
 fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/nextxy.bin"
-print *, fname
+!print *, fname
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) nextX
@@ -247,7 +247,7 @@ close(34)
 
 ! read lons and lats
 fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/lonlat.bin"
-print *, fname
+!print *, fname
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) lons
@@ -262,7 +262,7 @@ ocean = (nextX==-9999) * (-1)
 
 ! read river length
 fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivlen.bin"
-print *, fname
+!print *, fname
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) rivlen
@@ -274,7 +274,7 @@ close(34)
 
 ! read distance to next grid
 fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/nxtdst.bin"
-print *, fname
+!print *, fname
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) nextdst
@@ -307,9 +307,22 @@ close(34)
 !end if
 !close(34)
 
+!read observations and observation error variance
+allocate(obs(lonpx,latpx),obs_err(lonpx,latpx))
+fname=trim(adjustl(hydrowebdir))//"/bin/hydroweb"//yyyymmdd//".bin"
+open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+if(ios==0)then
+    read(34,rec=1) obs
+    read(34,rec=2) obs_err
+else
+    write(*,*) "no file storage"
+end if
+close(34)
+
+
 ! inflation parameter
 fname=trim(adjustl(expdir))//"/inflation/parm_infl"//yyyymmdd//".bin"
-print *, fname
+!print *, fname
 open(34,file=fname,form="unformatted",access="direct",recl=4*lonpx*latpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) parm_infl
@@ -324,7 +337,7 @@ meanglobalx=0
 do num=1,ens_num
     write(numch,'(i3.3)') num
     fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/meansfcelvC"//numch//".bin"
-    print *, fname
+    !print *, fname
     open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
     if(ios==0)then
         read(34,rec=1) meanglobalx(:,:,num)
@@ -352,7 +365,7 @@ globalx=0
 do num=1,ens_num
     write(numch,'(i3.3)') num
     fname=trim(adjustl(expdir))//"/CaMa_out/"//yyyymmdd//"A"//numch//"/sfcelv"//yyyymmdd(1:4)//".bin"
-    print *, fname
+    !print *, fname
     open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
     if(ios==0)then
         read(34,rec=1) globalx(:,:,num)
@@ -388,7 +401,7 @@ end do
 !fname=trim(adjustl(expdir))//"/local_patch/countnum.bin"
 !fname="../covariance/local_patch_0.90/countnum.bin"
 fname=trim(adjustl(patchdir))//"/countnum.bin"
-print *, fname
+!print *, fname
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) countp
@@ -408,7 +421,7 @@ close(34)
 !end do
 
 ! make randomlist
-allocate(randlist(ens_num*366))
+!allocate(randlist(ens_num*366))
 !randlist=0
 !fname=trim(adjustl(expdir))//"/CaMa_out/randlist.bin"
 !open(34,file=fname,form="unformatted",access="direct",recl=4*366*ens_num,status="old",iostat=ios)
@@ -511,16 +524,22 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
         local_err=-9999.0
         local_wgt=wgt(1:countnum)
         xt=-9999.0
+        !print*,"L514: read observation"
         do i=1,countnum
             i_m=xlist(i)
             j_m=ylist(i)
-            ! get the VS for (i_m,j_m)
-            call get_virtualstation(i_m,j_m,yyyymmdd,10.0,hydrowebdir,mapname,station,wse,std,flag)
-            if (flag==1) then
+            if (obs(i_m,j_m)/=-9999.0) then
                 local_sat(i)=1
-                xt(i)=wse
-                local_err(i)=std
+                xt(i)=obs(i_m,j_m)
+                local_err(i)=obs_err(i_m,j_m)
             end if
+            !! get the VS for (i_m,j_m)
+            !call get_virtualstation(i_m,j_m,yyyymmdd,10.0,hydrowebdir,mapname,station,wse,std,flag)
+            !if (flag==1) then
+            !    local_sat(i)=1
+            !    xt(i)=wse
+            !    local_err(i)=std
+            !end if
         end do
         !---
         allocate(local_obs(countnum))
@@ -534,6 +553,7 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
         !write(*,*) "make xf"
         allocate(xf(countnum,ens_num))!localx(countnum,countnum,ens_num),
         xf=0
+        !print*,"L538: read model forcasts"
         do i=1,countnum
             i_m=xlist(i)
             j_m=ylist(i)
@@ -549,7 +569,7 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
         if(sum(local_obs)==0)then
             !xa=xf
             errflg=1
-            !write(*,*) "error",errflg
+            write(*,*) "error",errflg
             write(82,*) lat,lon,"error",errflg
             goto 9999
         end if
@@ -941,10 +961,10 @@ close(73)
 close(74)
 close(82)
 
-deallocate (rivwth,rivlen,nextdst,lons,lats,weightage,storage,parm_infl)
-deallocate (nextX,nextY,ocean,countp,targetp)
-
-deallocate(global_xa,globalx,ens_xa,global_null,obs_mask)
+deallocate(rivwth,rivlen,nextdst,lons,lats,weightage,storage,parm_infl)
+deallocate(nextX,nextY,ocean,countp,targetp)
+deallocate(obs,obs_err)
+deallocate(global_xa,globalx,ens_xa,global_null)!,obs_mask)
 deallocate(meanglobalx,meanglobaltrue)
 end program data_assim
 !*****************************************************************

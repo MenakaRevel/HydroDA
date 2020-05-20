@@ -499,10 +499,10 @@ def compile_func(): #used
 def store_out(yyyy,mm,dd):
     # program for storing data #
     
-    looptype = "true"
-    # storing rivout
-    numch = "000" 
-    shutil.copy("./CaMa_out/"+yyyy+mm+dd+"T"+numch+"/rivout"+yyyy+".bin","assim_out/rivout/"+looptype+"/rivout"+yyyy+mm+dd+".bin")
+#    looptype = "true"
+#    # storing rivout
+#    numch = "000" 
+#    shutil.copy("./CaMa_out/"+yyyy+mm+dd+"T"+numch+"/rivout"+yyyy+".bin","assim_out/rivout/"+looptype+"/rivout"+yyyy+mm+dd+".bin")
 
     # storing rivdph
     #shutil.copy("./CaMa_out/"+yyyy+mm+dd+"T"+numch+"/rivdph"+yyyy+".bin","assim_out/rivdph/"+looptype+"/rivdph"+yyyy+mm+dd+".bin")
