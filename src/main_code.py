@@ -1321,13 +1321,13 @@ def prepare_input():
     # spinup start_year
     # simulation end_year
     start_year=pm.spinup_end_year()
-    end_year,end_month,end_date=pm.starttime()
+    end_year,end_month,end_date=pm.endtime()
     #start_year=pm.start_year()
     #end_year=pm.end_year()
     start_dt=datetime.date(start_year,1,1)
     last_dt=datetime.date(end_year,end_month,end_date)
     start=0
-    last=int((last_dt-start_dt).days)+1
+    last=int((last_dt-start_dt).days)
     #--------------
     # E2O
     if pm.input()=="E2O": # Earth2Observe

@@ -569,7 +569,7 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
         if(sum(local_obs)==0)then
             !xa=xf
             errflg=1
-            write(*,*) "error",errflg
+            !write(*,*) "error",errflg
             write(82,*) lat,lon,"error",errflg
             goto 9999
         end if
@@ -594,6 +594,9 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
 
         ! number observations
         ovs=sum(local_obs)
+        !write(*,*) ovs
+        !write(*,*)xt
+        !write(*,*) local_obs
         if(ovs>0)then
             ! observation available
             allocate(H(ovs,countnum))
@@ -805,12 +808,12 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
         !write(*,*) "xa:",xa
         ! check center pixel ====================================
         !write(*,*) "errfix:", errfix, obserrrand(lon_cent,lat_cent)
-        write(*,*) "true   :",xt(target_pixel)
+        !write(*,*) "true   :",xt(target_pixel)
         write(*,*) "forcast:",sum(xf(target_pixel,:))/(ens_num+1e-20)
         write(*,*) "assimil:",sum(xa(target_pixel,:))/(ens_num+1e-20)
 
 
-        write(78,*) "true   :",xt(target_pixel)
+        !write(78,*) "true   :",xt(target_pixel)
         write(78,*) "forcast:",sum(xf(target_pixel,:))/(ens_num+1e-20)
         write(78,*) "assimil:",sum(xa(target_pixel,:))/(ens_num+1e-20)
         ! check K_ value (should be between 0-1) =======================================
