@@ -26,7 +26,7 @@ import cal_stat as stat
 
 #argvs = sys.argv
 
-experiment="E2O_wmc_01_anomalyDA"
+experiment="E2O_HydroWeb"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 print assim_out
@@ -85,6 +85,7 @@ N=int(last)
 green2="greenyellow"
 green ="green"
 #colors = pc.color_assimd()
+staid=[]
 pname=[]
 xlist=[]
 ylist=[]
@@ -115,9 +116,10 @@ for rivername in rivernames:
   print path
   mk_dir(path)
   #station_loc,x_list,y_list = grdc.get_grdc_loc(rivername,"b")
-  station_loc,x_list,y_list = grdc.get_grdc_loc_v396(rivername)
+  grdc_id,station_loc,x_list,y_list = grdc.get_grdc_loc_v396(rivername)
   print rivername, station_loc
   river.append([rivername]*len(station_loc))
+  staid.append(grdc_id)
   pname.append(station_loc)
   xlist.append(x_list)
   ylist.append(y_list)
@@ -171,6 +173,7 @@ for rivername in rivernames:
 #    ylist.append([353,397,383,372,363,343,359,376,379,342,351,351])
 
 river=([flatten for inner in river for flatten in inner])
+staid=([flatten for inner in pname for flatten in inner])
 pname=([flatten for inner in pname for flatten in inner])
 print len(pname), len(xlist)
 xlist=([flatten for inner in xlist for flatten in inner])
@@ -199,30 +202,30 @@ for day in np.arange(start,last):
 #    mesh=(mesh_in>=10)*(mesh_in<=60)
 #    meshP=mesh-1000*(mesh<0.1)
 
-    fname="../sat/observation_day%02d.bin"%(SWOT_day(yyyy,mm,dd))
-    meshP=np.fromfile(fname,np.int32).reshape([720,1440])
-    #meshP=(meshP>=1)*1
+#    fname="../sat/observation_day%02d.bin"%(SWOT_day(yyyy,mm,dd))
+#    meshP=np.fromfile(fname,np.int32).reshape([720,1440])
+#    #meshP=(meshP>=1)*1
 
 
-    # make org
-    fname=assim_out+"/rivout/true/rivout"+yyyy+mm+dd+".bin"
-    orgfile=np.fromfile(fname,np.float32).reshape([720,1440])
-
-    org_frag=[]
-    for point in np.arange(pnum):
-        #print point
-        xpoint=xlist[point]
-        ypoint=ylist[point]
-        org_frag.append(orgfile[ypoint,xpoint])
-        #---SWOT--
-        #if meshP[ypoint-40,xpoint] >= 1:
-        if meshP[ypoint,xpoint] >= 1:
-          if point not in swt.keys():
-            swt[point] = [day]
-          else:
-            swt[point].append(day)
-
-    org.append(org_frag)
+#    # make org
+#    fname=assim_out+"/rivout/true/rivout"+yyyy+mm+dd+".bin"
+#    orgfile=np.fromfile(fname,np.float32).reshape([720,1440])
+#
+#    org_frag=[]
+#    for point in np.arange(pnum):
+#        #print point
+#        xpoint=xlist[point]
+#        ypoint=ylist[point]
+#        org_frag.append(orgfile[ypoint,xpoint])
+#        #---SWOT--
+#        #if meshP[ypoint-40,xpoint] >= 1:
+#        if meshP[ypoint,xpoint] >= 1:
+#          if point not in swt.keys():
+#            swt[point] = [day]
+#          else:
+#            swt[point].append(day)
+#
+#    org.append(org_frag)
 
     # make asm and opn
     opn_ens=[]
@@ -253,7 +256,7 @@ for day in np.arange(start,last):
     opn.append(opn_ens)
     asm.append(asm_ens)
 
-org=np.array(org,dtype=np.float32)
+#org=np.array(org,dtype=np.float32)
 opn=np.array(opn,dtype=np.float32)
 asm=np.array(asm,dtype=np.float32)
 
@@ -295,7 +298,8 @@ def make_fig(point):
 #
 #    plt.ylim(ymin=0)
     fig, ax1 = plt.subplots()
-    ax1.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7,zorder=101) #,marker = "o",markevery=swt[point])
+    org=grdc.grdc_dis(staid[point],year,year)
+    ax1.plot(np.arange(start,last),org,label="GRDC",color="black",linewidth=0.7,zorder=101) #,marker = "o",markevery=swt[point])
 #    ax1.plot(np.arange(start,last),hgt[:,point],label="true",color="gray",linewidth=0.7,linestyle="--",zorder=101)
 #    plt.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7)
 
@@ -320,81 +324,81 @@ def make_fig(point):
     ax1.set_xticks(xxlist)
     ax1.set_xticklabels(xxlab,fontsize=10)
 
-    # twin axis
-    ax2 = ax1.twinx()
-    #aiv = stat.AI(asm[:,:,point],opn[:,:,point],org[:,point])
-    #aivn= stat.AI_new(asm[:,:,point],opn[:,:,point],org[:,point])
-    aivn,error = stat.AI_new(asm[:,:,point],opn[:,:,point],org[:,point])
-    #print aivn
-    #--
-    pBias,pB_c = stat.pBias(asm[:,:,point],opn[:,:,point],org[:,point])
-    ai_mean =np.mean(ma.masked_less_equal(aivn,0.0))# np.nanmean(ma.masked_less_equal(aivn,0.0))
-    # RMSE
-    RootMSE=stat.RMSE(asm[:,:,point],org[:,point])
-    # rRMSE
-    rRootMSE=stat.rRMSE(asm[:,:,point],org[:,point])
-    # NRMSE
-    NRootMSE=stat.NRMSE(asm[:,:,point],org[:,point])
-    # VE
-    VolEff=stat.VE(asm[:,:,point],org[:,point])
-    # NSE
-    NSEc,NSa,NSc=stat.NSE(asm[:,:,point],opn[:,:,point],org[:,point])
-    # PDRI PTRI
-    PDRI,PTRI=stat.PRI(asm[:,:,point],opn[:,:,point],org[:,point])
-    #---
-    EnsSprd=stat.EnsSpr(asm[:,:,point],opn[:,:,point],org[:,point])
-    EnsSpr_mean=np.mean(ma.masked_less_equal(EnsSprd,0.0))
-    #---
-    AssimQlt=stat.AQ(PDRI,PTRI,ai_mean,EnsSpr_mean)
-    #---
-    mai = "meanAI:%1.2f"%(ai_mean)
-    pB  = "pBIAS:%1.1f%%"%(pBias)
-    rms = "RMSE:%8.2f"%(RootMSE)
-    rrms= "rRMSE:%3.2f"%(rRootMSE)
-    nrms= "NRMSE:%3.2f"%(NRootMSE)
-    veff= "VE:%3.2f"%(VolEff)
-    nsec= "NSE:%3.2f"%(NSEc)
-    pdr = "PDRI:%3.2f"%(PDRI)
-    ptr = "PTRI:%3.2f"%(PTRI)
-    ESrd= "EnsSpr:%3.2f"%(EnsSpr_mean)
-    AssQ= "AQ:%3.2f"%(AssimQlt)
-    NSac= "NSEa:%3.2f, NSEc:%3.2f"%(NSa,NSc)
-    print mai , pB#, "pB_c", pB_c, "%"
-    #pB  = pB + r'{1.1f}\%'.format(pBias)
-    ax1.text(0.02,0.95,mai,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
-    ax1.text(0.02,0.85,nsec,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
-    ax1.text(0.02,0.75,pB,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
-    ax1.text(0.02,0.65,rms,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
-    ax1.text(0.02,0.55,rrms,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
-    ax1.text(0.02,0.45,nrms,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
-    ax1.text(0.02,0.35,veff,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
-    ax1.text(0.02,0.25,pdr,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
-    ax1.text(0.02,0.15,ptr,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
-    #ax1.text(0.02,0.05,AssQ,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
-    ax1.text(0.02,0.05,NSac,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+#    # twin axis
+#    ax2 = ax1.twinx()
+#    #aiv = stat.AI(asm[:,:,point],opn[:,:,point],org[:,point])
+#    #aivn= stat.AI_new(asm[:,:,point],opn[:,:,point],org[:,point])
+#    aivn,error = stat.AI_new(asm[:,:,point],opn[:,:,point],org[:,point])
+#    #print aivn
+#    #--
+#    pBias,pB_c = stat.pBias(asm[:,:,point],opn[:,:,point],org[:,point])
+#    ai_mean =np.mean(ma.masked_less_equal(aivn,0.0))# np.nanmean(ma.masked_less_equal(aivn,0.0))
+#    # RMSE
+#    RootMSE=stat.RMSE(asm[:,:,point],org[:,point])
+#    # rRMSE
+#    rRootMSE=stat.rRMSE(asm[:,:,point],org[:,point])
+#    # NRMSE
+#    NRootMSE=stat.NRMSE(asm[:,:,point],org[:,point])
+#    # VE
+#    VolEff=stat.VE(asm[:,:,point],org[:,point])
+#    # NSE
+#    NSEc,NSa,NSc=stat.NSE(asm[:,:,point],opn[:,:,point],org[:,point])
+#    # PDRI PTRI
+#    PDRI,PTRI=stat.PRI(asm[:,:,point],opn[:,:,point],org[:,point])
+#    #---
+#    EnsSprd=stat.EnsSpr(asm[:,:,point],opn[:,:,point],org[:,point])
+#    EnsSpr_mean=np.mean(ma.masked_less_equal(EnsSprd,0.0))
+#    #---
+#    AssimQlt=stat.AQ(PDRI,PTRI,ai_mean,EnsSpr_mean)
+#    #---
+#    mai = "meanAI:%1.2f"%(ai_mean)
+#    pB  = "pBIAS:%1.1f%%"%(pBias)
+#    rms = "RMSE:%8.2f"%(RootMSE)
+#    rrms= "rRMSE:%3.2f"%(rRootMSE)
+#    nrms= "NRMSE:%3.2f"%(NRootMSE)
+#    veff= "VE:%3.2f"%(VolEff)
+#    nsec= "NSE:%3.2f"%(NSEc)
+#    pdr = "PDRI:%3.2f"%(PDRI)
+#    ptr = "PTRI:%3.2f"%(PTRI)
+#    ESrd= "EnsSpr:%3.2f"%(EnsSpr_mean)
+#    AssQ= "AQ:%3.2f"%(AssimQlt)
+#    NSac= "NSEa:%3.2f, NSEc:%3.2f"%(NSa,NSc)
+#    print mai , pB#, "pB_c", pB_c, "%"
+#    #pB  = pB + r'{1.1f}\%'.format(pBias)
+#    ax1.text(0.02,0.95,mai,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+#    ax1.text(0.02,0.85,nsec,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+#    ax1.text(0.02,0.75,pB,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+#    ax1.text(0.02,0.65,rms,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+#    ax1.text(0.02,0.55,rrms,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+#    ax1.text(0.02,0.45,nrms,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+#    ax1.text(0.02,0.35,veff,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+#    ax1.text(0.02,0.25,pdr,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+#    ax1.text(0.02,0.15,ptr,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+#    #ax1.text(0.02,0.05,AssQ,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+#    ax1.text(0.02,0.05,NSac,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
 
     #---
-    pBA_p=np.sum(ma.masked_greater((np.mean(asm[:,:,point],axis=1)-org[:,point]),0.0).filled(0.0))
-    pBA_n=np.sum(ma.masked_less((np.mean(asm[:,:,point],axis=1)-org[:,point]),0.0).filled(0.0))
-    #---
-    pBC_p=np.sum(ma.masked_greater((np.mean(opn[:,:,point],axis=1)-org[:,point]),0.0).filled(0.0))
-    pBC_n=np.sum(ma.masked_less((np.mean(opn[:,:,point],axis=1)-org[:,point]),0.0).filled(0.0))
-    ax1.text(0.80,0.95,"pBa_p:%1.1f%%"%(pBA_p),ha="left",va="center",transform=ax1.transAxes,fontsize=10)
-    ax1.text(0.80,0.85,"pBa_n:%1.1f%%"%(pBA_n),ha="left",va="center",transform=ax1.transAxes,fontsize=10)
-    ax1.text(0.80,0.75,"pBc_p:%1.1f%%"%(pBC_p),ha="left",va="center",transform=ax1.transAxes,fontsize=10)
-    ax1.text(0.80,0.65,"pBc_n:%1.1f%%"%(pBC_n),ha="left",va="center",transform=ax1.transAxes,fontsize=10)
-    ax1.text(0.80,0.55,"pBa_p/pBa_n:%1.1f"%(abs(pBA_p/pBA_n+1.0e-20)),ha="left",va="center",transform=ax1.transAxes,fontsize=10)
-    ax1.text(0.80,0.45,"pBc_p/pBc_n:%1.1f"%(abs(pBC_p/pBC_n+1.0e-20)),ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+#    pBA_p=np.sum(ma.masked_greater((np.mean(asm[:,:,point],axis=1)-org[:,point]),0.0).filled(0.0))
+#    pBA_n=np.sum(ma.masked_less((np.mean(asm[:,:,point],axis=1)-org[:,point]),0.0).filled(0.0))
+#    #---
+#    pBC_p=np.sum(ma.masked_greater((np.mean(opn[:,:,point],axis=1)-org[:,point]),0.0).filled(0.0))
+#    pBC_n=np.sum(ma.masked_less((np.mean(opn[:,:,point],axis=1)-org[:,point]),0.0).filled(0.0))
+#    ax1.text(0.80,0.95,"pBa_p:%1.1f%%"%(pBA_p),ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+#    ax1.text(0.80,0.85,"pBa_n:%1.1f%%"%(pBA_n),ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+#    ax1.text(0.80,0.75,"pBc_p:%1.1f%%"%(pBC_p),ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+#    ax1.text(0.80,0.65,"pBc_n:%1.1f%%"%(pBC_n),ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+#    ax1.text(0.80,0.55,"pBa_p/pBa_n:%1.1f"%(abs(pBA_p/pBA_n+1.0e-20)),ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+#    ax1.text(0.80,0.45,"pBc_p/pBc_n:%1.1f"%(abs(pBC_p/pBC_n+1.0e-20)),ha="left",va="center",transform=ax1.transAxes,fontsize=10)
 
 
 #    ax2.plot(np.arange(start,last),aiv,color="green",zorder=104,marker = "o",alpha=0.3, markevery=swt[point])
     #ax2.plot(np.arange(start,last),ma.masked_less_equal(aivn,1.0e-20),color="green",zorder=104,marker = "o", alpha=0.5,linewidth=0.5,markevery=swt[point])
-    ax2.plot(np.arange(start,last),ma.masked_where(error<=0.1,aivn),color=green,marker = "o",markeredgecolor =green, alpha=1,linewidth=0.5,markevery=swt[point],markersize=3,zorder=100)#,label="AI")
-    ax2.plot(np.arange(start,last),ma.masked_where(error>0.1,aivn),color=green2,marker = "o",markeredgecolor =green2, alpha=1,linewidth=0.5,markevery=swt[point],markersize=3,zorder=100)#,label="AI")
-    ax2.set_ylabel('AI', color='green')
-    ax2.tick_params('y', colors='green')
-    ax2.set_ylim(ymin=0.,ymax=1.)
-    ax2.set_xlim(xmin=0,xmax=last+1)
+#    ax2.plot(np.arange(start,last),ma.masked_where(error<=0.1,aivn),color=green,marker = "o",markeredgecolor =green, alpha=1,linewidth=0.5,markevery=swt[point],markersize=3,zorder=100)#,label="AI")
+#    ax2.plot(np.arange(start,last),ma.masked_where(error>0.1,aivn),color=green2,marker = "o",markeredgecolor =green2, alpha=1,linewidth=0.5,markevery=swt[point],markersize=3,zorder=100)#,label="AI")
+#    ax2.set_ylabel('AI', color='green')
+#    ax2.tick_params('y', colors='green')
+#    ax2.set_ylim(ymin=0.,ymax=1.)
+#    ax2.set_xlim(xmin=0,xmax=last+1)
 #    print swt[point]
     print 'save',river[point],pname[point]
     plt.savefig(assim_out+"/fig/disgraph/"+river[point]+"/"+pname[point]+".png",dpi=500)
