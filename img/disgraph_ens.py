@@ -117,7 +117,7 @@ for rivername in rivernames:
   mk_dir(path)
   #station_loc,x_list,y_list = grdc.get_grdc_loc(rivername,"b")
   grdc_id,station_loc,x_list,y_list = grdc.get_grdc_loc_v396(rivername)
-  print rivername, station_loc
+  print rivername, grdc_id,station_loc
   river.append([rivername]*len(station_loc))
   staid.append(grdc_id)
   pname.append(station_loc)
@@ -173,7 +173,7 @@ for rivername in rivernames:
 #    ylist.append([353,397,383,372,363,343,359,376,379,342,351,351])
 
 river=([flatten for inner in river for flatten in inner])
-staid=([flatten for inner in pname for flatten in inner])
+staid=([flatten for inner in staid for flatten in inner])
 pname=([flatten for inner in pname for flatten in inner])
 print len(pname), len(xlist)
 xlist=([flatten for inner in xlist for flatten in inner])
@@ -299,7 +299,8 @@ def make_fig(point):
 #    plt.ylim(ymin=0)
     fig, ax1 = plt.subplots()
     org=grdc.grdc_dis(staid[point],year,year)
-    ax1.plot(np.arange(start,last),org,label="GRDC",color="black",linewidth=0.7,zorder=101) #,marker = "o",markevery=swt[point])
+    org=np.array(org)
+    ax1.plot(np.arange(start,last),ma.masked_less(org,0.0),label="GRDC",color="black",linewidth=0.7,zorder=101) #,marker = "o",markevery=swt[point])
 #    ax1.plot(np.arange(start,last),hgt[:,point],label="true",color="gray",linewidth=0.7,linestyle="--",zorder=101)
 #    plt.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7)
 

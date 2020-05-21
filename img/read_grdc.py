@@ -6,7 +6,7 @@ import shutil
 import os
 import datetime
 #--
-os.system("ln -sf ../params.py params.py")
+#os.system("ln -sf ../params.py params.py")
 #shutil.copy("../params.py","params.py")
 import params as pm
 #--
@@ -206,7 +206,7 @@ def get_grdc_loc_v396(name):
   #---
   for line in lines[1::]:
     #print line
-    line    = filter(None, re.split("; ",line))
+    line    = filter(None, re.split(";",line))
     #print line
     grdc_id = line[0]
     river   = line[1].strip()
@@ -280,38 +280,45 @@ def get_grdc_station_v396(name):
 #------------
 def grdc_dis(grdc_id,syear,eyear,smon=1,emon=12,sday=1,eday=31):
   start_dt=datetime.date(syear,smon,sday)
-  last_dt=datime.date(eyear,emon,eday)
-  #iid=grdc_id()[name]
-  #iid="%d"%(idt)
-  # read grdc q
-  grdc ="/cluster/data6/menaka/GRDC_2019/"+grdc_id+"_Q_day.Cmd.txt"
-  f = open(grdc,"r")
-  lines = f.readlines()
-  f.close()
-  dis = {}
-  for line in lines[37::]:
-    line     = filter(None, re.split(";",line))
-    yyyymmdd = filter(None, re.split("-",line[0]))
-    #print yyyymmdd
-    yyyy     = int(yyyymmdd[0])
-    mm       = int(yyyymmdd[1])
-    dd       = int(yyyymmdd[2])
-    #---
-    #print start_dt.year,start_dt.month,start_dt.day
-    if start_dt <= datetime.date(yyyy,mm,dd) and last_dt  >= datetime.date(yyyy,mm,dd):
-      dis[yyyy,mm,dd]=float(line[2])
-      #print float(line[2])
-    elif last_dt  < datetime.date(yyyy,mm,dd):
-      break
-  #---
+  last_dt=datetime.date(eyear,emon,eday)
+  #--
   start=0
   last=(last_dt-start_dt).days + 1
-  Q=[]
-  for day in np.arange(start,last):
-    target_dt=start_dt+datetime.timedelta(days=day)
-    if (target_dt.year,target_dt.month,target_dt.day) in dis.keys():
-      Q.append(dis[target_dt.year,target_dt.month,target_dt.day])
-    else:
-      Q.append(-99.0)
-  return np.array(Q)
+  #iid=grdc_id()[name]
+  #iid="%d"%(grdc_id)
+  iid=grdc_id
+  # read grdc q
+  grdc ="/cluster/data6/menaka/GRDC_2019/"+iid+"_Q_Day.Cmd.txt"
+  if not os.path.exists(grdc):
+      return np.ones([last],np.float32)*-99.0
+  else:
+      f = open(grdc,"r")
+      lines = f.readlines()
+      f.close()
+      dis = {}
+      for line in lines[37::]:
+        line     = filter(None, re.split(";",line))
+        yyyymmdd = filter(None, re.split("-",line[0]))
+        #print yyyymmdd
+        yyyy     = int(yyyymmdd[0])
+        mm       = int(yyyymmdd[1])
+        dd       = int(yyyymmdd[2])
+        #---
+        #print start_dt.year,start_dt.month,start_dt.day
+        if start_dt <= datetime.date(yyyy,mm,dd) and last_dt  >= datetime.date(yyyy,mm,dd):
+          dis[yyyy,mm,dd]=float(line[2])
+          #print float(line[2])
+        elif last_dt  < datetime.date(yyyy,mm,dd):
+          break
+      #---
+      start=0
+      last=(last_dt-start_dt).days + 1
+      Q=[]
+      for day in np.arange(start,last):
+        target_dt=start_dt+datetime.timedelta(days=day)
+        if (target_dt.year,target_dt.month,target_dt.day) in dis.keys():
+          Q.append(dis[target_dt.year,target_dt.month,target_dt.day])
+        else:
+          Q.append(-99.0)
+      return np.array(Q)
 #--
