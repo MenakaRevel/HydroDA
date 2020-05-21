@@ -13,6 +13,7 @@ import calendar
 from multiprocessing import Pool
 from multiprocessing import Process
 from numpy import ma
+import re
 
 os.system("ln -sf ../gosh/params.py params.py")
 #sys.path.append('../assim_out/')
@@ -341,8 +342,8 @@ def make_fig(point):
 
     fig, ax1 = plt.subplots()
     #ax1.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7,zorder=101,marker = "o",markevery=swt[point])
-    time,org=hweb.HydroWeb_WSE(pname[point])
-    org=org-EGM08[point]+EGM96
+    time,org=hweb.HydroWeb_WSE(pname[point],year,year)
+    data=np.array(org)-np.array(EGM08[point])+np.array(EGM96[point])
     lines=[ax1.plot(time,data,label="obs",marker="o",color="black",linewidth=0.0,zorder=101)[0]]
 #    ax1.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7,zorder=101)
 #    ax1.plot(np.arange(start,last),m_sf[:,point],label="mean sfcelv",color="black",linewidth=0.7,linestyle="--",zorder=107)
@@ -390,8 +391,8 @@ def make_fig(point):
 #    ax2.tick_params('y', colors='green')
 #    ax2.set_ylim(ymin=0.,ymax=1.)
     fig.legend(lines,labels,ncol=1)
-    print 'save',river[point],re.split("_",pname[point])[2]
-    plt.savefig(assim_out+"/fig/sfcelv/"+river[point]+"/"+re.split("_",pname[point])[2]+".png",dpi=300)
+    print 'save',river[point],re.split("_",pname[point])[2]+"_"+re.split("_",pname[point])[3]
+    plt.savefig(assim_out+"/fig/sfcelv/"+river[point]+"/"+re.split("_",pname[point])[2]+"_"+re.split("_",pname[point])[3]+".png",dpi=300)
     return 0
 #
 para_flag=1
