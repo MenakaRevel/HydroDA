@@ -370,12 +370,13 @@ def data_assim(yyyy,mm,dd,day): # new data assimilation function (2017-06-30)
     dir1=pm.CaMa_dir()+"/"
     thisday=datetime.date(int(yyyy),int(mm),int(dd))
     nxt_day=thisday+datetime.timedelta(days=1)
+    pre_day=thisday-datetime.timedelta(days=1)
     print '%02d'%(nxt_day.day)
     exp_dir=pm.DA_dir()+"/out/"+pm.experiment()
     #os.system(pm.DA_dir()+"/src/data_assim "+str(pm.assimN())+" "+str(pm.assimS())+" "+str(pm.assimW())+" "+str(pm.assimE())+" "+yyyy+mm+dd+" "+str('%02d'%SWOT_day(yyyy,mm,dd))+" "+str(pm.patch_size())+" "+str(pm.ens_mem())+" "+str(day)+" "+str('%04d'%(nxt_day.year)+'%02d'%(nxt_day.month)+'%02d'%(nxt_day.day))+" "+str(pm.err_expansion())+" "+dir1+" "+str(errrand)+" "+str(pm.ovs_err())+" "+str(pm.thersold()))
 #    os.system("src/data_assim "+str(pm.assimN())+" "+str(pm.assimS())+" "+str(pm.assimW())+" "+str(pm.assimE())+" "+yyyy+mm+dd+" "+str('%02d'%SWOT_day(yyyy,mm,dd))+" "+str(pm.patch_size())+" "+str(pm.ens_mem())+" "+str(day)+" "+str('%04d'%(nxt_day.year)+'%02d'%(nxt_day.month)+'%02d'%(nxt_day.day))+" "+str(pm.err_expansion())+" "+dir1+" "+str(errrand)+" "+str(pm.ovs_err()))
 #    os.system("src/data_assim_fld "+str(pm.assimN())+" "+str(pm.assimS())+" "+str(pm.assimW())+" "+str(pm.assimE())+" "+yyyy+mm+dd+" "+str('%02d'%SWOT_day(yyyy,mm,dd))+" "+str(pm.patch_size())+" "+str(pm.ens_mem())+" "+str(day)+" "+str('%04d'%(nxt_day.year)+'%02d'%(nxt_day.month)+'%02d'%(nxt_day.day))+" "+str(pm.err_expansion())+" "+dir1+" "+str(errrand)+" "+str(pm.ovs_err()))
-    os.system(pm.DA_dir()+"/src/data_assim "+str(pm.assimN())+" "+str(pm.assimS())+" "+str(pm.assimW())+" "+str(pm.assimE())+" "+yyyy+mm+dd+" "+str('%02d'%SWOT_day(yyyy,mm,dd))+" "+str(pm.patch_size())+" "+str(pm.ens_mem())+" "+str(day)+" "+str('%04d'%(nxt_day.year)+'%02d'%(nxt_day.month)+'%02d'%(nxt_day.day))+" "+str(pm.err_expansion())+" "+dir1+" "+str(errrand)+" "+str(pm.ovs_err())+" "+str(pm.thersold())+" "+exp_dir+" "+pm.DA_dir()+" "+pm.patch_dir()+" "+str(pm.rho())+" "+str(pm.sigma_b()))
+    os.system(pm.DA_dir()+"/src/data_assim "+str(pm.assimN())+" "+str(pm.assimS())+" "+str(pm.assimW())+" "+str(pm.assimE())+" "+yyyy+mm+dd+" "+str('%02d'%SWOT_day(yyyy,mm,dd))+" "+str(pm.patch_size())+" "+str(pm.ens_mem())+" "+str(day)+" "+str('%04d'%(nxt_day.year)+'%02d'%(nxt_day.month)+'%02d'%(nxt_day.day))+" "+str('%04d'%(pre_day.year)+'%02d'%(pre_day.month)+'%02d'%(pre_day.day))+" "+str(pm.err_expansion())+" "+dir1+" "+str(errrand)+" "+str(pm.ovs_err())+" "+str(pm.thersold())+" "+exp_dir+" "+pm.DA_dir()+" "+pm.patch_dir()+" "+str(pm.rho())+" "+str(pm.sigma_b()))
     return 0
 ###########################
 def make_init_storge():
@@ -1823,6 +1824,33 @@ def sfcelv_mean(ens):
     sf_mean.tofile(fname)
     return 0
 ##########################
+def sfcelv_end(ens):
+    # save last day as yearly mean WSE
+    year=pm.spinup_end_year()
+    mon =pm.spinup_end_month()
+    day =pm.spinup_end_date()
+    ens =str(ens) # T000 or C0XX
+    #--
+    dz=days_year(year)
+    nx=1440
+    ny=720
+    #create filename
+    yyyy="%04d"%(year)
+    mm="%2d"%(mon)
+    dd="%2d"%(day)
+    sfcelv=pm.DA_dir()+"/out/"+pm.experiment()+"/CaMa_out/"+yyyy+mm+dd+ens+"/sfcelv"+yyyy+".bin"
+    sfcelv=np.fromfile(sfcelv,np.float32).reshape(dz,ny,nx)
+    sf_mean=sfcelv[-1] #np.mean(sfcelv,axis=0)
+    #mkdir(pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out/mean_sfcelv")
+    if ens=="T000":
+        assim_dir="xa_m"
+        fname=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out/"+assim_dir+"/true/"+yyyy+mm+dd+"_xam.bin"
+    else:
+        assim_dir="ens_xa"
+        fname=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out/"+assim_dir+"/assim/"+yyyy+mm+dd+"_"+ens[1::]+"_xa.bin"
+    sf_mean.tofile(fname)
+    return 0
+##########################
 def days_year(year):
     year=int(year)
     days=365
@@ -1837,7 +1865,8 @@ def calc_mean():
         inputlist.append("C%03d"%(mem))
     #--
     p=Pool(pm.para_nums())
-    p.map(sfcelv_mean,inputlist)
+    #p.map(sfcelv_mean,inputlist)
+    p.map(sfcelv_end,inputlist)
     p.terminate()
     return 0
 ##########################

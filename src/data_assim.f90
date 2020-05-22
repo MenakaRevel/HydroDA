@@ -7,7 +7,7 @@ program data_assim
 !**************************
 implicit none
 character*128                   :: fname,buf,camadir,expdir,DAdir,patchdir
-character*8                     :: yyyymmdd,nxtyyyymmdd
+character*8                     :: yyyymmdd,nxtyyyymmdd,befyyyymmdd
 real                            :: assimN,assimS,assimW,assimE,lat,lon
 character*2                     :: swot_day
 character*4                     :: patchid
@@ -93,35 +93,38 @@ call getarg(10,buf)
 read(buf,*) nxtyyyymmdd
 
 call getarg(11,buf)
-read(buf,*) errexp
+read(buf,*) befyyyymmdd
 
 call getarg(12,buf)
+read(buf,*) errexp
+
+call getarg(13,buf)
 read(buf,"(A)") camadir
 write(*,*) camadir
 
-call getarg(13,buf)
+call getarg(14,buf)
 read(buf,*) errrand
 write(*,*) errrand
 
-call getarg(14,buf)
+call getarg(15,buf)
 read(buf,*) errfix
 
-call getarg(15,buf)
+call getarg(16,buf)
 read(buf,*) thresold
 
-call getarg(16,buf)
+call getarg(17,buf)
 read(buf,"(A)") expdir
 
-call getarg(17,buf)
+call getarg(18,buf)
 read(buf,"(A)") DAdir
 
-call getarg(18,buf)
+call getarg(19,buf)
 read(buf,"(A)") patchdir
 
-call getarg(19,buf)
+call getarg(20,buf)
 read(buf,*) rho_fixed
 
-call getarg(20,buf)
+call getarg(21,buf)
 read(buf,*) sigma_b
 
 
@@ -275,7 +278,8 @@ allocate(meanglobalx(lonpx,latpx,ens_num))
 meanglobalx=0
 do num=1,ens_num
     write(numch,'(i3.3)') num
-    fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/meansfcelvC"//numch//".bin"
+    !fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/meansfcelvC"//numch//".bin"
+    fname=trim(adjustl(expdir))//"/assim_out/ens_xa/"//befyyyymmdd//"_"//numch//"_xa.bin"
     open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
     if(ios==0)then
         read(34,rec=1) meanglobalx(:,:,num)
@@ -288,6 +292,7 @@ end do
 ! read mean WSE true
 allocate(meanglobaltrue(lonpx,latpx))
 meanglobaltrue=0
+!fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/meansfcelvT000.bin"
 fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/meansfcelvT000.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
@@ -313,7 +318,7 @@ do num=1,ens_num
 end do
 
 ! update globalx
-!globalx=globalx-meanglobalx
+globalx=globalx-meanglobalx
 
 ! mean of ensembles
 !do num=1,ens_num
@@ -332,7 +337,7 @@ else
 end if
 close(34)
 ! update globalture
-globaltrue=globaltrue-meanglobaltrue+(sum(meanglobalx(:,:,:),dim=3)/real(ens_num))
+globaltrue=globaltrue-meanglobaltrue!+(sum(meanglobalx(:,:,:),dim=3)/real(ens_num))
 
 ! read countnum
 !fname=trim(adjustl(expdir))//"/local_patch/countnum.bin"
@@ -892,7 +897,7 @@ fname=trim(adjustl(expdir))//"/logout/usedwhat_"//yyyymmdd//".log"
 ! make ensemble output (WSE)
 allocate(ens_xa(lonpx,latpx,ens_num))
 do num=1,ens_num
-    ens_xa(:,:,num) = global_xa(:,:,num)*(global_null) + globalx(:,:,num)*(1-global_null) !+ meanglobalx(:,:,num) !+ (sum(meanglobalx(:,:,:),dim=3)/real(ens_num)) !
+    ens_xa(:,:,num) = global_xa(:,:,num)*(global_null) + globalx(:,:,num)*(1-global_null) + meanglobalx(:,:,num) !+ (sum(meanglobalx(:,:,:),dim=3)/real(ens_num)) !
 end do
 
 !fname="./logout/OutSfcLog_"//yyyymmdd//".log"
