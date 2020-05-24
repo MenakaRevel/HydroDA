@@ -370,7 +370,7 @@ def data_assim(yyyy,mm,dd,day): # new data assimilation function (2017-06-30)
     dir1=pm.CaMa_dir()+"/"
     thisday=datetime.date(int(yyyy),int(mm),int(dd))
     nxt_day=thisday+datetime.timedelta(days=1)
-    pre_day=thisday-datetime.timedelta(days=1)
+    pre_day="20031231"#thisday-datetime.timedelta(days=1)
     print '%02d'%(nxt_day.day)
     exp_dir=pm.DA_dir()+"/out/"+pm.experiment()
     #os.system(pm.DA_dir()+"/src/data_assim "+str(pm.assimN())+" "+str(pm.assimS())+" "+str(pm.assimW())+" "+str(pm.assimE())+" "+yyyy+mm+dd+" "+str('%02d'%SWOT_day(yyyy,mm,dd))+" "+str(pm.patch_size())+" "+str(pm.ens_mem())+" "+str(day)+" "+str('%04d'%(nxt_day.year)+'%02d'%(nxt_day.month)+'%02d'%(nxt_day.day))+" "+str(pm.err_expansion())+" "+dir1+" "+str(errrand)+" "+str(pm.ovs_err())+" "+str(pm.thersold()))
