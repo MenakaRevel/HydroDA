@@ -370,7 +370,7 @@ def data_assim(yyyy,mm,dd,day): # new data assimilation function (2017-06-30)
     dir1=pm.CaMa_dir()+"/"
     thisday=datetime.date(int(yyyy),int(mm),int(dd))
     nxt_day=thisday+datetime.timedelta(days=1)
-    pre_day=datetme.date(2003,12,31)
+    pre_day=datetime.date(2003,12,31)
     #pre_day=thisday-datetime.timedelta(days=1)
     print '%02d'%(nxt_day.day)
     exp_dir=pm.DA_dir()+"/out/"+pm.experiment()
