@@ -24,7 +24,7 @@ import cal_stat as stat
 
 #argvs = sys.argv
 
-experiment="E2O_womc_anomalyDA_if2.0"
+experiment="E2O_womc_anomalyDA4_adif"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 print assim_out
@@ -43,8 +43,8 @@ print assim_out
 #assim_out="assim_out_biased_wmc"
 
 
-os.system("mkdir ../assim_out/img")
-os.system("mkdir ../assim_out/img/sfcelv")
+#os.system("mkdir ../assim_out/img")
+#os.system("mkdir ../assim_out/img/sfcelv")
 #----
 def SWOT_day(yyyy,mm,dd):
   st_year,st_month,st_date=pm.starttime()
@@ -221,7 +221,7 @@ for day in np.arange(start,last):
     fname=pm.CaMa_dir()+"/map/glb_15min/rivhgt.bin"
     bathyfile=np.fromfile(fname,np.float32).reshape([720,1440])
 
-    fname=assim_out+"/mean_sfcelv/meansfcelvT000.bin"
+    #fname=assim_out+"/mean_sfcelv/meansfcelvT000.bin"
     mean_true=np.fromfile(fname,np.float32).reshape([720,1440])
 
     org_frag=[]
@@ -268,7 +268,7 @@ for day in np.arange(start,last):
         #fname="../CaMa_out/"+yyyy+mm+dd+"A"+numch+"/sfcelv"+yyyy+".bin"
         rhgtfile=np.fromfile(fname,np.float32).reshape([720,1440])
 
-        fname=assim_out+"/mean_sfcelv/meansfcelvC"+numch+".bin"
+        #fname=assim_out+"/mean_sfcelv/meansfcelvC"+numch+".bin"
         mean_corr=np.fromfile(fname,np.float32).reshape([720,1440])
 
         opn_frag=[]
@@ -337,7 +337,7 @@ def make_fig(point):
     fig, ax1 = plt.subplots()
     #ax1.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7,zorder=101,marker = "o",markevery=swt[point])
     ax1.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7,zorder=101)
-    ax1.plot(np.arange(start,last),m_sf[:,point],label="mean sfcelv",color="black",linewidth=0.7,linestyle="--",zorder=107)
+    #ax1.plot(np.arange(start,last),m_sf[:,point],label="mean sfcelv",color="black",linewidth=0.7,linestyle="--",zorder=107)
 #    plt.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7)
 
     for num in np.arange(0,int(pm.ens_mem())):
@@ -348,7 +348,7 @@ def make_fig(point):
 #        plt.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.3,alpha=0.5)
     ax1.plot(np.arange(start,last),np.mean(opn[:,:,point],axis=1),label="corrupted",color="blue",linewidth=0.8,alpha=0.8,zorder=102)
     ax1.plot(np.arange(start,last),np.mean(asm[:,:,point],axis=1),label="assimilated",color="red",linewidth=0.8,alpha=0.8,zorder=103)
-    ax1.plot(np.arange(start,last),np.mean(em_sf[:,:,point],axis=1),label="mean sfelv",color="blue",linewidth=0.5,linestyle="--",alpha=0.5,zorder=103)
+    #ax1.plot(np.arange(start,last),np.mean(em_sf[:,:,point],axis=1),label="mean sfelv",color="blue",linewidth=0.5,linestyle="--",alpha=0.5,zorder=103)
 #    plt.ylim(ymin=)
     # Make the y-axis label, ticks and tick labels match the line color.
     ax1.set_ylabel('WSE (m)', color='k')
