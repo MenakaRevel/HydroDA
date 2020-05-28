@@ -33,7 +33,7 @@ integer,allocatable             :: obs_mask(:,:) ! NEW v.1.1.0
 real,allocatable                :: ens_xa(:,:,:)
 
 integer,parameter               :: latpx=720,lonpx=1440
-real,dimension(lonpx,latpx)     :: rivwth,rivlen,nextdst,weightage,storage,parm_infl
+real,dimension(lonpx,latpx)     :: rivwth,rivlen,nextdst,elevtn,,weightage,storage,parm_infl
 integer,dimension(lonpx,latpx)  :: nextX,nextY,ocean,countp,targetp
 
 integer,allocatable             :: usedwhat(:)
@@ -238,6 +238,16 @@ else
     write(*,*) "no file nextdst",fname
 end if
 close(34)
+
+! read elevation
+fname=trim(adjustl(camadir))//"map/glb_15min/elevtn.bin"
+open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+if(ios==0)then
+    read(34,rec=1) elevtn
+else
+    write(*,*) "no file elevation",fname
+end if
+close(34)
 !--
 ! read SWOT observation distance data
 allocate(swot_obs(1440,640))
@@ -293,7 +303,7 @@ end do
 allocate(meanglobaltrue(lonpx,latpx))
 meanglobaltrue=0
 !fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/meansfcelvT000.bin"
-fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/meansfcelvT000.bin"
+fname=trim(adjustl(expdir))//"/assim_out/xa_m/true/"//befyyyymmdd//"_xam.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) meanglobaltrue
@@ -318,12 +328,13 @@ do num=1,ens_num
 end do
 
 ! update globalx
-globalx=globalx-meanglobalx
+!globalx=globalx-meanglobalx
 
 ! mean of ensembles
-!do num=1,ens_num
+do num=1,ens_num
 !    globalx(:,:,num)=globalx(:,:,num)-(sum(meanglobalx(:,:,:),dim=3)/real(ens_num))
-!end do
+    globalx(:,:,num)=globalx(:,:,num)-elevtn(:,:)
+end do
 
 ! read true WSE
 allocate(globaltrue(lonpx,latpx))
@@ -337,8 +348,8 @@ else
 end if
 close(34)
 ! update globalture
-globaltrue=globaltrue-meanglobaltrue!+(sum(meanglobalx(:,:,:),dim=3)/real(ens_num))
-
+!globaltrue=globaltrue-meanglobaltrue!+(sum(meanglobalx(:,:,:),dim=3)/real(ens_num))
+globaltrue=globaltrue-elevtn
 ! read countnum
 !fname=trim(adjustl(expdir))//"/local_patch/countnum.bin"
 !fname="../covariance/local_patch_0.90/countnum.bin"
@@ -897,7 +908,8 @@ fname=trim(adjustl(expdir))//"/logout/usedwhat_"//yyyymmdd//".log"
 ! make ensemble output (WSE)
 allocate(ens_xa(lonpx,latpx,ens_num))
 do num=1,ens_num
-    ens_xa(:,:,num) = global_xa(:,:,num)*(global_null) + globalx(:,:,num)*(1-global_null) + meanglobalx(:,:,num) !+ (sum(meanglobalx(:,:,:),dim=3)/real(ens_num)) !
+!    ens_xa(:,:,num) = global_xa(:,:,num)*(global_null) + globalx(:,:,num)*(1-global_null) + meanglobalx(:,:,num) !+ (sum(meanglobalx(:,:,:),dim=3)/real(ens_num)) !
+    ens_xa(:,:,num) = global_xa(:,:,num)*(global_null) + globalx(:,:,num)*(1-global_null) + elevtn(:,:)
 end do
 
 !fname="./logout/OutSfcLog_"//yyyymmdd//".log"

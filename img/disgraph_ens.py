@@ -26,7 +26,7 @@ import cal_stat as stat
 
 #argvs = sys.argv
 
-experiment="E2O_womc_anomalyDA4_adif"
+experiment="E2O_womc_anomalyDA5_adif"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 print assim_out
@@ -340,7 +340,7 @@ def make_fig(point):
     # NSE
     NSEc,NSa,NSc=stat.NSE(asm[:,:,point],opn[:,:,point],org[:,point])
     # PDRI PTRI
-    PDRI,PTRI=stat.PRI(asm[:,:,point],opn[:,:,point],org[:,point])
+    PDRI,PTRI=0.0,0.0 #stat.PRI(asm[:,:,point],opn[:,:,point],org[:,point])
     #---
     EnsSprd=stat.EnsSpr(asm[:,:,point],opn[:,:,point],org[:,point])
     EnsSpr_mean=np.mean(ma.masked_less_equal(EnsSprd,0.0))
@@ -420,8 +420,8 @@ def make_fig(point):
 
 
 
-para_flag=1
-#para_flag=0
+#para_flag=1
+para_flag=0
 #--
 if para_flag==1:
     p=Pool(20)
