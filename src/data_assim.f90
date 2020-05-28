@@ -33,7 +33,7 @@ integer,allocatable             :: obs_mask(:,:) ! NEW v.1.1.0
 real,allocatable                :: ens_xa(:,:,:)
 
 integer,parameter               :: latpx=720,lonpx=1440
-real,dimension(lonpx,latpx)     :: rivwth,rivlen,nextdst,elevtn,,weightage,storage,parm_infl
+real,dimension(lonpx,latpx)     :: rivwth,rivlen,nextdst,elevtn,weightage,storage,parm_infl
 integer,dimension(lonpx,latpx)  :: nextX,nextY,ocean,countp,targetp
 
 integer,allocatable             :: usedwhat(:)
