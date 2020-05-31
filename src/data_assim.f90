@@ -34,7 +34,7 @@ real,allocatable                :: ens_xa(:,:,:)
 !-map variables
 real                            :: gsize,west, north, east, south ! map boundries
 integer                         :: latpx,lonpx,nflp    ! pixel size, calculated
-real,allocatable                :: rivwth(:,:),rivlen(:,:),nextdst(:,:),lons(:,:),lats(:,:)
+real,allocatable                :: rivwth(:,:),rivlen(:,:),nextdst(:,:),lons(:,:),lats(:,:),elevtn(:,:)
 real,allocatable                :: weightage(:,:),storage(:,:),parm_infl(:,:)
 integer,allocatable             :: nextX(:,:),nextY(:,:),ocean(:,:),countp(:,:),targetp(:,:)
 
@@ -67,7 +67,7 @@ integer(kind=4)                 :: i_m,j_m
 integer,allocatable             :: xlist(:),ylist(:)
 integer(kind=4)                 :: target_pixel !,fn
 character(len=4)                :: llon,llat
-real,allocatable                :: obs(:,:),obs_err(:,:)!, obserrrand(:,:)
+real,allocatable                :: obs(:,:),obs_err(:,:),altitude(:,:)!, obserrrand(:,:)
 
 write(*,*) "data_assim"
 call getarg(1,buf)
@@ -282,6 +282,18 @@ else
     write(*,*) "no file nextdst",fname
 end if
 close(34)
+
+! read elevation data
+fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/elevtn.bin"
+!print *, fname
+open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+if(ios==0)then
+    read(34,rec=1) elevtn
+else
+    write(*,*) "no file nextdst",fname
+end if
+close(34)
+
 !--
 ! read SWOT observation distance data
 !allocate(swot_obs(1440,640))
@@ -308,17 +320,26 @@ close(34)
 !close(34)
 
 !read observations and observation error variance
-allocate(obs(lonpx,latpx),obs_err(lonpx,latpx))
+allocate(obs(lonpx,latpx),obs_err(lonpx,latpx),altitude(lonpx,latpx))
 fname=trim(adjustl(hydrowebdir))//"/bin/hydroweb"//yyyymmdd//".bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) obs
     read(34,rec=2) obs_err
 else
-    write(*,*) "no file storage"
+    write(*,*) "no file ", fname
 end if
 close(34)
 
+! altitude
+fname=trim(adjustl(hydrowebdir))//"/bin/HydroWeb_altitude.bin"
+open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+if(ios==0)then
+    read(34,rec=1) altitude
+else
+    write(*,*) "no file ", fname
+end if
+close(34)
 
 ! inflation parameter
 fname=trim(adjustl(expdir))//"/inflation/parm_infl"//yyyymmdd//".bin"
@@ -378,10 +399,14 @@ end do
 ! update globalx
 !globalx=globalx-meanglobalx
 
-! mean of ensembles
-!do num=1,ens_num
-!    globalx(:,:,num)=globalx(:,:,num)-(sum(meanglobalx(:,:,:),dim=3)/real(ens_num))
-!end do
+! make anomaly
+do num=1,ens_num
+    globalx(:,:,num)=globalx(:,:,num)-elevtn(:,:)
+end do
+
+! make observation anomaly
+altitude=altitude * (altitude/=-9999.0)
+obs=obs-altitude
 
 ! read true WSE
 !allocate(globaltrue(lonpx,latpx))
@@ -915,7 +940,7 @@ fname=trim(adjustl(expdir))//"/logout/usedwhat_"//yyyymmdd//".log"
 ! make ensemble output (WSE)
 allocate(ens_xa(lonpx,latpx,ens_num))
 do num=1,ens_num
-    ens_xa(:,:,num) = global_xa(:,:,num)*(global_null) + globalx(:,:,num)*(1-global_null) !+ meanglobalx(:,:,num) !+ (sum(meanglobalx(:,:,:),dim=3)/real(ens_num)) !
+    ens_xa(:,:,num) = global_xa(:,:,num)*(global_null) + globalx(:,:,num)*(1-global_null) + elevtn(:,:) !+ meanglobalx(:,:,num) !+ (sum(meanglobalx(:,:,:),dim=3)/real(ens_num)) !
 end do
 
 !fname="./logout/OutSfcLog_"//yyyymmdd//".log"
@@ -964,9 +989,9 @@ close(73)
 close(74)
 close(82)
 
-deallocate(rivwth,rivlen,nextdst,lons,lats,weightage,storage,parm_infl)
+deallocate(rivwth,rivlen,nextdst,lons,lats,elevtn,weightage,storage,parm_infl)
 deallocate(nextX,nextY,ocean,countp,targetp)
-deallocate(obs,obs_err)
+deallocate(obs,obs_err,altitude)
 deallocate(global_xa,globalx,ens_xa,global_null)!,obs_mask)
 deallocate(meanglobalx,meanglobaltrue)
 end program data_assim
