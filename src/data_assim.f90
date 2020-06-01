@@ -290,7 +290,7 @@ open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status=
 if(ios==0)then
     read(34,rec=1) elevtn
 else
-    write(*,*) "no file nextdst",fname
+    write(*,*) "no file elevtn",fname
 end if
 close(34)
 
