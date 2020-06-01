@@ -201,7 +201,7 @@ open(74,file=fname,status='replace')
 fname=trim(adjustl(expdir))//"/logout/error_"//yyyymmdd//".log"
 open(82,file=fname,status='replace')
 
-allocate(rivwth(lonpx,latpx),rivlen(lonpx,latpx),nextdst(lonpx,latpx),lons(lonpx,latpx),lats(lonpx,latpx),weightage(lonpx,latpx),storage(lonpx,latpx),parm_infl(lonpx,latpx))
+allocate(rivwth(lonpx,latpx),rivlen(lonpx,latpx),nextdst(lonpx,latpx),lons(lonpx,latpx),lats(lonpx,latpx),elevtn(lonpx,latpx),weightage(lonpx,latpx),storage(lonpx,latpx),parm_infl(lonpx,latpx))
 allocate(nextX(lonpx,latpx),nextY(lonpx,latpx),ocean(lonpx,latpx),countp(lonpx,latpx),targetp(lonpx,latpx))
 
 ! read storage (for making ocean mask)
