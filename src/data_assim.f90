@@ -100,13 +100,13 @@ read(buf,*) ens_num ! number of ensemble
 !call getarg(10,buf)
 !read(buf,*) day ! number of date; start from 0
 
-!call getarg(9,buf)
-!read(buf,*) nxtyyyymmdd
+call getarg(9,buf)
+read(buf,*) nxtyyyymmdd
 
 !call getarg(9,buf)
 !read(buf,*) errexp
 
-call getarg(9,buf)
+call getarg(10,buf)
 read(buf,"(A)") camadir
 write(*,*) camadir
 
@@ -117,25 +117,25 @@ write(*,*) camadir
 !call getarg(10,buf)
 !read(buf,*) errfix
 
-call getarg(10,buf)
+call getarg(11,buf)
 read(buf,*) thresold
 
-call getarg(11,buf)
+call getarg(12,buf)
 read(buf,"(A)") expdir
 
-call getarg(12,buf)
+call getarg(13,buf)
 read(buf,"(A)") DAdir
 
-call getarg(13,buf)
+call getarg(14,buf)
 read(buf,"(A)") patchdir
 
-call getarg(14,buf)
+call getarg(15,buf)
 read(buf,"(A)") hydrowebdir
 
-call getarg(15,buf)
+call getarg(16,buf)
 read(buf,*) rho_fixed
 
-call getarg(16,buf)
+call getarg(17,buf)
 read(buf,*) sigma_b
 
 !==
@@ -348,7 +348,7 @@ open(34,file=fname,form="unformatted",access="direct",recl=4*lonpx*latpx,status=
 if(ios==0)then
     read(34,rec=1) parm_infl
 else
-    write(*,*) "no parm_infl"
+    write(*,*) "no parm_infl",fname
 end if
 close(34)
 
