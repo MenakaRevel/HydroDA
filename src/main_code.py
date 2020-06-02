@@ -340,7 +340,13 @@ def data_assim(yyyy,mm,dd,day): # new data assimilation function (2020/05/18)
     #print '%02d'%(nxt_day.day)
     exp_dir=pm.DA_dir()+"/out/"+pm.experiment()
     print pm.ens_mem()
-    os.system(pm.DA_dir()+"/src/data_assim "+str(pm.assimN())+" "+str(pm.assimS())+" "+str(pm.assimW())+" "+str(pm.assimE())+" "+pm.mapname()+" "+yyyy+mm+dd+" "+str(pm.patch_size())+" "+str(pm.ens_mem())+" "+pm.CaMa_dir()+" "+str(pm.thersold())+" "+exp_dir+" "+pm.DA_dir()+" "+pm.patch_dir()+" "+pm.HydroWeb_dir()+" "+str(pm.rho())+" "+str(pm.sigma_b()))
+    thisday=datetime.date(int(yyyy),int(mm),int(dd))
+    nxt_day=thisday+datetime.timedelta(days=1)
+    nyear=nxt_day.year
+    nmon=nxt_day.month
+    nday=nxt_day.day
+    nxtyyyymmdd="%04d%02d%02d"%(nyear,nmon,nday)
+    os.system(pm.DA_dir()+"/src/data_assim "+str(pm.assimN())+" "+str(pm.assimS())+" "+str(pm.assimW())+" "+str(pm.assimE())+" "+pm.mapname()+" "+yyyy+mm+dd+" "+str(pm.patch_size())+" "+str(pm.ens_mem())+" "+nxtyyyymmdd+" "+pm.CaMa_dir()+" "+str(pm.thersold())+" "+exp_dir+" "+pm.DA_dir()+" "+pm.patch_dir()+" "+pm.HydroWeb_dir()+" "+str(pm.rho())+" "+str(pm.sigma_b()))
     return 0
 ###########################
 def make_init_storge():
