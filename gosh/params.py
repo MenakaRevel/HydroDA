@@ -167,7 +167,7 @@ def patch_id():
     return "0.60"
 
 def spinup_mode():
-    return 3
+    return 0
     # 0: do spinup simulation for both (corrupted and true) simulation
     # 1: do spin up only at corrupted simulation
     # 2: do spin up only at true simulation
