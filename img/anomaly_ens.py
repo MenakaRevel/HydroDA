@@ -18,13 +18,14 @@ os.system("ln -sf ../gosh/params.py params.py")
 #sys.path.append('../assim_out/')
 import params as pm
 import read_grdc as grdc
+import read_hydroweb as hweb
 import cal_stat as stat
 #from matplotlib.font_manager import FontProperties
 #fp = FontProperties(fname="jap.ttc",size=15)
 
 #argvs = sys.argv
 
-experiment="E2O_womc_anomalyDA_if2.0"
+experiment="E2O_HydroWeb2"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 print assim_out
@@ -96,19 +97,22 @@ pname=[]
 xlist=[]
 ylist=[]
 river=[]
+EGM08=[]
+EGM96=[]
 #--
 rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZON","MEKONG","IRRAWADDY","VOLGA", "NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
 for rivername in rivernames:
   path = assim_out+"/fig/anomaly/%s"%(rivername)
   print path
   mk_dir(path)
-  #station_loc,x_list,y_list = grdc.get_grdc_loc(rivername,"b")
-  station_loc,x_list,y_list = grdc.get_grdc_loc_v396(rivername)
+  station_loc,x_list,y_list,egm08,egm96 =hweb.get_hydroweb_loc(rivername)
   print rivername, station_loc
   river.append([rivername]*len(station_loc))
   pname.append(station_loc)
   xlist.append(x_list)
   ylist.append(y_list)
+  EGM08.append(egm08)
+  EGM96.append(egm96)
 
 ##rivernames = grdc.grdc_river_name()
 ##for rivername in rivernames: 
@@ -185,7 +189,8 @@ river=([flatten for inner in river for flatten in inner])
 pname=([flatten for inner in pname for flatten in inner])
 xlist=([flatten for inner in xlist for flatten in inner])
 ylist=([flatten for inner in ylist for flatten in inner])
-
+EGM08=([flatten for inner in EGM08 for flatten in inner])
+EGM96=([flatten for inner in EGM96 for flatten in inner])
 
 pnum=len(pname)
 #print len(river),pnum,pname,river
@@ -208,45 +213,45 @@ for day in np.arange(start,last):
     dd='%02d' % (target_dt.day)
     print yyyy,mm,dd
 
-    fname="../sat/mesh_day%02d.bin"%(SWOT_day(yyyy,mm,dd))
-    mesh_in=np.fromfile(fname,np.float32).reshape([640,1440])
-    mesh=(mesh_in>=10)*(mesh_in<=60)
-    meshP=mesh-1000*(mesh<0.1)
-
-    # make org
-    fname=assim_out+"/xa_m/true/"+yyyy+mm+dd+"_xam.bin"
-    #fname="../CaMa_out/"+yyyy+mm+dd+"T000/sfcelv"+yyyy+".bin"
-    orgfile=np.fromfile(fname,np.float32).reshape([720,1440])
-
-    fname=pm.CaMa_dir()+"/map/glb_15min/rivhgt.bin"
-    bathyfile=np.fromfile(fname,np.float32).reshape([720,1440])
-
-    fname=assim_out+"/mean_sfcelv/meansfcelvT000.bin"
-    mean_true=np.fromfile(fname,np.float32).reshape([720,1440])
-
-    org_frag=[]
-    bathy_frag=[]
-    ele_frag=[]
-    m_sf_frag=[]
-    for point in np.arange(pnum):
-        xpoint=xlist[point]
-        ypoint=ylist[point]
-        org_frag.append(orgfile[ypoint,xpoint]-mean_true[ypoint,xpoint])
-        bathy_frag.append(elevtn[ypoint,xpoint] -bathyfile[ypoint,xpoint])
-        ele_frag.append(elevtn[ypoint,xpoint])
-        m_sf_frag.append(mean_true[ypoint,xpoint])
-
-        #---SWOT--
-        if meshP[ypoint-40,xpoint] >= 1:
-          if point not in swt.keys():
-            swt[point] = [day]
-          else:
-            swt[point].append(day)
-
-    org.append(org_frag)
-    bathy.append(bathy_frag)
-    ele.append(ele_frag)
-    m_sf.append(m_sf_frag)
+#    fname="../sat/mesh_day%02d.bin"%(SWOT_day(yyyy,mm,dd))
+#    mesh_in=np.fromfile(fname,np.float32).reshape([640,1440])
+#    mesh=(mesh_in>=10)*(mesh_in<=60)
+#    meshP=mesh-1000*(mesh<0.1)
+#
+#    # make org
+#    fname=assim_out+"/xa_m/true/"+yyyy+mm+dd+"_xam.bin"
+#    #fname="../CaMa_out/"+yyyy+mm+dd+"T000/sfcelv"+yyyy+".bin"
+#    orgfile=np.fromfile(fname,np.float32).reshape([720,1440])
+#
+#    fname=pm.CaMa_dir()+"/map/glb_15min/rivhgt.bin"
+#    bathyfile=np.fromfile(fname,np.float32).reshape([720,1440])
+#
+#    fname=assim_out+"/mean_sfcelv/meansfcelvT000.bin"
+#    mean_true=np.fromfile(fname,np.float32).reshape([720,1440])
+#
+#    org_frag=[]
+#    bathy_frag=[]
+#    ele_frag=[]
+#    m_sf_frag=[]
+#    for point in np.arange(pnum):
+#        xpoint=xlist[point]
+#        ypoint=ylist[point]
+#        org_frag.append(orgfile[ypoint,xpoint]-mean_true[ypoint,xpoint])
+#        bathy_frag.append(elevtn[ypoint,xpoint] -bathyfile[ypoint,xpoint])
+#        ele_frag.append(elevtn[ypoint,xpoint])
+#        m_sf_frag.append(mean_true[ypoint,xpoint])
+#
+#        #---SWOT--
+#        if meshP[ypoint-40,xpoint] >= 1:
+#          if point not in swt.keys():
+#            swt[point] = [day]
+#          else:
+#            swt[point].append(day)
+#
+#    org.append(org_frag)
+#    bathy.append(bathy_frag)
+#    ele.append(ele_frag)
+#    m_sf.append(m_sf_frag)
 
     # make asm and opn
     opn_ens=[]
@@ -278,8 +283,8 @@ for day in np.arange(start,last):
         for point in np.arange(pnum):
             xpoint=xlist[point]
             ypoint=ylist[point]
-            opn_frag.append(opnfile[ypoint,xpoint]-mean_corr[ypoint,xpoint])
-            asm_frag.append(asmfile[ypoint,xpoint]-mean_corr[ypoint,xpoint])
+            opn_frag.append(opnfile[ypoint,xpoint]-elevtn[ypoint,xpoint])
+            asm_frag.append(asmfile[ypoint,xpoint]-elevtn[ypoint,xpoint])
             hgt_frag.append(rhgtfile[ypoint,xpoint])
             #print asmfile[ypoint,xpoint],elevtn[ypoint,xpoint] - rhgtfile[ypoint,xpoint],rhgtfile[ypoint,xpoint]
             em_sf_frag.append(mean_corr[ypoint,xpoint])
@@ -326,7 +331,7 @@ print 'making figure'
 #for point in np.arange(pnum):
 def make_fig(point):
     plt.close()
-
+    labels=["HydroWeb","corrupted","assimilated"]
 #    print org[:,point]
 #    print "----------------"
 #    print np.mean(asm[:,:,point],axis=1)
@@ -336,7 +341,11 @@ def make_fig(point):
 
     fig, ax1 = plt.subplots()
     #ax1.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7,zorder=101,marker = "o",markevery=swt[point])
-    ax1.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7,zorder=101)
+    time,org=hweb.HydroWeb_WSE(pname[point],year,year)
+    alti=hweb.altimetry(pname[point]) - EGM08[point] + EGM96[point]
+    data=np.array(org)-np.array(EGM08[point])+np.array(EGM96[point]) - alti
+    lines=[ax1.plot(time,data,label="obs",marker="o",color="black",linewidth=0.0,zorder=101)[0]]
+#    ax1.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7,zorder=101)
 #    ax1.plot(np.arange(start,last),m_sf[:,point],label="mean sfcelv",color="black",linewidth=0.7,linestyle="--",zorder=107)
 #    plt.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7)
 
@@ -346,8 +355,8 @@ def make_fig(point):
 #        ax1.plot(np.arange(start,last),em_sf[:,num,point],label="mean sfcelv",color="blue",linewidth=0.3,linestyle="--",alpha=0.5,zorder=103)
 #        plt.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.3,alpha=0.5)
 #        plt.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.3,alpha=0.5)
-    ax1.plot(np.arange(start,last),np.mean(opn[:,:,point],axis=1),label="corrupted",color="blue",linewidth=0.8,alpha=0.8,zorder=102)
-    ax1.plot(np.arange(start,last),np.mean(asm[:,:,point],axis=1),label="assimilated",color="red",linewidth=0.8,alpha=0.8,zorder=103)
+    lines.append(ax1.plot(np.arange(start,last),np.mean(opn[:,:,point],axis=1),label="corrupted",color="blue",linewidth=0.8,alpha=0.8,zorder=102)[0])
+    lines.append(ax1.plot(np.arange(start,last),np.mean(asm[:,:,point],axis=1),label="assimilated",color="red",linewidth=0.8,alpha=0.8,zorder=103)[0])
 #    ax1.plot(np.arange(start,last),np.mean(em_sf[:,:,point],axis=1),label="mean sfelv",color="blue",linewidth=0.5,linestyle="--",alpha=0.5,zorder=103)
 #    plt.ylim(ymin=)
     # Make the y-axis label, ticks and tick labels match the line color.
@@ -357,30 +366,31 @@ def make_fig(point):
     ax1.tick_params('y', colors='k')
     xxlist=np.linspace(15,N-15,int(N/30))
     xxlab=[calendar.month_name[i][:3] for i in range(1,13)]
-    #ax1.set_xticks(xxlist)
-    #ax1.set_xticklabels(xxlab,fontsize=10)
+    ax1.set_xticks(xxlist)
+    ax1.set_xticklabels(xxlab,fontsize=10)
 
-    ax2 = ax1.twinx()
-    aiv = stat.AI(asm[:,:,point],opn[:,:,point],org[:,point])
-    aivn,error= stat.AI_new(asm[:,:,point],opn[:,:,point],org[:,point])#[0]
-    fmax = np.finfo(np.float32).max
-    aivn[aivn>fmax]=0
-    aivn[aivn<-fmax]=0
-    print np.mean(aivn)
-    #--
-    pBias,pB_c = stat.pBias(asm[:,:,point],opn[:,:,point],org[:,point])
-    ai_mean = np.mean(ma.masked_less_equal(aivn,0.0)) #np.nanmean(ma.masked_less_equal(aivn,0.0))
-    mai = "meanAI:%1.2f"%(ai_mean)
-    pB  = "pBIAS:%1.1f%%"%(pBias)
-    print  mai # pB, "pB_c", pB_c, "%"
-    #pB  = pB + r'{1.1f}\%'.format(pBias)
-    ax1.text(0.02,0.9,mai,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
-    ax1.text(0.02,0.8,pB,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
-#    ax2.plot(np.arange(start,last),aiv,color="green",zorder=104,marker = "o",alpha=0.3, markevery=swt[point])
-    ax2.plot(np.arange(start,last),ma.masked_less_equal(aivn,1.0e-20),color="green",zorder=104,marker = "o", alpha=0.5,linewidth=0.5,markevery=swt[point])
-    ax2.set_ylabel('AI', color='green')
-    ax2.tick_params('y', colors='green')
-    ax2.set_ylim(ymin=0.,ymax=1.)
+#    ax2 = ax1.twinx()
+#    aiv = stat.AI(asm[:,:,point],opn[:,:,point],org[:,point])
+#    aivn,error= stat.AI_new(asm[:,:,point],opn[:,:,point],org[:,point])#[0]
+#    fmax = np.finfo(np.float32).max
+#    aivn[aivn>fmax]=0
+#    aivn[aivn<-fmax]=0
+#    print np.mean(aivn)
+#    #--
+#    pBias,pB_c = stat.pBias(asm[:,:,point],opn[:,:,point],org[:,point])
+#    ai_mean = np.mean(ma.masked_less_equal(aivn,0.0)) #np.nanmean(ma.masked_less_equal(aivn,0.0))
+#    mai = "meanAI:%1.2f"%(ai_mean)
+#    pB  = "pBIAS:%1.1f%%"%(pBias)
+#    print  mai # pB, "pB_c", pB_c, "%"
+#    #pB  = pB + r'{1.1f}\%'.format(pBias)
+#    ax1.text(0.02,0.9,mai,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+#    ax1.text(0.02,0.8,pB,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+##    ax2.plot(np.arange(start,last),aiv,color="green",zorder=104,marker = "o",alpha=0.3, markevery=swt[point])
+#    ax2.plot(np.arange(start,last),ma.masked_less_equal(aivn,1.0e-20),color="green",zorder=104,marker = "o", alpha=0.5,linewidth=0.5,markevery=swt[point])
+#    ax2.set_ylabel('AI', color='green')
+#    ax2.tick_params('y', colors='green')
+#    ax2.set_ylim(ymin=0.,ymax=1.)
+    fig.legend(lines,labels,ncol=1)
     print 'save',river[point]
     plt.savefig(assim_out+"/fig/anomaly/"+river[point]+"/"+pname[point]+".png",dpi=300)
     return 0

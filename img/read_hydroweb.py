@@ -11,7 +11,7 @@ def hydroweb_river_name(mapname="glb_15min"):
     #--
     river=[]
     #--
-    f=open(fname,"r")
+    f=open(hydroweb,"r")
     lines=f.readlines()
     for line in lines[1::]:
         line    = filter(None,re.split(" ",line))
@@ -115,3 +115,16 @@ def HydroWeb_WSE(station,syear,eyear,smon=1,emon=12,sday=1,eday=31):
         time.append(lag)
     return time, data
 #####################################
+def altimetry(name,mapname="glb_15min"):
+    # directory
+    hydroweb="/cluster/data6/menaka/HydroWeb/HydroWeb_alloc_"+mapname+".txt"
+    #--
+    f=open(hydroweb,"r")
+    lines=f.readlines()
+    for line in lines[1::]:
+        line    = filter(None,re.split(" ",line))
+        station = line[1]
+        if station==name:
+            alti= float(line[6])
+    return alti
+################################
