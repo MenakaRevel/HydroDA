@@ -160,8 +160,8 @@ def DA_dir():
     # where src, dat, sat, out exsits
 
 def patch_dir():
-    return "/cluster/data6/menaka/covariance/local_patch"
-    #return "/cluster/data6/menaka/covariance/local_patchMS"
+    #return "/cluster/data6/menaka/covariance/local_patch"
+    return "/cluster/data6/menaka/covariance/local_patchMS"
 
 def patch_id():
     return "0.60"
