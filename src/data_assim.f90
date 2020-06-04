@@ -405,8 +405,8 @@ do num=1,ens_num
 end do
 
 ! make observation anomaly
-altitude=altitude * (altitude/=-9999.0)
-obs=obs-altitude
+!altitude=altitude * (altitude/=-9999.0)
+!obs=obs-altitude
 
 ! read true WSE
 !allocate(globaltrue(lonpx,latpx))
@@ -554,8 +554,9 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
             i_m=xlist(i)
             j_m=ylist(i)
             if (obs(i_m,j_m)/=-9999.0) then
+                !print*, obs(i_m,j_m),altitude(i_m,j_m)
                 local_sat(i)=1
-                xt(i)=obs(i_m,j_m)
+                xt(i)=obs(i_m,j_m)-altitude(i_m,j_m)
                 local_err(i)=obs_err(i_m,j_m)
             end if
             !! get the VS for (i_m,j_m)
