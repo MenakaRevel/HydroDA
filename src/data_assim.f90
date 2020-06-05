@@ -400,9 +400,9 @@ end do
 !globalx=globalx-meanglobalx
 
 ! make anomaly
-do num=1,ens_num
-    globalx(:,:,num)=globalx(:,:,num)-elevtn(:,:)
-end do
+!do num=1,ens_num
+!    globalx(:,:,num)=globalx(:,:,num)-elevtn(:,:)
+!end do
 
 ! make observation anomaly
 !altitude=altitude * (altitude/=-9999.0)
@@ -558,6 +558,10 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
                 local_sat(i)=1
                 xt(i)=obs(i_m,j_m)-altitude(i_m,j_m)
                 local_err(i)=obs_err(i_m,j_m)
+            else
+                local_sat(i)=-9999
+                xt(i)=-9999.0
+                local_err(i)=-9999.0
             end if
             !! get the VS for (i_m,j_m)
             !call get_virtualstation(i_m,j_m,yyyymmdd,10.0,hydrowebdir,mapname,station,wse,std,flag)
@@ -583,7 +587,7 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
         do i=1,countnum
             i_m=xlist(i)
             j_m=ylist(i)
-            xf(i,:)=globalx(i_m,j_m,:)
+            xf(i,:)=globalx(i_m,j_m,:) - elevtn(i_m,j_m)
         end do
 
         ! deallocate variables of making observation and dimension related
@@ -620,8 +624,8 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
 
         ! number observations
         ovs=sum(local_obs)
-        !write(*,*) ovs
-        !write(*,*)xt
+        write(*,*) ovs
+        write(*,*)xt
         !write(*,*) local_obs
         if(ovs>0)then
             ! observation available
