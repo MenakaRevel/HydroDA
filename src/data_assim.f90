@@ -749,8 +749,10 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
         ! Eigon value decomposition
         ! Diagonalizate VDVT to calculate inverse matrix
         !call ssyevx("V","A","U",ens_num,VDVT,ens_num,1e-5,1e5,1,2,1.2e-38*2.,m,la_p,U_p,ens_num,work,1000,iwork,ifail,info)
-        call ssyevx("V","A","U",ens_num,VDVT,ens_num,-1e20,1e20,1,ens_num,-1.0,m,la_p,U_p,ens_num,work,1000,iwork,ifail,info)
+        !call ssyevx("V","A","U",ens_num,VDVT,ens_num,-1e20,1e20,1,ens_num,-1.0,m,la_p,U_p,ens_num,work,1000,iwork,ifail,info)
+        !call ssyevx("V","I","U",ens_num,VDVT,ens_num,-1e20,1e20,1,ens_num,-1.0,m,la_p,U_p,ens_num,work,1000,iwork,ifail,info)
         !call ssyevr("V","A","U",ens_num,VDVT,ens_num,-1e-20,1e20,1,ens_num,2.0*2.3e-38,m,la_p,U_p,ens_num,isuppz,work,1000,iwork,1000,info)
+        call ssyevr("V","A","U",ens_num,VDVT,ens_num,-1e20,1e20,1,ens_num,-1.0,m,la_p,U_p,ens_num,isuppz,work,1000,iwork,1000,info)
         !write(78,*) "m",m
         !write(78,*) "ovs:",ovs
         !write(78,*) "la_p",la_p
@@ -762,6 +764,7 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
             errflg=2
             !write(78,*) "~~~ m<ens_num ~~~ m=",m
             write(*,*) "~~~ m<ens_num ~~~ m=",m,info
+            write(*,*) real(ens_num-1.)*UNI/rho+HETRHE
             !xa=xf
             write(36,*) lat,lon,"error",errflg,"info",info
             goto 9999 
