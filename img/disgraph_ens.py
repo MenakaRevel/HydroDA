@@ -26,9 +26,10 @@ import cal_stat as stat
 
 #argvs = sys.argv
 
-experiment="E2O_HydroWeb2"
+experiment="E2O_HydroWeb4"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
-assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
+#assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
+assim_out=pm.DA_dir()+"/out/"+experiment
 print assim_out
 #assim_out="assim_out_E2O_wmc"
 #assim_out="assim_out_E2O_womc_0"
@@ -63,8 +64,8 @@ def mk_dir(sdir):
   except:
     pass
 #----
-mk_dir(assim_out+"/fig")
-mk_dir(assim_out+"/fig/disgraph")
+mk_dir(assim_out+"/figures")
+mk_dir(assim_out+"/figures/disgraph")
 #----
 year=2004#1991
 month=1
@@ -102,7 +103,7 @@ rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZON","MEKO
 #    gid=grdc.get_id(station)
 #    if gid== -9999:
 #      continue
-#    path = "../"+assim_out+"/fig/disgraph/%s"%(rivername)
+#    path = "../"+assim_out+"/figures/disgraph/%s"%(rivername)
 #    #print path
 #    mk_dir(path)
 #    ix, iy = grdc.get_loc_v394(gid)
@@ -112,7 +113,7 @@ rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZON","MEKO
 #    xlist.append(ix)
 #    ylist.append(iy)
 for rivername in rivernames:
-  path = assim_out+"/fig/disgraph/%s"%(rivername)
+  path = assim_out+"/figures/disgraph/%s"%(rivername)
   print path
   mk_dir(path)
   #station_loc,x_list,y_list = grdc.get_grdc_loc(rivername,"b")
@@ -402,7 +403,7 @@ def make_fig(point):
 #    ax2.set_xlim(xmin=0,xmax=last+1)
 #    print swt[point]
     print 'save',river[point],pname[point]
-    plt.savefig(assim_out+"/fig/disgraph/"+river[point]+"/"+pname[point]+".png",dpi=500)
+    plt.savefig(assim_out+"/figures/disgraph/"+river[point]+"/"+pname[point]+".png",dpi=500)
     return 0
 
 

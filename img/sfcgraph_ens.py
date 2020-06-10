@@ -26,9 +26,10 @@ import cal_stat as stat
 
 #argvs = sys.argv
 
-experiment="E2O_HydroWeb2"
+experiment="E2O_HydroWeb4"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
-assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
+#assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
+assim_out=pm.DA_dir()+"/out/"+experiment
 print assim_out
 
 #assim_out="assim_out_E2O_womc"
@@ -62,8 +63,8 @@ def mk_dir(sdir):
   except:
     pass
 #----
-mk_dir(assim_out+"/fig")
-mk_dir(assim_out+"/fig/sfcelv")
+mk_dir(assim_out+"/figures")
+mk_dir(assim_out+"/figures/sfcelv")
 #---
 year=2004
 month=1
@@ -103,7 +104,7 @@ EGM96=[]
 #--
 rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZONAS","MEKONG","IRRAWADDY","VOLGA", "NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
 for rivername in rivernames:
-  path = assim_out+"/fig/sfcelv/%s"%(rivername)
+  path = assim_out+"/figures/sfcelv/%s"%(rivername)
   print path
   mk_dir(path)
   #station_loc,x_list,y_list = grdc.get_grdc_loc(rivername,"b")
@@ -392,7 +393,7 @@ def make_fig(point):
 #    ax2.set_ylim(ymin=0.,ymax=1.)
     fig.legend(lines,labels,ncol=1)
     print 'save',river[point],re.split("_",pname[point])[2]+"_"+re.split("_",pname[point])[3]
-    plt.savefig(assim_out+"/fig/sfcelv/"+river[point]+"/"+re.split("_",pname[point])[2]+"_"+re.split("_",pname[point])[3]+".png",dpi=300)
+    plt.savefig(assim_out+"/figures/sfcelv/"+river[point]+"/"+re.split("_",pname[point])[2]+"_"+re.split("_",pname[point])[3]+".png",dpi=300)
     return 0
 #
 para_flag=1

@@ -25,9 +25,10 @@ import cal_stat as stat
 
 #argvs = sys.argv
 
-experiment="E2O_HydroWeb2"
+experiment="E2O_HydroWeb4"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
-assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
+#assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
+assim_out=pm.DA_dir()+"/out/"+experiment
 print assim_out
 
 #assim_out="assim_out_E2O_womc"
@@ -61,8 +62,8 @@ def mk_dir(sdir):
   except:
     pass
 #----
-mk_dir(assim_out+"/fig")
-mk_dir(assim_out+"/fig/anomaly")
+mk_dir(assim_out+"/figures")
+mk_dir(assim_out+"/figures/anomaly")
 #---
 year=2004
 month=1
@@ -100,9 +101,9 @@ river=[]
 EGM08=[]
 EGM96=[]
 #--
-rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZON","MEKONG","IRRAWADDY","VOLGA", "NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
+rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZONAS","MEKONG","IRRAWADDY","VOLGA", "NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
 for rivername in rivernames:
-  path = assim_out+"/fig/anomaly/%s"%(rivername)
+  path = assim_out+"/figures/anomaly/%s"%(rivername)
   print path
   mk_dir(path)
   station_loc,x_list,y_list,egm08,egm96 =hweb.get_hydroweb_loc(rivername)
@@ -392,7 +393,7 @@ def make_fig(point):
 #    ax2.set_ylim(ymin=0.,ymax=1.)
     fig.legend(lines,labels,ncol=1)
     print 'save',river[point]
-    plt.savefig(assim_out+"/fig/anomaly/"+river[point]+"/"+pname[point]+".png",dpi=300)
+    plt.savefig(assim_out+"/figures/anomaly/"+river[point]+"/"+pname[point]+".png",dpi=300)
     return 0
 #
 para_flag=1
