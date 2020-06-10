@@ -338,6 +338,9 @@ def assim_at_fort(yyyy,mm,dd,day): #previous --> used
 ###########################
 def data_assim(yyyy,mm,dd,day): # new data assimilation function (2020/05/18)
     #print '%02d'%(nxt_day.day)
+    parallels="%d"%(pm.para_nums()*pm.cpu_nums())
+    os.environ['OMP_NUM_THREADS']=parallels
+    #os.system("export $OMP_NUM_THREADS=%d"%(pm.para_nums()*pm.cpu_nums()))
     exp_dir=pm.DA_dir()+"/out/"+pm.experiment()
     print pm.ens_mem()
     thisday=datetime.date(int(yyyy),int(mm),int(dd))

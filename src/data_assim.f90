@@ -68,7 +68,8 @@ integer,allocatable             :: xlist(:),ylist(:)
 integer(kind=4)                 :: target_pixel !,fn
 character(len=4)                :: llon,llat
 real,allocatable                :: obs(:,:),obs_err(:,:),altitude(:,:)!, obserrrand(:,:)
-
+real                            :: pslamch
+external pslamch
 write(*,*) "data_assim"
 call getarg(1,buf)
 read(buf,*) assimN
@@ -556,7 +557,7 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
             if (obs(i_m,j_m)/=-9999.0) then
                 !print*, obs(i_m,j_m),altitude(i_m,j_m)
                 local_sat(i)=1
-                xt(i)=obs(i_m,j_m)-altitude(i_m,j_m)
+                xt(i)=obs(i_m,j_m) - altitude(i_m,j_m) + elevtn(i_m,j_m)
                 local_err(i)=obs_err(i_m,j_m)
             else
                 local_sat(i)=-9999
@@ -587,7 +588,7 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
         do i=1,countnum
             i_m=xlist(i)
             j_m=ylist(i)
-            xf(i,:)=globalx(i_m,j_m,:) - elevtn(i_m,j_m)
+            xf(i,:)=globalx(i_m,j_m,:)
         end do
 
         ! deallocate variables of making observation and dimension related
@@ -624,8 +625,8 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
 
         ! number observations
         ovs=sum(local_obs)
-        write(*,*) ovs
-        write(*,*)xt
+        !write(*,*) ovs
+        !write(*,*)xt
         !write(*,*) local_obs
         if(ovs>0)then
             ! observation available
@@ -747,9 +748,9 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
 
         ! Eigon value decomposition
         ! Diagonalizate VDVT to calculate inverse matrix
-        call ssyevx("V","A","U",ens_num,VDVT,ens_num,1e-5,1e5,1,2,1.2e-38*2.,m,la_p,U_p,ens_num,work,1000,iwork,ifail,info)
-
-        !call ssyevr("V","A","U",ens_num,VDVT,ens_num,1e-5,1e5,1,2,1.2e-38*2.,m,la_p,U_p,ens_num,isuppz,work,1000,iwork,1000,info)
+        !call ssyevx("V","A","U",ens_num,VDVT,ens_num,1e-5,1e5,1,2,1.2e-38*2.,m,la_p,U_p,ens_num,work,1000,iwork,ifail,info)
+        call ssyevx("V","A","U",ens_num,VDVT,ens_num,-1e20,1e20,1,ens_num,-1.0,m,la_p,U_p,ens_num,work,1000,iwork,ifail,info)
+        !call ssyevr("V","A","U",ens_num,VDVT,ens_num,-1e-20,1e20,1,ens_num,2.0*2.3e-38,m,la_p,U_p,ens_num,isuppz,work,1000,iwork,1000,info)
         !write(78,*) "m",m
         !write(78,*) "ovs:",ovs
         !write(78,*) "la_p",la_p
@@ -760,7 +761,7 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
         if (m<ens_num)then
             errflg=2
             !write(78,*) "~~~ m<ens_num ~~~ m=",m
-            write(*,*) "~~~ m<ens_num ~~~ m=",m,rho
+            write(*,*) "~~~ m<ens_num ~~~ m=",m,info
             !xa=xf
             write(36,*) lat,lon,"error",errflg,"info",info
             goto 9999 
@@ -805,7 +806,7 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
 
             Wvec = matmul(matmul(matmul(Pa,TRANSPOSE(matmul(H,Ef))),R),yo-matmul(H,xf_m))
             !write(78,*) "yo-Hxt",yo-matmul(H,xf_m)
-
+            write(*,*) "yo-Hxt",yo,matmul(H,xf_m),yo-matmul(H,xf_m)
             do i = 1,ens_num
                 W(:,i) = Wvec + sqrt(ens_num-1.)*Pasqr(:,i)
             end do
@@ -945,7 +946,8 @@ fname=trim(adjustl(expdir))//"/logout/usedwhat_"//yyyymmdd//".log"
 ! make ensemble output (WSE)
 allocate(ens_xa(lonpx,latpx,ens_num))
 do num=1,ens_num
-    ens_xa(:,:,num) = global_xa(:,:,num)*(global_null) + globalx(:,:,num)*(1-global_null) + elevtn(:,:) !+ meanglobalx(:,:,num) !+ (sum(meanglobalx(:,:,:),dim=3)/real(ens_num)) !
+    ens_xa(:,:,num) = global_xa(:,:,num)*(global_null) + globalx(:,:,num)*(1-global_null)! + elevtn(:,:)
+    !+ meanglobalx(:,:,num) !+ (sum(meanglobalx(:,:,:),dim=3)/real(ens_num)) !
 end do
 
 !fname="./logout/OutSfcLog_"//yyyymmdd//".log"
