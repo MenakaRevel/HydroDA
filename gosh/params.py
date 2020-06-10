@@ -57,23 +57,27 @@ def diststd(num):
     # noise to make runoff input to scatter ensembles
 
 def assimS():
-    return -75
+    return -20
+    #return -75
     # data Assimilation's Region (South Edge at latitude)
     # *note: should be larger or equal to -80
 
 def assimN():
-    return 75
+    return 5
+    #return 75
     # data Assimilation's Region (North Edge at latitude)
     # *note: should be smaller or equal to 80
 
 def assimW():
-    return -170
+    return -80
+    #return -170
     #return -68.25 # use this for disabling west side of the Amazon basin's observation
     # data Assimilation's Region (West Edge at latitude)
     # *note: should be larger or equal to -170
 
 def assimE():
-    return 170
+    return -45
+    #return 170
     # data Assimilation's Region (East Edge at latitude)
     # *note: should be smaller or equal to 170
 
@@ -160,8 +164,8 @@ def DA_dir():
     # where src, dat, sat, out exsits
 
 def patch_dir():
-    #return "/cluster/data6/menaka/covariance/local_patch"
-    return "/cluster/data6/menaka/covariance/local_patchMS"
+    return "/cluster/data6/menaka/covariance/local_patch"
+    #return "/cluster/data6/menaka/covariance/local_patchMS"
 
 def patch_id():
     return "0.60"
