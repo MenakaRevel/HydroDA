@@ -5,6 +5,8 @@ dat
 
 #params file at out folder
 out/*/params.py
+*/img/params.py
+*/sat/params.py
 
 #binary files
 *.one
@@ -13,6 +15,7 @@ out/*/params.py
 #fortan excutbles
 make_restart
 data_assim
+calc_stat
 
 #.pyc files
 *.pyc
@@ -24,6 +27,12 @@ HydroDA.o*
 #figures
 *.png
 *.jpg
+
+#text files
+*.txt
+
+#log files
+*.log
 
 #temporary opened files
 *.swp
