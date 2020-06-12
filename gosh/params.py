@@ -164,8 +164,9 @@ def DA_dir():
     # where src, dat, sat, out exsits
 
 def patch_dir():
-    return "/cluster/data6/menaka/covariance/local_patch"
+    #return "/cluster/data6/menaka/covariance/local_patch"
     #return "/cluster/data6/menaka/covariance/local_patchMS"
+    return "/cluster/data6/menaka/covariance/local_patch_0.80"
 
 def patch_id():
     return "0.60"
@@ -195,7 +196,7 @@ def ovs_err():
     # hope to be below 0.10
 
 def thersold():
-    return 0.60 # not needed for ERA20CM
+    return 0.60 
     # thersold to define the local patch
 
 def initial_infl():
