@@ -25,7 +25,7 @@ import cal_stat as stat
 
 #argvs = sys.argv
 
-experiment="E2O_HydroWeb4"
+experiment="E2O_HydroWeb5"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 assim_out=pm.DA_dir()+"/out/"+experiment
@@ -262,19 +262,19 @@ for day in np.arange(start,last):
     for num in np.arange(1,int(pm.ens_mem())+1):
         numch='%03d'%num
 
-        fname=assim_out+"/ens_xa/open/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
+        fname=assim_out+"/assim_out/ens_xa/open/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
         #fname="../CaMa_out/"+yyyy+mm+dd+"C"+numch+"/sfcelv"+yyyy+".bin"
         #fname="../"+assim_out+"/ens_xa/open/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
         opnfile=np.fromfile(fname,np.float32).reshape([720,1440])
 
-        fname=assim_out+"/ens_xa/assim/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
+        fname=assim_out+"/assim_out/ens_xa/assim/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
         asmfile=np.fromfile(fname,np.float32).reshape([720,1440])
 
 #        fname="../assim_out/rivhgt/assim/rivhgt"+yyyy+mm+dd+"_"+numch+"A.bin"
         #fname="../CaMa_out/"+yyyy+mm+dd+"A"+numch+"/sfcelv"+yyyy+".bin"
         rhgtfile=np.fromfile(fname,np.float32).reshape([720,1440])
 
-        fname=assim_out+"/mean_sfcelv/meansfcelvC"+numch+".bin"
+        fname=assim_out+"/assim_out/mean_sfcelv/meansfcelvC"+numch+".bin"
         mean_corr=np.fromfile(fname,np.float32).reshape([720,1440])
 
         opn_frag=[]
@@ -391,6 +391,7 @@ def make_fig(point):
 #    ax2.set_ylabel('AI', color='green')
 #    ax2.tick_params('y', colors='green')
 #    ax2.set_ylim(ymin=0.,ymax=1.)
+    plt.legend(lines,labels,ncol=1,loc='upper right') #, bbox_to_anchor=(1.0, 1.0),transform=ax1.transAxes)
     fig.legend(lines,labels,ncol=1)
     print 'save',river[point]
     plt.savefig(assim_out+"/figures/anomaly/"+river[point]+"/"+pname[point]+".png",dpi=300)

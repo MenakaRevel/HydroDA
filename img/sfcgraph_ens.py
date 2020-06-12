@@ -26,7 +26,7 @@ import cal_stat as stat
 
 #argvs = sys.argv
 
-experiment="E2O_HydroWeb4"
+experiment="E2O_HydroWeb5"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 assim_out=pm.DA_dir()+"/out/"+experiment
@@ -102,7 +102,8 @@ river=[]
 EGM08=[]
 EGM96=[]
 #--
-rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZONAS","MEKONG","IRRAWADDY","VOLGA", "NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
+#rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZONAS","MEKONG","IRRAWADDY","VOLGA", "NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
+rivernames  = ["AMAZONAS"]
 for rivername in rivernames:
   path = assim_out+"/figures/sfcelv/%s"%(rivername)
   print path
@@ -263,19 +264,19 @@ for day in np.arange(start,last):
     for num in np.arange(1,int(pm.ens_mem())+1):
         numch='%03d'%num
 
-        fname=assim_out+"/ens_xa/open/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
+        fname=assim_out+"/assim_out/ens_xa/open/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
         #fname="../CaMa_out/"+yyyy+mm+dd+"C"+numch+"/sfcelv"+yyyy+".bin"
         #fname="../"+assim_out+"/ens_xa/open/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
         opnfile=np.fromfile(fname,np.float32).reshape([720,1440])
 
-        fname=assim_out+"/ens_xa/assim/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
+        fname=assim_out+"/assim_out/ens_xa/assim/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
         asmfile=np.fromfile(fname,np.float32).reshape([720,1440])
 
 #        fname="../assim_out/rivhgt/assim/rivhgt"+yyyy+mm+dd+"_"+numch+"A.bin"
         #fname="../CaMa_out/"+yyyy+mm+dd+"A"+numch+"/sfcelv"+yyyy+".bin"
         rhgtfile=np.fromfile(fname,np.float32).reshape([720,1440])
 
-        fname=assim_out+"/mean_sfcelv/meansfcelvC"+numch+".bin"
+        fname=assim_out+"/assim_out/mean_sfcelv/meansfcelvC"+numch+".bin"
         mean_corr=np.fromfile(fname,np.float32).reshape([720,1440])
 
         opn_frag=[]
@@ -345,6 +346,8 @@ def make_fig(point):
     #ax1.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7,zorder=101,marker = "o",markevery=swt[point])
     time,org=hweb.HydroWeb_WSE(pname[point],year,year)
     data=np.array(org)-np.array(EGM08[point])+np.array(EGM96[point])
+    alti=hweb.altimetry(pname[point]) - EGM08[point] + EGM96[point]
+    data=data-alti+elevtn[ylist[point],xlist[point]]
     lines=[ax1.plot(time,data,label="obs",marker="o",color="black",linewidth=0.0,zorder=101)[0]]
 #    ax1.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7,zorder=101)
 #    ax1.plot(np.arange(start,last),m_sf[:,point],label="mean sfcelv",color="black",linewidth=0.7,linestyle="--",zorder=107)
@@ -391,7 +394,8 @@ def make_fig(point):
 #    ax2.set_ylabel('AI', color='green')
 #    ax2.tick_params('y', colors='green')
 #    ax2.set_ylim(ymin=0.,ymax=1.)
-    fig.legend(lines,labels,ncol=1)
+    plt.legend(lines,labels,ncol=1,loc='upper right') #, bbox_to_anchor=(1.0, 1.0),transform=ax1.transAxes)
+#    fig.legend(lines,labels,ncol=1,loc='lower left', bbox_to_anchor=(1.0, 1.0))
     print 'save',river[point],re.split("_",pname[point])[2]+"_"+re.split("_",pname[point])[3]
     plt.savefig(assim_out+"/figures/sfcelv/"+river[point]+"/"+re.split("_",pname[point])[2]+"_"+re.split("_",pname[point])[3]+".png",dpi=300)
     return 0

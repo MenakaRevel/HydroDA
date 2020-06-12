@@ -26,7 +26,7 @@ import cal_stat as stat
 
 #argvs = sys.argv
 
-experiment="E2O_HydroWeb4"
+experiment="E2O_HydroWeb5"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 assim_out=pm.DA_dir()+"/out/"+experiment
@@ -92,7 +92,8 @@ xlist=[]
 ylist=[]
 river=[]
 #--
-rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZON","MEKONG","IRRAWADDY","VOLGA", "NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
+#rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZON","MEKONG","IRRAWADDY","VOLGA", "NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
+rivernames  = ["AMAZON"]
 #rivernames = grdc.grdc_river_name_v396()
 #rivernames = grdc.grdc_river_name()
 #for rivername in rivernames:
@@ -234,11 +235,11 @@ for day in np.arange(start,last):
     for num in np.arange(1,pm.ens_mem()+1):
         numch='%03d'%num
 
-        fname=assim_out+"/rivout/open/rivout"+yyyy+mm+dd+"_"+numch+".bin"
+        fname=assim_out+"/assim_out/rivout/open/rivout"+yyyy+mm+dd+"_"+numch+".bin"
         #fname="../CaMa_out/"+yyyy+mm+dd+"C"+numch+"/rivout"+yyyy+".bin"
         opnfile=np.fromfile(fname,np.float32).reshape([720,1440])
 
-        fname=assim_out+"/rivout/assim/rivout"+yyyy+mm+dd+"_"+numch+".bin"
+        fname=assim_out+"/assim_out/rivout/assim/rivout"+yyyy+mm+dd+"_"+numch+".bin"
         #fname="../CaMa_out/"+yyyy+mm+dd+"A"+numch+"/rivout"+yyyy+".bin"
         asmfile=np.fromfile(fname,np.float32).reshape([720,1440])
 
@@ -285,7 +286,8 @@ asm=np.array(asm,dtype=np.float32)
 #for point in np.arange(pnum):
 def make_fig(point):
     plt.close()
-
+    labels=["GRDC","corrupted","assimilated"]
+    #
     #print org[:,point]
     #for i in np.arange(start,last):
         #print opn[i,:,point]
@@ -301,7 +303,7 @@ def make_fig(point):
     fig, ax1 = plt.subplots()
     org=grdc.grdc_dis(staid[point],year,year)
     org=np.array(org)
-    ax1.plot(np.arange(start,last),ma.masked_less(org,0.0),label="GRDC",color="black",linewidth=0.7,zorder=101) #,marker = "o",markevery=swt[point])
+    lines=[ax1.plot(np.arange(start,last),ma.masked_less(org,0.0),label="GRDC",color="black",linewidth=0.7,zorder=101)[0]] #,marker = "o",markevery=swt[point])
 #    ax1.plot(np.arange(start,last),hgt[:,point],label="true",color="gray",linewidth=0.7,linestyle="--",zorder=101)
 #    plt.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7)
 
@@ -311,10 +313,9 @@ def make_fig(point):
 #        plt.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.3,alpha=0.5)
 #        plt.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.3,alpha=0.5)
     # draw mean of ensembles
-    ax1.plot(np.arange(start,last),np.mean(opn[:,:,point],axis=1),label="corrupted",color="blue",linewidth=0.8,alpha=1,zorder=104)
-    ax1.plot(np.arange(start,last),np.mean(asm[:,:,point],axis=1),label="assimilated",color="red",linewidth=0.8,alpha=1,zorder=106)
-
-#    plt.ylim(ymin=)
+    lines.append(ax1.plot(np.arange(start,last),np.mean(opn[:,:,point],axis=1),label="corrupted",color="blue",linewidth=0.8,alpha=1,zorder=104)[0])
+    lines.append(ax1.plot(np.arange(start,last),np.mean(asm[:,:,point],axis=1),label="assimilated",color="red",linewidth=0.8,alpha=1,zorder=106)[0])
+    #    plt.ylim(ymin=)
     # Make the y-axis label, ticks and tick labels match the line color.
     ax1.set_ylabel('discharge (m$^3$/s)', color='k')
     ax1.set_xlim(xmin=0,xmax=last+1)
@@ -402,6 +403,7 @@ def make_fig(point):
 #    ax2.set_ylim(ymin=0.,ymax=1.)
 #    ax2.set_xlim(xmin=0,xmax=last+1)
 #    print swt[point]
+    plt.legend(lines,labels,ncol=1,loc='upper right') #, bbox_to_anchor=(1.0, 1.0),transform=ax1.transAxes)
     print 'save',river[point],pname[point]
     plt.savefig(assim_out+"/figures/disgraph/"+river[point]+"/"+pname[point]+".png",dpi=500)
     return 0
