@@ -101,7 +101,8 @@ river=[]
 EGM08=[]
 EGM96=[]
 #--
-rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZONAS","MEKONG","IRRAWADDY","VOLGA", "NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
+#rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZONAS","MEKONG","IRRAWADDY","VOLGA", "NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
+rivernames  = ["AMAZONAS"]
 for rivername in rivernames:
   path = assim_out+"/figures/anomaly/%s"%(rivername)
   print path
@@ -392,7 +393,7 @@ def make_fig(point):
 #    ax2.tick_params('y', colors='green')
 #    ax2.set_ylim(ymin=0.,ymax=1.)
     plt.legend(lines,labels,ncol=1,loc='upper right') #, bbox_to_anchor=(1.0, 1.0),transform=ax1.transAxes)
-    fig.legend(lines,labels,ncol=1)
+    #fig.legend(lines,labels,ncol=1)
     print 'save',river[point]
     plt.savefig(assim_out+"/figures/anomaly/"+river[point]+"/"+pname[point]+".png",dpi=300)
     return 0
