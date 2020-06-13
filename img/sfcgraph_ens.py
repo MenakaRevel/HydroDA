@@ -26,7 +26,7 @@ import cal_stat as stat
 
 #argvs = sys.argv
 
-experiment="E2O_HydroWeb5"
+experiment="E2O_HydroWeb7"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 assim_out=pm.DA_dir()+"/out/"+experiment
@@ -94,6 +94,11 @@ rivhgt = np.fromfile(rivhgt,np.float32).reshape(720,1440)
 rivlen = np.fromfile(rivlen,np.float32).reshape(720,1440)
 elevtn = np.fromfile(elevtn,np.float32).reshape(720,1440)
 #----
+mean_sfcelv = pm.DA_dir()+"/dat/mean_sfcelv_1960-2013.bin"
+mean_sfcelv = np.fromfile(mean_sfcelv,np.float32).reshape(720,1440)
+#- mean obs HydroWeb
+#mean_obs = pm.DA_dir()+"/dat/mean_sfcelv_1960-2013.bin"
+#mean_obs = np.fromfile(mean_obs,np.float32).reshape(720,1440)
 
 pname=[]
 xlist=[]
@@ -346,8 +351,9 @@ def make_fig(point):
     #ax1.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7,zorder=101,marker = "o",markevery=swt[point])
     time,org=hweb.HydroWeb_WSE(pname[point],year,year)
     data=np.array(org)-np.array(EGM08[point])+np.array(EGM96[point])
-    alti=hweb.altimetry(pname[point]) - EGM08[point] + EGM96[point]
-    data=data-alti+elevtn[ylist[point],xlist[point]]
+    #alti=hweb.altimetry(pname[point]) - EGM08[point] + EGM96[point]
+    #data=data-alti+elevtn[ylist[point],xlist[point]]
+    data=data-np.mean(data)+mean_sfcelv[ylist[point],xlist[point]]
     lines=[ax1.plot(time,data,label="obs",marker="o",color="black",linewidth=0.0,zorder=101)[0]]
 #    ax1.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7,zorder=101)
 #    ax1.plot(np.arange(start,last),m_sf[:,point],label="mean sfcelv",color="black",linewidth=0.7,linestyle="--",zorder=107)
