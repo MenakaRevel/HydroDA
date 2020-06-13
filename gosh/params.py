@@ -160,7 +160,7 @@ def mapname():
 
 def DA_dir():
     return "/cluster/data6/menaka/HydroDA"
-    # directory od SWOTDA
+    # directory of HydroDA
     # where src, dat, sat, out exsits
 
 def patch_dir():

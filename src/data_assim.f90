@@ -384,14 +384,18 @@ end do
 allocate(meanglobaltrue(lonpx,latpx))
 meanglobaltrue=0
 !fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/meansfcelvT000.bin"
-fname=trim(adjustl(DAdir))//"/dat/mean_sfcelv_1960-2013.bin"
-open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
-if(ios==0)then
-    read(34,rec=1) meanglobaltrue
-else
-    write(*,*) "no true"
-end if
-close(34)
+!fname=trim(adjustl(DAdir))//"/dat/mean_sfcelv_1960-2013.bin"
+!open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+!if(ios==0)then
+!    read(34,rec=1) meanglobaltrue
+!else
+!    write(*,*) "no true"
+!end if
+!close(34)
+
+! update meanglobalture
+meanglobaltrue=(sum(meanglobalx(:,:,:),dim=3)/real(ens_num))
+
 
 ! read WSE from all model
 allocate(globalx(lonpx,latpx,ens_num))
