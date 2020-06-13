@@ -571,7 +571,7 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
                 local_sat(i)=1
                 !xt(i)=obs(i_m,j_m) - altitude(i_m,j_m) + elevtn(i_m,j_m)
                 xt(i)=obs(i_m,j_m) - mean_obs(i_m,j_m) + meanglobaltrue(i_m,j_m)
-                local_err(i)=obs_err(i_m,j_m)
+                local_err(i)=max(obs_err(i_m,j_m),0.30)
             else
                 local_sat(i)=-9999
                 xt(i)=-9999.0
