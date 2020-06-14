@@ -24,7 +24,7 @@ cd $HydroDA
 
 # experiment : edit the experiment name in here and params.py experiment()
 # before running run_mool.sh , please edit the nessary experimental settings in params.py
-EXP="E2O_HydroWeb8"
+EXP="E2O_HydroWeb9"
 #IFACTOR="1.08"
 
 mkdir $HydroDA"/out"

@@ -26,7 +26,7 @@ import cal_stat as stat
 
 #argvs = sys.argv
 
-experiment="E2O_HydroWeb7"
+experiment="E2O_HydroWeb8"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 assim_out=pm.DA_dir()+"/out/"+experiment
@@ -99,7 +99,15 @@ mean_sfcelv = np.fromfile(mean_sfcelv,np.float32).reshape(720,1440)
 #- mean obs HydroWeb
 #mean_obs = pm.DA_dir()+"/dat/mean_sfcelv_1960-2013.bin"
 #mean_obs = np.fromfile(mean_obs,np.float32).reshape(720,1440)
-
+#-------
+mean_sfcelvs=np.zeros([pm.ens_mem(),720,1440])
+for num in np.arange(1,int(pm.ens_mem())+1):
+    numch='%03d'%num
+    fname=assim_out+"/assim_out/mean_sfcelv/meansfcelvC"+numch+".bin"
+    mean_corr=np.fromfile(fname,np.float32).reshape([720,1440])
+    mean_sfcelvs[num-1]=mean_corr
+mean_sfcelv=np.mean(mean_sfcelvs,axis=0)
+#------
 pname=[]
 xlist=[]
 ylist=[]

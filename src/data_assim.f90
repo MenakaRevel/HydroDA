@@ -384,17 +384,17 @@ end do
 allocate(meanglobaltrue(lonpx,latpx))
 meanglobaltrue=0
 !fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/meansfcelvT000.bin"
-!fname=trim(adjustl(DAdir))//"/dat/mean_sfcelv_1960-2013.bin"
-!open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
-!if(ios==0)then
-!    read(34,rec=1) meanglobaltrue
-!else
-!    write(*,*) "no true"
-!end if
-!close(34)
+fname=trim(adjustl(DAdir))//"/dat/mean_sfcelv_1960-2013.bin"
+open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+if(ios==0)then
+    read(34,rec=1) meanglobaltrue
+else
+    write(*,*) "no true"
+end if
+close(34)
 
 ! update meanglobalture
-meanglobaltrue=(sum(meanglobalx(:,:,:),dim=3)/real(ens_num))
+!meanglobaltrue=(sum(meanglobalx(:,:,:),dim=3)/real(ens_num))
 
 
 ! read WSE from all model
@@ -574,7 +574,7 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
                 !print*, obs(i_m,j_m),altitude(i_m,j_m)
                 local_sat(i)=1
                 !xt(i)=obs(i_m,j_m) - altitude(i_m,j_m) + elevtn(i_m,j_m)
-                xt(i)=obs(i_m,j_m) - mean_obs(i_m,j_m) + meanglobaltrue(i_m,j_m)
+                xt(i)=obs(i_m,j_m) - mean_obs(i_m,j_m) !+ meanglobaltrue(i_m,j_m)
                 local_err(i)=max(obs_err(i_m,j_m),0.30)
             else
                 local_sat(i)=-9999
@@ -966,7 +966,8 @@ fname=trim(adjustl(expdir))//"/logout/usedwhat_"//yyyymmdd//".log"
 ! make ensemble output (WSE)
 allocate(ens_xa(lonpx,latpx,ens_num))
 do num=1,ens_num
-    ens_xa(:,:,num) = global_xa(:,:,num)*(global_null) + globalx(:,:,num)*(1-global_null)! + elevtn(:,:)
+    ens_xa(:,:,num) = global_xa(:,:,num)*(global_null) + globalx(:,:,num)*(1-global_null) + meanglobaltrue(:,:)
+    ! + elevtn(:,:)
     !+ meanglobalx(:,:,num) !+ (sum(meanglobalx(:,:,:),dim=3)/real(ens_num)) !
 end do
 
