@@ -12,7 +12,8 @@ real                            :: assimN,assimS,assimW,assimE,lat,lon
 !character(len=2)                :: swot_day
 !character(len=4)                :: patchid
 real,allocatable                :: global_xa(:,:,:) !swot_obs(:,:),
-integer(kind=4)                 :: lon_cent,lat_cent,patch_size,patch_side,i,j,k,countnum,patch_nums,countR
+integer(kind=4)                 :: lon_cent,lat_cent,patch_size,patch_side,i,j,k,patch_nums,countR
+integer(kind=4)                 :: patch_start,patch_end,countnumber,targetpixel
 !integer*4                       :: S_lon_cent,S_lat_cent
 integer,allocatable             :: local_obs(:),iwork(:),ifail(:),H(:,:)!,localx(:,:,:)
 real,allocatable                :: xf_m(:),xf(:,:),globalx(:,:,:),xa(:,:)!,H(:,:)!xa_m(:),,localx_line(:)
@@ -65,11 +66,11 @@ real,allocatable                :: local_sat(:),local_err(:)!,local_swot_line(:)
 !real,allocatable                :: local_river(:)!,localRW_line(:)
 integer(kind=4)                 :: i_m,j_m
 integer,allocatable             :: xlist(:),ylist(:)
-integer(kind=4)                 :: target_pixel !,fn
+integer(kind=4)                 :: target_pixel,countnum!,fn
 character(len=4)                :: llon,llat
 real,allocatable                :: obs(:,:),obs_err(:,:),altitude(:,:),mean_obs(:,:)!, obserrrand(:,:)
 real                            :: pslamch
-external pslamch
+!external pslamch
 write(*,*) "data_assim"
 call getarg(1,buf)
 read(buf,*) assimN
@@ -174,6 +175,7 @@ rho=1.0d0
 !---
 fname=trim(adjustl(expdir))//"/logout/errrand_"//yyyymmdd//".log"
 open(36,file=fname,status='replace')
+errrand=-1
 write(36,*) errrand
 close(36)
 
@@ -542,45 +544,67 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
         end if
 
         ! countnum and target pixel
-        countnum=countp(lon_cent,lat_cent)
-        target_pixel=targetp(lon_cent,lat_cent)
+        countnumber=countp(lon_cent,lat_cent)
+        targetpixel=targetp(lon_cent,lat_cent)
 
         ! open emperical local patch
-        allocate(lag(patch_nums),xlist(countnum),ylist(countnum),wgt(countnum))
+        allocate(lag(patch_nums),xlist(countnumber),ylist(countnumber),wgt(countnumber))
         write(llon,'(i4.4)') lon_cent
         write(llat,'(i4.4)') lat_cent
         fname=trim(adjustl(patchdir))//"/patch"//trim(llon)//trim(llat)//".txt"
         !write(*,*) fname
         open(34,file=fname,status='old',access='sequential',form='formatted',action='read')!
-        do i=1, countnum
+        do i=1, countnumber
           read(34,*) xlist(i),ylist(i),wgt(i)
           !write(*,*) xlist(i),ylist(i),wgt(i)
         end do
         !write(*,23) xlist,ylist,wgt
         close(34)
         !--
+        if (patch_size == 0) then ! for zero local patch ***Only target pixel is used
+            patch_start=targetpixel
+            patch_end=targetpixel
+            target_pixel=1
+            countnum=1
+        else
+            patch_start=1
+            patch_end=countnumber
+            target_pixel=targetpixel
+            countnum=countnumber
+       end if
+        !----------------------------
         ! read local satellite values
-        allocate(local_sat(countnum),local_err(countnum))
-        allocate(xt(countnum),local_lag(countnum),local_wgt(countnum))
+        allocate(local_sat(countnum))
+        allocate(local_err(countnum))
+        allocate(xt(countnum))
+        print*, countnum,lon_cent,lat_cent
+        allocate(local_lag(countnum))
+        !print*,shape(local_lag)
+        allocate(local_wgt(countnum))
         local_sat=-9999.0
         local_err=-9999.0
-        local_wgt=wgt(1:countnum)
+        !local_lag=-9999.0
+        local_wgt=wgt(patch_start:patch_end)
         xt=-9999.0
         !print*,"L514: read observation"
-        do i=1,countnum
+        print*, patch_start,patch_end
+        ! read observations
+        j=1
+        do i=patch_start,patch_end
             i_m=xlist(i)
             j_m=ylist(i)
             if (obs(i_m,j_m)/=-9999.0) then
                 !print*, obs(i_m,j_m),altitude(i_m,j_m)
-                local_sat(i)=1
+                local_sat(j)=1
                 !xt(i)=obs(i_m,j_m) - altitude(i_m,j_m) + elevtn(i_m,j_m)
-                xt(i)=obs(i_m,j_m) - mean_obs(i_m,j_m) !+ meanglobaltrue(i_m,j_m)
-                local_err(i)=max(obs_err(i_m,j_m),0.30)
+                xt(j)=obs(i_m,j_m) - mean_obs(i_m,j_m) !+ meanglobaltrue(i_m,j_m)
+                local_err(j)=max(obs_err(i_m,j_m),0.30)
             else
-                local_sat(i)=-9999
-                xt(i)=-9999.0
-                local_err(i)=-9999.0
+                local_sat(j)=-9999
+                xt(j)=-9999.0
+                local_err(j)=-9999.0
             end if
+            j=j+1
             !! get the VS for (i_m,j_m)
             !call get_virtualstation(i_m,j_m,yyyymmdd,10.0,hydrowebdir,mapname,station,wse,std,flag)
             !if (flag==1) then
@@ -593,7 +617,7 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
         allocate(local_obs(countnum))
         local_obs=0
 
-        ! SWOT
+        ! satellite observation 
         local_obs=(local_sat/=-9999.0)*(-1) ! .true.=1 of .false.=0
         !write(72,*) lat,lon,local_obs
 
@@ -602,13 +626,16 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
         allocate(xf(countnum,ens_num))!localx(countnum,countnum,ens_num),
         xf=0
         !print*,"L538: read model forcasts"
-        do i=1,countnum
+        j=1
+        do i=patch_start,patch_end
             i_m=xlist(i)
             j_m=ylist(i)
-            !xf(i,:)=globalx(i_m,j_m,:)-meanglobaltrue(i_m,j_m)
+            !xf(j,:)=globalx(i_m,j_m,:)-meanglobaltrue(i_m,j_m)
             do num=1, ens_num
-                xf(i,num)=globalx(i_m,j_m,num)-meanglobaltrue(i_m,j_m) !meanglobalx(i_m,j_m,num)
+                xf(j,num)=globalx(i_m,j_m,num)-meanglobaltrue(i_m,j_m) !meanglobalx(i_m,j_m,num)
+                !print*, "L611",globalx(i_m,j_m,num)-meanglobaltrue(i_m,j_m)
             end do
+        j=j+1
         end do
 
         ! deallocate variables of making observation and dimension related
@@ -620,7 +647,7 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
         if(sum(local_obs)==0)then
             !xa=xf
             errflg=1
-            !write(*,*) "error",errflg
+            write(*,*) "error",errflg
             write(82,*) lat,lon,"error",errflg
             goto 9999
         end if
@@ -942,7 +969,12 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
         elseif(errflg==4)then
             deallocate(Ef,R,Rdiag,W,VDVT,la,U,Dinv,Dsqr,Pa,Pasqr,UNI,work,H,iwork,ifail,U_p,la_p,HETRHE,xf_m,isuppz)
         end if
-        deallocate(local_obs,xf,xt,local_lag,local_wgt,local_err)
+        print*,"L962"
+        deallocate(local_obs,xf,xt)
+        deallocate(local_lag)
+        print*,"L965"
+        deallocate(local_wgt,local_err)
+        print*,"END L971"
     end do
 end do
 !$omp end do
