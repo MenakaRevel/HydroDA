@@ -605,10 +605,10 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
         do i=1,countnum
             i_m=xlist(i)
             j_m=ylist(i)
-            xf(i,:)=globalx(i_m,j_m,:)-meanglobaltrue(i_m,j_m)
-            !do num=1, ens_num
-            !    xf(i,num)=globalx(i_m,j_m,num)-meanglobalx(i_m,j_m,num)
-            !    end do
+            !xf(i,:)=globalx(i_m,j_m,:)-meanglobaltrue(i_m,j_m)
+            do num=1, ens_num
+                xf(i,num)=globalx(i_m,j_m,num)-meanglobaltrue(i_m,j_m) !meanglobalx(i_m,j_m,num)
+            end do
         end do
 
         ! deallocate variables of making observation and dimension related
