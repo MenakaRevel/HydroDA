@@ -577,7 +577,7 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
         allocate(local_sat(countnum))
         allocate(local_err(countnum))
         allocate(xt(countnum))
-        print*, countnum,lon_cent,lat_cent
+        !print*, countnum,lon_cent,lat_cent
         allocate(local_lag(countnum))
         !print*,shape(local_lag)
         allocate(local_wgt(countnum))
@@ -587,7 +587,7 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
         local_wgt=wgt(patch_start:patch_end)
         xt=-9999.0
         !print*,"L514: read observation"
-        print*, patch_start,patch_end
+        !print*, patch_start,patch_end
         ! read observations
         j=1
         do i=patch_start,patch_end
@@ -597,7 +597,7 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
                 !print*, obs(i_m,j_m),altitude(i_m,j_m)
                 local_sat(j)=1
                 !xt(i)=obs(i_m,j_m) - altitude(i_m,j_m) + elevtn(i_m,j_m)
-                xt(j)=obs(i_m,j_m) - mean_obs(i_m,j_m) !+ meanglobaltrue(i_m,j_m)
+                xt(j)=obs(i_m,j_m) - mean_obs(i_m,j_m) + meanglobaltrue(i_m,j_m)
                 local_err(j)=max(obs_err(i_m,j_m),0.30)
             else
                 local_sat(j)=-9999
@@ -630,11 +630,11 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
         do i=patch_start,patch_end
             i_m=xlist(i)
             j_m=ylist(i)
-            !xf(j,:)=globalx(i_m,j_m,:)-meanglobaltrue(i_m,j_m)
-            do num=1, ens_num
-                xf(j,num)=globalx(i_m,j_m,num)-meanglobaltrue(i_m,j_m) !meanglobalx(i_m,j_m,num)
-                !print*, "L611",globalx(i_m,j_m,num)-meanglobaltrue(i_m,j_m)
-            end do
+            xf(j,:)=globalx(i_m,j_m,:)!-meanglobaltrue(i_m,j_m)
+            !do num=1, ens_num
+            !    xf(j,num)=globalx(i_m,j_m,num)-meanglobaltrue(i_m,j_m) !meanglobalx(i_m,j_m,num)
+            !    !print*, "L611",globalx(i_m,j_m,num)-meanglobaltrue(i_m,j_m)
+            !end do
         j=j+1
         end do
 
@@ -647,7 +647,7 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
         if(sum(local_obs)==0)then
             !xa=xf
             errflg=1
-            write(*,*) "error",errflg
+            !write(*,*) "error",errflg
             write(82,*) lat,lon,"error",errflg
             goto 9999
         end if
@@ -943,7 +943,7 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
         parm_infl(lon_cent,lat_cent)=rho
         !write(*,*) target_pixel,shape(xa), xa(target_pixel,num)
         do num=1,ens_num
-            global_xa(lon_cent,lat_cent,num) = xa(target_pixel,num)
+            global_xa(lon_cent,lat_cent,num) = xa(target_pixel,num)!+ meanglobaltrue(lon_cent,lat_cent)
         end do
         global_null(lon_cent,lat_cent) = 1.0
 !        if (sum(K_) > real(ens_num)) then 
@@ -969,12 +969,12 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
         elseif(errflg==4)then
             deallocate(Ef,R,Rdiag,W,VDVT,la,U,Dinv,Dsqr,Pa,Pasqr,UNI,work,H,iwork,ifail,U_p,la_p,HETRHE,xf_m,isuppz)
         end if
-        print*,"L962"
+        !print*,"L962"
         deallocate(local_obs,xf,xt)
         deallocate(local_lag)
-        print*,"L965"
+        !print*,"L965"
         deallocate(local_wgt,local_err)
-        print*,"END L971"
+        !print*,"END L971"
     end do
 end do
 !$omp end do
@@ -1001,7 +1001,7 @@ fname=trim(adjustl(expdir))//"/logout/usedwhat_"//yyyymmdd//".log"
 ! make ensemble output (WSE)
 allocate(ens_xa(lonpx,latpx,ens_num))
 do num=1,ens_num
-    ens_xa(:,:,num) = global_xa(:,:,num)*(global_null) + globalx(:,:,num)*(1-global_null) + meanglobaltrue(:,:)
+    ens_xa(:,:,num) = global_xa(:,:,num)*(global_null) + globalx(:,:,num)*(1-global_null) !+ meanglobaltrue(:,:)
     ! + elevtn(:,:)
     !+ meanglobalx(:,:,num) !+ (sum(meanglobalx(:,:,:),dim=3)/real(ens_num)) !
 end do
