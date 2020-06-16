@@ -24,7 +24,7 @@ cd $HydroDA
 
 # experiment : edit the experiment name in here and params.py experiment()
 # before running run_mool.sh , please edit the nessary experimental settings in params.py
-EXP="E2O_HydroWeb9"
+EXP="E2O_HydroWeb10"
 #IFACTOR="1.08"
 
 mkdir $HydroDA"/out"
@@ -40,7 +40,7 @@ cp -r "$HydroDA/gosh/params.py" "$HydroDA/out/$EXP/params.py"
 cp -r $HydroDA"/src/"run.py $HydroDA"/out/"$EXP"/"run.py
 ln -sf $HydroDA"/src/"main_code.py $HydroDA"/out/"$EXP"/"main_code.py
 
-# run the main code using virtual environment
-#/home/menaka/miniconda3/envs/pydef/bin/python2.7 $HydroDA"/src/"PBS_run.py $EXP $IFACTOR
 cd $HydroDA"/out/"$EXP
-python run.py
+#python run.py
+# run the main code using virtual environment
+/home/menaka/miniconda3/envs/pydef/bin/python2.7 run.py
