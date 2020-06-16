@@ -26,7 +26,7 @@ import cal_stat as stat
 
 #argvs = sys.argv
 
-experiment="E2O_HydroWeb8"
+experiment="E2O_HydroWeb11"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 assim_out=pm.DA_dir()+"/out/"+experiment
@@ -66,9 +66,9 @@ def mk_dir(sdir):
 mk_dir(assim_out+"/figures")
 mk_dir(assim_out+"/figures/sfcelv")
 #---
-year=2004
-month=1
-date=1
+year,month,date=pm.starttime()
+#month=1
+#date=1
 start_dt=datetime.date(year,month,date)
 size=60
 
