@@ -12,10 +12,10 @@ def timestep():
     return 86400 # outer timestep in seconds
 
 def starttime():
-    return (2010,1,1) # start date: [year,month,date]
+    return (2009,1,1) # start date: [year,month,date]
 
 def endtime():
-    return (2011,1,1) # end date: [year,month,date]
+    return (2010,1,1) # end date: [year,month,date]
                       # *note: this date is not included
 
 def ens_mem():
@@ -181,7 +181,7 @@ def spinup_mode():
     ### if initial restart file is ready, spinup simulation is no need
 
 def spinup_end_year():
-    return 2009
+    return 2008
 
 def spinup_end_month():
     return 12
