@@ -1,6 +1,7 @@
 #!/opt/local/bin/python
 # -*- coding: utf-8 -*-
 import numpy as np
+import re
 
 ########################
 #
@@ -151,13 +152,25 @@ def true_run(num):
         return 3
 
 def CaMa_dir():
-    return "/cluster/data6/menaka/CaMa-Flood_v396_20191225"
+    return "/cluster/data6/menaka/CaMa-Flood_v396a_20200514"
+    #return "/cluster/data6/menaka/CaMa-Flood_v396_20191225"
     #return "/cluster/data6/menaka/CaMa-Flood_v395b_20191030"
     # directory of CaMa-Flood
     # indicate the directory of ./map or ./src and other folders
 
 def mapname():
-    return "glb_15min"
+    return "amz_06min"
+
+def map_dimension():
+    fname=CaMa_dir()+"/map/"+mapname+"/params.txt"
+    f=open(fname,"r")
+    line=f.readlines()
+    f.close()
+    #-------
+    nx     = int(filter(None, re.split(" ",lines[0]))[0])
+    ny     = int(filter(None, re.split(" ",lines[1]))[0])
+    gsize  = float(filter(None, re.split(" ",lines[3]))[0])
+    return nx,ny,gsize
 
 def DA_dir():
     return "/cluster/data6/menaka/HydroDA"

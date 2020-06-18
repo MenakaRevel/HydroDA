@@ -250,8 +250,9 @@ def spinup_loop(inputlist):
     mode=pm.mode()
     run_name=pm.runname(mode)
     exp_dir=pm.DA_dir()+"/out/"+pm.experiment()
+    mapname=pm.mapname()
     print  "%s for %03d"%(loop,int(ens_num))
-    os.system("source "+pm.DA_dir()+"/src/spin_up.sh "+str(yyyy)+" "+str(loop)+" "+ens_num+" "+dir2+" "+str(cpunums)+" "+str(run_name)+" "+str(exp_dir))
+    os.system("source "+pm.DA_dir()+"/src/spin_up.sh "+str(yyyy)+" "+str(loop)+" "+ens_num+" "+dir2+" "+str(cpunums)+" "+str(run_name)+" "+str(exp_dir)+" "+str(mapname))
     return 0
 ###########################
 def one_day_sim(inputlist):
@@ -280,7 +281,8 @@ def one_day_sim(inputlist):
     print yyyy+" "+mm+" "+dd+" "+ens_num+" "+dir2+" "+looptype
     cpunums = pm.cpu_nums()
     exp_dir=pm.DA_dir()+"/out/"+pm.experiment()
-    os.system("source "+pm.DA_dir()+"/src/oneday_sim.sh "+yyyy+" "+mm+" "+dd+" "+ens_num+" "+dir2+" "+looptype+" "+str(cpunums)+" "+str(run_name)+" "+str(exp_dir))
+    mapname=pm.mapname()
+    os.system("source "+pm.DA_dir()+"/src/oneday_sim.sh "+yyyy+" "+mm+" "+dd+" "+ens_num+" "+dir2+" "+looptype+" "+str(cpunums)+" "+str(run_name)+" "+str(exp_dir)+" "+str(mapname))
 
 #    if looptype=="true":
 #        # copying "restart file" to ./CaMa_in/
@@ -676,7 +678,8 @@ def courrpt_rivhgt():
     return 0
 ###########################
 def make_initial_infl():
-    parm_infl=np.ones([720,1440],np.float32)*pm.initial_infl()
+    nx,ny,gsize=pm.map_dimension()
+    parm_infl=np.ones([ny,nx],np.float32)*pm.initial_infl()
     start_year,start_month,start_date=pm.starttime() # Start year month date
     yyyy='%04d' % (start_year)
     mm='%02d' % (start_month)
@@ -1682,8 +1685,7 @@ def sfcelv_mean(ens):
     ens =str(ens) # T000 or C0XX
     #--
     dz=days_year(year)
-    nx=1440
-    ny=720
+    nx,ny,gsize=pm.map_dimension()
     #create filename
     yyyy="%04d"%(year)
     mm="%2d"%(mon)

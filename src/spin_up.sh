@@ -38,6 +38,8 @@ cpunums=$5
 runname=$6
 
 EXP_DIR=$7
+
+mapname=$8
 #================================================
 echo $CAMADIR
 echo $EXP_DIR
@@ -176,7 +178,7 @@ LROSPLIT=".FALSE."                          # .TRUE. for sub-surface runoff
 
 #============================
 #*** 1f. river map & topography
-FMAP="${BASE}/map/glb_15min"                  # map directory
+FMAP="${BASE}/map/${mapname}"                  # map directory
 CDIMINFO="${FMAP}/diminfo_test-1deg.txt"      # dimention information file
 CINPMAT="${FMAP}/inpmat_test-1deg.bin"        # runoff input matrix for interporlation
 #CDIMINFO="${FMAP}/diminfo_test-15min_nc.txt" # dimention information file
@@ -184,11 +186,11 @@ CINPMAT="${FMAP}/inpmat_test-1deg.bin"        # runoff input matrix for interpor
 #CDIMINFO="${FMAP}/diminfo_test-15min.txt"    # dimention information file
 #CINPMAT=${FMAP}/inpmat_test-15min.bin        # runoff input matrix for interporlation
 if [ $runname = "E2O" ];then
-    CDIMINFO="${FMAP}/diminfo_test-15min.txt" # dimention information file
-    CINPMAT="${FMAP}/inpmat_test-15min.bin"   # runoff input matrix for interporlation
+    CDIMINFO="${FMAP}/diminfo-15min.txt" # dimention information file
+    CINPMAT="${FMAP}/inpmat-15min.bin"   # runoff input matrix for interporlation
 elif [ $runname = "ERA20CM" ];then
-	CDIMINFO="${FMAP}/diminfo_test-1deg.txt"  # dimention information file
-    CINPMAT="${FMAP}/inpmat_test-1deg.bin"    # runoff input matrix for interporlation
+	CDIMINFO="${FMAP}/diminfo-1deg.txt"  # dimention information file
+    CINPMAT="${FMAP}/inpmat-1deg.bin"    # runoff input matrix for interporlation
 elif [ $runname = "ELSE_KIM2009" ];then
     CDIMINFO="${FMAP}/diminfo_test-1deg.txt"  # dimention information file
     CINPMAT="${FMAP}/inpmat_test-1deg.bin"    # runoff input matrix for interporlation
