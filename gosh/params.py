@@ -15,7 +15,7 @@ def starttime():
     return (2002,1,1) # start date: [year,month,date]
 
 def endtime():
-    return (2015,1,1) # end date: [year,month,date]
+    return (2005,1,1) # end date: [year,month,date]
                       # *note: this date is not included
 
 def ens_mem():

@@ -26,7 +26,7 @@ import cal_stat as stat
 
 #argvs = sys.argv
 
-experiment="E2O_HydroWeb12"
+experiment="E2O_HydroWeb13"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 assim_out=pm.DA_dir()+"/out/"+experiment
@@ -67,18 +67,21 @@ def mk_dir(sdir):
 mk_dir(assim_out+"/figures")
 mk_dir(assim_out+"/figures/disgraph")
 #----
-year,month,date=pm.starttime()#2004#1991
+syear,smonth,sdate=pm.starttime()#2004#1991
+eyear,emonth,edate=pm.endtime()
 #month=1
 #date=1
-start_dt=datetime.date(year,month,date)
+start_dt=datetime.date(syear,smonth,sdate)
+end_dt=datetime.date(eyear,emonth,edate)
 size=60
 
 start=0
-last=365#int(argvs[1])
-if calendar.isleap(year):
-    last=366
-else:
-    last=365
+last=(end_dt-start_dt).days
+#last=365#int(argvs[1])
+#if calendar.isleap(year):
+#    last=366
+#else:
+#    last=365
 
 #last=89
 N=int(last)
@@ -246,10 +249,17 @@ for day in np.arange(start,last):
         opn_frag=[]
         asm_frag=[]
         for point in np.arange(pnum):
+            ix1,iy1,ix2,iy2=grdc.get_grdc_station_v396(pname[point])
             xpoint=xlist[point]
             ypoint=ylist[point]
-            opn_frag.append(opnfile[ypoint,xpoint])
-            asm_frag.append(asmfile[ypoint,xpoint])
+            if ix2 == -9999 or iy2 == -9999:
+                opn_frag.append(opnfile[iy1,ix1]+opnfile[iy2,ix2])
+                asm_frag.append(asmfile[iy1,ix1]+asmfile[iy2,ix2])
+            else:
+                opn_frag.append(opnfile[iy1,ix1])
+                asm_frag.append(asmfile[iy1,ix1])
+            #opn_frag.append(opnfile[ypoint,xpoint])
+            #asm_frag.append(asmfile[ypoint,xpoint])
 
         opn_ens.append(opn_frag)
         asm_ens.append(asm_frag)
@@ -301,15 +311,15 @@ def make_fig(point):
 #
 #    plt.ylim(ymin=0)
     fig, ax1 = plt.subplots()
-    org=grdc.grdc_dis(staid[point],year,year)
+    org=grdc.grdc_dis(staid[point],syear,eyear-1)
     org=np.array(org)
     lines=[ax1.plot(np.arange(start,last),ma.masked_less(org,0.0),label="GRDC",color="black",linewidth=0.7,zorder=101)[0]] #,marker = "o",markevery=swt[point])
 #    ax1.plot(np.arange(start,last),hgt[:,point],label="true",color="gray",linewidth=0.7,linestyle="--",zorder=101)
 #    plt.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7)
 
     for num in np.arange(0,pm.ens_mem()):
-        ax1.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.1,alpha=0.3,zorder=102)
-        ax1.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.1,alpha=0.3,zorder=103)
+        ax1.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.1,alpha=0.1,zorder=102)
+        ax1.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.1,alpha=0.1,zorder=103)
 #        plt.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.3,alpha=0.5)
 #        plt.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.3,alpha=0.5)
     # draw mean of ensembles
@@ -322,8 +332,9 @@ def make_fig(point):
     ax1.tick_params('y', colors='k')
     # scentific notaion
     ax1.ticklabel_format(style="sci",axis="y",scilimits=(0,0))
-    xxlist=np.linspace(15,N-15,12)
-    xxlab=[calendar.month_name[i][:3] for i in range(1,13)]
+    xxlist=np.linspace(0,N,(eyear-syear)+1)
+    xxlab=np.arange(syear,eyear+1,1)
+    #xxlab=[calendar.month_name[i][:3] for i in range(1,13)]
     ax1.set_xticks(xxlist)
     ax1.set_xticklabels(xxlab,fontsize=10)
 

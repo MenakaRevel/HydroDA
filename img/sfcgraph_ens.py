@@ -26,7 +26,7 @@ import cal_stat as stat
 
 #argvs = sys.argv
 
-experiment="E2O_HydroWeb12"
+experiment="E2O_HydroWeb13"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 assim_out=pm.DA_dir()+"/out/"+experiment
@@ -66,19 +66,29 @@ def mk_dir(sdir):
 mk_dir(assim_out+"/figures")
 mk_dir(assim_out+"/figures/sfcelv")
 #---
-year,month,date=pm.starttime()
+####year,month,date=pm.starttime()
+#####month=1
+#####date=1
+####start_dt=datetime.date(year,month,date)
+####size=60
+####
+####start=0
+#####last=int(argvs[1])
+####last=365#int(argvs[1])
+####if calendar.isleap(year):
+####    last=366
+####else:
+####    last=365
+syear,smonth,sdate=pm.starttime()#2004#1991
+eyear,emonth,edate=pm.endtime()
 #month=1
 #date=1
-start_dt=datetime.date(year,month,date)
+start_dt=datetime.date(syear,smonth,sdate)
+end_dt=datetime.date(eyear,emonth,edate)
 size=60
 
 start=0
-#last=int(argvs[1])
-last=365#int(argvs[1])
-if calendar.isleap(year):
-    last=366
-else:
-    last=365
+last=(end_dt-start_dt).days+1
 
 N=int(last)
 green2="greenyellow"
@@ -357,7 +367,7 @@ def make_fig(point):
 
     fig, ax1 = plt.subplots()
     #ax1.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7,zorder=101,marker = "o",markevery=swt[point])
-    time,org=hweb.HydroWeb_WSE(pname[point],year,year)
+    time,org=hweb.HydroWeb_WSE(pname[point],syear,eyear)
     data=np.array(org)-np.array(EGM08[point])+np.array(EGM96[point])
     #alti=hweb.altimetry(pname[point]) - EGM08[point] + EGM96[point]
     #data=data-alti+elevtn[ylist[point],xlist[point]]
@@ -382,10 +392,13 @@ def make_fig(point):
     #ax1.set_ylim(ymin=0,ymax=250.)
     ax1.set_xlim(xmin=0,xmax=last+1)
     ax1.tick_params('y', colors='k')
-    xxlist=np.linspace(15,N-15,int(N/30))
-    xxlab=[calendar.month_name[i][:3] for i in range(1,13)]
-    #ax1.set_xticks(xxlist)
-    #ax1.set_xticklabels(xxlab,fontsize=10)
+    xxlist=np.linspace(0,N,(eyear-syear)+1)
+    xxlab=np.arange(syear,eyear+1,1)
+
+    #xxlist=np.linspace(15,N-15,int(N/30))
+    #xxlab=[calendar.month_name[i][:3] for i in range(1,13)]
+    ax1.set_xticks(xxlist)
+    ax1.set_xticklabels(xxlab,fontsize=10)
 
 #    ax2 = ax1.twinx()
 #    aiv = stat.AI(asm[:,:,point],opn[:,:,point],org[:,point])
