@@ -68,7 +68,8 @@ integer(kind=4)                 :: i_m,j_m
 integer,allocatable             :: xlist(:),ylist(:)
 integer(kind=4)                 :: target_pixel,countnum!,fn
 character(len=4)                :: llon,llat
-real,allocatable                :: obs(:,:),obs_err(:,:),altitude(:,:),mean_obs(:,:)!, obserrrand(:,:)
+! observations
+real,allocatable                :: obs(:,:),obs_err(:,:),altitude(:,:),mean_obs(:,:),std_obs(:,:)!, obserrrand(:,:)
 real                            :: pslamch
 !external pslamch
 write(*,*) "data_assim"
@@ -323,7 +324,7 @@ close(34)
 !close(34)
 
 !read observations and observation error variance
-allocate(obs(lonpx,latpx),obs_err(lonpx,latpx),altitude(lonpx,latpx),mean_obs(lonpx,latpx))
+allocate(obs(lonpx,latpx),obs_err(lonpx,latpx),altitude(lonpx,latpx),mean_obs(lonpx,latpx),std_obs(lonpx,latpx))
 fname=trim(adjustl(hydrowebdir))//"/bin/hydroweb"//yyyymmdd//".bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
@@ -354,6 +355,15 @@ else
 end if
 close(34)
 
+! std observation
+fname=trim(adjustl(hydrowebdir))//"/bin/HydroWeb_std.bin"
+open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+if(ios==0)then
+    read(34,rec=1) std_obs
+else
+    write(*,*) "no file ", fname
+end if
+close(34)
 
 ! inflation parameter
 fname=trim(adjustl(expdir))//"/inflation/parm_infl"//yyyymmdd//".bin"
@@ -597,7 +607,7 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
                 !print*, obs(i_m,j_m),altitude(i_m,j_m)
                 local_sat(j)=1
                 !xt(i)=obs(i_m,j_m) - altitude(i_m,j_m) + elevtn(i_m,j_m)
-                xt(j)=obs(i_m,j_m) - mean_obs(i_m,j_m) + meanglobaltrue(i_m,j_m)
+                xt(j)=(obs(i_m,j_m) - mean_obs(i_m,j_m))/(std_obs(i_m,j_m)+1.0e-20)! + meanglobaltrue(i_m,j_m)
                 local_err(j)=max(obs_err(i_m,j_m),0.30)
             else
                 local_sat(j)=-9999
@@ -1054,7 +1064,7 @@ close(82)
 
 deallocate(rivwth,rivlen,nextdst,lons,lats,elevtn,weightage,storage,parm_infl)
 deallocate(nextX,nextY,ocean,countp,targetp)
-deallocate(obs,obs_err,altitude,mean_obs)
+deallocate(obs,obs_err,altitude,mean_obs,std_obs)
 deallocate(global_xa,globalx,ens_xa,global_null)!,obs_mask)
 deallocate(meanglobalx,meanglobaltrue)
 end program data_assim
