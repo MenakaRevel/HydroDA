@@ -26,7 +26,7 @@ import cal_stat as stat
 
 #argvs = sys.argv
 
-experiment="E2O_HydroWeb13"
+experiment="E2O_HydroWeb14"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 assim_out=pm.DA_dir()+"/out/"+experiment
@@ -88,7 +88,7 @@ end_dt=datetime.date(eyear,emonth,edate)
 size=60
 
 start=0
-last=(end_dt-start_dt).days+1
+last=(end_dt-start_dt).days
 
 N=int(last)
 green2="greenyellow"

@@ -410,7 +410,7 @@ close(34)
 
 ! read std WSE true
 allocate(stdglobaltrue(lonpx,latpx))
-meanglobaltrue=0
+stdglobaltrue=0
 !fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/meansfcelvT000.bin"
 fname=trim(adjustl(DAdir))//"/dat/std_sfcelv_1960-2013.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
@@ -619,7 +619,9 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
                 !print*, obs(i_m,j_m),altitude(i_m,j_m)
                 local_sat(j)=1
                 !xt(i)=obs(i_m,j_m) - altitude(i_m,j_m) + elevtn(i_m,j_m)
-                xt(j)=((obs(i_m,j_m) - mean_obs(i_m,j_m))/(std_obs(i_m,j_m)+1.0e-20))*stdglobaltrue(i_m,j_m) + meanglobaltrue(i_m,j_m)
+                xt(j)=((obs(i_m,j_m) - mean_obs(i_m,j_m))/std_obs(i_m,j_m))*stdglobaltrue(i_m,j_m) + meanglobaltrue(i_m,j_m)
+!                print*, "observation converstion"
+!                print*, xt(j),obs(i_m,j_m),mean_obs(i_m,j_m),std_obs(i_m,j_m),stdglobaltrue(i_m,j_m) , meanglobaltrue(i_m,j_m)
                 local_err(j)=max(obs_err(i_m,j_m),0.30)
             else
                 local_sat(j)=-9999
