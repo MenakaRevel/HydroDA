@@ -17,7 +17,7 @@ integer(kind=4)                 :: patch_start,patch_end,countnumber,targetpixel
 !integer*4                       :: S_lon_cent,S_lat_cent
 integer,allocatable             :: local_obs(:),iwork(:),ifail(:),H(:,:)!,localx(:,:,:)
 real,allocatable                :: xf_m(:),xf(:,:),globalx(:,:,:),xa(:,:)!,H(:,:)!xa_m(:),,localx_line(:)
-real,allocatable                :: meanglobalx(:,:,:),meanglobaltrue(:,:)
+real,allocatable                :: meanglobalx(:,:,:),meanglobaltrue(:,:),stdglobaltrue(:,:)
 integer                         :: ens_num,num,ios,ovs,info,info2,errflg,m
 character(len=3)                :: numch
 real,allocatable                :: globaltrue(:,:),xt(:),R(:,:),Rdiag(:)!
@@ -68,7 +68,8 @@ integer(kind=4)                 :: i_m,j_m
 integer,allocatable             :: xlist(:),ylist(:)
 integer(kind=4)                 :: target_pixel,countnum!,fn
 character(len=4)                :: llon,llat
-real,allocatable                :: obs(:,:),obs_err(:,:),altitude(:,:),mean_obs(:,:)!, obserrrand(:,:)
+! observations
+real,allocatable                :: obs(:,:),obs_err(:,:),altitude(:,:),mean_obs(:,:),std_obs(:,:)!, obserrrand(:,:)
 real                            :: pslamch
 !external pslamch
 write(*,*) "data_assim"
@@ -323,7 +324,7 @@ close(34)
 !close(34)
 
 !read observations and observation error variance
-allocate(obs(lonpx,latpx),obs_err(lonpx,latpx),altitude(lonpx,latpx),mean_obs(lonpx,latpx))
+allocate(obs(lonpx,latpx),obs_err(lonpx,latpx),altitude(lonpx,latpx),mean_obs(lonpx,latpx),std_obs(lonpx,latpx))
 fname=trim(adjustl(hydrowebdir))//"/bin/hydroweb"//yyyymmdd//".bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
@@ -354,6 +355,15 @@ else
 end if
 close(34)
 
+! std observation
+fname=trim(adjustl(hydrowebdir))//"/bin/HydroWeb_std.bin"
+open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+if(ios==0)then
+    read(34,rec=1) std_obs
+else
+    write(*,*) "no file ", fname
+end if
+close(34)
 
 ! inflation parameter
 fname=trim(adjustl(expdir))//"/inflation/parm_infl"//yyyymmdd//".bin"
@@ -386,18 +396,30 @@ end do
 allocate(meanglobaltrue(lonpx,latpx))
 meanglobaltrue=0
 !fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/meansfcelvT000.bin"
-!fname=trim(adjustl(DAdir))//"/dat/mean_sfcelv_1960-2013.bin"
-!open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
-!if(ios==0)then
-!    read(34,rec=1) meanglobaltrue
-!else
-!    write(*,*) "no true"
-!end if
-!close(34)
+fname=trim(adjustl(DAdir))//"/dat/mean_sfcelv_1960-2013.bin"
+open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+if(ios==0)then
+    read(34,rec=1) meanglobaltrue
+else
+    write(*,*) "no true"
+end if
+close(34)
 
 ! update meanglobalture
-meanglobaltrue=(sum(meanglobalx(:,:,:),dim=3)/real(ens_num))
+!meanglobaltrue=(sum(meanglobalx(:,:,:),dim=3)/real(ens_num))
 
+! read std WSE true
+allocate(stdglobaltrue(lonpx,latpx))
+stdglobaltrue=0
+!fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/meansfcelvT000.bin"
+fname=trim(adjustl(DAdir))//"/dat/std_sfcelv_1960-2013.bin"
+open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+if(ios==0)then
+    read(34,rec=1) stdglobaltrue
+else
+    write(*,*) "no true"
+end if
+close(34)
 
 ! read WSE from all model
 allocate(globalx(lonpx,latpx,ens_num))
@@ -597,7 +619,9 @@ do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
                 !print*, obs(i_m,j_m),altitude(i_m,j_m)
                 local_sat(j)=1
                 !xt(i)=obs(i_m,j_m) - altitude(i_m,j_m) + elevtn(i_m,j_m)
-                xt(j)=obs(i_m,j_m) - mean_obs(i_m,j_m) + meanglobaltrue(i_m,j_m)
+                xt(j)=((obs(i_m,j_m) - mean_obs(i_m,j_m))/std_obs(i_m,j_m))*stdglobaltrue(i_m,j_m) + meanglobaltrue(i_m,j_m)
+!                print*, "observation converstion"
+!                print*, xt(j),obs(i_m,j_m),mean_obs(i_m,j_m),std_obs(i_m,j_m),stdglobaltrue(i_m,j_m) , meanglobaltrue(i_m,j_m)
                 local_err(j)=max(obs_err(i_m,j_m),0.30)
             else
                 local_sat(j)=-9999
@@ -1054,9 +1078,9 @@ close(82)
 
 deallocate(rivwth,rivlen,nextdst,lons,lats,elevtn,weightage,storage,parm_infl)
 deallocate(nextX,nextY,ocean,countp,targetp)
-deallocate(obs,obs_err,altitude,mean_obs)
+deallocate(obs,obs_err,altitude,mean_obs,std_obs)
 deallocate(global_xa,globalx,ens_xa,global_null)!,obs_mask)
-deallocate(meanglobalx,meanglobaltrue)
+deallocate(meanglobalx,meanglobaltrue,stdglobaltrue)
 end program data_assim
 !*****************************************************************
 subroutine lag_distance(i,j,x,y,nx,ny,nextX,nextY,nextdst,lag_dist)

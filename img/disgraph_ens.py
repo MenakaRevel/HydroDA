@@ -16,7 +16,7 @@ from numpy import ma
 
 
 #sys.path.append('../assim_out/')
-os.system("ln -sf ../gosh/params.py params.py")
+#os.system("ln -sf ../gosh/params.py params.py")
 import params as pm
 import read_grdc as grdc
 import cal_stat as stat
@@ -26,7 +26,7 @@ import cal_stat as stat
 
 #argvs = sys.argv
 
-experiment="E2O_HydroWeb13"
+experiment="E2O_HydroWeb14"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 assim_out=pm.DA_dir()+"/out/"+experiment
@@ -253,11 +253,11 @@ for day in np.arange(start,last):
             xpoint=xlist[point]
             ypoint=ylist[point]
             if ix2 == -9999 or iy2 == -9999:
-                opn_frag.append(opnfile[iy1,ix1]+opnfile[iy2,ix2])
-                asm_frag.append(asmfile[iy1,ix1]+asmfile[iy2,ix2])
-            else:
                 opn_frag.append(opnfile[iy1,ix1])
                 asm_frag.append(asmfile[iy1,ix1])
+            else:
+                opn_frag.append(opnfile[iy1,ix1]+opnfile[iy2,ix2])
+                asm_frag.append(asmfile[iy1,ix1]+asmfile[iy2,ix2])
             #opn_frag.append(opnfile[ypoint,xpoint])
             #asm_frag.append(asmfile[ypoint,xpoint])
 
