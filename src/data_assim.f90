@@ -550,8 +550,8 @@ print *, "L456"
 !$omp& UNI,la_p,U_p,HETRHE,VDVTmax,work,iwork,ifail,m,info,U,la,Dinv,Dsqr,info2,yo, &
 !$omp& Wvec,xa,EfW,K_,num,rho)
 !$omp do
-do lon_cent = int((assimW+180)*4+1),int((assimE+180)*4+1),1
-  do lat_cent = int((90-assimN)*4+1),int((90-assimS)*4+1),1
+do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)+1),1
+  do lat_cent = int((north-assimN)*(1.0/gsize)+1),int((north-assimS)*(1.0/gsize)+1),1
         lat = lats(lon_cent,lat_cent) !90.0-(lat_cent-1.0)/4.0
         lon = lons(lon_cent,lat_cent) !(lon_cent-1.0)/4.0-180.0
         ! not connected to longtitude direction; no calculation available near lon=-180,180 or lat=-80,80

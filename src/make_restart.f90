@@ -1,28 +1,31 @@
 program make_restart
 implicit none
 integer                         :: i,j,ios,n
-integer,parameter               :: latpx=720,lonpx=1440
-real,dimension(lonpx,latpx)     :: rivsto,fldsto ! put to restart file
-real,dimension(lonpx,latpx)     :: elevtn
-character*128                   :: fname,buf,camadir,expdir
-real,dimension(lonpx,latpx)     :: rivlen,rivwth,rivsto_max,rivhgt
-real,dimension(lonpx,latpx,10)  :: fldhgt
-integer,dimension(lonpx,latpx)  :: oceanmask,fldstage
-real,dimension(lonpx,latpx)     :: grid_area
-real,dimension(lonpx,latpx)     :: nextdst
-integer*4,dimension(lonpx,latpx):: nextX,nextY
+character(len=128)              :: fname,buf,camadir,expdir,mapname
+!-map variables
+real                            :: gsize,west, north, east, south ! map boundries
+integer                         :: latpx,lonpx,nflp    ! pixel size, calculated
+real,allocatable                :: rivsto(:,:),fldsto(:,:) ! put to restart file
+real,allocatable                :: elevtn(:,:)
+
+real,allocatable                :: rivlen(:,:),rivwth(:,:),rivsto_max(:,:),rivhgt(:,:)
+real,allocatable                :: fldhgt(:,:,:)
+integer,allocatable             :: oceanmask(:,:),fldstage(:,:)
+real,allocatable                :: grid_area(:,:)
+real,allocatable                :: nextdst(:,:)
+integer,allocatable             :: nextX(:,:),nextY(:,:)
 real,parameter                  :: g=9.80665,dt=86400.,man=0.03,man2=0.10,pdstmth=10000.
-character*8                     :: yyyymmdd,onedaybef,onedayaft
+character(len=8)                :: yyyymmdd,onedaybef,onedayaft
 real                            :: dhgtpre        !! private
-character*3                     :: num_name
-character*10                    :: loop
+character(len=3)                :: num_name
+character(len=10)               :: loop
 
-real,dimension(lonpx,latpx)     :: fldfrac
+real,allocatable                :: fldfrac(:,:)
 
-character*1                     :: loopchar
+character(len=1)                :: loopchar
 integer                         :: ens_num,k
 
-real,dimension(lonpx,latpx)     :: xa,rivdph,flddph
+real,allocatable                :: xa(:,:),rivdph(:,:),flddph(:,:)
 
 real                            :: hgt,pre,Across
 
@@ -47,14 +50,30 @@ call getarg(5,buf)
 read(buf,"(A)") camadir
 
 call getarg(6,buf)
-read(buf,*) ens_num ! number of ensemble members
+read(buf,"(A)") mapname
 
 call getarg(7,buf)
-read(buf,*) num_name
+read(buf,*) ens_num ! number of ensemble members
 
 call getarg(8,buf)
+read(buf,*) num_name
+
+call getarg(9,buf)
 read(buf,"(A)") expdir
 
+!==
+fname=trim(camadir)//"/map/"//trim(mapname)//"/params.txt"
+open(11,file=fname,form='formatted')
+read(11,*) lonpx
+read(11,*) latpx
+read(11,*) nflp
+read(11,*) gsize
+read(11,*) west
+read(11,*) east
+read(11,*) south
+read(11,*) north
+close(11)
+!-------
 
 if(trim(adjustl(loop))=="open") loopchar="C"
 if(trim(adjustl(loop))=="assim") loopchar="A"
@@ -76,7 +95,10 @@ end if
 close(34)
 
 ! read many parameters
-fname=trim(adjustl(camadir))//"map/glb_15min/rivlen.bin"
+! read CaMa-Flood parametes
+allocate(rivlen(lonpx,latpx),rivwth(lonpx,latpx),rivhgt(lonpx,latpx),fldhgt(lonpx,latpx,nflp))
+allocate(elevtn(lonpx,latpx),nextX(lonpx,latpx),nextY(lonpx,latpx),nextdst(lonpx,latpx),grid_area(lonpx,latpx))
+fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivlen.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) rivlen
@@ -87,7 +109,7 @@ else
 end if
 close(34)
 
-fname=trim(adjustl(camadir))//"map/glb_15min/rivwth_gwdlr.bin"
+fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivwth_gwdlr.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) rivwth
@@ -99,11 +121,11 @@ end if
 close(34)
 
 !    if ((loopchar == "C") .or. (loopchar == "A")) then 
-!      fname=trim(adjustl(camadir))//"map/glb_15min/rivhgt_"//num_name//loopchar//".bin"
+!      fname=trim(adjustl(camadir))//"map/"//trim(mapname)//"/rivhgt_"//num_name//loopchar//".bin"
 !    else
-!      fname=trim(adjustl(camadir))//"map/glb_15min/rivhgt.bin"
+!      fname=trim(adjustl(camadir))//"map/"//trim(mapname)//"/rivhgt.bin"
 !    end if
-fname=trim(adjustl(camadir))//"map/glb_15min/rivhgt.bin" 
+fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivhgt.bin" 
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) rivhgt
@@ -114,7 +136,7 @@ else
 end if
 close(34)
 
-fname=trim(adjustl(camadir))//"map/glb_15min/fldhgt.bin"
+fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/fldhgt.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx*10,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) fldhgt
@@ -125,9 +147,9 @@ else
 end if
 close(34)
 
-!    fname=trim(adjustl(camadir))//"map/glb_15min/elevtn.bin"
+!    fname=trim(adjustl(camadir))//"map/"//trim(mapname)//"/elevtn.bin"
 !    write(numch,'(i3.3)') num
-fname=trim(adjustl(camadir))//"map/glb_15min/elevtn.bin"
+fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/elevtn.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) elevtn
@@ -140,7 +162,7 @@ close(34)
 
 ! read next grid information
 ! read nextX and nextY
-fname=trim(adjustl(camadir))//"map/glb_15min/nextxy.bin"
+fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/nextxy.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) nextX
@@ -152,7 +174,7 @@ end if
 close(34)
 
 ! read distance to next grid
-fname=trim(adjustl(camadir))//"map/glb_15min/nxtdst.bin"
+fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/nxtdst.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) nextdst
@@ -165,8 +187,8 @@ close(34)
 
 
 ! read grid area
-!fname=trim(adjustl(camadir))//"map/glb_15min/grdare.bin"
-fname=trim(adjustl(camadir))//"map/glb_15min/ctmare.bin"
+!fname=trim(adjustl(camadir))//"map/"//trim(mapname)//"/grdare.bin"
+fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/ctmare.bin" ! after CaMa v3.9
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) grid_area
@@ -178,6 +200,9 @@ end if
 close(34)
 
 ! =======================================================
+! allocate
+allocate(rivsto_max(lonpx,latpx),oceanmask(lonpx,latpx),fldstage(lonpx,latpx))
+allocate(fldfrac(lonpx,latpx),rivdph(lonpx,latpx),rivsto(lonpx,latpx),flddph(lonpx,latpx),fldsto(lonpx,latpx))
 ! calc river storage max
 rivsto_max = rivlen*rivwth*rivhgt
 
@@ -250,45 +275,45 @@ end do
 
 ! calculate fldsto
 fldsto = 0
-do i=1,1440
-  do j=1,720
-    ! calculate flood storage until fldstage(i,j)-1
-    if(fldstage(i,j)>1)then
-      dhgtpre = 0
-      do n=1,fldstage(i,j)-1
-        fldsto(i,j) = fldsto(i,j) + grid_area(i,j)*0.1*(real(n)-0.5)*(fldhgt(i,j,n)-dhgtpre)
-        dhgtpre = fldhgt(i,j,n)
-        fldfrac(i,j) = fldfrac(i,j) + 0.1
-      end do
-    end if
+do i=1,lonpx
+    do j=1,latpx
+        ! calculate flood storage until fldstage(i,j)-1
+        if(fldstage(i,j)>1)then
+          dhgtpre = 0
+          do n=1,fldstage(i,j)-1
+            fldsto(i,j) = fldsto(i,j) + grid_area(i,j)*0.1*(real(n)-0.5)*(fldhgt(i,j,n)-dhgtpre)
+            dhgtpre = fldhgt(i,j,n)
+            fldfrac(i,j) = fldfrac(i,j) + 0.1
+          end do
+        end if
 
-    ! calculate flood storage at fldstage(i,j)
-    if(fldstage(i,j)>0 .and. fldstage(i,j)<11)then
-      if(fldstage(i,j)==1)then
-        dhgtpre = 0
-      end if
-      if(fldstage(i,j)>1)then
-        dhgtpre = fldhgt(i,j,fldstage(i,j)-1)
-      end if
-      n = fldstage(i,j)
-      k = fldstage(i,j)-1
-      hgt = fldhgt(i,j,n)
-      pre = dhgtpre
+        ! calculate flood storage at fldstage(i,j)
+        if(fldstage(i,j)>0 .and. fldstage(i,j)<11)then
+          if(fldstage(i,j)==1)then
+            dhgtpre = 0
+          end if
+          if(fldstage(i,j)>1)then
+            dhgtpre = fldhgt(i,j,fldstage(i,j)-1)
+          end if
+          n = fldstage(i,j)
+          k = fldstage(i,j)-1
+          hgt = fldhgt(i,j,n)
+          pre = dhgtpre
  
-      !Across = grid_area(i,j)*(k*(hgt-flddph(i,j))+(K+1)*(flddph(i,j)-pre))/(hgt-pre+1e-20)*0.1
-      Across = 0.1*grid_area(i,j)*(k + ((flddph(i,j)-pre)/(hgt-pre+1e-20))*1.0)    !(k*(hgt-flddph(i,j))+(k+1)*(flddph(i,j)-pre))/(hgt-pre+1e-20)
-      fldfrac(i,j) = fldfrac(i,j) + 0.1/(hgt-pre+1e-20)*(0*(hgt-flddph(i,j))+1*(flddph(i,j)-pre))
+          !Across = grid_area(i,j)*(k*(hgt-flddph(i,j))+(K+1)*(flddph(i,j)-pre))/(hgt-pre+1e-20)*0.1
+          Across = 0.1*grid_area(i,j)*(k + ((flddph(i,j)-pre)/(hgt-pre+1e-20))*1.0)    !(k*(hgt-flddph(i,j))+(k+1)*(flddph(i,j)-pre))/(hgt-pre+1e-20)
+          fldfrac(i,j) = fldfrac(i,j) + 0.1/(hgt-pre+1e-20)*(0*(hgt-flddph(i,j))+1*(flddph(i,j)-pre))
 
-      fldsto(i,j) = fldsto(i,j) + ((Across+0.1*grid_area(i,j)*k)*0.5)*(flddph(i,j)-pre)
+          fldsto(i,j) = fldsto(i,j) + ((Across+0.1*grid_area(i,j)*k)*0.5)*(flddph(i,j)-pre)
 
-    end if
-    if (fldstage(i,j)==11)then
-      pre = fldhgt(i,j,10)
-      fldsto(i,j) = fldsto(i,j) + grid_area(i,j)*(flddph(i,j)-pre)
-      fldfrac(i,j) = 1.0
-    end if
+        end if
+        if (fldstage(i,j)==11)then
+          pre = fldhgt(i,j,10)
+          fldsto(i,j) = fldsto(i,j) + grid_area(i,j)*(flddph(i,j)-pre)
+          fldfrac(i,j) = 1.0
+        end if
 
-  end do
+    end do
 end do
 
 ! ===================================================
@@ -316,4 +341,8 @@ end if
 close(35)
 write(82,*) "done restart file at:",fname
 close(82)
+!deallocate
+deallocate(rivlen,rivwth,rivhgt,fldhgt)
+deallocate(elevtn,nextX,nextY,nextdst,grid_area)
+deallocate(rivdph,rivsto,flddph,fldsto)
 end program make_restart
