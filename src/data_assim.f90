@@ -396,7 +396,7 @@ end do
 allocate(meanglobaltrue(lonpx,latpx))
 meanglobaltrue=0
 !fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/meansfcelvT000.bin"
-fname=trim(adjustl(DAdir))//"/dat/mean_sfcelv_1960-2013.bin"
+fname=trim(adjustl(DAdir))//"/dat/mean_sfcelv_1958-2013.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) meanglobaltrue
@@ -412,7 +412,7 @@ close(34)
 allocate(stdglobaltrue(lonpx,latpx))
 stdglobaltrue=0
 !fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/meansfcelvT000.bin"
-fname=trim(adjustl(DAdir))//"/dat/std_sfcelv_1960-2013.bin"
+fname=trim(adjustl(DAdir))//"/dat/std_sfcelv_1958-2013.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) stdglobaltrue

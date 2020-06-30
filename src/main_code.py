@@ -86,7 +86,6 @@ def main_act():
 
     # run daily simulations
     for day in np.arange(days_count):
-
         running_dt=start_dt+datetime.timedelta(days=day)
         yyyy='%04d' % (running_dt.year)
         mm='%02d' % (running_dt.month)
@@ -607,10 +606,8 @@ def make_restart(inputlist):
     dd_n="%02d"%nextdate.day
 
     # calculate other variables from water storage
-    dir1=pm.CaMa_dir()+"/"
-    print "dir1",dir1
     exp_dir=pm.DA_dir()+"/out/"+pm.experiment()
-    os.system(pm.DA_dir()+"/src/make_restart "+yyyy+mm+dd+" "+yyyy_b+mm_b+dd_b+" "+yyyy_n+mm_n+dd_n+" "+loop+" "+dir1+" "+str(pm.ens_mem())+" "+numch+" "+exp_dir)
+    os.system(pm.DA_dir()+"/src/make_restart "+yyyy+mm+dd+" "+yyyy_b+mm_b+dd_b+" "+yyyy_n+mm_n+dd_n+" "+loop+" "+pm.CaMa_dir()+" "+pm.mapname()+" "+str(pm.ens_mem())+" "+numch+" "+exp_dir)
 
     print "finish restarting",numch
 ###########################
@@ -626,9 +623,7 @@ def make_rivout(inputlist):
     #print "calculate insantaneous discharge using Manning's equation"
 
     # calculate other variables from water storage
-    dir1=pm.CaMa_dir()+"/"
-    print "dir1",dir1
-    os.system("./src/make_rivout "+yyyy+mm+dd+" "+loop+" "+dir1+" "+str(pm.ens_mem())+" "+numch)
+    os.system("./src/make_rivout "+yyyy+mm+dd+" "+loop+" "+pm.CaMa_dir()+" "+pm.mapname()+" "+str(pm.ens_mem())+" "+numch)
 ###########################
 def copy_runoff(inputlist): #do it parallel
     iname=inputlist[0]

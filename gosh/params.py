@@ -164,7 +164,7 @@ def mapname():
 def map_dimension():
     fname=CaMa_dir()+"/map/"+mapname+"/params.txt"
     f=open(fname,"r")
-    line=f.readlines()
+    lines=f.readlines()
     f.close()
     #-------
     nx     = int(filter(None, re.split(" ",lines[0]))[0])
