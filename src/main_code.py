@@ -61,6 +61,7 @@ def main_act():
     make_initial_infl()
 
     # Set Time
+    print "Set Time"
     timestep=pm.timestep() #time step for assimilation
     start_year,start_month,start_date=pm.starttime() # Start year month date
     end_year,end_month,end_date=pm.endtime() # End year month date
@@ -679,7 +680,7 @@ def make_initial_infl():
     yyyy='%04d' % (start_year)
     mm='%02d' % (start_month)
     dd='%02d' % (start_date)
-    parm_infl.tofile("./inflation/parm_infl"+yyyy+mm+dd+".bin")
+    parm_infl.tofile(pm.DA_dir()+"/out/"+pm.experiment()+"/inflation/parm_infl"+yyyy+mm+dd+".bin")
 ###########################
 def mkdir(path):
     try:

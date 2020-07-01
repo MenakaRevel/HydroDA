@@ -13,10 +13,10 @@ def timestep():
     return 86400 # outer timestep in seconds
 
 def starttime():
-    return (2002,1,1) # start date: [year,month,date]
+    return (2003,1,1) # start date: [year,month,date]
 
 def endtime():
-    return (2015,1,1) # end date: [year,month,date]
+    return (2004,1,1) # end date: [year,month,date]
                       # *note: this date is not included
 
 def ens_mem():
@@ -162,7 +162,7 @@ def mapname():
     return "amz_06min"
 
 def map_dimension():
-    fname=CaMa_dir()+"/map/"+mapname+"/params.txt"
+    fname=CaMa_dir()+"/map/"+mapname()+"/params.txt"
     f=open(fname,"r")
     lines=f.readlines()
     f.close()
@@ -178,7 +178,8 @@ def DA_dir():
     # where src, dat, sat, out exsits
 
 def patch_dir():
-    return "/cluster/data6/menaka/covariance/local_patch"
+    return "/cluster/data6/menaka/Empirical_LocalPatch/local_patch"
+    #return "/cluster/data6/menaka/covariance/local_patch"
     #return "/cluster/data6/menaka/covariance/local_patchMS"
     #return "/cluster/data6/menaka/covariance/local_patch_0.80"
 
@@ -194,7 +195,7 @@ def spinup_mode():
     ### if initial restart file is ready, spinup simulation is no need
 
 def spinup_end_year():
-    return 2001
+    return 2002
 
 def spinup_end_month():
     return 12
@@ -210,7 +211,7 @@ def ovs_err():
     # hope to be below 0.10
 
 def thersold():
-    return 0.60 
+    return 0.60
     # thersold to define the local patch
 
 def initial_infl():
