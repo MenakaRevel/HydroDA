@@ -26,7 +26,7 @@ import cal_stat as stat
 
 #argvs = sys.argv
 
-experiment="E2O_HydroWeb12"
+experiment="E2O_HydroWeb15"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 assim_out=pm.DA_dir()+"/out/"+experiment
@@ -65,48 +65,71 @@ def mk_dir(sdir):
 #----
 mk_dir(assim_out+"/figures")
 mk_dir(assim_out+"/figures/sfcelv")
+#----
+fname=pm.CaMa_dir()+"/map/"+pm.mapname()+"/params.txt"
+f=open(fname,"r")
+lines=f.readlines()
+f.close()
+#-------
+nx     = int(filter(None, re.split(" ",lines[0]))[0])
+ny     = int(filter(None, re.split(" ",lines[1]))[0])
+gsize  = float(filter(None, re.split(" ",lines[3]))[0])
 #---
-year,month,date=pm.starttime()
+###year,month,date=pm.starttime()
+####month=1
+####date=1
+###start_dt=datetime.date(year,month,date)
+###size=60
+###
+###start=0
+####last=int(argvs[1])
+###last=365#int(argvs[1])
+###if calendar.isleap(year):
+###    last=366
+###else:
+###    last=365
+syear,smonth,sdate=pm.starttime()#2004#1991
+eyear,emonth,edate=pm.endtime()
 #month=1
 #date=1
-start_dt=datetime.date(year,month,date)
+start_dt=datetime.date(syear,smonth,sdate)
+end_dt=datetime.date(eyear,emonth,edate)
 size=60
 
 start=0
-#last=int(argvs[1])
-last=365#int(argvs[1])
-if calendar.isleap(year):
-    last=366
-else:
-    last=365
+last=(end_dt-start_dt).days
 
 N=int(last)
 green2="greenyellow"
 #--------------
-nextxy = pm.CaMa_dir()+"/map/glb_15min/nextxy.bin"
-rivwth = pm.CaMa_dir()+"/map/glb_15min/rivwth_gwdlr.bin"
-rivhgt = pm.CaMa_dir()+"/map/glb_15min/rivhgt.bin"
-rivlen = pm.CaMa_dir()+"/map/glb_15min/rivlen.bin"
-elevtn = pm.CaMa_dir()+"/map/glb_15min/elevtn.bin"
-nextxy = np.fromfile(nextxy,np.int32).reshape(2,720,1440)
-rivwth = np.fromfile(rivwth,np.float32).reshape(720,1440)
-rivhgt = np.fromfile(rivhgt,np.float32).reshape(720,1440)
-rivlen = np.fromfile(rivlen,np.float32).reshape(720,1440)
-elevtn = np.fromfile(elevtn,np.float32).reshape(720,1440)
+nextxy = pm.CaMa_dir()+"/map/"+pm.mapname()+"/nextxy.bin"
+rivwth = pm.CaMa_dir()+"/map/"+pm.mapname()+"/rivwth_gwdlr.bin"
+rivhgt = pm.CaMa_dir()+"/map/"+pm.mapname()+"/rivhgt.bin"
+rivlen = pm.CaMa_dir()+"/map/"+pm.mapname()+"/rivlen.bin"
+elevtn = pm.CaMa_dir()+"/map/"+pm.mapname()+"/elevtn.bin"
+nextxy = np.fromfile(nextxy,np.int32).reshape(2,ny,nx)
+rivwth = np.fromfile(rivwth,np.float32).reshape(ny,nx)
+rivhgt = np.fromfile(rivhgt,np.float32).reshape(ny,nx)
+rivlen = np.fromfile(rivlen,np.float32).reshape(ny,nx)
+elevtn = np.fromfile(elevtn,np.float32).reshape(ny,nx)
 #----
-mean_sfcelv = pm.DA_dir()+"/dat/mean_sfcelv_1960-2013.bin"
-mean_sfcelv = np.fromfile(mean_sfcelv,np.float32).reshape(720,1440)
+# mean
+mean_sfcelv = pm.DA_dir()+"/dat/mean_sfcelv_1958-2013.bin"
+mean_sfcelv = np.fromfile(mean_sfcelv,np.float32).reshape(ny,nx)
+# std
+std_sfcelv = pm.DA_dir()+"/dat/std_sfcelv_1958-2013.bin"
+std_sfcelv = np.fromfile(std_sfcelv,np.float32).reshape(ny,nx)
 #- mean obs HydroWeb
 #mean_obs = pm.DA_dir()+"/dat/mean_sfcelv_1960-2013.bin"
 #mean_obs = np.fromfile(mean_obs,np.float32).reshape(720,1440)
 #-------
-mean_sfcelvs=np.zeros([pm.ens_mem(),720,1440])
-for num in np.arange(1,int(pm.ens_mem())+1):
-    numch='%03d'%num
-    fname=assim_out+"/assim_out/mean_sfcelv/meansfcelvC"+numch+".bin"
-    mean_corr=np.fromfile(fname,np.float32).reshape([720,1440])
-    mean_sfcelvs[num-1]=mean_corr
-mean_sfcelv=np.mean(mean_sfcelvs,axis=0)
+##mean_sfcelvs=np.zeros([pm.ens_mem(),720,1440])
+##for num in np.arange(1,int(pm.ens_mem())+1):
+##    numch='%03d'%num
+##    fname=assim_out+"/assim_out/mean_sfcelv/meansfcelvC"+numch+".bin"
+##    mean_corr=np.fromfile(fname,np.float32).reshape([720,1440])
+##    mean_sfcelvs[num-1]=mean_corr
+##mean_sfcelv=np.mean(mean_sfcelvs,axis=0)
 #------
 pname=[]
 xlist=[]
@@ -122,7 +145,7 @@ for rivername in rivernames:
   print path
   mk_dir(path)
   #station_loc,x_list,y_list = grdc.get_grdc_loc(rivername,"b")
-  station_loc,x_list,y_list,egm08,egm96 =hweb.get_hydroweb_loc(rivername)
+  station_loc,x_list,y_list,egm08,egm96 =hweb.get_hydroweb_loc(rivername,pm.mapname())
   print rivername, station_loc
   river.append([rivername]*len(station_loc))
   pname.append(station_loc)
@@ -280,17 +303,17 @@ for day in np.arange(start,last):
         fname=assim_out+"/assim_out/ens_xa/open/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
         #fname="../CaMa_out/"+yyyy+mm+dd+"C"+numch+"/sfcelv"+yyyy+".bin"
         #fname="../"+assim_out+"/ens_xa/open/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
-        opnfile=np.fromfile(fname,np.float32).reshape([720,1440])
+        opnfile=np.fromfile(fname,np.float32).reshape([ny,nx])
 
         fname=assim_out+"/assim_out/ens_xa/assim/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
-        asmfile=np.fromfile(fname,np.float32).reshape([720,1440])
+        asmfile=np.fromfile(fname,np.float32).reshape([ny,nx])
 
 #        fname="../assim_out/rivhgt/assim/rivhgt"+yyyy+mm+dd+"_"+numch+"A.bin"
         #fname="../CaMa_out/"+yyyy+mm+dd+"A"+numch+"/sfcelv"+yyyy+".bin"
-        rhgtfile=np.fromfile(fname,np.float32).reshape([720,1440])
+        rhgtfile=np.fromfile(fname,np.float32).reshape([ny,nx])
 
         fname=assim_out+"/assim_out/mean_sfcelv/meansfcelvC"+numch+".bin"
-        mean_corr=np.fromfile(fname,np.float32).reshape([720,1440])
+        mean_corr=np.fromfile(fname,np.float32).reshape([ny,nx])
 
         opn_frag=[]
         asm_frag=[]
@@ -357,11 +380,11 @@ def make_fig(point):
 
     fig, ax1 = plt.subplots()
     #ax1.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7,zorder=101,marker = "o",markevery=swt[point])
-    time,org=hweb.HydroWeb_WSE(pname[point],year,year)
-    data=np.array(org)-np.array(EGM08[point])+np.array(EGM96[point])
+    time,org=hweb.HydroWeb_WSE(pname[point],syear,eyear)
+    data=np.array(org)+np.array(EGM08[point])-np.array(EGM96[point])
     #alti=hweb.altimetry(pname[point]) - EGM08[point] + EGM96[point]
     #data=data-alti+elevtn[ylist[point],xlist[point]]
-    data=data-np.mean(data)+mean_sfcelv[ylist[point],xlist[point]]
+    data=((data-np.mean(data))/np.std(data))*std_sfcelv[ylist[point],xlist[point]]+mean_sfcelv[ylist[point],xlist[point]]
     lines=[ax1.plot(time,data,label="obs",marker="o",color="black",linewidth=0.0,zorder=101)[0]]
 #    ax1.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7,zorder=101)
 #    ax1.plot(np.arange(start,last),m_sf[:,point],label="mean sfcelv",color="black",linewidth=0.7,linestyle="--",zorder=107)

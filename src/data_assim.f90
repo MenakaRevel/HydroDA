@@ -223,7 +223,7 @@ allocate(nextX(lonpx,latpx),nextY(lonpx,latpx),ocean(lonpx,latpx),countp(lonpx,l
 
 ! make ocean mask from storage data (1 is ocean; 0 is not ocean)
 !ocean = (storage>1e18) * (-1)
-
+write(82,*) "File I/O Errors"
 ! read river width
 fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivwth_gwdlr.bin"
 !print *, fname
@@ -233,6 +233,7 @@ if(ios==0)then
     ! ocean is -9999
 else
     write(*,*) "no file rivwth"
+    write(82,*) "no file :", fname
 end if
 close(34)
 
@@ -246,6 +247,7 @@ if(ios==0)then
     read(34,rec=2) nextY
 else
     write(*,*) "no file nextXY at:",fname
+    write(82,*) "no file :", fname
 end if
 close(34)
 
@@ -258,6 +260,7 @@ if(ios==0)then
     read(34,rec=2) lats
 else
     write(*,*) "no file nextXY at:",fname
+    write(82,*) "no file :", fname
 end if
 close(34)
 
@@ -273,6 +276,7 @@ if(ios==0)then
     ! ocean is -9999
 else
     write(*,*) "no file rivlen",fname
+    write(82,*) "no file :", fname
 end if
 close(34)
 
@@ -284,6 +288,7 @@ if(ios==0)then
     read(34,rec=1) nextdst
 else
     write(*,*) "no file nextdst",fname
+    write(82,*) "no file :", fname
 end if
 close(34)
 
@@ -295,6 +300,7 @@ if(ios==0)then
     read(34,rec=1) elevtn
 else
     write(*,*) "no file elevtn",fname
+    write(82,*) "no file :", fname
 end if
 close(34)
 
@@ -332,6 +338,7 @@ if(ios==0)then
     read(34,rec=2) obs_err
 else
     write(*,*) "no file ", fname
+    write(82,*) "no file :", fname
 end if
 close(34)
 
@@ -342,6 +349,7 @@ if(ios==0)then
     read(34,rec=1) altitude
 else
     write(*,*) "no file ", fname
+    write(82,*) "no file :", fname
 end if
 close(34)
 
@@ -352,6 +360,7 @@ if(ios==0)then
     read(34,rec=1) mean_obs
 else
     write(*,*) "no file ", fname
+    write(82,*) "no file :", fname
 end if
 close(34)
 
@@ -362,6 +371,7 @@ if(ios==0)then
     read(34,rec=1) std_obs
 else
     write(*,*) "no file ", fname
+    write(82,*) "no file :", fname
 end if
 close(34)
 
@@ -373,6 +383,7 @@ if(ios==0)then
     read(34,rec=1) parm_infl
 else
     write(*,*) "no parm_infl",fname
+    write(82,*) "no file :", fname
 end if
 close(34)
 
@@ -388,6 +399,7 @@ do num=1,ens_num
         read(34,rec=1) meanglobalx(:,:,num)
     else
         write(*,*) "no mean x"
+        write(82,*) "no file :", fname
     end if
     close(34)
 end do
@@ -402,6 +414,7 @@ if(ios==0)then
     read(34,rec=1) meanglobaltrue
 else
     write(*,*) "no true"
+    write(82,*) "no file :", fname
 end if
 close(34)
 
@@ -418,6 +431,7 @@ if(ios==0)then
     read(34,rec=1) stdglobaltrue
 else
     write(*,*) "no true"
+    write(82,*) "no file :", fname
 end if
 close(34)
 
@@ -433,6 +447,7 @@ do num=1,ens_num
         read(34,rec=1) globalx(:,:,num)
     else
         write(*,*) "no x"
+        write(82,*) "no file :", fname
     end if
     close(34)
 end do
@@ -473,7 +488,8 @@ if(ios==0)then
     read(34,rec=1) countp
     read(34,rec=2) targetp
 else
-    write(*,*) "countp , tsrget"
+    write(*,*) "countp , target"
+    write(82,*) "no file :", fname
 end if
 close(34)
 
@@ -532,11 +548,12 @@ global_null = 0.0
 !obs_mask=0 ! 0 means no observatioin
 
 !write(72,*) "L445"
-print *, "L456"
+!print *, "L456"
 !=======
 ! !HydroWeb data refer
 !!allocate(VSrefer(lonpx,latpx))
-
+write(82,*) "====================================="
+write(82,*) "Calculation Errors"
 ! parallel calculation
 
 !$omp parallel default(none)&
@@ -550,8 +567,8 @@ print *, "L456"
 !$omp& UNI,la_p,U_p,HETRHE,VDVTmax,work,iwork,ifail,m,info,U,la,Dinv,Dsqr,info2,yo, &
 !$omp& Wvec,xa,EfW,K_,num,rho)
 !$omp do
-do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)+1),1
-  do lat_cent = int((north-assimN)*(1.0/gsize)+1),int((north-assimS)*(1.0/gsize)+1),1
+do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
+  do lat_cent = int((north-assimN)*(1.0/gsize)+1),int((north-assimS)*(1.0/gsize)),1
         lat = lats(lon_cent,lat_cent) !90.0-(lat_cent-1.0)/4.0
         lon = lons(lon_cent,lat_cent) !(lon_cent-1.0)/4.0-180.0
         ! not connected to longtitude direction; no calculation available near lon=-180,180 or lat=-80,80
@@ -564,7 +581,9 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)+1),
         if (rivwth(lon_cent,lat_cent) <=0.0) then
             cycle
         end if
-
+        !=========================
+        write(82,*) "+++++++++++++++++"
+        write(82,*) lon_cent, lat_cent
         ! countnum and target pixel
         countnumber=countp(lon_cent,lat_cent)
         targetpixel=targetp(lon_cent,lat_cent)
@@ -593,7 +612,10 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)+1),
             patch_end=countnumber
             target_pixel=targetpixel
             countnum=countnumber
-       end if
+        end if
+        !============================
+        write(79,*)"patch dimesion",patch_start,patch_end,target_pixel,countnum
+        write(*,*)"patch dimesion",patch_start,patch_end,target_pixel,countnum
         !----------------------------
         ! read local satellite values
         allocate(local_sat(countnum))
@@ -607,6 +629,8 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)+1),
         local_err=-9999.0
         !local_lag=-9999.0
         local_wgt=wgt(patch_start:patch_end)
+        print*, "local_wgt",local_wgt
+        write(79,*) "local_wgt", local_wgt
         xt=-9999.0
         !print*,"L514: read observation"
         !print*, patch_start,patch_end
@@ -619,12 +643,15 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)+1),
                 !print*, obs(i_m,j_m),altitude(i_m,j_m)
                 local_sat(j)=1
                 !xt(i)=obs(i_m,j_m) - altitude(i_m,j_m) + elevtn(i_m,j_m)
-                xt(j)=((obs(i_m,j_m) - mean_obs(i_m,j_m))/std_obs(i_m,j_m))*stdglobaltrue(i_m,j_m) + meanglobaltrue(i_m,j_m)
-!                print*, "observation converstion"
-!                print*, xt(j),obs(i_m,j_m),mean_obs(i_m,j_m),std_obs(i_m,j_m),stdglobaltrue(i_m,j_m) , meanglobaltrue(i_m,j_m)
-                local_err(j)=max(obs_err(i_m,j_m),0.30)
+                xt(j)=obs(i_m,j_m) - mean_obs(i_m,j_m) + meanglobaltrue(i_m,j_m)
+                !xt(j)=((obs(i_m,j_m) - mean_obs(i_m,j_m))/std_obs(i_m,j_m))*stdglobaltrue(i_m,j_m) + meanglobaltrue(i_m,j_m)
+                write(79,*) "Observations"
+                write(79,*) i_m,j_m,obs(i_m,j_m)
+                print*, "observation converstion"
+                print*, xt(j),obs(i_m,j_m),mean_obs(i_m,j_m),std_obs(i_m,j_m),stdglobaltrue(i_m,j_m) , meanglobaltrue(i_m,j_m)
+                local_err(j)=obs_err(i_m,j_m) !max(obs_err(i_m,j_m),0.30)
             else
-                local_sat(j)=-9999
+                local_sat(j)=-9999.0
                 xt(j)=-9999.0
                 local_err(j)=-9999.0
             end if
@@ -643,7 +670,8 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)+1),
 
         ! satellite observation 
         local_obs=(local_sat/=-9999.0)*(-1) ! .true.=1 of .false.=0
-        !write(72,*) lat,lon,local_obs
+        write(72,*) lon_cent,lat_cent,lat,lon,local_obs
+        write(79,*) "satellite observations",lon_cent,lat_cent,lat,lon,local_obs
 
         ! make xf =====================================
         !write(*,*) "make xf"
@@ -678,9 +706,11 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)+1),
         !------------------------------------------------------------
         ! ========= reach here only when there is at least one observation inside the local patch =======
         !------------------------------------------------------------
-        write(78,*) "================================================"
+        write(78,*) "=========================================================="
         !write(78,*) "******************",lat,lon,"*******************"
-        write(78,*) "******************",lon_cent,lat_cent,"*******************"
+        write(78,*) "******************",lon_cent,lat_cent," *******************"
+        write(78,*) "=========================================================="
+        !=========
         write(*,*) "******************",lon_cent,lat_cent,"*******************"
         write(78,*) "size",countnum
         write(78,*) "local obs",local_obs
@@ -913,12 +943,12 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)+1),
         !write(*,*) "xa:",xa
         ! check center pixel ====================================
         !write(*,*) "errfix:", errfix, obserrrand(lon_cent,lat_cent)
-        !write(*,*) "true   :",xt(target_pixel)
+        write(*,*) "true   :",xt(target_pixel)
         write(*,*) "forcast:",sum(xf(target_pixel,:))/(ens_num+1e-20)
         write(*,*) "assimil:",sum(xa(target_pixel,:))/(ens_num+1e-20)
 
 
-        !write(78,*) "true   :",xt(target_pixel)
+        write(78,*) "true   :",xt(target_pixel)
         write(78,*) "forcast:",sum(xf(target_pixel,:))/(ens_num+1e-20)
         write(78,*) "assimil:",sum(xa(target_pixel,:))/(ens_num+1e-20)
         ! check K_ value (should be between 0-1) =======================================

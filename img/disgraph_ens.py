@@ -13,10 +13,10 @@ import calendar
 from multiprocessing import Pool
 from multiprocessing import Process
 from numpy import ma
-
+import re
 
 #sys.path.append('../assim_out/')
-#os.system("ln -sf ../gosh/params.py params.py")
+os.system("ln -sf ../gosh/params.py params.py")
 import params as pm
 import read_grdc as grdc
 import cal_stat as stat
@@ -26,7 +26,7 @@ import cal_stat as stat
 
 #argvs = sys.argv
 
-experiment="E2O_HydroWeb14"
+experiment="E2O_HydroWeb15"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 assim_out=pm.DA_dir()+"/out/"+experiment
@@ -67,6 +67,15 @@ def mk_dir(sdir):
 mk_dir(assim_out+"/figures")
 mk_dir(assim_out+"/figures/disgraph")
 #----
+fname=pm.CaMa_dir()+"/map/"+pm.mapname()+"/params.txt"
+f=open(fname,"r")
+lines=f.readlines()
+f.close()
+#-------
+nx     = int(filter(None, re.split(" ",lines[0]))[0])
+ny     = int(filter(None, re.split(" ",lines[1]))[0])
+gsize  = float(filter(None, re.split(" ",lines[3]))[0])
+#----
 syear,smonth,sdate=pm.starttime()#2004#1991
 eyear,emonth,edate=pm.endtime()
 #month=1
@@ -96,8 +105,8 @@ ylist=[]
 river=[]
 #--
 #rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZON","MEKONG","IRRAWADDY","VOLGA", "NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
-rivernames  = ["AMAZON"]
-#rivernames = grdc.grdc_river_name_v396()
+#rivernames  = ["AMAZON"]
+rivernames = grdc.grdc_river_name_v396()
 #rivernames = grdc.grdc_river_name()
 #for rivername in rivernames:
 #  #station_loc,x_list,y_list = grdc.get_grdc_loc(rivername,"b")
@@ -208,13 +217,13 @@ for day in np.arange(start,last):
 #    meshP=mesh-1000*(mesh<0.1)
 
 #    fname="../sat/observation_day%02d.bin"%(SWOT_day(yyyy,mm,dd))
-#    meshP=np.fromfile(fname,np.int32).reshape([720,1440])
+#    meshP=np.fromfile(fname,np.int32).reshape([ny,nx])
 #    #meshP=(meshP>=1)*1
 
 
 #    # make org
 #    fname=assim_out+"/rivout/true/rivout"+yyyy+mm+dd+".bin"
-#    orgfile=np.fromfile(fname,np.float32).reshape([720,1440])
+#    orgfile=np.fromfile(fname,np.float32).reshape([ny,nx])
 #
 #    org_frag=[]
 #    for point in np.arange(pnum):
@@ -240,11 +249,11 @@ for day in np.arange(start,last):
 
         fname=assim_out+"/assim_out/rivout/open/rivout"+yyyy+mm+dd+"_"+numch+".bin"
         #fname="../CaMa_out/"+yyyy+mm+dd+"C"+numch+"/rivout"+yyyy+".bin"
-        opnfile=np.fromfile(fname,np.float32).reshape([720,1440])
+        opnfile=np.fromfile(fname,np.float32).reshape([ny,nx])
 
         fname=assim_out+"/assim_out/rivout/assim/rivout"+yyyy+mm+dd+"_"+numch+".bin"
         #fname="../CaMa_out/"+yyyy+mm+dd+"A"+numch+"/rivout"+yyyy+".bin"
-        asmfile=np.fromfile(fname,np.float32).reshape([720,1440])
+        asmfile=np.fromfile(fname,np.float32).reshape([ny,nx])
 
         opn_frag=[]
         asm_frag=[]

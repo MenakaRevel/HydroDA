@@ -16,7 +16,7 @@ def starttime():
     return (2003,1,1) # start date: [year,month,date]
 
 def endtime():
-    return (2004,1,1) # end date: [year,month,date]
+    return (2003,1,2) # end date: [year,month,date]
                       # *note: this date is not included
 
 def ens_mem():
@@ -83,8 +83,8 @@ def assimE():
     # *note: should be smaller or equal to 170
 
 def patch_size():
-    #return 0
-    return 100
+    return 0
+    #return 100
     # the size of the local patch of LETKF(Local ** EnKF)
     # 0: only 1 pixel (the pixel itself) belongs to its local patch
     # 100: empirical local patch
@@ -123,7 +123,7 @@ def rivman_error():
     # 7 : with manning error: Manning's n depend on
 
 def run_flag():
-    return 0
+    return 3
     # 0 run all simulations
     # 1 run only corrupted and assimilated simulations
     # 2 run only true and assimilated simulations
@@ -187,7 +187,7 @@ def patch_id():
     return "0.60"
 
 def spinup_mode():
-    return 0
+    return 3
     # 0: do spinup simulation for both (corrupted and true) simulation
     # 1: do spin up only at corrupted simulation
     # 2: do spin up only at true simulation

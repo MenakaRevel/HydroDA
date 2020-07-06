@@ -84,6 +84,7 @@ open(82,file=fname,status='replace')
 write(82,*) "make_restart.f90 Errors"
 
 ! read assimilated xa
+allocate(xa(lonpx,latpx))
 fname=trim(adjustl(expdir))//"/assim_out/ens_xa/"//trim(adjustl(loop))//"/"//yyyymmdd//"_"//num_name//"_xa.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
@@ -208,8 +209,8 @@ rivsto_max = rivlen*rivwth*rivhgt
 
 ! make ocean mask
 ! 0:inland 1:mouth 2:ocean
-do i=1,1440
-    do j=1,720
+do i=1,lonpx
+    do j=1,latpx
         if(nextX(i,j)==-9999)then
             oceanmask(i,j)=2
         else if(nextX(i,j)==-9)then ! ocean
@@ -229,8 +230,8 @@ end do
 ! hence, max = elevtn
 fldstage=0
 fldfrac=0
-do i=1,1440
-    do j=1,720
+do i=1,lonpx
+    do j=1,latpx
         if(oceanmask(i,j)<2)then
             if(xa(i,j)>elevtn(i,j))then
                 fldstage(i,j)=1
@@ -248,8 +249,8 @@ rivsto = rivdph * rivlen * rivwth
 
 ! calculate flddph
 flddph = 0
-do i=1,1440
-  do j=1,720
+do i=1,lonpx
+  do j=1,latpx
     if(fldstage(i,j)>0)then
       flddph(i,j) = rivdph(i,j) - rivhgt(i,j)
       !if (flddph(i,j)<1e-2) flddph(i,j) =0
@@ -258,8 +259,8 @@ do i=1,1440
 end do
 
 ! calculate flood inundation percentage
-do i=1,1440
-  do j=1,720
+do i=1,lonpx
+  do j=1,latpx
     if(fldstage(i,j)==1)then
       do n=1,10
         if(fldhgt(i,j,n)>flddph(i,j)) exit
@@ -318,8 +319,8 @@ end do
 
 ! ===================================================
 ! arrangement for ocean mask
-do i=1,1440
-    do j=1,720
+do i=1,lonpx
+    do j=1,latpx
         if(oceanmask(i,j)==2)then
             rivsto(i,j)=1e20
             fldsto(i,j)=1e20
@@ -342,7 +343,7 @@ close(35)
 write(82,*) "done restart file at:",fname
 close(82)
 !deallocate
-deallocate(rivlen,rivwth,rivhgt,fldhgt)
+deallocate(xa,rivlen,rivwth,rivhgt,fldhgt)
 deallocate(elevtn,nextX,nextY,nextdst,grid_area)
 deallocate(rivdph,rivsto,flddph,fldsto)
 end program make_restart

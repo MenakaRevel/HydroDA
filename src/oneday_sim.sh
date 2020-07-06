@@ -43,7 +43,7 @@ runname=$8
 
 EXP_DIR=$9
 
-mapname=$10
+mapname=${10}
 
 echo "looptype" $looptype
 #=================================================
