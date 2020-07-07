@@ -120,8 +120,11 @@ mean_sfcelv = np.fromfile(mean_sfcelv,np.float32).reshape(ny,nx)
 std_sfcelv = pm.DA_dir()+"/dat/std_sfcelv_1958-2013.bin"
 std_sfcelv = np.fromfile(std_sfcelv,np.float32).reshape(ny,nx)
 #- mean obs HydroWeb
-#mean_obs = pm.DA_dir()+"/dat/mean_sfcelv_1960-2013.bin"
-#mean_obs = np.fromfile(mean_obs,np.float32).reshape(720,1440)
+mean_obs = pm.HydroWeb_dir()+"/bin/HydroWeb_mean.bin"
+mean_obs = np.fromfile(mean_obs,np.float32).reshape(ny,nx)
+# std obs HydroWeb
+std_obs = pm.HydroWeb_dir()+"/bin/HydroWeb_std.bin"
+std_obs = np.fromfile(std_obs,np.float32).reshape(ny,nx)
 #-------
 ##mean_sfcelvs=np.zeros([pm.ens_mem(),720,1440])
 ##for num in np.arange(1,int(pm.ens_mem())+1):
@@ -384,7 +387,10 @@ def make_fig(point):
     data=np.array(org)+np.array(EGM08[point])-np.array(EGM96[point])
     #alti=hweb.altimetry(pname[point]) - EGM08[point] + EGM96[point]
     #data=data-alti+elevtn[ylist[point],xlist[point]]
-    data=((data-np.mean(data))/np.std(data))*std_sfcelv[ylist[point],xlist[point]]+mean_sfcelv[ylist[point],xlist[point]]
+    #data=((data-np.mean(data))/np.std(data))*std_sfcelv[ylist[point],xlist[point]]+mean_sfcelv[ylist[point],xlist[point]]
+    #data=(data-np.mean(data))+mean_sfcelv[ylist[point],xlist[point]]
+    #---------
+    data=((data-mean_obs[ylist[point],xlist[point]])/(std_obs[ylist[point],xlist[point]]+1.0e-20))*std_sfcelv[ylist[point],xlist[point]]+mean_sfcelv[ylist[point],xlist[point]]
     lines=[ax1.plot(time,data,label="obs",marker="o",color="black",linewidth=0.0,zorder=101)[0]]
 #    ax1.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7,zorder=101)
 #    ax1.plot(np.arange(start,last),m_sf[:,point],label="mean sfcelv",color="black",linewidth=0.7,linestyle="--",zorder=107)
@@ -433,7 +439,7 @@ def make_fig(point):
 #    ax2.set_ylim(ymin=0.,ymax=1.)
     plt.legend(lines,labels,ncol=1,loc='upper right') #, bbox_to_anchor=(1.0, 1.0),transform=ax1.transAxes)
 #    fig.legend(lines,labels,ncol=1,loc='lower left', bbox_to_anchor=(1.0, 1.0))
-    print 'save',river[point],re.split("_",pname[point])[2]+"_"+re.split("_",pname[point])[3]
+    print 'save',river[point],re.split("_",pname[point])[2]+"_"+re.split("_",pname[point])[3],ylist[point],xlist[point],mean_obs[ylist[point],xlist[point]],std_obs[ylist[point],xlist[point]]
     plt.savefig(assim_out+"/figures/sfcelv/"+river[point]+"/"+re.split("_",pname[point])[2]+"_"+re.split("_",pname[point])[3]+".png",dpi=300)
     return 0
 #

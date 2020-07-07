@@ -615,7 +615,7 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         end if
         !============================
         write(79,*)"patch dimesion",patch_start,patch_end,target_pixel,countnum
-        write(*,*)"patch dimesion",patch_start,patch_end,target_pixel,countnum
+        !write(*,*)"patch dimesion",patch_start,patch_end,target_pixel,countnum
         !----------------------------
         ! read local satellite values
         allocate(local_sat(countnum))
@@ -629,26 +629,30 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         local_err=-9999.0
         !local_lag=-9999.0
         local_wgt=wgt(patch_start:patch_end)
-        print*, "local_wgt",local_wgt
+        !print*, "local_wgt",local_wgt
         write(79,*) "local_wgt", local_wgt
         xt=-9999.0
         !print*,"L514: read observation"
         !print*, patch_start,patch_end
         ! read observations
+        !print*,"^^^^^^^^^^^^^^^^^"
+        !print*, lon_cent,lat_cent
         j=1
         do i=patch_start,patch_end
             i_m=xlist(i)
             j_m=ylist(i)
             if (obs(i_m,j_m)/=-9999.0) then
                 !print*, obs(i_m,j_m),altitude(i_m,j_m)
-                local_sat(j)=1
+                print*,"^^^^^^^^^^^^^^^^^"
+                print*,lon_cent,lat_cent,patch_start,patch_end,targetpixel,countnumber
+                local_sat(j)=1.0
                 !xt(i)=obs(i_m,j_m) - altitude(i_m,j_m) + elevtn(i_m,j_m)
-                xt(j)=obs(i_m,j_m) - mean_obs(i_m,j_m) + meanglobaltrue(i_m,j_m)
-                !xt(j)=((obs(i_m,j_m) - mean_obs(i_m,j_m))/std_obs(i_m,j_m))*stdglobaltrue(i_m,j_m) + meanglobaltrue(i_m,j_m)
+                !xt(j)=obs(i_m,j_m) - mean_obs(i_m,j_m) + meanglobaltrue(i_m,j_m)
+                xt(j)=((obs(i_m,j_m) - mean_obs(i_m,j_m))/std_obs(i_m,j_m))*stdglobaltrue(i_m,j_m) + meanglobaltrue(i_m,j_m)
                 write(79,*) "Observations"
-                write(79,*) i_m,j_m,obs(i_m,j_m)
+                write(79,*) i_m,j_m,obs(i_m,j_m),mean_obs(i_m,j_m),std_obs(i_m,j_m),stdglobaltrue(i_m,j_m) , meanglobaltrue(i_m,j_m)
                 print*, "observation converstion"
-                print*, xt(j),obs(i_m,j_m),mean_obs(i_m,j_m),std_obs(i_m,j_m),stdglobaltrue(i_m,j_m) , meanglobaltrue(i_m,j_m)
+                print*,i_m,j_m, xt(j),obs(i_m,j_m),mean_obs(i_m,j_m),std_obs(i_m,j_m),stdglobaltrue(i_m,j_m) , meanglobaltrue(i_m,j_m)
                 local_err(j)=obs_err(i_m,j_m) !max(obs_err(i_m,j_m),0.30)
             else
                 local_sat(j)=-9999.0
