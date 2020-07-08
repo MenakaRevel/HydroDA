@@ -17,7 +17,7 @@ integer(kind=4)                 :: patch_start,patch_end,countnumber,targetpixel
 !integer*4                       :: S_lon_cent,S_lat_cent
 integer,allocatable             :: local_obs(:),iwork(:),ifail(:),H(:,:)!,localx(:,:,:)
 real,allocatable                :: xf_m(:),xf(:,:),globalx(:,:,:),xa(:,:)!,H(:,:)!xa_m(:),,localx_line(:)
-real,allocatable                :: meanglobalx(:,:,:),meanglobaltrue(:,:),stdglobaltrue(:,:)
+real,allocatable                :: meanglobalx(:,:,:),stdglobalx(:,:,:),meanglobaltrue(:,:),stdglobaltrue(:,:)
 integer                         :: ens_num,num,ios,ovs,info,info2,errflg,m
 character(len=3)                :: numch
 real,allocatable                :: globaltrue(:,:),xt(:),R(:,:),Rdiag(:)!
@@ -388,7 +388,7 @@ end if
 close(34)
 
 ! read mean sfelv forcast
-allocate(meanglobalx(lonpx,latpx,ens_num))
+allocate(meanglobalx(lonpx,latpx,ens_num),stdglobalx(lonpx,latpx,ens_num))
 meanglobalx=0
 do num=1,ens_num
     write(numch,'(i3.3)') num
@@ -404,36 +404,54 @@ do num=1,ens_num
     close(34)
 end do
 
+stdglobalx=0
+do num=1,ens_num
+    write(numch,'(i3.3)') num
+    fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/stdsfcelvC"//numch//".bin"
+    !print *, fname
+    open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+    if(ios==0)then
+        read(34,rec=1) stdglobalx(:,:,num)
+    else
+        write(*,*) "no mean x"
+        write(82,*) "no file :", fname
+    end if
+    close(34)
+end do
+
 ! read mean WSE true
 allocate(meanglobaltrue(lonpx,latpx))
 meanglobaltrue=0
 !fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/meansfcelvT000.bin"
-fname=trim(adjustl(DAdir))//"/dat/mean_sfcelv_1958-2013.bin"
-open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
-if(ios==0)then
-    read(34,rec=1) meanglobaltrue
-else
-    write(*,*) "no true"
-    write(82,*) "no file :", fname
-end if
-close(34)
+!fname=trim(adjustl(DAdir))//"/dat/mean_sfcelv_1958-2013.bin"
+!open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+!if(ios==0)then
+!    read(34,rec=1) meanglobaltrue
+!else
+!    write(*,*) "no true"
+!    write(82,*) "no file :", fname
+!end if
+!close(34)
 
 ! update meanglobalture
-!meanglobaltrue=(sum(meanglobalx(:,:,:),dim=3)/real(ens_num))
+meanglobaltrue=(sum(meanglobalx(:,:,:),dim=3)/real(ens_num))
 
 ! read std WSE true
 allocate(stdglobaltrue(lonpx,latpx))
 stdglobaltrue=0
 !fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/meansfcelvT000.bin"
-fname=trim(adjustl(DAdir))//"/dat/std_sfcelv_1958-2013.bin"
-open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
-if(ios==0)then
-    read(34,rec=1) stdglobaltrue
-else
-    write(*,*) "no true"
-    write(82,*) "no file :", fname
-end if
-close(34)
+!fname=trim(adjustl(DAdir))//"/dat/std_sfcelv_1958-2013.bin"
+!open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+!if(ios==0)then
+!    read(34,rec=1) stdglobaltrue
+!else
+!    write(*,*) "no true"
+!    write(82,*) "no file :", fname
+!end if
+!close(34)
+
+! update stdglobalture
+stdglobaltrue=(sum(stdglobalx(:,:,:),dim=3)/real(ens_num))
 
 ! read WSE from all model
 allocate(globalx(lonpx,latpx,ens_num))
@@ -1114,7 +1132,7 @@ deallocate(rivwth,rivlen,nextdst,lons,lats,elevtn,weightage,storage,parm_infl)
 deallocate(nextX,nextY,ocean,countp,targetp)
 deallocate(obs,obs_err,altitude,mean_obs,std_obs)
 deallocate(global_xa,globalx,ens_xa,global_null)!,obs_mask)
-deallocate(meanglobalx,meanglobaltrue,stdglobaltrue)
+deallocate(meanglobalx,stdglobalx,meanglobaltrue,stdglobaltrue)
 end program data_assim
 !*****************************************************************
 subroutine lag_distance(i,j,x,y,nx,ny,nextX,nextY,nextdst,lag_dist)

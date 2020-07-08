@@ -1689,9 +1689,12 @@ def sfcelv_mean(ens):
     sfcelv=pm.DA_dir()+"/out/"+pm.experiment()+"/CaMa_out/"+yyyy+mm+dd+ens+"/sfcelv"+yyyy+".bin"
     sfcelv=np.fromfile(sfcelv,np.float32).reshape(dz,ny,nx)
     sf_mean=np.mean(sfcelv,axis=0)
+    sf_std=np.std(sfcelv,axis=0)
     mkdir(pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out/mean_sfcelv")
     fname=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out/mean_sfcelv/meansfcelv"+ens+".bin"
     sf_mean.tofile(fname)
+    fname=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out/mean_sfcelv/stdsfcelv"+ens+".bin"
+    sf_std.tofile(fname)
     return 0
 ##########################
 def days_year(year):
