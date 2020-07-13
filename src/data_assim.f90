@@ -665,8 +665,8 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
                 print*,lon_cent,lat_cent,patch_start,patch_end,targetpixel,countnumber
                 local_sat(j)=1.0
                 !xt(i)=obs(i_m,j_m) - altitude(i_m,j_m) + elevtn(i_m,j_m)
-                !xt(j)=obs(i_m,j_m) - mean_obs(i_m,j_m) + meanglobaltrue(i_m,j_m)
-                xt(j)=((obs(i_m,j_m) - mean_obs(i_m,j_m))/std_obs(i_m,j_m))*stdglobaltrue(i_m,j_m) + meanglobaltrue(i_m,j_m)
+                xt(j)=obs(i_m,j_m) - mean_obs(i_m,j_m) !+ meanglobaltrue(i_m,j_m)
+                !xt(j)=((obs(i_m,j_m) - mean_obs(i_m,j_m))/std_obs(i_m,j_m))*stdglobaltrue(i_m,j_m) + meanglobaltrue(i_m,j_m)
                 write(79,*) "Observations"
                 write(79,*) i_m,j_m,obs(i_m,j_m),mean_obs(i_m,j_m),std_obs(i_m,j_m),stdglobaltrue(i_m,j_m) , meanglobaltrue(i_m,j_m)
                 print*, "observation converstion"
@@ -704,11 +704,12 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         do i=patch_start,patch_end
             i_m=xlist(i)
             j_m=ylist(i)
-            xf(j,:)=globalx(i_m,j_m,:)!-meanglobaltrue(i_m,j_m)
-            !do num=1, ens_num
+            !xf(j,:)=globalx(i_m,j_m,:)!-meanglobaltrue(i_m,j_m)
+            do num=1, ens_num
+                xf(j,num)=globalx(i_m,j_m,num)-meanglobalx(i_m,j_m,num)
             !    xf(j,num)=globalx(i_m,j_m,num)-meanglobaltrue(i_m,j_m) !meanglobalx(i_m,j_m,num)
             !    !print*, "L611",globalx(i_m,j_m,num)-meanglobaltrue(i_m,j_m)
-            !end do
+            end do
         j=j+1
         end do
 
@@ -1019,7 +1020,7 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         parm_infl(lon_cent,lat_cent)=rho
         !write(*,*) target_pixel,shape(xa), xa(target_pixel,num)
         do num=1,ens_num
-            global_xa(lon_cent,lat_cent,num) = xa(target_pixel,num)!+ meanglobaltrue(lon_cent,lat_cent)
+            global_xa(lon_cent,lat_cent,num) = xa(target_pixel,num) + meanglobalx(lon_cent,lat_cent,num)!+ meanglobaltrue(lon_cent,lat_cent)
         end do
         global_null(lon_cent,lat_cent) = 1.0
 !        if (sum(K_) > real(ens_num)) then 

@@ -1,8 +1,8 @@
 #/bin/bash
 
 ### SET "mool PBS" @ IIS U-Tokyo
-#PBS -q E20
-#PBS -l select=1:ncpus=20:mem=60gb
+#PBS -q E40
+#PBS -l select=1:ncpus=40:mem=60gb
 #PBS -l place=scatter
 #PBS -j oe
 #PBS -m ea
@@ -12,7 +12,7 @@
 
 #source ~/.bashrc
 
-#export OMP_NUM_THREADS=40
+export OMP_NUM_THREADS=40
 
 # got to working dirctory
 HydroDA="/cluster/data6/menaka/HydroDA"
@@ -24,7 +24,7 @@ cd $HydroDA
 
 # experiment : edit the experiment name in here and params.py experiment()
 # before running run_mool.sh , please edit the nessary experimental settings in params.py
-EXP="E2O_HydroWeb16"
+EXP="E2O_HydroWeb18"
 #IFACTOR="1.08"
 
 mkdir $HydroDA"/out"

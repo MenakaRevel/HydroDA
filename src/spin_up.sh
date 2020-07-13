@@ -103,7 +103,7 @@ LDAMOUT=".FALSE."                           # .TRUE. to activate reservoir opera
 #============================
 #*** 1c. simulation time
 YSTA=$yyyy                                  # start year ( from YSTA / Jan  1st _ 00:00)
-YEND=`expr $yyyy + 1`                        # end   year (until YEND / Dec 31st _ 24:00)
+YEND=$yyyy                                  # end   year (until YEND / Dec 31st _ 24:00)
 SPINUP=0                                    # [0]: zero-storage start, [1]: from restart file
 NSP=1                                       # spinup repeat time
 
@@ -306,39 +306,42 @@ fi
 ISP=1           ## spinup count
 IYR=${YSTA}     ## curent year
 CYR=`printf %04d ${IYR}`
- 
-#*** 3a. modify restart setting
-if [ ${SPINUP} -eq 0 ];then
-  LRESTART=".FALSE."                  ## from zero storage
-  CRESTSTO=""
-else
-  LRESTART=".TRUE."
-  CRESTSTO="${CVNREST}${CYR}010100.bin"    ## from restart file
-#    CRESTSTO="${CVNREST}${CYR}010100.nc"    ## from restart file
-fi
+while [ ${IYR} -le ${YEND}  ];
+do
+    CYR=`printf %04d ${IYR}`   ## update file name, bugfix in v3.96a
 
-#*** 3b. update start-end year
-SYEAR=$IYR
-SMON=1
-SDAY=1
-SHOUR=0
+    #*** 3a. modify restart setting
+    if [ ${SPINUP} -eq 0 ];then
+      LRESTART=".FALSE."                  ## from zero storage
+      CRESTSTO=""
+    else
+      LRESTART=".TRUE."
+      CRESTSTO="${CVNREST}${CYR}010100.bin"    ## from restart file
+    #    CRESTSTO="${CVNREST}${CYR}010100.nc"    ## from restart file
+    fi
 
-EYEAR=`expr $SYEAR + 1`
-EMON=1
-EDAY=1
-EHOUR=0
+    #*** 3b. update start-end year
+    SYEAR=$IYR
+    SMON=1
+    SDAY=1
+    SHOUR=0
 
-ln -sf $PROG $EXE
+    EYEAR=`expr $SYEAR + 1`
+    EMON=1
+    EDAY=1
+    EHOUR=0
 
-#*** 3c. update input / output file data
-CSYEAR=`printf %04d ${SYEAR}`
-COUTTAG=${CSYEAR}                  # output file tag
+    ln -sf $PROG $EXE
 
-#CROFCDF="${CROFDIR}/${CROFPRE}${CSYEAR}.nc"  # input netCDF runoff file
-#SYEARIN=$IYR
-#SMONIN=1
-#SDAYIN=1
-#SHOURIN=0
+    #*** 3c. update input / output file data
+    CSYEAR=`printf %04d ${SYEAR}`
+    COUTTAG=${CSYEAR}                  # output file tag
+
+    #CROFCDF="${CROFDIR}/${CROFPRE}${CSYEAR}.nc"  # input netCDF runoff file
+    #SYEARIN=$IYR
+    #SMONIN=1
+    #SDAYIN=1
+    #SHOURIN=0
 
 #================================================
 # (4) Create NAMELIST for simulation year
@@ -516,6 +519,52 @@ time ./${EXE}                  >> log.txt
 echo "end:   ${SYEAR}" `date`  >> log.txt
 
 mv ${LOGOUT} log_CaMa-${CYR}.txt
+#================================================
+# (6) manage spin up
+
+# if curent spinup time $ISP < required spinup time $NSP
+#   copy the restart file restart$(IYR+1) to restart${IYR}
+#   copy the outputs to directory "${IYR}-sp1"
+
+SPINUP=1
+if [ ${IYR} -eq ${YSTA} ];
+then
+  if [ ${ISP} -le ${NSP} ];
+    then
+    IYR1=`expr ${IYR} + 1`
+    CYR1=`printf %04d ${IYR1}`
+    cp -f ${CVNREST}${CYR1}010100.bin ${CVNREST}${CYR}010100.bin-sp${ISP}         2> /dev/null
+    mv -f ${CVNREST}${CYR1}010100.bin ${CVNREST}${CYR}010100.bin                  2> /dev/null
+
+    cp -f ${CVNREST}${CYR1}010100.bin.pth ${CVNREST}${CYR}010100.bin.pth-sp${ISP} 2> /dev/null
+    mv -f ${CVNREST}${CYR1}010100.bin.pth ${CVNREST}${CYR}010100.bin.pth          2> /dev/null
+
+    cp -f ${CVNREST}${CYR1}010100.nc ${CVNREST}${CYR}010100.nc-sp${ISP}           2> /dev/null
+    mv -f ${CVNREST}${CYR1}010100.nc ${CVNREST}${CYR}010100.nc                    2> /dev/null
+
+    mkdir -p ${CYR}-sp${ISP}
+    mv -f ./${CVNREST}${CYR}010100.bin-sp${ISP}      ${CYR}-sp${ISP}  2> /dev/null
+    mv -f ./${CVNREST}${CYR}010100.bin.pth-sp${ISP}  ${CYR}-sp${ISP}  2> /dev/null
+    mv -f ./${CVNREST}${CYR}010100.nc-sp${ISP}       ${CYR}-sp${ISP}  2> /dev/null
+    mv -f ./*${CYR}.bin                              ${CYR}-sp${ISP}  2> /dev/null
+    mv -f ./*${CYR}.pth                              ${CYR}-sp${ISP}  2> /dev/null
+    mv -f ./o_*${CYR}.nc                             ${CYR}-sp${ISP}  2> /dev/null
+    mv -f ./*${CYR}.log                              ${CYR}-sp${ISP}  2> /dev/null
+    mv -f ./log_CaMa-${CYR}.txt                      ${CYR}-sp${ISP}  2> /dev/null
+
+    ISP=`expr ${ISP} + 1`
+  else
+    ISP=0
+    IYR=`expr ${IYR} + 1`
+  fi
+else
+  IYR=`expr ${IYR} + 1`
+fi
+
+#================================================
+# (7) End of each year loop. Back to (3)
+
+done # loop to next year simulation
 
 # move restart file
 RYR=`printf %04d ${EYEAR}`

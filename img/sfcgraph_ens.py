@@ -26,7 +26,7 @@ import cal_stat as stat
 
 #argvs = sys.argv
 
-experiment="E2O_HydroWeb15"
+experiment="E2O_HydroWeb17"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 assim_out=pm.DA_dir()+"/out/"+experiment
@@ -126,13 +126,19 @@ mean_obs = np.fromfile(mean_obs,np.float32).reshape(ny,nx)
 std_obs = pm.HydroWeb_dir()+"/bin/HydroWeb_std.bin"
 std_obs = np.fromfile(std_obs,np.float32).reshape(ny,nx)
 #-------
-##mean_sfcelvs=np.zeros([pm.ens_mem(),720,1440])
-##for num in np.arange(1,int(pm.ens_mem())+1):
-##    numch='%03d'%num
-##    fname=assim_out+"/assim_out/mean_sfcelv/meansfcelvC"+numch+".bin"
-##    mean_corr=np.fromfile(fname,np.float32).reshape([720,1440])
-##    mean_sfcelvs[num-1]=mean_corr
-##mean_sfcelv=np.mean(mean_sfcelvs,axis=0)
+# mean & std from previous year
+mean_obss=np.zeros([pm.ens_mem(),ny,nx])
+std_obss=np.zeros([pm.ens_mem(),ny,nx])
+for num in np.arange(1,int(pm.ens_mem())+1):
+    numch='%03d'%num
+    fname=assim_out+"/assim_out/mean_sfcelv/meansfcelvC"+numch+".bin"
+    mean_corr=np.fromfile(fname,np.float32).reshape([ny,nx])
+    mean_obss[num-1]=mean_corr
+    fname=assim_out+"/assim_out/mean_sfcelv/stdsfcelvC"+numch+".bin"
+    std_corr=np.fromfile(fname,np.float32).reshape([ny,nx])
+    std_obss[num-1]=std_corr
+mean_sfcelv=np.mean(mean_obss,axis=0)
+std_sfcelv=np.std(std_obss,axis=0)
 #------
 pname=[]
 xlist=[]
@@ -390,7 +396,8 @@ def make_fig(point):
     #data=((data-np.mean(data))/np.std(data))*std_sfcelv[ylist[point],xlist[point]]+mean_sfcelv[ylist[point],xlist[point]]
     #data=(data-np.mean(data))+mean_sfcelv[ylist[point],xlist[point]]
     #---------
-    data=((data-mean_obs[ylist[point],xlist[point]])/(std_obs[ylist[point],xlist[point]]+1.0e-20))*std_sfcelv[ylist[point],xlist[point]]+mean_sfcelv[ylist[point],xlist[point]]
+    data=data-mean_obs[ylist[point],xlist[point]]+mean_sfcelv[ylist[point],xlist[point]]
+#    data=((data-mean_obs[ylist[point],xlist[point]])/(std_obs[ylist[point],xlist[point]]+1.0e-20))*std_sfcelv[ylist[point],xlist[point]]+mean_sfcelv[ylist[point],xlist[point]]
     lines=[ax1.plot(time,data,label="obs",marker="o",color="black",linewidth=0.0,zorder=101)[0]]
 #    ax1.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7,zorder=101)
 #    ax1.plot(np.arange(start,last),m_sf[:,point],label="mean sfcelv",color="black",linewidth=0.7,linestyle="--",zorder=107)
@@ -415,7 +422,16 @@ def make_fig(point):
     xxlab=[calendar.month_name[i][:3] for i in range(1,13)]
     #ax1.set_xticks(xxlist)
     #ax1.set_xticklabels(xxlab,fontsize=10)
-
+    #--for bug fixing
+    corr_mean=np.mean(np.mean(opn[:,:,point],axis=1),axis=0)
+    obs_mean=mean_obs[ylist[point],xlist[point]]
+    sfc_mean=mean_sfcelv[ylist[point],xlist[point]]
+    outtext="courrpted mean: %6.2f"%(corr_mean)
+    ax1.text(0.02,0.9,outtext,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    outtext="used(norm) mean: %6.2f"%(sfc_mean)
+    ax1.text(0.02,0.8,outtext,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    outtext="observation mean: %6.2f"%(obs_mean)
+    ax1.text(0.02,0.7,outtext,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
 #    ax2 = ax1.twinx()
 #    aiv = stat.AI(asm[:,:,point],opn[:,:,point],org[:,point])
 #    aivn,error= stat.AI_new(asm[:,:,point],opn[:,:,point],org[:,point])#[0]
