@@ -26,7 +26,7 @@ import cal_stat as stat
 
 #argvs = sys.argv
 
-experiment="E2O_HydroWeb17"
+experiment="E2O_HydroWeb20"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 assim_out=pm.DA_dir()+"/out/"+experiment
@@ -63,6 +63,23 @@ def mk_dir(sdir):
     os.makedirs(sdir)
   except:
     pass
+#----
+def NS(s,o):
+    """
+    Nash Sutcliffe efficiency coefficient
+    input:
+        s: simulated
+        o: observed
+    output:
+        ns: Nash Sutcliffe efficient coefficient
+    """
+    #s,o = filter_nan(s,o)
+    o=ma.masked_where(o<=0.0,o).filled(0.0)
+    s=ma.masked_where(o<=0.0,s).filled(0.0)
+    o=np.compress(o>0.0,o)
+    s=np.compress(o>0.0,s) 
+    return 1 - sum((s-o)**2)/(sum((o-np.mean(o))**2)+1e-20)
+B
 #----
 mk_dir(assim_out+"/figures")
 mk_dir(assim_out+"/figures/disgraph")
@@ -209,6 +226,7 @@ for day in np.arange(start,last):
     yyyy='%04d' % (target_dt.year)
     mm='%02d' % (target_dt.month)
     dd='%02d' % (target_dt.day)
+    B
     print yyyy,mm,dd
 
 #    fname="../data/mesh_day%02d.bin"%(SWOT_day(yyyy,mm,dd))
@@ -325,7 +343,6 @@ def make_fig(point):
     lines=[ax1.plot(np.arange(start,last),ma.masked_less(org,0.0),label="GRDC",color="black",linewidth=0.7,zorder=101)[0]] #,marker = "o",markevery=swt[point])
 #    ax1.plot(np.arange(start,last),hgt[:,point],label="true",color="gray",linewidth=0.7,linestyle="--",zorder=101)
 #    plt.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7)
-
     for num in np.arange(0,pm.ens_mem()):
         ax1.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.1,alpha=0.1,zorder=102)
         ax1.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.1,alpha=0.1,zorder=103)
@@ -341,11 +358,24 @@ def make_fig(point):
     ax1.tick_params('y', colors='k')
     # scentific notaion
     ax1.ticklabel_format(style="sci",axis="y",scilimits=(0,0))
+    ax1.yaxis.major.formatter._useMathText=True 
+    #
     xxlist=np.linspace(0,N,(eyear-syear)+1)
     xxlab=np.arange(syear,eyear+1,1)
     #xxlab=[calendar.month_name[i][:3] for i in range(1,13)]
     ax1.set_xticks(xxlist)
     ax1.set_xticklabels(xxlab,fontsize=10)
+    # Nash-Sutcllf calcuation
+    NS1=NS(asm[:,num,point],org)
+    NS2=NS(opn[:,num,point],org)
+    #1-((np.sum((org[:ed,point]-org_Q)**2))/(np.sum((org_Q-np.mean(org_Q))**2)))
+    #print point,NS1,NS2
+    Nash1="NS (assim):%4.2f"%(NS1)
+    Nash2="NS (open):%4.2f"%(NS2)
+    #
+    ax1.text(0.02,0.95,Nash1,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    ax1.text(0.02,0.85,Nash2,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+
 
 #    # twin axis
 #    ax2 = ax1.twinx()
@@ -424,8 +454,10 @@ def make_fig(point):
 #    ax2.set_xlim(xmin=0,xmax=last+1)
 #    print swt[point]
     plt.legend(lines,labels,ncol=1,loc='upper right') #, bbox_to_anchor=(1.0, 1.0),transform=ax1.transAxes)
-    print 'save',river[point],pname[point]
-    plt.savefig(assim_out+"/figures/disgraph/"+river[point]+"/"+pname[point]+".png",dpi=500)
+    station_loc_list=pname[point].split("/")
+    station_name="-".join(station_loc_list) 
+    print 'save',river[point] , station_name
+    plt.savefig(assim_out+"/figures/disgraph/"+river[point]+"/"+station_name+".png",dpi=500)
     return 0
 
 

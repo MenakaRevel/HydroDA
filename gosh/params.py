@@ -83,8 +83,8 @@ def assimE():
     # *note: should be smaller or equal to 170
 
 def patch_size():
-    return 0
-    #return 100
+    #return 0
+    return 100
     # the size of the local patch of LETKF(Local ** EnKF)
     # 0: only 1 pixel (the pixel itself) belongs to its local patch
     # 100: empirical local patch

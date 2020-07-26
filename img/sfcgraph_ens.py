@@ -26,7 +26,7 @@ import cal_stat as stat
 
 #argvs = sys.argv
 
-experiment="E2O_HydroWeb17"
+experiment="E2O_HydroWeb20"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 assim_out=pm.DA_dir()+"/out/"+experiment
@@ -139,7 +139,7 @@ for num in np.arange(1,int(pm.ens_mem())+1):
     std_obss[num-1]=std_corr
 mean_sfcelv=np.mean(mean_obss,axis=0)
 std_sfcelv=np.std(std_obss,axis=0)
-#------
+###------
 pname=[]
 xlist=[]
 ylist=[]
