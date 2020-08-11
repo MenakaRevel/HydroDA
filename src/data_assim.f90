@@ -671,9 +671,9 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
                 !xt(j)=((obs(i_m,j_m) - mean_obs(i_m,j_m))/std_obs(i_m,j_m))*stdglobaltrue(i_m,j_m) + meanglobaltrue(i_m,j_m)
                 xt(j)=(obs(i_m,j_m)-mean_obs(i_m,j_m))/(std_obs(i_m,j_m)+1.0e-20)
                 write(79,*) "Observations"
-                write(79,*) i_m,j_m,obs(i_m,j_m),mean_obs(i_m,j_m),std_obs(i_m,j_m),stdglobaltrue(i_m,j_m) , meanglobaltrue(i_m,j_m)
+                write(79,*) i_m,j_m,obs(i_m,j_m),mean_obs(i_m,j_m),std_obs(i_m,j_m) !,stdglobaltrue(i_m,j_m) , meanglobaltrue(i_m,j_m)
                 print*, "observation converstion"
-                print*,i_m,j_m, xt(j),obs(i_m,j_m),mean_obs(i_m,j_m),std_obs(i_m,j_m),stdglobaltrue(i_m,j_m) , meanglobaltrue(i_m,j_m)
+                print*,i_m,j_m, xt(j),obs(i_m,j_m),mean_obs(i_m,j_m),std_obs(i_m,j_m)!,stdglobaltrue(i_m,j_m) , meanglobaltrue(i_m,j_m)
                 local_err(j)=obs_err(i_m,j_m) !max(obs_err(i_m,j_m),0.30)
             else
                 local_sat(j)=-9999.0
@@ -710,8 +710,8 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
             !xf(j,:)=globalx(i_m,j_m,:)!-meanglobaltrue(i_m,j_m)
             do num=1, ens_num
                 !xf(j,num)=globalx(i_m,j_m,num)-meanglobalx(i_m,j_m,num)
-                xf(j,num)=(globalx(i_m,j_m,num)-meanglobalx(i_m,j_m,num))/(stdglobalx(i_m,j_m,num)+1.0e-20)
-                !    xf(j,num)=globalx(i_m,j_m,num)-meanglobaltrue(i_m,j_m) !meanglobalx(i_m,j_m,num)
+                !xf(j,num)=(globalx(i_m,j_m,num)-meanglobalx(i_m,j_m,num))/(stdglobalx(i_m,j_m,num)+1.0e-20)
+                xf(j,num)=(globalx(i_m,j_m,num)-meanglobaltrue(i_m,j_m))/stdglobaltrue(i_m,j_m) !meanglobalx(i_m,j_m,num)
             !    !print*, "L611",globalx(i_m,j_m,num)-meanglobaltrue(i_m,j_m)
             end do
         j=j+1
