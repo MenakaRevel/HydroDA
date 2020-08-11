@@ -16,7 +16,7 @@ def starttime():
     return (2003,1,1) # start date: [year,month,date]
 
 def endtime():
-    return (2004,1,1) # end date: [year,month,date]
+    return (2005,1,1) # end date: [year,month,date]
                       # *note: this date is not included
 
 def ens_mem():
@@ -307,3 +307,4 @@ def cpu_nums():
 def version():
     return "v5.0.0 CaMa-Flood and HydroWeb"#, Bathymetry"
     # version for WSE assimilation / observation localization
+    # CaMa-Flood v396a used

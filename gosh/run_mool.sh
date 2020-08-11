@@ -22,9 +22,9 @@ cd $HydroDA
 #cd $PBS_O_WORKDIR
 #cd $swotda
 
-# experiment : edit the experiment name in here and params.py experiment()
+# experiment : edit the experiment name in here it will be written in $HydroDA/$EXP/exp.txt
 # before running run_mool.sh , please edit the nessary experimental settings in params.py
-EXP="E2O_HydroWeb20"
+EXP="E2O_HydroWeb21"
 #IFACTOR="1.08"
 
 mkdir $HydroDA"/out"
