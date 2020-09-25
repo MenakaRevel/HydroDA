@@ -12,8 +12,10 @@ import os
 import calendar
 from multiprocessing import Pool
 from multiprocessing import Process
+from multiprocessing import sharedctypes
 from numpy import ma
 import re
+import math
 
 #sys.path.append('../assim_out/')
 os.system("ln -sf ../gosh/params.py params.py")
@@ -26,7 +28,7 @@ import cal_stat as stat
 
 #argvs = sys.argv
 
-experiment="E2O_HydroWeb20"
+experiment="E2O_HydroWeb21"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 assim_out=pm.DA_dir()+"/out/"+experiment
@@ -79,7 +81,6 @@ def NS(s,o):
     o=np.compress(o>0.0,o)
     s=np.compress(o>0.0,s) 
     return 1 - sum((s-o)**2)/(sum((o-np.mean(o))**2)+1e-20)
-B
 #----
 mk_dir(assim_out+"/figures")
 mk_dir(assim_out+"/figures/disgraph")
@@ -121,6 +122,10 @@ xlist=[]
 ylist=[]
 river=[]
 #--
+# rivername="AMAZON"
+# path = assim_out+"/figures/disgraph/%s"%(rivername)
+# print path
+# mk_dir(path)
 #rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZON","MEKONG","IRRAWADDY","VOLGA", "NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
 #rivernames  = ["AMAZON"]
 rivernames = grdc.grdc_river_name_v396()
@@ -143,9 +148,9 @@ rivernames = grdc.grdc_river_name_v396()
 #    xlist.append(ix)
 #    ylist.append(iy)
 for rivername in rivernames:
-  path = assim_out+"/figures/disgraph/%s"%(rivername)
-  print path
-  mk_dir(path)
+#   path = assim_out+"/figures/disgraph/%s"%(rivername)
+#   print path
+#   mk_dir(path)
   #station_loc,x_list,y_list = grdc.get_grdc_loc(rivername,"b")
   grdc_id,station_loc,x_list,y_list = grdc.get_grdc_loc_v396(rivername)
   print rivername, grdc_id,station_loc
@@ -220,84 +225,142 @@ asm=[]
 swt={}
 for point in np.arange(pnum):
     swt[point] = []
-
+# multiprocessing array
+# result       = np.ctypeslib.as_ctypes(np.zeros((size, size)))
+# shared_array = sharedctypes.RawArray(result._type_, result)
+opn=np.ctypeslib.as_ctypes(np.zeros([N,pm.ens_mem(),pnum],np.float32))
+shared_array_opn  = sharedctypes.RawArray(opn._type_, opn)
+asm=np.ctypeslib.as_ctypes(np.zeros([N,pm.ens_mem(),pnum],np.float32))
+shared_array_asm  = sharedctypes.RawArray(asm._type_, asm)
+# for parallel calcualtion
+inputlist=[]
 for day in np.arange(start,last):
     target_dt=start_dt+datetime.timedelta(days=day)
     yyyy='%04d' % (target_dt.year)
     mm='%02d' % (target_dt.month)
     dd='%02d' % (target_dt.day)
-    B
-    print yyyy,mm,dd
-
-#    fname="../data/mesh_day%02d.bin"%(SWOT_day(yyyy,mm,dd))
-#    mesh_in=np.fromfile(fname,np.float32).reshape([640,1440])
-#    mesh=(mesh_in>=10)*(mesh_in<=60)
-#    meshP=mesh-1000*(mesh<0.1)
-
-#    fname="../sat/observation_day%02d.bin"%(SWOT_day(yyyy,mm,dd))
-#    meshP=np.fromfile(fname,np.int32).reshape([ny,nx])
-#    #meshP=(meshP>=1)*1
-
-
-#    # make org
-#    fname=assim_out+"/rivout/true/rivout"+yyyy+mm+dd+".bin"
-#    orgfile=np.fromfile(fname,np.float32).reshape([ny,nx])
-#
-#    org_frag=[]
-#    for point in np.arange(pnum):
-#        #print point
-#        xpoint=xlist[point]
-#        ypoint=ylist[point]
-#        org_frag.append(orgfile[ypoint,xpoint])
-#        #---SWOT--
-#        #if meshP[ypoint-40,xpoint] >= 1:
-#        if meshP[ypoint,xpoint] >= 1:
-#          if point not in swt.keys():
-#            swt[point] = [day]
-#          else:
-#            swt[point].append(day)
-#
-#    org.append(org_frag)
-
-    # make asm and opn
-    opn_ens=[]
-    asm_ens=[]
     for num in np.arange(1,pm.ens_mem()+1):
         numch='%03d'%num
+        inputlist.append([yyyy,mm,dd,numch])
+        print yyyy,mm,dd,numch
 
-        fname=assim_out+"/assim_out/rivout/open/rivout"+yyyy+mm+dd+"_"+numch+".bin"
-        #fname="../CaMa_out/"+yyyy+mm+dd+"C"+numch+"/rivout"+yyyy+".bin"
-        opnfile=np.fromfile(fname,np.float32).reshape([ny,nx])
+def read_data(inputlist):
+    yyyy = inputlist[0]
+    mm   = inputlist[1]
+    dd   = inputlist[2]
+    numch= inputlist[3]
+    #--
+    tmp_opn  = np.ctypeslib.as_array(shared_array_opn)
+    tmp_asm  = np.ctypeslib.as_array(shared_array_asm)
 
-        fname=assim_out+"/assim_out/rivout/assim/rivout"+yyyy+mm+dd+"_"+numch+".bin"
-        #fname="../CaMa_out/"+yyyy+mm+dd+"A"+numch+"/rivout"+yyyy+".bin"
-        asmfile=np.fromfile(fname,np.float32).reshape([ny,nx])
+    # year, mon, day
+    year=int(yyyy)
+    mon=int(mm)
+    day=int(dd)
+    num=int(numch)-1
+    #--
+    target_dt=datetime.date(year,mon,day)
+    dt=(target_dt-start_dt).days
+    # corrpted
+    fname=assim_out+"/assim_out/outflw/open/outflw"+yyyy+mm+dd+"_"+numch+".bin"
+    #fname=assim_out+"/assim_out/rivout/open/rivout"+yyyy+mm+dd+"_"+numch+".bin"
+    opnfile=np.fromfile(fname,np.float32).reshape([ny,nx])
+    # assimilated
+    fname=assim_out+"/assim_out/outflw/assim/outflw"+yyyy+mm+dd+"_"+numch+".bin"
+    #fname=assim_out+"/assim_out/rivout/assim/rivout"+yyyy+mm+dd+"_"+numch+".bin"
+    asmfile=np.fromfile(fname,np.float32).reshape([ny,nx])
+    #-------------
+    for point in np.arange(pnum):
+        ix1,iy1,ix2,iy2=grdc.get_grdc_station_v396(pname[point])
+        if ix2 == -9999 or iy2 == -9999:
+            tmp_opn[dt,num,point]=opnfile[iy1,ix1]
+            tmp_asm[dt,num,point]=asmfile[iy1,ix1]
+        else:
+            tmp_opn[dt,num,point]=opnfile[iy1,ix1]+opnfile[iy2,ix2]
+            tmp_asm[dt,num,point]=asmfile[iy1,ix1]+asmfile[iy2,ix2]
+#--------
+p   = Pool(20)
+res = p.map(read_data, inputlist)
+opn = np.ctypeslib.as_array(shared_array_opn)
+asm = np.ctypeslib.as_array(shared_array_asm)
+p.terminate()
 
-        opn_frag=[]
-        asm_frag=[]
-        for point in np.arange(pnum):
-            ix1,iy1,ix2,iy2=grdc.get_grdc_station_v396(pname[point])
-            xpoint=xlist[point]
-            ypoint=ylist[point]
-            if ix2 == -9999 or iy2 == -9999:
-                opn_frag.append(opnfile[iy1,ix1])
-                asm_frag.append(asmfile[iy1,ix1])
-            else:
-                opn_frag.append(opnfile[iy1,ix1]+opnfile[iy2,ix2])
-                asm_frag.append(asmfile[iy1,ix1]+asmfile[iy2,ix2])
-            #opn_frag.append(opnfile[ypoint,xpoint])
-            #asm_frag.append(asmfile[ypoint,xpoint])
+# for day in np.arange(start,last):
+#     target_dt=start_dt+datetime.timedelta(days=day)
+#     yyyy='%04d' % (target_dt.year)
+#     mm='%02d' % (target_dt.month)
+#     dd='%02d' % (target_dt.day)
+#     print yyyy,mm,dd
 
-        opn_ens.append(opn_frag)
-        asm_ens.append(asm_frag)
+# #    fname="../data/mesh_day%02d.bin"%(SWOT_day(yyyy,mm,dd))
+# #    mesh_in=np.fromfile(fname,np.float32).reshape([640,1440])
+# #    mesh=(mesh_in>=10)*(mesh_in<=60)
+# #    meshP=mesh-1000*(mesh<0.1)
+
+# #    fname="../sat/observation_day%02d.bin"%(SWOT_day(yyyy,mm,dd))
+# #    meshP=np.fromfile(fname,np.int32).reshape([ny,nx])
+# #    #meshP=(meshP>=1)*1
 
 
-    opn.append(opn_ens)
-    asm.append(asm_ens)
+# #    # make org
+# #    fname=assim_out+"/rivout/true/rivout"+yyyy+mm+dd+".bin"
+# #    orgfile=np.fromfile(fname,np.float32).reshape([ny,nx])
+# #
+# #    org_frag=[]
+# #    for point in np.arange(pnum):
+# #        #print point
+# #        xpoint=xlist[point]
+# #        ypoint=ylist[point]
+# #        org_frag.append(orgfile[ypoint,xpoint])
+# #        #---SWOT--
+# #        #if meshP[ypoint-40,xpoint] >= 1:
+# #        if meshP[ypoint,xpoint] >= 1:
+# #          if point not in swt.keys():
+# #            swt[point] = [day]
+# #          else:
+# #            swt[point].append(day)
+# #
+# #    org.append(org_frag)
 
-#org=np.array(org,dtype=np.float32)
-opn=np.array(opn,dtype=np.float32)
-asm=np.array(asm,dtype=np.float32)
+#     # make asm and opn
+#     opn_ens=[]
+#     asm_ens=[]
+#     for num in np.arange(1,pm.ens_mem()+1):
+#         numch='%03d'%num
+
+#         fname=assim_out+"/assim_out/rivout/open/rivout"+yyyy+mm+dd+"_"+numch+".bin"
+#         #fname="../CaMa_out/"+yyyy+mm+dd+"C"+numch+"/rivout"+yyyy+".bin"
+#         opnfile=np.fromfile(fname,np.float32).reshape([ny,nx])
+
+#         fname=assim_out+"/assim_out/rivout/assim/rivout"+yyyy+mm+dd+"_"+numch+".bin"
+#         #fname="../CaMa_out/"+yyyy+mm+dd+"A"+numch+"/rivout"+yyyy+".bin"
+#         asmfile=np.fromfile(fname,np.float32).reshape([ny,nx])
+
+#         opn_frag=[]
+#         asm_frag=[]
+#         for point in np.arange(pnum):
+#             ix1,iy1,ix2,iy2=grdc.get_grdc_station_v396(pname[point])
+#             xpoint=xlist[point]
+#             ypoint=ylist[point]
+#             if ix2 == -9999 or iy2 == -9999:
+#                 opn_frag.append(opnfile[iy1,ix1])
+#                 asm_frag.append(asmfile[iy1,ix1])
+#             else:
+#                 opn_frag.append(opnfile[iy1,ix1]+opnfile[iy2,ix2])
+#                 asm_frag.append(asmfile[iy1,ix1]+asmfile[iy2,ix2])
+#             #opn_frag.append(opnfile[ypoint,xpoint])
+#             #asm_frag.append(asmfile[ypoint,xpoint])
+
+#         opn_ens.append(opn_frag)
+#         asm_ens.append(asm_frag)
+
+
+#     opn.append(opn_ens)
+#     asm.append(asm_ens)
+
+# #org=np.array(org,dtype=np.float32)
+# opn=np.array(opn,dtype=np.float32)
+# asm=np.array(asm,dtype=np.float32)
 
 ##--
 #print np.shape(org),org.dtype
@@ -323,7 +386,8 @@ asm=np.array(asm,dtype=np.float32)
 #for point in np.arange(pnum):
 def make_fig(point):
     plt.close()
-    labels=["GRDC","corrupted","assimilated"]
+    #labels=["GRDC","corrupted","assimilated"]
+    labels=["GRDC","simulated","assimilated"]
     #
     #print org[:,point]
     #for i in np.arange(start,last):
@@ -340,17 +404,17 @@ def make_fig(point):
     fig, ax1 = plt.subplots()
     org=grdc.grdc_dis(staid[point],syear,eyear-1)
     org=np.array(org)
-    lines=[ax1.plot(np.arange(start,last),ma.masked_less(org,0.0),label="GRDC",color="black",linewidth=0.7,zorder=101)[0]] #,marker = "o",markevery=swt[point])
+    lines=[ax1.plot(np.arange(start,last),ma.masked_less(org,0.0),label="GRDC",color="black",linewidth=1.5,zorder=101)[0]] #,marker = "o",markevery=swt[point])
 #    ax1.plot(np.arange(start,last),hgt[:,point],label="true",color="gray",linewidth=0.7,linestyle="--",zorder=101)
 #    plt.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7)
-    for num in np.arange(0,pm.ens_mem()):
-        ax1.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.1,alpha=0.1,zorder=102)
-        ax1.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.1,alpha=0.1,zorder=103)
+    # for num in np.arange(0,pm.ens_mem()):
+    #     ax1.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.1,alpha=0.1,zorder=102)
+    #     ax1.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.1,alpha=0.1,zorder=103)
 #        plt.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.3,alpha=0.5)
 #        plt.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.3,alpha=0.5)
     # draw mean of ensembles
-    lines.append(ax1.plot(np.arange(start,last),np.mean(opn[:,:,point],axis=1),label="corrupted",color="blue",linewidth=0.8,alpha=1,zorder=104)[0])
-    lines.append(ax1.plot(np.arange(start,last),np.mean(asm[:,:,point],axis=1),label="assimilated",color="red",linewidth=0.8,alpha=1,zorder=106)[0])
+    lines.append(ax1.plot(np.arange(start,last),np.mean(opn[:,:,point],axis=1),label="corrupted",color="blue",linewidth=1.0,alpha=1,zorder=104)[0])
+    lines.append(ax1.plot(np.arange(start,last),np.mean(asm[:,:,point],axis=1),label="assimilated",color="red",linewidth=1.0,alpha=1,zorder=106)[0])
     #    plt.ylim(ymin=)
     # Make the y-axis label, ticks and tick labels match the line color.
     ax1.set_ylabel('discharge (m$^3$/s)', color='k')
@@ -360,14 +424,23 @@ def make_fig(point):
     ax1.ticklabel_format(style="sci",axis="y",scilimits=(0,0))
     ax1.yaxis.major.formatter._useMathText=True 
     #
-    xxlist=np.linspace(0,N,(eyear-syear)+1)
-    xxlab=np.arange(syear,eyear+1,1)
+    #xxlist=np.linspace(0,N,(eyear-syear)+1)
+    #xlab=np.arange(syear,eyear+1,1)
     #xxlab=[calendar.month_name[i][:3] for i in range(1,13)]
+    if eyear-syear > 5:
+        dtt=5
+        dt=int(math.ceil(((eyear-syear)+1)/5.0))
+    else:
+        dtt=1
+        dt=(eyear-syear)+1
+    xxlist=np.linspace(0,N,dt,endpoint=True)
+    #xxlab=[calendar.month_name[i][:3] for i in range(1,13)]
+    xxlab=np.arange(syear,eyear+1,dtt)
     ax1.set_xticks(xxlist)
     ax1.set_xticklabels(xxlab,fontsize=10)
     # Nash-Sutcllf calcuation
-    NS1=NS(asm[:,num,point],org)
-    NS2=NS(opn[:,num,point],org)
+    NS1=NS(np.mean(asm[:,:,point],axis=1),org)
+    NS2=NS(np.mean(opn[:,:,point],axis=1),org)
     #1-((np.sum((org[:ed,point]-org_Q)**2))/(np.sum((org_Q-np.mean(org_Q))**2)))
     #print point,NS1,NS2
     Nash1="NS (assim):%4.2f"%(NS1)
@@ -457,7 +530,7 @@ def make_fig(point):
     station_loc_list=pname[point].split("/")
     station_name="-".join(station_loc_list) 
     print 'save',river[point] , station_name
-    plt.savefig(assim_out+"/figures/disgraph/"+river[point]+"/"+station_name+".png",dpi=500)
+    plt.savefig(assim_out+"/figures/disgraph/"+river[point]+"-"+station_name+".png",dpi=500)
     return 0
 
 
@@ -480,8 +553,8 @@ def make_fig(point):
 
 
 
-para_flag=1
-#para_flag=0
+#para_flag=1
+para_flag=0
 #--
 if para_flag==1:
     p=Pool(20)

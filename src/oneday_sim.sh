@@ -280,7 +280,7 @@ COUTDIR="./"                                # output directory
 #CVARSOUT="outflw,storge,fldfrc,maxdph,flddph" # list output variable (comma separated)
 #CVARSOUT="rivout,rivsto,rivdph,rivvel,fldout,fldsto,flddph,fldfrc,fldare,sfcelv,outflw,storge,pthflw,pthout,maxsto,maxflw,maxdph" # list output variable (comma separated)
 #CVARSOUT="rivout,rivsto,rivdph,fldout,flddph,fldfrc,fldare,sfcelv,outflw,storge,maxsto,maxflw,maxdph" # list output variable (comma separated)
-CVARSOUT="rivout,rivsto,sfcelv,outflw,storge" # list output variable (comma separated)
+CVARSOUT="rivout,rivsto,fldout,flddph,fldfrc,sfcelv,outflw,storge,maxsto,maxflw,maxdph" # list output variable (comma separated)
 COUTTAG=""  # see (3) set each year         #   output tag $(COUTDIR)/$(VARNAME)$(OUTTAG).bin
 
 ##### Model Parameters ################

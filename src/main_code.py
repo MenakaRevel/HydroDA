@@ -443,6 +443,10 @@ def initial(): #used
     mkdir("assim_out/rivout/open")
     mkdir("assim_out/rivout/assim")
     mkdir("assim_out/rivout/true")
+    mkdir("assim_out/outflw")
+    mkdir("assim_out/outflw/open")
+    mkdir("assim_out/outflw/assim")
+    mkdir("assim_out/outflw/true")
     mkdir("assim_out/fldout")
     mkdir("assim_out/fldout/open")
     mkdir("assim_out/fldout/assim")
@@ -543,7 +547,12 @@ def store_out(yyyy,mm,dd):
         # storing rivout
         for num in np.arange(1,pm.ens_mem()+1):
             numch = '%03d' % num 
-            shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/rivout"+yyyy+".bin","assim_out/rivout/"+looptype+"/rivout"+yyyy+mm+dd+"_"+numch+".bin")
+            shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/rivout"+yyyy+".bin","./assim_out/rivout/"+looptype+"/rivout"+yyyy+mm+dd+"_"+numch+".bin")
+
+        # storing outflw
+        for num in np.arange(1,pm.ens_mem()+1):
+            numch = '%03d' % num 
+            shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/outflw"+yyyy+".bin","./assim_out/outflw/"+looptype+"/outflw"+yyyy+mm+dd+"_"+numch+".bin")
 
 #        # storing fldout
 #        for num in np.arange(1,pm.ens_mem()+1):

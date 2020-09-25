@@ -231,6 +231,45 @@ def get_grdc_loc_v396(name):
 
   return id_list,station_loc,x_list,y_list
 #------------
+#--
+def get_grdc_latlon_v396(name):
+  #--ask the river name and a or b
+  #  all locations
+  #grdc = pm.CaMa_dir() + "/map/glb_15min/grdc_loc.txt"
+  grdc = pm.CaMa_dir() + "/map/"+pm.mapname()+"/grdc_loc.txt"
+  f = open(grdc,"r")
+  lines = f.readlines()
+  f.close()
+  #--
+  id_list     = []
+  station_loc = []
+  x_list      = []
+  y_list      = []
+  lons        = []
+  lats        = []
+  #---
+  for line in lines[1::]:
+    #print line
+    line    = filter(None, re.split(";",line))
+    #print line
+    grdc_id = line[0]
+    river   = line[1].strip()
+    station = line[2].strip()
+    ix      = int(line[3])-1
+    iy      = int(line[4])-1
+    ix2     = int(line[5])
+    #print river
+    if ix2 != -9999:
+        continue
+    if river == name:
+        id_list.append(grdc_id)
+        station_loc.append(station)
+        x_list.append(ix)
+        y_list.append(iy)
+        lons.append()
+
+  return id_list,station_loc,x_list,y_list
+#------------
 def grdc_river_name_v396():
   #grdc = pm.CaMa_dir() + "/map/glb_15min/grdc_loc.txt"
   grdc = pm.CaMa_dir() + "/map/"+pm.mapname()+"/grdc_loc.txt"
