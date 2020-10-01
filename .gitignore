@@ -37,3 +37,6 @@ HydroDA.o*
 #temporary opened files
 *.swp
 *.swo
+
+#vscode
+.vscode
