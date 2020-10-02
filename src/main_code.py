@@ -1471,7 +1471,7 @@ def prepare_input():
         mkdir("./CaMa_in/"+runname+"/Roff_CORR")
         #--
         # dist std for ensembles
-        distopen_ranges={}
+        #distopen_ranges={}
         distopen_range=np.zeros([pm.ens_mem(),nYY,nXX],np.float32)
         fname="../../dat/std_runoff_E2O_1980-2000.bin"
         std_runoff=np.fromfile(fname,np.float32).reshape(nYY,nXX)
@@ -1494,7 +1494,7 @@ def prepare_input():
                 roffc.tofile(oname)
     #--------------
     # -25% biased runoff experiment
-    if pm.mode()==3: # ELSE Kim 2009/E2O/ERA20CM
+    if pm.input()=="ELSE": # Kim 2009/E2O/ERA20CM
         #print "-25% biased runoff experiment", pm.true_run(3), pm.runname(3)
         distopen=pm.distopen(3)
         diststd=pm.diststd(3)
@@ -1583,7 +1583,7 @@ def prepare_input():
         #p.terminate()
     #--------------
     # blind runoff experiment
-    if pm.mode()==4: # ELSE_KIM2009 , differnt yeaer
+    if pm.input()=="ELSE_KIM2009": # differnt yeaer
         #distopen=1.0 #0.75 #pm.distopen()
         #diststd=0.5  #pm.diststd()
         distopen=pm.distopen(4)
