@@ -134,6 +134,8 @@ elif [ $runname = "ERA20CM" ];then
      DROFUNIT="1000"   # [mm/day->m/s]      # runoff unit conversion
 elif [ $runname = "ELSE_KIM2009" ];then
      DROFUNIT="86400000"   # [mm/day->m/s]  # runoff unit conversion
+elif [ $runname = "VIC_BC" ];then
+     DROFUNIT="86400000"   # [mm/day->m/s]  # runoff unit conversion
 fi
 
 #----- for plain binary runoff forcing
@@ -189,11 +191,14 @@ if [ $runname = "E2O" ];then
     CDIMINFO="${FMAP}/diminfo-15min.txt" # dimention information file
     CINPMAT="${FMAP}/inpmat-15min.bin"   # runoff input matrix for interporlation
 elif [ $runname = "ERA20CM" ];then
-	CDIMINFO="${FMAP}/diminfo-1deg.txt"  # dimention information file
+	  CDIMINFO="${FMAP}/diminfo-1deg.txt"  # dimention information file
     CINPMAT="${FMAP}/inpmat-1deg.bin"    # runoff input matrix for interporlation
 elif [ $runname = "ELSE_KIM2009" ];then
     CDIMINFO="${FMAP}/diminfo_test-1deg.txt"  # dimention information file
     CINPMAT="${FMAP}/inpmat_test-1deg.bin"    # runoff input matrix for interporlation
+elif [ $runname = "VIC_BC" ] ; then
+	  CDIMINFO="${FMAP}/diminfo-15min.txt"  # dimention information file
+    CINPMAT="${FMAP}/inpmat-15min.bin"      # runoff input matrix for interporlation
 fi
 echo $CDIMINFO  $CINPMAT
 #----- for plain binary map input
