@@ -1457,6 +1457,7 @@ def prepare_input():
     #---------
     # VIC BC
     if pm.input()=="VIC_BC": #VIC BC
+        nXX,nYY=1440,720
         distopen=pm.distopen(3)
         diststd=pm.diststd(3)
         true_run=pm.true_run(3) # for true ensemble
@@ -1474,38 +1475,23 @@ def prepare_input():
         distopen_range=np.zeros([pm.ens_mem(),nYY,nXX],np.float32)
         fname="../../dat/std_runoff_E2O_1980-2000.bin"
         std_runoff=np.fromfile(fname,np.float32).reshape(nYY,nXX)
-        
-        #open_list=np.setdiff1d(np.arange(1,10+1),[true_run])
-        open_list=np.arange(1,10+1)
-        random_runs=random.sample(open_list,k=2)
-        for runens in open_list:
-            ens_char="%03d"%(runens)
-            diststd_num=2
-            distopen_range=rd.normal(1,diststd,diststd_num)
-            distopen_range=np.sort(distopen_range)
-            distopen_range=distopen_range.astype(np.float32)
-            distopen_ranges[ens_char]=distopen_range#[0.25,1.00,1.25]
-        #
-        inputlist=[]
+        std_runoff=ma.masked_where(std_runoff==-9999.0,std_runoff).filled(0.0)
+        for iXX in range(nXX):
+            for iYY in range(nYY):
+                distopen_range[:,iYY,iXX]=rd.normal(1.0,std_runoff[iYY,iXX],pm.ens_mem())
+        #----------
         for day in np.arange(start,last):
             target_dt=start_dt+datetime.timedelta(days=day)
             yyyy='%04d' % (target_dt.year)
             mm='%02d' % (target_dt.month)
             dd='%02d' % (target_dt.day)
-            ens_num=1
-            for runens in open_list: #np.arange(1,10+1):
-                run_num="%03d"%(runens)
-                iname=pm.DA_dir()+"/inp/"+runname+"/Roff/Roff__"+yyyy+mm+dd+run_num+".one"
-                distopens=distopen_ranges[run_num]
-                for dist in distopens:
-                    ens_char="C%03d"%(ens_num)
-                    oname="./CaMa_in/"+runname+"/Roff_CORR/Roff__"+yyyy+mm+dd+ens_char+".one"
-                    inputlist.append([iname,oname,str(dist)])
-                    ens_num=ens_num+1
-        # do parallel
-        p=Pool(pm.para_nums())
-        p.map(copy_runoff,inputlist)
-        p.terminate()
+            iname=pm.DA_dir()+"/inp/"+runname+"/Roff/Roff____"+yyyy+mm+dd+".one"
+            roff=np.fromfile(iname,np.float32).reshape(nYY,nXX)
+            for ens_num in np.arange(pm.ens_num()):
+                ens_char="C%03d"%(ens_num)
+                roffc=roff*distopen_range[ens_num,:,:]
+                oname="./CaMa_in/"+runname+"/Roff_CORR/Roff__"+yyyy+mm+dd+ens_char+".one"
+                roffc.tofile(oname)
     #--------------
     # -25% biased runoff experiment
     if pm.mode()==3: # ELSE Kim 2009/E2O/ERA20CM
