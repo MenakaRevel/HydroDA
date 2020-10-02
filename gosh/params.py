@@ -20,7 +20,7 @@ def endtime():
                       # *note: this date is not included
 
 def ens_mem():
-    return 21
+    return 20
     # number of ensemble members
 
 def max_lat():

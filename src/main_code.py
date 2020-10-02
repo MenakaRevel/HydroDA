@@ -1487,7 +1487,7 @@ def prepare_input():
             dd='%02d' % (target_dt.day)
             iname=pm.DA_dir()+"/inp/"+runname+"/Roff/Roff____"+yyyy+mm+dd+".one"
             roff=np.fromfile(iname,np.float32).reshape(nYY,nXX)
-            for ens_num in np.arange(pm.ens_num()):
+            for ens_num in np.arange(pm.ens_mem()):
                 ens_char="C%03d"%(ens_num)
                 roffc=roff*distopen_range[ens_num,:,:]
                 oname="./CaMa_in/"+runname+"/Roff_CORR/Roff__"+yyyy+mm+dd+ens_char+".one"
