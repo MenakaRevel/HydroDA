@@ -16,7 +16,7 @@ def starttime():
     return (2003,1,1) # start date: [year,month,date]
 
 def endtime():
-    return (2015,1,1) # end date: [year,month,date]
+    return (2004,1,1) # end date: [year,month,date]
                       # *note: this date is not included
 
 def ens_mem():
@@ -192,7 +192,7 @@ def patch_id():
     return "0.60"
 
 def spinup_mode():
-    return 0
+    return 3
     # 0: do spinup simulation for both (corrupted and true) simulation
     # 1: do spin up only at corrupted simulation
     # 2: do spin up only at true simulation

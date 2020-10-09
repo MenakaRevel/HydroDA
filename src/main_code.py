@@ -70,9 +70,9 @@ def main_act():
     print "spin up simulation"
     spin_up()
 
-    # # Calculate mean for anomaly assimilation ### NEW
-    # print "calculate mean of %04d"%(pm.spinup_end_year())
-    # calc_mean()
+    # Calculate mean for anomaly assimilation ### NEW
+    print "calculate mean of %04d"%(pm.spinup_end_year())
+    calc_mean()
 
     # make initial restart
     print "make intial restart"
@@ -1458,7 +1458,7 @@ def prepare_input():
     # VIC BC
     if pm.input()=="VIC_BC": #VIC BC
         nXX,nYY=1440,720
-        distopen=pm.distopen(3)
+        distopen=0.0 #pm.distopen(3)
         diststd=pm.diststd(3)
         true_run=pm.true_run(3) # for true ensemble
         runname=pm.runname(3) # get runoff name
@@ -1478,7 +1478,7 @@ def prepare_input():
         std_runoff=ma.masked_where(std_runoff==-9999.0,std_runoff).filled(0.0)
         for iXX in range(nXX):
             for iYY in range(nYY):
-                distopen_range[:,iYY,iXX]=rd.normal(1.0,std_runoff[iYY,iXX],pm.ens_mem())
+                distopen_range[:,iYY,iXX]=np.sort(rd.normal(distopen,std_runoff[iYY,iXX],pm.ens_mem()))
         #----------
         for day in np.arange(start,last):
             target_dt=start_dt+datetime.timedelta(days=day)
@@ -1489,7 +1489,7 @@ def prepare_input():
             roff=np.fromfile(iname,np.float32).reshape(nYY,nXX)
             for ens_num in np.arange(pm.ens_mem()):
                 ens_char="C%03d"%(ens_num+1)
-                roffc=roff*distopen_range[ens_num,:,:]
+                roffc=roff+roff*distopen_range[ens_num,:,:]
                 oname="./CaMa_in/"+runname+"/Roff_CORR/Roff__"+yyyy+mm+dd+ens_char+".one"
                 roffc.tofile(oname)
     #--------------

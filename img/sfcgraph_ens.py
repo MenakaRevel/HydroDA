@@ -12,8 +12,10 @@ import os
 import calendar 
 from multiprocessing import Pool
 from multiprocessing import Process
+from multiprocessing import sharedctypes
 from numpy import ma
 import re
+import math
 
 os.system("ln -sf ../gosh/params.py params.py")
 #sys.path.append('../assim_out/')
@@ -27,6 +29,7 @@ import cal_stat as stat
 #argvs = sys.argv
 
 experiment="E2O_HydroWeb21"
+#experiment="VIC_BC_HydroWeb01"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 assim_out=pm.DA_dir()+"/out/"+experiment
@@ -114,10 +117,12 @@ rivlen = np.fromfile(rivlen,np.float32).reshape(ny,nx)
 elevtn = np.fromfile(elevtn,np.float32).reshape(ny,nx)
 #----
 # mean
-mean_sfcelv = pm.DA_dir()+"/dat/mean_sfcelv_1958-2013.bin"
+#mean_sfcelv = pm.DA_dir()+"/dat/mean_sfcelv_1958-2013.bin"
+mean_sfcelv = pm.DA_dir()+"/dat/mean_sfcelv_VIC_BC_1980-2014.bin"
 mean_sfcelv = np.fromfile(mean_sfcelv,np.float32).reshape(ny,nx)
 # std
-std_sfcelv = pm.DA_dir()+"/dat/std_sfcelv_1958-2013.bin"
+#std_sfcelv = pm.DA_dir()+"/dat/std_sfcelv_1958-2013.bin"
+std_sfcelv = pm.DA_dir()+"/dat/std_sfcelv_VIC_BC_1980-2014.bin"
 std_sfcelv = np.fromfile(std_sfcelv,np.float32).reshape(ny,nx)
 #- mean obs HydroWeb
 mean_obs = pm.HydroWeb_dir()+"/bin/HydroWeb_mean.bin"
@@ -126,19 +131,19 @@ mean_obs = np.fromfile(mean_obs,np.float32).reshape(ny,nx)
 std_obs = pm.HydroWeb_dir()+"/bin/HydroWeb_std.bin"
 std_obs = np.fromfile(std_obs,np.float32).reshape(ny,nx)
 #-------
-# mean & std from previous year
-mean_obss=np.zeros([pm.ens_mem(),ny,nx])
-std_obss=np.zeros([pm.ens_mem(),ny,nx])
-for num in np.arange(1,int(pm.ens_mem())+1):
-    numch='%03d'%num
-    fname=assim_out+"/assim_out/mean_sfcelv/meansfcelvC"+numch+".bin"
-    mean_corr=np.fromfile(fname,np.float32).reshape([ny,nx])
-    mean_obss[num-1]=mean_corr
-    fname=assim_out+"/assim_out/mean_sfcelv/stdsfcelvC"+numch+".bin"
-    std_corr=np.fromfile(fname,np.float32).reshape([ny,nx])
-    std_obss[num-1]=std_corr
-mean_sfcelv=np.mean(mean_obss,axis=0)
-std_sfcelv=np.std(std_obss,axis=0)
+# # mean & std from previous year
+# mean_obss=np.zeros([pm.ens_mem(),ny,nx])
+# std_obss=np.zeros([pm.ens_mem(),ny,nx])
+# for num in np.arange(1,int(pm.ens_mem())+1):
+#     numch='%03d'%num
+#     fname=assim_out+"/assim_out/mean_sfcelv/meansfcelvC"+numch+".bin"
+#     mean_corr=np.fromfile(fname,np.float32).reshape([ny,nx])
+#     mean_obss[num-1]=mean_corr
+#     fname=assim_out+"/assim_out/mean_sfcelv/stdsfcelvC"+numch+".bin"
+#     std_corr=np.fromfile(fname,np.float32).reshape([ny,nx])
+#     std_obss[num-1]=std_corr
+# mean_sfcelv=np.mean(mean_obss,axis=0)
+# std_sfcelv=np.std(std_obss,axis=0)
 ###------
 pname=[]
 xlist=[]
@@ -245,131 +250,192 @@ pnum=len(pname)
 org=[]
 opn=[]
 asm=[]
-hgt=[]
-bathy=[]
-ele=[]
-m_sf=[]
-em_sf=[]
-swt={}
-for point in np.arange(pnum):
-    swt[point] = []
-
+# multiprocessing array
+# result       = np.ctypeslib.as_ctypes(np.zeros((size, size)))
+# shared_array = sharedctypes.RawArray(result._type_, result)
+opn=np.ctypeslib.as_ctypes(np.zeros([N,pm.ens_mem(),pnum],np.float32))
+shared_array_opn  = sharedctypes.RawArray(opn._type_, opn)
+asm=np.ctypeslib.as_ctypes(np.zeros([N,pm.ens_mem(),pnum],np.float32))
+shared_array_asm  = sharedctypes.RawArray(asm._type_, asm)
+# for parallel calcualtion
+inputlist=[]
 for day in np.arange(start,last):
     target_dt=start_dt+datetime.timedelta(days=day)
     yyyy='%04d' % (target_dt.year)
     mm='%02d' % (target_dt.month)
     dd='%02d' % (target_dt.day)
-    print yyyy,mm,dd
-
-#    fname="../sat/mesh_day%02d.bin"%(SWOT_day(yyyy,mm,dd))
-#    mesh_in=np.fromfile(fname,np.float32).reshape([640,1440])
-#    mesh=(mesh_in>=10)*(mesh_in<=60)
-#    meshP=mesh-1000*(mesh<0.1)
-#
-#    # make org
-#    fname=assim_out+"/xa_m/true/"+yyyy+mm+dd+"_xam.bin"
-#    #fname="../CaMa_out/"+yyyy+mm+dd+"T000/sfcelv"+yyyy+".bin"
-#    orgfile=np.fromfile(fname,np.float32).reshape([720,1440])
-#
-#    fname=pm.CaMa_dir()+"/map/glb_15min/rivhgt.bin"
-#    bathyfile=np.fromfile(fname,np.float32).reshape([720,1440])
-#
-#    fname=assim_out+"/mean_sfcelv/meansfcelvT000.bin"
-#    mean_true=np.fromfile(fname,np.float32).reshape([720,1440])
-#
-#    org_frag=[]
-#    bathy_frag=[]
-#    ele_frag=[]
-#    m_sf_frag=[]
-#    for point in np.arange(pnum):
-#        xpoint=xlist[point]
-#        ypoint=ylist[point]
-#        org_frag.append(orgfile[ypoint,xpoint])
-#        bathy_frag.append(elevtn[ypoint,xpoint] -bathyfile[ypoint,xpoint])
-#        ele_frag.append(elevtn[ypoint,xpoint])
-#        m_sf_frag.append(mean_true[ypoint,xpoint])
-#
-#        #---SWOT--
-#        if meshP[ypoint-40,xpoint] >= 1:
-#          if point not in swt.keys():
-#            swt[point] = [day]
-#          else:
-#            swt[point].append(day)
-#
-#    org.append(org_frag)
-#    bathy.append(bathy_frag)
-#    ele.append(ele_frag)
-#    m_sf.append(m_sf_frag)
-
-    # make asm and opn
-    opn_ens=[]
-    asm_ens=[]
-    hgt_ens=[]
-    em_sf_ens=[]
-    for num in np.arange(1,int(pm.ens_mem())+1):
+    for num in np.arange(1,pm.ens_mem()+1):
         numch='%03d'%num
+        inputlist.append([yyyy,mm,dd,numch])
+        print yyyy,mm,dd,numch
 
-        fname=assim_out+"/assim_out/ens_xa/open/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
-        #fname="../CaMa_out/"+yyyy+mm+dd+"C"+numch+"/sfcelv"+yyyy+".bin"
-        #fname="../"+assim_out+"/ens_xa/open/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
-        opnfile=np.fromfile(fname,np.float32).reshape([ny,nx])
+def read_data(inputlist):
+    yyyy = inputlist[0]
+    mm   = inputlist[1]
+    dd   = inputlist[2]
+    numch= inputlist[3]
+    #--
+    tmp_opn  = np.ctypeslib.as_array(shared_array_opn)
+    tmp_asm  = np.ctypeslib.as_array(shared_array_asm)
 
-        fname=assim_out+"/assim_out/ens_xa/assim/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
-        asmfile=np.fromfile(fname,np.float32).reshape([ny,nx])
+    # year, mon, day
+    year=int(yyyy)
+    mon=int(mm)
+    day=int(dd)
+    num=int(numch)-1
+    #--
+    target_dt=datetime.date(year,mon,day)
+    dt=(target_dt-start_dt).days
+    # corrpted
+    fname=assim_out+"/assim_out/outflw/open/outflw"+yyyy+mm+dd+"_"+numch+".bin"
+    #fname=assim_out+"/assim_out/rivout/open/rivout"+yyyy+mm+dd+"_"+numch+".bin"
+    opnfile=np.fromfile(fname,np.float32).reshape([ny,nx])
+    # assimilated
+    fname=assim_out+"/assim_out/outflw/assim/outflw"+yyyy+mm+dd+"_"+numch+".bin"
+    #fname=assim_out+"/assim_out/rivout/assim/rivout"+yyyy+mm+dd+"_"+numch+".bin"
+    asmfile=np.fromfile(fname,np.float32).reshape([ny,nx])
+    #-------------
+    for point in np.arange(pnum):
+        ix1,iy1,ix2,iy2=grdc.get_grdc_station_v396(pname[point])
+        if ix2 == -9999 or iy2 == -9999:
+            tmp_opn[dt,num,point]=opnfile[iy1,ix1]
+            tmp_asm[dt,num,point]=asmfile[iy1,ix1]
+        else:
+            tmp_opn[dt,num,point]=opnfile[iy1,ix1]+opnfile[iy2,ix2]
+            tmp_asm[dt,num,point]=asmfile[iy1,ix1]+asmfile[iy2,ix2]
+#--------
+p   = Pool(20)
+res = p.map(read_data, inputlist)
+opn = np.ctypeslib.as_array(shared_array_opn)
+asm = np.ctypeslib.as_array(shared_array_asm)
+p.terminate()
+#############
+# hgt=[]
+# bathy=[]
+# ele=[]
+# m_sf=[]
+# em_sf=[]
+# swt={}
+# for point in np.arange(pnum):
+#     swt[point] = []
 
-#        fname="../assim_out/rivhgt/assim/rivhgt"+yyyy+mm+dd+"_"+numch+"A.bin"
-        #fname="../CaMa_out/"+yyyy+mm+dd+"A"+numch+"/sfcelv"+yyyy+".bin"
-        rhgtfile=np.fromfile(fname,np.float32).reshape([ny,nx])
+# for day in np.arange(start,last):
+#     target_dt=start_dt+datetime.timedelta(days=day)
+#     yyyy='%04d' % (target_dt.year)
+#     mm='%02d' % (target_dt.month)
+#     dd='%02d' % (target_dt.day)
+#     print yyyy,mm,dd
 
-        fname=assim_out+"/assim_out/mean_sfcelv/meansfcelvC"+numch+".bin"
-        mean_corr=np.fromfile(fname,np.float32).reshape([ny,nx])
+# #    fname="../sat/mesh_day%02d.bin"%(SWOT_day(yyyy,mm,dd))
+# #    mesh_in=np.fromfile(fname,np.float32).reshape([640,1440])
+# #    mesh=(mesh_in>=10)*(mesh_in<=60)
+# #    meshP=mesh-1000*(mesh<0.1)
+# #
+# #    # make org
+# #    fname=assim_out+"/xa_m/true/"+yyyy+mm+dd+"_xam.bin"
+# #    #fname="../CaMa_out/"+yyyy+mm+dd+"T000/sfcelv"+yyyy+".bin"
+# #    orgfile=np.fromfile(fname,np.float32).reshape([720,1440])
+# #
+# #    fname=pm.CaMa_dir()+"/map/glb_15min/rivhgt.bin"
+# #    bathyfile=np.fromfile(fname,np.float32).reshape([720,1440])
+# #
+# #    fname=assim_out+"/mean_sfcelv/meansfcelvT000.bin"
+# #    mean_true=np.fromfile(fname,np.float32).reshape([720,1440])
+# #
+# #    org_frag=[]
+# #    bathy_frag=[]
+# #    ele_frag=[]
+# #    m_sf_frag=[]
+# #    for point in np.arange(pnum):
+# #        xpoint=xlist[point]
+# #        ypoint=ylist[point]
+# #        org_frag.append(orgfile[ypoint,xpoint])
+# #        bathy_frag.append(elevtn[ypoint,xpoint] -bathyfile[ypoint,xpoint])
+# #        ele_frag.append(elevtn[ypoint,xpoint])
+# #        m_sf_frag.append(mean_true[ypoint,xpoint])
+# #
+# #        #---SWOT--
+# #        if meshP[ypoint-40,xpoint] >= 1:
+# #          if point not in swt.keys():
+# #            swt[point] = [day]
+# #          else:
+# #            swt[point].append(day)
+# #
+# #    org.append(org_frag)
+# #    bathy.append(bathy_frag)
+# #    ele.append(ele_frag)
+# #    m_sf.append(m_sf_frag)
 
-        opn_frag=[]
-        asm_frag=[]
-        hgt_frag=[]
-        em_sf_frag=[]
-        for point in np.arange(pnum):
-            xpoint=xlist[point]
-            ypoint=ylist[point]
-            opn_frag.append(opnfile[ypoint,xpoint])
-            asm_frag.append(asmfile[ypoint,xpoint])
-            hgt_frag.append(rhgtfile[ypoint,xpoint])
-            #print asmfile[ypoint,xpoint],elevtn[ypoint,xpoint] - rhgtfile[ypoint,xpoint],rhgtfile[ypoint,xpoint]
-            em_sf_frag.append(mean_corr[ypoint,xpoint])
-        opn_ens.append(opn_frag)
-        asm_ens.append(asm_frag)
-        hgt_ens.append(hgt_frag)
-        em_sf_ens.append(em_sf_frag)
+#     # make asm and opn
+#     opn_ens=[]
+#     asm_ens=[]
+#     hgt_ens=[]
+#     em_sf_ens=[]
+#     for num in np.arange(1,int(pm.ens_mem())+1):
+#         numch='%03d'%num
 
-    opn.append(opn_ens)
-    asm.append(asm_ens)
-    hgt.append(hgt_ens)
-    em_sf.append(em_sf_ens)
-#-----
-#org=np.array(org)
-#bathy=np.array(bathy)
-#ele=np.array(ele)
-opn=np.array(opn)
-asm=np.array(asm)
-#hgt=np.array(hgt)
-#m_sf=np.array(m_sf)
-em_sf=np.array(em_sf)
+#         fname=assim_out+"/assim_out/ens_xa/open/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
+#         #fname="../CaMa_out/"+yyyy+mm+dd+"C"+numch+"/sfcelv"+yyyy+".bin"
+#         #fname="../"+assim_out+"/ens_xa/open/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
+#         opnfile=np.fromfile(fname,np.float32).reshape([ny,nx])
 
-#print np.shape(org),org.dtype
-#org.tofile("org.bin")
-#print np.shape(opn)
-#opn.tofile("opn.bin")
-#print np.shape(asm)
-#asm.tofile("asm.bin")
+#         fname=assim_out+"/assim_out/ens_xa/assim/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
+#         asmfile=np.fromfile(fname,np.float32).reshape([ny,nx])
+
+# #        fname="../assim_out/rivhgt/assim/rivhgt"+yyyy+mm+dd+"_"+numch+"A.bin"
+#         #fname="../CaMa_out/"+yyyy+mm+dd+"A"+numch+"/sfcelv"+yyyy+".bin"
+#         rhgtfile=np.fromfile(fname,np.float32).reshape([ny,nx])
+
+#         #fname=assim_out+"/assim_out/mean_sfcelv/meansfcelvC"+numch+".bin"
+#         mean_corr=np.fromfile(fname,np.float32).reshape([ny,nx])
+
+#         opn_frag=[]
+#         asm_frag=[]
+#         hgt_frag=[]
+#         em_sf_frag=[]
+#         for point in np.arange(pnum):
+#             xpoint=xlist[point]
+#             ypoint=ylist[point]
+#             opn_frag.append(opnfile[ypoint,xpoint])
+#             asm_frag.append(asmfile[ypoint,xpoint])
+#             hgt_frag.append(rhgtfile[ypoint,xpoint])
+#             #print asmfile[ypoint,xpoint],elevtn[ypoint,xpoint] - rhgtfile[ypoint,xpoint],rhgtfile[ypoint,xpoint]
+#             em_sf_frag.append(mean_corr[ypoint,xpoint])
+#         opn_ens.append(opn_frag)
+#         asm_ens.append(asm_frag)
+#         hgt_ens.append(hgt_frag)
+#         em_sf_ens.append(em_sf_frag)
+
+#     opn.append(opn_ens)
+#     asm.append(asm_ens)
+#     hgt.append(hgt_ens)
+#     em_sf.append(em_sf_ens)
+# #-----
+# #org=np.array(org)
+# #bathy=np.array(bathy)
+# #ele=np.array(ele)
+# opn=np.array(opn)
+# asm=np.array(asm)
+# #hgt=np.array(hgt)
+# #m_sf=np.array(m_sf)
+# em_sf=np.array(em_sf)
+
+# #print np.shape(org),org.dtype
+# #org.tofile("org.bin")
+# #print np.shape(opn)
+# #opn.tofile("opn.bin")
+# #print np.shape(asm)
+# #asm.tofile("asm.bin")
+#======================
 #--
-def save_txt(data,name):
-  data=data.flatten()
-  f=open(name,"w")
-  for i in data:
-    line="%10.4f\n"%(i)
-    f.write(line)
-  f.close()
-  return 0
+# def save_txt(data,name):
+#   data=data.flatten()
+#   f=open(name,"w")
+#   for i in data:
+#     line="%10.4f\n"%(i)
+#     f.write(line)
+#   f.close()
+#   return 0
 
 #save_txt(org,"org.txt")
 #save_txt(opn,"opn.txt")
@@ -396,8 +462,8 @@ def make_fig(point):
     #data=((data-np.mean(data))/np.std(data))*std_sfcelv[ylist[point],xlist[point]]+mean_sfcelv[ylist[point],xlist[point]]
     #data=(data-np.mean(data))+mean_sfcelv[ylist[point],xlist[point]]
     #---------
-    data=data-mean_obs[ylist[point],xlist[point]]+mean_sfcelv[ylist[point],xlist[point]]
-#    data=((data-mean_obs[ylist[point],xlist[point]])/(std_obs[ylist[point],xlist[point]]+1.0e-20))*std_sfcelv[ylist[point],xlist[point]]+mean_sfcelv[ylist[point],xlist[point]]
+    #data=data-mean_obs[ylist[point],xlist[point]]+mean_sfcelv[ylist[point],xlist[point]]
+    data=((data-mean_obs[ylist[point],xlist[point]])/(std_obs[ylist[point],xlist[point]]+1.0e-20))*std_sfcelv[ylist[point],xlist[point]]+mean_sfcelv[ylist[point],xlist[point]]
     lines=[ax1.plot(time,data,label="obs",marker="o",color="black",linewidth=0.0,zorder=101)[0]]
 #    ax1.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7,zorder=101)
 #    ax1.plot(np.arange(start,last),m_sf[:,point],label="mean sfcelv",color="black",linewidth=0.7,linestyle="--",zorder=107)
@@ -418,8 +484,8 @@ def make_fig(point):
     #ax1.set_ylim(ymin=0,ymax=250.)
     ax1.set_xlim(xmin=0,xmax=last+1)
     ax1.tick_params('y', colors='k')
-    xxlist=np.linspace(15,N-15,int(N/30))
-    xxlab=[calendar.month_name[i][:3] for i in range(1,13)]
+    # xxlist=np.linspace(15,N-15,int(N/30))
+    # xxlab=[calendar.month_name[i][:3] for i in range(1,13)]
     #ax1.set_xticks(xxlist)
     #ax1.set_xticklabels(xxlab,fontsize=10)
     #--for bug fixing
@@ -432,6 +498,19 @@ def make_fig(point):
     ax1.text(0.02,0.8,outtext,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
     outtext="observation mean: %6.2f"%(obs_mean)
     ax1.text(0.02,0.7,outtext,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    # xlable in years
+    if eyear-syear > 5:
+        dtt=5
+        dt=int(math.ceil(((eyear-syear)+1)/5.0))
+    else:
+        dtt=1
+        dt=(eyear-syear)+1
+    xxlist=np.linspace(0,N,dt,endpoint=True)
+    #xxlab=[calendar.month_name[i][:3] for i in range(1,13)]
+    xxlab=np.arange(syear,eyear+1,dtt)
+    ax1.set_xticks(xxlist)
+    ax1.set_xticklabels(xxlab,fontsize=10)
+
 #    ax2 = ax1.twinx()
 #    aiv = stat.AI(asm[:,:,point],opn[:,:,point],org[:,point])
 #    aivn,error= stat.AI_new(asm[:,:,point],opn[:,:,point],org[:,point])#[0]
