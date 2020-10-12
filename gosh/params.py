@@ -13,10 +13,10 @@ def timestep():
     return 86400 # outer timestep in seconds
 
 def starttime():
-    return (2003,1,1) # start date: [year,month,date]
+    return (2002,1,1) # start date: [year,month,date]
 
 def endtime():
-    return (2004,1,1) # end date: [year,month,date]
+    return (2015,1,1) # end date: [year,month,date]
                       # *note: this date is not included
 
 def ens_mem():
@@ -192,7 +192,7 @@ def patch_id():
     return "0.60"
 
 def spinup_mode():
-    return 3
+    return 0
     # 0: do spinup simulation for both (corrupted and true) simulation
     # 1: do spin up only at corrupted simulation
     # 2: do spin up only at true simulation
@@ -200,7 +200,7 @@ def spinup_mode():
     ### if initial restart file is ready, spinup simulation is no need
 
 def spinup_end_year():
-    return 2002
+    return 2001
 
 def spinup_end_month():
     return 12
@@ -230,7 +230,7 @@ def rho():
 
 def sigma_b():
     return 0.0400000
-    # bacground variance of iflation for adaptive inflation Myoshi et al (2011)
+    # bacground variance of inflation for adaptive inflation Myoshi et al (2011)
 
 def MKLdir():
     return "/opt/intel/compilers_and_libraries_2016.3.170/mac/mkl"

@@ -11,6 +11,13 @@
 #PBS -N HydroDA
 
 #source ~/.bashrc
+# import virtual environment
+source ~/.bashrc
+source ~/.bash_conda
+
+source activate pydef
+
+which python
 
 export OMP_NUM_THREADS=40
 
@@ -43,4 +50,8 @@ ln -sf $HydroDA"/src/"main_code.py $HydroDA"/out/"$EXP"/"main_code.py
 cd $HydroDA"/out/"$EXP
 #python run.py
 # run the main code using virtual environment
-/home/menaka/miniconda3/envs/pydef/bin/python2.7 run.py
+/home/menaka/miniconda3/envs/pydef/bin/python2.7 run.py &
+
+wait
+
+conda deactivate

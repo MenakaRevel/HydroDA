@@ -203,7 +203,7 @@ epix=(180+east)*4
 cmap=mbar.colormap("H01")
 cmap.set_under("w",alpha=0)
 cmapL=cmap #cm.get_cmap("rainbow_r")
-vmin=0.0
+vmin=-1.0
 vmax=1.0
 norm=Normalize(vmin=vmin,vmax=vmax)
 #------
@@ -228,8 +228,8 @@ for point in np.arange(pnum):
     if NSEopn==1.00:
         print (NSEopn)
         continue
-    #NSEAI=(NSEasm-NSEopn)/(1.0-NSEopn+1.0e-20)
-    NSEAI=NSEasm
+    NSEAI=(NSEasm-NSEopn)/(1.0-NSEopn+1.0e-20)
+    #NSEAI=NSEasm
     ix=xlist[point]
     iy=ylist[point]
     #--------------
@@ -238,10 +238,10 @@ for point in np.arange(pnum):
     lon=lonlat[0,iy,ix]
     lat=lonlat[1,iy,ix]
     c=cmapL(norm(NSEAI))
-    print lon,lat,NSEAI
-    ax.scatter(lon,lat,s=1,marker="o") #,edgecolors=c, facecolors=c)
+    print lon,lat,NSEAI,NSEasm,NSEopn
+    ax.scatter(lon,lat,s=10,marker="o",zorder=110,edgecolors=c, facecolors=c)
 #--
-im=plt.scatter([],[],c=[],cmap=cmap,s=0.1,vmin=0.0,vmax=1.0,norm=norm)
+im=plt.scatter([],[],c=[],cmap=cmap,s=0.1,vmin=vmin,vmax=vmin,norm=norm)
 im.set_visible(False)
 cbar=m.colorbar(im,"right",size="2%")
 #plt.title(stitle)
