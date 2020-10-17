@@ -18,9 +18,9 @@ data_assim
 calc_stat
 
 #img/bin
-*print_flddpth
+*print_flddpth*
 *print_flddpth.o
-*print_grid
+*print_grid*
 *print_grid.o
 *print_rivvec
 *print_rivvec.o
