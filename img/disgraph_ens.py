@@ -95,7 +95,7 @@ nx     = int(filter(None, re.split(" ",lines[0]))[0])
 ny     = int(filter(None, re.split(" ",lines[1]))[0])
 gsize  = float(filter(None, re.split(" ",lines[3]))[0])
 #----
-syear,smonth,sdate=pm.starttime()#2004#1991
+syear,smonth,sdate=2003,1,1 #pm.starttime()#2004#1991
 eyear,emonth,edate=pm.endtime()
 #month=1
 #date=1
@@ -243,13 +243,14 @@ for day in np.arange(start,last):
     for num in np.arange(1,pm.ens_mem()+1):
         numch='%03d'%num
         inputlist.append([yyyy,mm,dd,numch])
-        print yyyy,mm,dd,numch
+        #print (yyyy,mm,dd,numch)
 
 def read_data(inputlist):
     yyyy = inputlist[0]
     mm   = inputlist[1]
     dd   = inputlist[2]
     numch= inputlist[3]
+    print (yyyy,mm,dd,numch)
     #--
     tmp_opn  = np.ctypeslib.as_array(shared_array_opn)
     tmp_asm  = np.ctypeslib.as_array(shared_array_asm)
@@ -264,6 +265,7 @@ def read_data(inputlist):
     dt=(target_dt-start_dt).days
     # corrpted
     fname=assim_out+"/assim_out/outflw/open/outflw"+yyyy+mm+dd+"_"+numch+".bin"
+    #print (fname)
     #fname=assim_out+"/assim_out/rivout/open/rivout"+yyyy+mm+dd+"_"+numch+".bin"
     opnfile=np.fromfile(fname,np.float32).reshape([ny,nx])
     # assimilated

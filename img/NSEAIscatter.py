@@ -18,6 +18,11 @@ from multiprocessing import sharedctypes
 from numpy import ma
 import re
 import my_colorbar as mbar
+import cartopy.crs as ccrs
+import cartopy
+from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
+import cartopy.feature as cfeature
+import os
 
 #sys.path.append('../assim_out/')
 os.system("ln -sf ../gosh/params.py params.py")
@@ -35,7 +40,44 @@ experiment="VIC_BC_HydroWeb01"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 assim_out=pm.DA_dir()+"/out/"+experiment
-print assim_out
+print (assim_out)
+#----
+def vec_par(LEVEL,ax=None):
+    ax=ax or plt.gca()
+    txt="tmp_%02d.txt"%(LEVEL)
+    os.system("./bin/print_rivvec tmp1.txt 1 "+str(LEVEL)+" > "+txt)
+    width=(float(LEVEL)**sup)*w
+    #print LEVEL, width#, lon1,lat1,lon2-lon1,lat2-lat1#x1[0],y1[0],x1[1]-x1[0],y1[1]-y1[0]
+    # open tmp2.txt
+    f = open(txt,"r")
+    lines = f.readlines()
+    f.close()
+    #print LEVEL, width, lines, txt
+    #---
+    for line in lines:
+        line    = filter(None, re.split(" ",line))
+        lon1 = float(line[0])
+        lat1 = float(line[1])
+        lon2 = float(line[3])
+        lat2 = float(line[4])
+
+        # ix = int((lon1 + 180.)*4.0)
+        # iy = int((-lat1 + 90.)*4.0)
+
+        if lon1-lon2 > 180.0:
+            print (lon1, lon2)
+            lon2=180.0
+        elif lon2-lon1> 180.0:
+            print (lon1,lon2)
+            lon2=-180.0
+        #--------
+        colorVal="w" 
+        #print (lon1,lon2,lat1,lat2,width)
+        plot_ax(lon1,lon2,lat1,lat2,width,colorVal,ax)
+#----
+def plot_ax(lon1,lon2,lat1,lat2,width,colorVal,ax=None):
+    ax=ax or plt.gca()
+    return ax.plot([lon1,lon2],[lat1,lat2],color=colorVal,linewidth=width,zorder=105,alpha=alpha)
 #----
 def mk_dir(sdir):
   try:
@@ -91,9 +133,14 @@ rivlen = np.fromfile(rivlen,np.float32).reshape(ny,nx)
 elevtn = np.fromfile(elevtn,np.float32).reshape(ny,nx)
 lonlat = np.fromfile(lonlat,np.float32).reshape(2,ny,nx)
 uparea = np.fromfile(uparea,np.float32).reshape(ny,nx)
+# #higher resolution data
+# catmxy = pm.CaMa_dir()+"/map/"+pm.mapname()+"/1min/1min.catmxy.bin"
+# catmxy = np.fromfile(catmxy,np.int16).reshape(2,ny*60,nx*60)
 #----
-syear,smonth,sdate=pm.starttime()#2004#1991
-eyear,emonth,edate=2005,1,1 #pm.endtime()
+rivermap=(nextxy[0]>0)*1.0
+#----
+syear,smonth,sdate=2003,1,1 #spm.starttime()#2004#1991  2004,1,1 #
+eyear,emonth,edate=pm.endtime() #2005,1,1 #
 #month=1
 #date=1
 start_dt=datetime.date(syear,smonth,sdate)
@@ -115,7 +162,7 @@ river=[]
 rivernames = grdc.grdc_river_name_v396()
 for rivername in rivernames:
     grdc_id,station_loc,x_list,y_list = grdc.get_grdc_loc_v396(rivername)
-    print rivername, grdc_id,station_loc
+    print (rivername, grdc_id,station_loc)
     river.append([rivername]*len(station_loc))
     staid.append(grdc_id)
     pname.append(station_loc)
@@ -125,7 +172,7 @@ for rivername in rivernames:
 river=([flatten for inner in river for flatten in inner])
 staid=([flatten for inner in staid for flatten in inner])
 pname=([flatten for inner in pname for flatten in inner])
-print len(pname), len(xlist)
+print (len(pname), len(xlist))
 xlist=([flatten for inner in xlist for flatten in inner])
 ylist=([flatten for inner in ylist for flatten in inner])
 #########################################################
@@ -144,7 +191,7 @@ for day in np.arange(start,last):
     for num in np.arange(1,pm.ens_mem()+1):
         numch='%03d'%num
         inputlist.append([yyyy,mm,dd,numch])
-        print yyyy,mm,dd,numch
+        print (yyyy,mm,dd,numch)
 #----------------------
 # function to read data
 def read_data(inputlist):
@@ -207,26 +254,40 @@ vmin=-1.0
 vmax=1.0
 norm=Normalize(vmin=vmin,vmax=vmax)
 #------
+# river width
+sup=2
+w=0.02
+alpha=1
+width=0.5
+#------
+print (west,east,south,north)
 resol=1
 fig=plt.figure()
 G = gridspec.GridSpec(1,1)
 ax=fig.add_subplot(G[0,0])
 m = Basemap(projection='cyl',llcrnrlat=south,urcrnrlat=north,llcrnrlon=west,urcrnrlon=east, lat_ts=0,resolution='c',ax=ax)
 #m.drawcoastlines( linewidth=0.1, color='k' )
-m.fillcontinents(color=land,lake_color=water)
-m.drawmapboundary(fill_color=water)
-m.drawparallels(np.arange(south,north+0.1,5), labels = [1,0,0,0], fontsize=10,linewidth=0)
-m.drawmeridians(np.arange(west,east+0.1,5), labels = [0,0,0,1], fontsize=10,linewidth=0)
+m.fillcontinents(color=land,lake_color=water,zorder=99)
+#m.drawmapboundary(fill_color=water,zorder=100)
+im=plt.scatter([],[],c=[],cmap=cmap,s=0.1,vmin=vmin,vmax=vmin,norm=norm,zorder=101)
+im.set_visible(False)
+m.drawparallels(np.arange(south,north+0.1,5), labels = [1,0,0,0], fontsize=10,linewidth=0,zorder=102)
+m.drawmeridians(np.arange(west,east+0.1,5), labels = [0,0,0,1], fontsize=10,linewidth=0,zorder=102)
+#--
+box="%f %f %f %f"%(west,east,north,south) 
+os.system("./bin/txt_vector "+box+" "+pm.CaMa_dir()+" "+pm.mapname()+" > tmp1.txt") 
+map(vec_par,np.arange(1,10+1,1))
+#--
 for point in np.arange(pnum):
     org=grdc.grdc_dis(staid[point],syear,eyear-1)
     org=np.array(org)
     if sum(ma.masked_where(org!=-99.9,org))==0.0:
-        print (sum(ma.masked_where(org!=-99.9,org)))
+        #print (sum(ma.masked_where(org!=-99.9,org)))
         continue
     NSEasm=NS(np.mean(asm[:,:,point],axis=1),org)
     NSEopn=NS(np.mean(opn[:,:,point],axis=1),org)
     if NSEopn==1.00:
-        print (NSEopn)
+        #print (NSEopn)
         continue
     NSEAI=(NSEasm-NSEopn)/(1.0-NSEopn+1.0e-20)
     #NSEAI=NSEasm
@@ -238,11 +299,10 @@ for point in np.arange(pnum):
     lon=lonlat[0,iy,ix]
     lat=lonlat[1,iy,ix]
     c=cmapL(norm(NSEAI))
-    print lon,lat,NSEAI,NSEasm,NSEopn
-    ax.scatter(lon,lat,s=10,marker="o",zorder=110,edgecolors=c, facecolors=c)
+    #print (lon,lat,NSEAI) #,NSEasm,NSEopn)
+    ax.scatter(lon,lat,s=10,marker="o",edgecolors=c, facecolors=c,zorder=106)
 #--
-im=plt.scatter([],[],c=[],cmap=cmap,s=0.1,vmin=vmin,vmax=vmin,norm=norm)
-im.set_visible(False)
 cbar=m.colorbar(im,"right",size="2%")
 #plt.title(stitle)
 plt.savefig(assim_out+"/figures/NSEAI/NSEAIscatter.png",dpi=300,bbox_inches="tight", pad_inches=0.05)
+os.system("rm -r tmp*.txt")

@@ -91,7 +91,7 @@ gsize  = float(filter(None, re.split(" ",lines[3]))[0])
 ###    last=366
 ###else:
 ###    last=365
-syear,smonth,sdate=pm.starttime()#2004#1991
+syear,smonth,sdate=2003,1,1 #pm.starttime()#2004#1991
 eyear,emonth,edate=pm.endtime()
 #month=1
 #date=1
@@ -156,11 +156,11 @@ EGM96=[]
 rivernames  = ["AMAZONAS"]
 for rivername in rivernames:
   path = assim_out+"/figures/sfcelv/%s"%(rivername)
-  print path
+  #print path
   mk_dir(path)
   #station_loc,x_list,y_list = grdc.get_grdc_loc(rivername,"b")
   station_loc,x_list,y_list,egm08,egm96 =hweb.get_hydroweb_loc(rivername,pm.mapname())
-  print rivername, station_loc
+  #print rivername, station_loc
   river.append([rivername]*len(station_loc))
   pname.append(station_loc)
   xlist.append(x_list)
@@ -267,13 +267,14 @@ for day in np.arange(start,last):
     for num in np.arange(1,pm.ens_mem()+1):
         numch='%03d'%num
         inputlist.append([yyyy,mm,dd,numch])
-        print yyyy,mm,dd,numch
+        #print yyyy,mm,dd,numch
 
 def read_data(inputlist):
     yyyy = inputlist[0]
     mm   = inputlist[1]
     dd   = inputlist[2]
     numch= inputlist[3]
+    #print (yyyy,mm,dd,numch)
     #--
     tmp_opn  = np.ctypeslib.as_array(shared_array_opn)
     tmp_asm  = np.ctypeslib.as_array(shared_array_asm)
@@ -287,25 +288,28 @@ def read_data(inputlist):
     target_dt=datetime.date(year,mon,day)
     dt=(target_dt-start_dt).days
     # corrpted
-    fname=assim_out+"/assim_out/outflw/open/outflw"+yyyy+mm+dd+"_"+numch+".bin"
+    fname=assim_out+"/assim_out/ens_xa/open/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
+    #fname=assim_out+"/assim_out/outflw/open/outflw"+yyyy+mm+dd+"_"+numch+".bin"
     #fname=assim_out+"/assim_out/rivout/open/rivout"+yyyy+mm+dd+"_"+numch+".bin"
     opnfile=np.fromfile(fname,np.float32).reshape([ny,nx])
     # assimilated
-    fname=assim_out+"/assim_out/outflw/assim/outflw"+yyyy+mm+dd+"_"+numch+".bin"
+    fname=assim_out+"/assim_out/ens_xa/assim/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
+    #fname=assim_out+"/assim_out/outflw/assim/outflw"+yyyy+mm+dd+"_"+numch+".bin"
     #fname=assim_out+"/assim_out/rivout/assim/rivout"+yyyy+mm+dd+"_"+numch+".bin"
     asmfile=np.fromfile(fname,np.float32).reshape([ny,nx])
+    #print (yyyy,mm,dd,numch,dt)
     #-------------
     for point in np.arange(pnum):
-        ix1,iy1,ix2,iy2=grdc.get_grdc_station_v396(pname[point])
-        if ix2 == -9999 or iy2 == -9999:
-            tmp_opn[dt,num,point]=opnfile[iy1,ix1]
-            tmp_asm[dt,num,point]=asmfile[iy1,ix1]
-        else:
-            tmp_opn[dt,num,point]=opnfile[iy1,ix1]+opnfile[iy2,ix2]
-            tmp_asm[dt,num,point]=asmfile[iy1,ix1]+asmfile[iy2,ix2]
+        ix1=xlist[point]
+        iy1=ylist[point]
+        #print (ix1,iy1)
+        tmp_opn[dt,num,point]=opnfile[iy1,ix1]
+        tmp_asm[dt,num,point]=asmfile[iy1,ix1]
 #--------
+#print (pname[0])
 p   = Pool(20)
 res = p.map(read_data, inputlist)
+#map(read_data, inputlist)
 opn = np.ctypeslib.as_array(shared_array_opn)
 asm = np.ctypeslib.as_array(shared_array_asm)
 p.terminate()
