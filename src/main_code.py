@@ -21,6 +21,7 @@ from numpy import ma
 import random
 import re
 import calendar
+import math
 #external python codes
 import params as pm
 #import src.letkf_lib as lb
@@ -1478,7 +1479,12 @@ def prepare_input():
         std_runoff=ma.masked_where(std_runoff==-9999.0,std_runoff).filled(0.0)
         for iXX in range(nXX):
             for iYY in range(nYY):
-                distopen_range[:,iYY,iXX]=np.sort(rd.normal(distopen,std_runoff[iYY,iXX],pm.ens_mem()))
+                #distopen_range[:,iYY,iXX]=np.sort(rd.normal(distopen,std_runoff[iYY,iXX],pm.ens_mem()))
+                #Log-normal model
+                sk=np.sort(rd.normal(0.0,1.0,pm.ens_mem()))
+                beta=0.0
+                E=std_runoff[iYY,iXX]
+                distopen_range[:,iYY,iXX]=((1+beta)/math.sqrt(E**2+1))*np.exp(math.sqrt(math.log(E**2+1))*sk)
         #----------
         for day in np.arange(start,last):
             target_dt=start_dt+datetime.timedelta(days=day)
@@ -1489,7 +1495,7 @@ def prepare_input():
             roff=np.fromfile(iname,np.float32).reshape(nYY,nXX)
             for ens_num in np.arange(pm.ens_mem()):
                 ens_char="C%03d"%(ens_num+1)
-                roffc=roff+roff*distopen_range[ens_num,:,:]
+                roffc=roff*distopen_range[ens_num,:,:]
                 oname="./CaMa_in/"+runname+"/Roff_CORR/Roff__"+yyyy+mm+dd+ens_char+".one"
                 roffc.tofile(oname)
     #--------------
