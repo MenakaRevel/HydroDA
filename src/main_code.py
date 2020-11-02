@@ -1460,7 +1460,7 @@ def prepare_input():
     if pm.input()=="VIC_BC": #VIC BC
         nXX,nYY=1440,720
         distopen=0.0 #pm.distopen(3)
-        diststd=pm.diststd(3)
+        diststd=1.0 #pm.diststd(3)
         true_run=pm.true_run(3) # for true ensemble
         runname=pm.runname(3) # get runoff name
         # make courrpted runoff
@@ -1481,7 +1481,7 @@ def prepare_input():
             for iYY in range(nYY):
                 #distopen_range[:,iYY,iXX]=np.sort(rd.normal(distopen,std_runoff[iYY,iXX],pm.ens_mem()))
                 #Log-normal model
-                sk=np.sort(rd.normal(0.0,1.0,pm.ens_mem()))
+                sk=np.sort(rd.normal(distopen,diststd,pm.ens_mem()))
                 beta=0.0
                 E=std_runoff[iYY,iXX]
                 distopen_range[:,iYY,iXX]=((1+beta)/math.sqrt(E**2+1))*np.exp(math.sqrt(math.log(E**2+1))*sk)
