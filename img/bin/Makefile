@@ -13,7 +13,7 @@ src: $(OBJECTS)
 TARGET1 = print_grid
 TARGET2 = txt_vector
 TARGET3 = print_rivvec
-TARGET4 = print_fldpth
+#TARGET4 = print_fldpth
 
 ##################################################
 $(TARGET1) : $(TARGET1).o $(LIBS)
@@ -25,13 +25,13 @@ $(TARGET2) : $(TARGET2).o $(LIBS)
 $(TARGET3) : $(TARGET3).o $(LIBS)
 	$(FC) $(LFLAGS) $@.o $(LIBS) $(MOD) -o $@ $(LIB)
 
-$(TARGET4) : $(TARGET4).o $(LIBS)
-	$(FC) $(LFLAGS) $@.o $(LIBS) $(MOD) -o $@ $(LIB)
+# $(TARGET4) : $(TARGET4).o $(LIBS)
+# 	$(FC) $(LFLAGS) $@.o $(LIBS) $(MOD) -o $@ $(LIB)
 
 ##################################################
 # Commands
 ##################################################
-all : ${TARGET1} ${TARGET2} ${TARGET3} ${TARGET4}
+all : ${TARGET1} ${TARGET2} ${TARGET3} #${TARGET4}
 clean: 
 	$(RM) -f *.o *.s core *~ *trace *.mod
 

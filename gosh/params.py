@@ -306,7 +306,11 @@ def non_hgt():
     # nominal water height
 
 def cpu_nums():
-    return 4
+    f=open("./ncpus.txt","r")
+    line=f.readline()
+    ncpus =int(line.split("\n")[0])
+    f.close()
+    return ncpus/para_nums()
     # number of cpus used
 
 def version():

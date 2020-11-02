@@ -50,3 +50,6 @@ HydroDA.o*
 
 #vscode
 .vscode
+
+#.linux files
+*/._Makefile
