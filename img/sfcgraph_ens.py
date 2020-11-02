@@ -28,8 +28,8 @@ import cal_stat as stat
 
 #argvs = sys.argv
 
-experiment="E2O_HydroWeb21"
-#experiment="VIC_BC_HydroWeb01"
+#experiment="E2O_HydroWeb21"
+experiment="VIC_BC_HydroWeb01"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 assim_out=pm.DA_dir()+"/out/"+experiment
@@ -539,7 +539,8 @@ def make_fig(point):
     plt.legend(lines,labels,ncol=1,loc='upper right') #, bbox_to_anchor=(1.0, 1.0),transform=ax1.transAxes)
 #    fig.legend(lines,labels,ncol=1,loc='lower left', bbox_to_anchor=(1.0, 1.0))
     print 'save',river[point],re.split("_",pname[point])[2]+"_"+re.split("_",pname[point])[3],ylist[point],xlist[point],mean_obs[ylist[point],xlist[point]],std_obs[ylist[point],xlist[point]]
-    plt.savefig(assim_out+"/figures/sfcelv/"+river[point]+"/"+re.split("_",pname[point])[2]+"_"+re.split("_",pname[point])[3]+".png",dpi=300)
+    #plt.savefig(assim_out+"/figures/sfcelv/"+river[point]+"_"+re.split("_",pname[point])[2]+"_"+re.split("_",pname[point])[3]+".png",dpi=300)
+    plt.savefig(assim_out+"/figures/sfcelv/"+pname[point][2::]+".png",dpi=300)
     return 0
 #
 para_flag=1
