@@ -1476,14 +1476,18 @@ def prepare_input():
         distopen_range=np.zeros([pm.ens_mem(),nYY,nXX],np.float32)
         fname="../../dat/std_runoff_E2O_1980-2000.bin"
         std_runoff=np.fromfile(fname,np.float32).reshape(nYY,nXX)
+        fname="../../dat/mean_runoff_E2O_1980-2000.bin"
+        mean_runoff=np.fromfile(fname,np.float32).reshape(nYY,nXX)
         std_runoff=ma.masked_where(std_runoff==-9999.0,std_runoff).filled(0.0)
+        mean_runoff=ma.masked_where(mean_runoff==-9999.0,mean_runoff).filled(0.0)
         for iXX in range(nXX):
             for iYY in range(nYY):
                 #distopen_range[:,iYY,iXX]=np.sort(rd.normal(distopen,std_runoff[iYY,iXX],pm.ens_mem()))
                 #Log-normal model
-                sk=np.sort(rd.normal(distopen,diststd,pm.ens_mem()))
+                #sk=np.sort(rd.normal(distopen,diststd,pm.ens_mem()))
+                sk=rd.normal(distopen,diststd,pm.ens_mem())
                 beta=0.0
-                E=std_runoff[iYY,iXX]
+                E=std_runoff[iYY,iXX]/mean_runoff[iYY,iXX]
                 distopen_range[:,iYY,iXX]=((1+beta)/math.sqrt(E**2+1))*np.exp(math.sqrt(math.log(E**2+1))*sk)
         #----------
         for day in np.arange(start,last):

@@ -92,7 +92,7 @@ gsize  = float(filter(None, re.split(" ",lines[3]))[0])
 ###else:
 ###    last=365
 syear,smonth,sdate=2003,1,1 #pm.starttime()#2004#1991
-eyear,emonth,edate=pm.endtime()
+eyear,emonth,edate=2005,1,1 #pm.endtime()
 #month=1
 #date=1
 start_dt=datetime.date(syear,smonth,sdate)
@@ -449,7 +449,7 @@ print 'making figure'
 #for point in np.arange(pnum):
 def make_fig(point):
     plt.close()
-    labels=["HydroWeb","corrupted","assimilated"]
+    labels=["HydroWeb","corrupted"]#,"assimilated"]
 #    print org[:,point]
 #    print "----------------"
 #    print np.mean(asm[:,:,point],axis=1)
@@ -475,12 +475,12 @@ def make_fig(point):
 
     for num in np.arange(0,int(pm.ens_mem())):
         ax1.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.2,alpha=0.5,zorder=102)
-        ax1.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.3,alpha=0.5,zorder=103)
+#        ax1.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.3,alpha=0.5,zorder=103)
 #        ax1.plot(np.arange(start,last),em_sf[:,num,point],label="mean sfcelv",color="blue",linewidth=0.3,linestyle="--",alpha=0.5,zorder=103)
 #        plt.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.3,alpha=0.5)
 #        plt.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.3,alpha=0.5)
     lines.append(ax1.plot(np.arange(start,last),np.mean(opn[:,:,point],axis=1),label="corrupted",color="blue",linewidth=0.8,alpha=0.8,zorder=102)[0])
-    lines.append(ax1.plot(np.arange(start,last),np.mean(asm[:,:,point],axis=1),label="assimilated",color="red",linewidth=0.8,alpha=0.8,zorder=103)[0])
+#    lines.append(ax1.plot(np.arange(start,last),np.mean(asm[:,:,point],axis=1),label="assimilated",color="red",linewidth=0.8,alpha=0.8,zorder=103)[0])
 #    ax1.plot(np.arange(start,last),np.mean(em_sf[:,:,point],axis=1),label="mean sfelv",color="blue",linewidth=0.5,linestyle="--",alpha=0.5,zorder=103)
 #    plt.ylim(ymin=)
     # Make the y-axis label, ticks and tick labels match the line color.
@@ -501,7 +501,7 @@ def make_fig(point):
     outtext="used(norm) mean: %6.2f"%(sfc_mean)
     ax1.text(0.02,0.8,outtext,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
     outtext="observation mean: %6.2f"%(obs_mean)
-    ax1.text(0.02,0.7,outtext,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+#    ax1.text(0.02,0.7,outtext,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
     # xlable in years
     if eyear-syear > 5:
         dtt=5
