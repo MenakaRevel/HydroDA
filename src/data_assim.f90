@@ -332,49 +332,53 @@ close(34)
 
 !read observations and observation error variance
 allocate(obs(lonpx,latpx),obs_err(lonpx,latpx),altitude(lonpx,latpx),mean_obs(lonpx,latpx),std_obs(lonpx,latpx))
-fname=trim(adjustl(hydrowebdir))//"/bin/hydroweb"//yyyymmdd//".bin"
-open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
-if(ios==0)then
-    read(34,rec=1) obs
-    read(34,rec=2) obs_err
-else
-    write(*,*) "no file ", fname
-    write(82,*) "no file :", fname
-end if
-close(34)
+! fname=trim(adjustl(hydrowebdir))//"/bin/hydroweb"//yyyymmdd//".bin"
+! open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+! if(ios==0)then
+!     read(34,rec=1) obs
+!     read(34,rec=2) obs_err
+! else
+!     write(*,*) "no file ", fname
+!     write(82,*) "no file :", fname
+! end if
+! close(34)
 
-! altitude
-fname=trim(adjustl(hydrowebdir))//"/bin/HydroWeb_altitude.bin"
-open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
-if(ios==0)then
-    read(34,rec=1) altitude
-else
-    write(*,*) "no file ", fname
-    write(82,*) "no file :", fname
-end if
-close(34)
+! ! altitude
+! fname=trim(adjustl(hydrowebdir))//"/bin/HydroWeb_altitude.bin"
+! open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+! if(ios==0)then
+!     read(34,rec=1) altitude
+! else
+!     write(*,*) "no file ", fname
+!     write(82,*) "no file :", fname
+! end if
+! close(34)
 
-! mean observation
-fname=trim(adjustl(hydrowebdir))//"/bin/HydroWeb_mean.bin"
-open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
-if(ios==0)then
-    read(34,rec=1) mean_obs
-else
-    write(*,*) "no file ", fname
-    write(82,*) "no file :", fname
-end if
-close(34)
+! ! mean observation
+! fname=trim(adjustl(hydrowebdir))//"/bin/HydroWeb_mean.bin"
+! open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+! if(ios==0)then
+!     read(34,rec=1) mean_obs
+! else
+!     write(*,*) "no file ", fname
+!     write(82,*) "no file :", fname
+! end if
+! close(34)
 
-! std observation
-fname=trim(adjustl(hydrowebdir))//"/bin/HydroWeb_std.bin"
-open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
-if(ios==0)then
-    read(34,rec=1) std_obs
-else
-    write(*,*) "no file ", fname
-    write(82,*) "no file :", fname
-end if
-close(34)
+! ! std observation
+! fname=trim(adjustl(hydrowebdir))//"/bin/HydroWeb_std.bin"
+! open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+! if(ios==0)then
+!     read(34,rec=1) std_obs
+! else
+!     write(*,*) "no file ", fname
+!     write(82,*) "no file :", fname
+! end if
+! close(34)
+
+!----
+!read HydroWeb data
+call read_HydroWeb(yyyymmdd,hydrowebdir,lonpx,latpx,obs,obs_err,mean_obs,std_obs)
 
 ! inflation parameter
 fname=trim(adjustl(expdir))//"/inflation/parm_infl"//yyyymmdd//".bin"
@@ -426,7 +430,8 @@ meanglobaltrue=0
 !fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/meansfcelvT000.bin"
 !fname=trim(adjustl(DAdir))//"/dat/mean_sfcelv_1958-2013.bin"
 !fname=trim(adjustl(DAdir))//"/dat/mean_sfcelv_E2O_1980-2014.bin"
-fname=trim(adjustl(DAdir))//"/dat/mean_sfcelv_VIC_BC_1980-2014.bin"
+!fname=trim(adjustl(DAdir))//"/dat/mean_sfcelv_VIC_BC_1980-2014.bin"
+fname=trim(adjustl(DAdir))//"/dat/mean_sfcelv_VIC_BC_amz_06min_1980-2014.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
    read(34,rec=1) meanglobaltrue
@@ -445,7 +450,8 @@ stdglobaltrue=0
 !fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/meansfcelvT000.bin"
 !fname=trim(adjustl(DAdir))//"/dat/std_sfcelv_1958-2013.bin"
 !fname=trim(adjustl(DAdir))//"/dat/std_sfcelv_E2O_1980-2014.bin"
-fname=trim(adjustl(DAdir))//"/dat/std_sfcelv_VIC_BC_1980-2014.bin"
+!fname=trim(adjustl(DAdir))//"/dat/std_sfcelv_VIC_BC_1980-2014.bin"
+fname=trim(adjustl(DAdir))//"/dat/std_sfcelv_VIC_BC_amz_06min_1980-2014.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
    read(34,rec=1) stdglobaltrue
@@ -1147,6 +1153,32 @@ deallocate(global_xa,globalx,ens_xa,global_null)!,obs_mask)
 deallocate(meanglobalx,stdglobalx,meanglobaltrue,stdglobaltrue)
 end program data_assim
 !*****************************************************************
+subroutine read_HydroWeb(yyyymmdd,hydrowebdir,nx,ny,obs,obs_err,mean_obs,std_obs)
+implicit none
+!---
+integer                             :: ix,iy,nx,ny
+character(len=128)                  :: hydrowebdir,fname,sat
+character(len=8)                    :: yyyymmdd
+real,dimension(nx,ny)               :: obs,obs_err,mean_obs,std_obs
+real                                :: wse,mean,std,obs_error
+!--
+obs=-9999.0
+obs_err=-9999.0
+mean_obs=-9999.0
+std_obs=-9999.0
+    fname=trim(adjustl(hydrowebdir))//"/txt/hydroweb"//yyyymmdd//".txt"
+    open(11, file=fname, form='formatted')
+1000 continue
+    read(11,*,end=1090) ix, iy, wse, mean, std, sat
+    obs(ix,iy)=wse
+    obs_err(ix,iy)=obs_error(sat)
+    mean_obs(ix,iy)=mean
+    std_obs(ix,iy)=std
+    goto 1000
+1090 continue
+return
+end subroutine read_HydroWeb
+!*****************************************************************
 subroutine lag_distance(i,j,x,y,nx,ny,nextX,nextY,nextdst,lag_dist)
 implicit none 
 !--
@@ -1341,7 +1373,7 @@ flag=0
 return
 end subroutine get_virtualstation
 !*********************************************************************
-subroutine read_HydroWeb(station,yyyymmdd,hydrowebdir,wse,std,flag)
+subroutine read_HydroWeb_data(station,yyyymmdd,hydrowebdir,wse,std,flag)
 implicit none
 ! for input--------------------------
 character*128              :: station,hydrowebdir
@@ -1385,7 +1417,7 @@ flag=0
 1090 continue
     close(12)
 return
-end subroutine read_HydroWeb
+end subroutine read_HydroWeb_data
 !*****************************
 function str2int(str)
 implicit none
@@ -1400,4 +1432,34 @@ read(str,*,iostat=stat)  str2int
 if (stat/=0) str2int=-9999
 return
 end function str2int
-!*****************************
+!*******************************
+function obs_error(sat)
+implicit none
+!---in
+character*128                :: sat
+!---out
+real                         :: obs_error
+!==================================================
+! observation errors are from Breada et al,. (2019)
+!Brêda, J. P. L. F., Paiva, R. C. D., Bravo, J. M., Passaia, O. A., & Moreira, D. M. (2019). Assimilation of Satellite Altimetry Data for Effective River Bathymetry. Water Resources Research, 55(9), 7441–7463. doi:10.1029/2018WR024010
+!--------------------------------------------------
+! Satellite  |  Error (m)
+! -----------------------
+!ENVISAT     |   0.30
+!JASON2      |   0.28
+!JASON3      |   0.28
+!SENTINEL3A  |   0.30*
+!------------------------
+! *1.Watson, C.; Legresy, B.; King, M.; Deane, A. Absolute altimeter bias results from Bass Strait, Australia.In Proceedings of the Ocean Surface Topography Science Team Meeting 2018, Ponta Delgada, Portugal,24–29 September 2018.
+! *2.Bonnefond, P.; Exertier, P.; Laurain, O.; Guinle, T.; Féménias, P. Corsica:  A 20-Yr multi-mission absolutealtimeter calibration site.  In Proceedings of the Ocean Surface Topography Science Team Meeting 2018,Ponta Delgada, Portugal, 24–29 September 2018.
+! *3.Garcia-Mondejar, A.; Zhao, Z.; Rhines, P. Sentinel-3 Range and Datation Calibration with Crete transponder.In Proceedings of the 25 Years of Progress in Radar Altimetry, Ponta Delgada, Portugal, 24–29 September 2018.
+! *4.Mertikas, S.; Donlon, C.; Féménias, P.; Mavrocordatos, C.; Galanakis, D.; Tripolitsiotis, A.; Frantzis, X.; Kokolakis, C.; Tziavos, I.N.; Vergos, G.; Guinle, T. Absolute Calibration of the European Sentinel-3A Surface Topography Mission over the Permanent Facility for Altimetry Calibration in west Crete, Greece. Remote Sens. 2018, 10, 1808.
+! =================================================
+obs_error=0.30
+if (trim(sat) == "ENVISAT") obs_error=0.30
+if (trim(sat) == "JASON2") obs_error=0.28
+if (trim(sat) == "JASON3") obs_error=0.28
+if (trim(sat) == "SENTINEL3A") obs_error=0.30
+return
+end function obs_error
+!********************************
