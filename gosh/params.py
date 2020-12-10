@@ -36,7 +36,7 @@ def distopen(num):
         return 1.0
 
     if num == 3:
-        return 0.75
+        return 1.0
     #return 0.75 # not needed for ERA20CM
     # corrupted runoff's percentage
     # 0.75 for original Data Assimilation simulation (25% reduced)
@@ -95,14 +95,14 @@ def err_expansion():
     # works well with 0.04
 
 def mode():
-    return 3
+    return 1
     # parameter to change assimilation mode
     # 1: Earth2Obs, 2: ERA20CM, 3: VIC_BC, 4: -25% baised (ELSE_KIM2009/E2O/ERA20CM)
 
 def input():
-    # return "E2O"
+    return "E2O"
     # return "ERA20CM"
-    return "VIC_BC"
+    #return "VIC_BC"
     # E2O/ERA20CM
 
 def experiment():
