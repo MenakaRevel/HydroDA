@@ -28,8 +28,8 @@ import cal_stat as stat
 
 #argvs = sys.argv
 
-#experiment="E2O_HydroWeb21"
-experiment="VIC_BC_HydroWeb02"
+#experiment="E2O_HydroWeb22"
+experiment="VIC_BC_HydroWeb08"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 assim_out=pm.DA_dir()+"/out/"+experiment
@@ -96,7 +96,7 @@ ny     = int(filter(None, re.split(" ",lines[1]))[0])
 gsize  = float(filter(None, re.split(" ",lines[3]))[0])
 #----
 syear,smonth,sdate=2003,1,1 #pm.starttime()#2004#1991
-eyear,emonth,edate=pm.endtime()
+eyear,emonth,edate=2005,1,1 #pm.endtime()
 #month=1
 #date=1
 start_dt=datetime.date(syear,smonth,sdate)

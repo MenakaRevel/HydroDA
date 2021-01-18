@@ -395,34 +395,34 @@ close(34)
 ! read mean sfelv forcast
 allocate(meanglobalx(lonpx,latpx,ens_num),stdglobalx(lonpx,latpx,ens_num))
 meanglobalx=0
-do num=1,ens_num
-    write(numch,'(i3.3)') num
-    fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/meansfcelvC"//numch//".bin"
-    !print *, fname
-    open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
-    if(ios==0)then
-        read(34,rec=1) meanglobalx(:,:,num)
-    else
-        write(*,*) "no mean x"
-        write(82,*) "no file :", fname
-    end if
-    close(34)
-end do
+! do num=1,ens_num
+!     write(numch,'(i3.3)') num
+!     fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/meansfcelvC"//numch//".bin"
+!     !print *, fname
+!     open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+!     if(ios==0)then
+!         read(34,rec=1) meanglobalx(:,:,num)
+!     else
+!         write(*,*) "no mean x"
+!         write(82,*) "no file :", fname
+!     end if
+!     close(34)
+! end do
 
 stdglobalx=0
-do num=1,ens_num
-    write(numch,'(i3.3)') num
-    fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/stdsfcelvC"//numch//".bin"
-    !print *, fname
-    open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
-    if(ios==0)then
-        read(34,rec=1) stdglobalx(:,:,num)
-    else
-        write(*,*) "no mean x"
-        write(82,*) "no file :", fname
-    end if
-    close(34)
-end do
+! do num=1,ens_num
+!     write(numch,'(i3.3)') num
+!     fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/stdsfcelvC"//numch//".bin"
+!     !print *, fname
+!     open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+!     if(ios==0)then
+!         read(34,rec=1) stdglobalx(:,:,num)
+!     else
+!         write(*,*) "no mean x"
+!         write(82,*) "no file :", fname
+!     end if
+!     close(34)
+! end do
 
 ! read mean WSE true
 allocate(meanglobaltrue(lonpx,latpx))
@@ -430,8 +430,10 @@ meanglobaltrue=0
 !fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/meansfcelvT000.bin"
 !fname=trim(adjustl(DAdir))//"/dat/mean_sfcelv_1958-2013.bin"
 !fname=trim(adjustl(DAdir))//"/dat/mean_sfcelv_E2O_1980-2014.bin"
+!fname=trim(adjustl(DAdir))//"/dat/mean_sfcelv_E2O_amz_06min_1980-2014.bin"
 !fname=trim(adjustl(DAdir))//"/dat/mean_sfcelv_VIC_BC_1980-2014.bin"
-fname=trim(adjustl(DAdir))//"/dat/mean_sfcelv_VIC_BC_amz_06min_1980-2014.bin"
+!fname=trim(adjustl(DAdir))//"/dat/mean_sfcelv_VIC_BC_amz_06min_1980-2014.bin"
+fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/mean_sfcelv.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
    read(34,rec=1) meanglobaltrue
@@ -450,8 +452,10 @@ stdglobaltrue=0
 !fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/meansfcelvT000.bin"
 !fname=trim(adjustl(DAdir))//"/dat/std_sfcelv_1958-2013.bin"
 !fname=trim(adjustl(DAdir))//"/dat/std_sfcelv_E2O_1980-2014.bin"
+!fname=trim(adjustl(DAdir))//"/dat/std_sfcelv_E2O_amz_06min_1980-2014.bin"
 !fname=trim(adjustl(DAdir))//"/dat/std_sfcelv_VIC_BC_1980-2014.bin"
-fname=trim(adjustl(DAdir))//"/dat/std_sfcelv_VIC_BC_amz_06min_1980-2014.bin"
+!fname=trim(adjustl(DAdir))//"/dat/std_sfcelv_VIC_BC_amz_06min_1980-2014.bin"
+fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/std_sfcelv.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
    read(34,rec=1) stdglobaltrue
@@ -1156,7 +1160,7 @@ end program data_assim
 subroutine read_HydroWeb(yyyymmdd,hydrowebdir,nx,ny,obs,obs_err,mean_obs,std_obs)
 implicit none
 !---
-integer                             :: ix,iy,nx,ny
+integer                             :: ix,iy,nx,ny,ios
 character(len=128)                  :: hydrowebdir,fname,sat
 character(len=8)                    :: yyyymmdd
 real,dimension(nx,ny)               :: obs,obs_err,mean_obs,std_obs
@@ -1166,10 +1170,14 @@ obs=-9999.0
 obs_err=-9999.0
 mean_obs=-9999.0
 std_obs=-9999.0
-    fname=trim(adjustl(hydrowebdir))//"/txt/hydroweb"//yyyymmdd//".txt"
-    open(11, file=fname, form='formatted')
+    fname=trim(adjustl(hydrowebdir))//"/txt/HydroWeb"//trim(yyyymmdd)//".txt"
+    open(11, file=fname, form='formatted',iostat=ios)
+    if (ios /= 0) then 
+        goto 1090
+    end if
 1000 continue
     read(11,*,end=1090) ix, iy, wse, mean, std, sat
+    print*, yyyymmdd, ix, iy, wse, trim(sat)
     obs(ix,iy)=wse
     obs_err(ix,iy)=obs_error(sat)
     mean_obs(ix,iy)=mean

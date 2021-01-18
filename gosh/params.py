@@ -95,14 +95,14 @@ def err_expansion():
     # works well with 0.04
 
 def mode():
-    return 1
+    return 3
     # parameter to change assimilation mode
     # 1: Earth2Obs, 2: ERA20CM, 3: VIC_BC, 4: -25% baised (ELSE_KIM2009/E2O/ERA20CM)
 
 def input():
-    return "E2O"
+    #return "E2O"
     # return "ERA20CM"
-    #return "VIC_BC"
+    return "VIC_BC"
     # E2O/ERA20CM
 
 def experiment():

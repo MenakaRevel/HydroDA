@@ -1,7 +1,7 @@
 #/bin/bash
 
 ### SET "mool PBS" @ IIS U-Tokyo
-#PBS -q E40
+#PBS -q F40
 #PBS -l select=1:ncpus=40:mem=60gb
 #PBS -l place=scatter
 #PBS -j oe
@@ -20,8 +20,8 @@ source activate pydef
 which python
 
 # get number of cpus
-export NCPUS=`cat ${PBS_NODEFILE} | wc -l`
-
+#export NCPUS=`cat ${PBS_NODEFILE} | wc -l`
+NCPUS=40
 # OMP Settings
 export OMP_NUM_THREADS=$NCPUS
 
@@ -35,7 +35,8 @@ cd $HydroDA
 
 # experiment : edit the experiment name in here it will be written in $HydroDA/$EXP/exp.txt
 # before running run_mool.sh , please edit the nessary experimental settings in params.py
-EXP="VIC_BC_HydroWeb03"
+EXP="VIC_BC_HydroWeb08"
+# EXP="E2O_HydroWeb22"
 #IFACTOR="1.08"
 
 mkdir $HydroDA"/out"

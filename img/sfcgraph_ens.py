@@ -28,8 +28,8 @@ import cal_stat as stat
 
 #argvs = sys.argv
 
-#experiment="E2O_HydroWeb21"
-experiment="VIC_BC_HydroWeb01"
+#experiment="E2O_HydroWeb22"
+experiment="VIC_BC_HydroWeb08"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 assim_out=pm.DA_dir()+"/out/"+experiment
@@ -91,8 +91,8 @@ gsize  = float(filter(None, re.split(" ",lines[3]))[0])
 ###    last=366
 ###else:
 ###    last=365
-syear,smonth,sdate=2003,1,1 #pm.starttime()#2004#1991
-eyear,emonth,edate=2005,1,1 #pm.endtime()
+syear,smonth,sdate=2002,1,1 #pm.starttime()#2004#1991
+eyear,emonth,edate=pm.endtime() #2005,1,1 #
 #month=1
 #date=1
 start_dt=datetime.date(syear,smonth,sdate)
@@ -118,11 +118,19 @@ elevtn = np.fromfile(elevtn,np.float32).reshape(ny,nx)
 #----
 # mean
 #mean_sfcelv = pm.DA_dir()+"/dat/mean_sfcelv_1958-2013.bin"
-mean_sfcelv = pm.DA_dir()+"/dat/mean_sfcelv_VIC_BC_1980-2014.bin"
+#mean_sfcelv = pm.DA_dir()+"/dat/mean_sfcelv_E2O_amz_06min_1980-2014.bin"
+#mean_sfcelv = pm.DA_dir()+"/dat/mean_sfcelv_VIC_BC_1980-2014.bin"
+#mean_sfcelv = pm.DA_dir()+"/dat/mean_sfcelv_"+pm.input()+"_"+pm.mapname()+"_1980-2014.bin"
+#mean_sfcelv = pm.DA_dir()+"/dat/mean_sfcelv_"+pm.input()+"_"+pm.mapname()+"_1979-2013.bin"
+mean_sfcelv = assim_out+"/assim_out/mean_sfcelv/mean_sfcelv.bin"
 mean_sfcelv = np.fromfile(mean_sfcelv,np.float32).reshape(ny,nx)
 # std
 #std_sfcelv = pm.DA_dir()+"/dat/std_sfcelv_1958-2013.bin"
-std_sfcelv = pm.DA_dir()+"/dat/std_sfcelv_VIC_BC_1980-2014.bin"
+#std_sfcelv = pm.DA_dir()+"/dat/std_sfcelv_E2O_amz_06min_1980-2014.bin"
+#std_sfcelv = pm.DA_dir()+"/dat/std_sfcelv_VIC_BC_1980-2014.bin"
+#std_sfcelv = pm.DA_dir()+"/dat/std_sfcelv_"+pm.input()+"_"+pm.mapname()+"_1980-2014.bin"
+#std_sfcelv = pm.DA_dir()+"/dat/std_sfcelv_"+pm.input()+"_"+pm.mapname()+"_1979-2013.bin"
+std_sfcelv = assim_out+"/assim_out/mean_sfcelv/std_sfcelv.bin"
 std_sfcelv = np.fromfile(std_sfcelv,np.float32).reshape(ny,nx)
 #- mean obs HydroWeb
 mean_obs = pm.HydroWeb_dir()+"/bin/HydroWeb_mean.bin"
@@ -157,7 +165,7 @@ rivernames  = ["AMAZONAS"]
 for rivername in rivernames:
   path = assim_out+"/figures/sfcelv/%s"%(rivername)
   #print path
-  mk_dir(path)
+  #mk_dir(path)
   #station_loc,x_list,y_list = grdc.get_grdc_loc(rivername,"b")
   station_loc,x_list,y_list,egm08,egm96 =hweb.get_hydroweb_loc(rivername,pm.mapname())
   #print rivername, station_loc
@@ -449,7 +457,7 @@ print 'making figure'
 #for point in np.arange(pnum):
 def make_fig(point):
     plt.close()
-    labels=["HydroWeb","corrupted"]#,"assimilated"]
+    labels=["HydroWeb","corrupted","assimilated"]
 #    print org[:,point]
 #    print "----------------"
 #    print np.mean(asm[:,:,point],axis=1)
@@ -474,13 +482,13 @@ def make_fig(point):
 #    plt.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7)
 
     for num in np.arange(0,int(pm.ens_mem())):
-        ax1.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.2,alpha=0.5,zorder=102)
-#        ax1.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.3,alpha=0.5,zorder=103)
+        ax1.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.1,alpha=0.5,zorder=102)
+        ax1.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.1,alpha=0.5,zorder=103)
 #        ax1.plot(np.arange(start,last),em_sf[:,num,point],label="mean sfcelv",color="blue",linewidth=0.3,linestyle="--",alpha=0.5,zorder=103)
 #        plt.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.3,alpha=0.5)
 #        plt.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.3,alpha=0.5)
     lines.append(ax1.plot(np.arange(start,last),np.mean(opn[:,:,point],axis=1),label="corrupted",color="blue",linewidth=0.8,alpha=0.8,zorder=102)[0])
-#    lines.append(ax1.plot(np.arange(start,last),np.mean(asm[:,:,point],axis=1),label="assimilated",color="red",linewidth=0.8,alpha=0.8,zorder=103)[0])
+    lines.append(ax1.plot(np.arange(start,last),np.mean(asm[:,:,point],axis=1),label="assimilated",color="red",linewidth=0.8,alpha=0.8,zorder=103)[0])
 #    ax1.plot(np.arange(start,last),np.mean(em_sf[:,:,point],axis=1),label="mean sfelv",color="blue",linewidth=0.5,linestyle="--",alpha=0.5,zorder=103)
 #    plt.ylim(ymin=)
     # Make the y-axis label, ticks and tick labels match the line color.
@@ -501,7 +509,7 @@ def make_fig(point):
     outtext="used(norm) mean: %6.2f"%(sfc_mean)
     ax1.text(0.02,0.8,outtext,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
     outtext="observation mean: %6.2f"%(obs_mean)
-#    ax1.text(0.02,0.7,outtext,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    ax1.text(0.02,0.7,outtext,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
     # xlable in years
     if eyear-syear > 5:
         dtt=5

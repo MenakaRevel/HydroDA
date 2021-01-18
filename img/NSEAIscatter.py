@@ -35,8 +35,8 @@ import cal_stat as stat
 
 #argvs = sys.argv
 
-#experiment="E2O_HydroWeb21"
-experiment="VIC_BC_HydroWeb02"
+#experiment="E2O_HydroWeb22"
+experiment="VIC_BC_HydroWeb08"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 assim_out=pm.DA_dir()+"/out/"+experiment
@@ -61,8 +61,11 @@ def vec_par(LEVEL,ax=None):
         lon2 = float(line[3])
         lat2 = float(line[4])
 
-        # ix = int((lon1 + 180.)*4.0)
-        # iy = int((-lat1 + 90.)*4.0)
+        # ix = int((lon1 + 180.)*(1/gsize))
+        # iy = int((-lat1 + 90.)*(1/gsize))
+
+        # if rivermap[iy,ix] == 0:
+        #     continue
 
         if lon1-lon2 > 180.0:
             print (lon1, lon2)
@@ -137,7 +140,9 @@ uparea = np.fromfile(uparea,np.float32).reshape(ny,nx)
 # catmxy = pm.CaMa_dir()+"/map/"+pm.mapname()+"/1min/1min.catmxy.bin"
 # catmxy = np.fromfile(catmxy,np.int16).reshape(2,ny*60,nx*60)
 #----
-rivermap=(nextxy[0]>0)*1.0
+rivnum="../dat/rivnum_"+pm.mapname()+".bin"
+rivnum=np.fromfile(rivnum,np.int32).reshape(ny,nx)
+rivermap=((nextxy[0]>0)*(rivnum==1))*1.0
 #----
 syear,smonth,sdate=2003,1,1 #spm.starttime()#2004#1991  2004,1,1 #
 eyear,emonth,edate=pm.endtime() #2005,1,1 #
@@ -162,7 +167,7 @@ river=[]
 rivernames = grdc.grdc_river_name_v396()
 for rivername in rivernames:
     grdc_id,station_loc,x_list,y_list = grdc.get_grdc_loc_v396(rivername)
-    print (rivername, grdc_id,station_loc)
+    #print (rivername, grdc_id,station_loc)
     river.append([rivername]*len(station_loc))
     staid.append(grdc_id)
     pname.append(station_loc)
@@ -191,7 +196,7 @@ for day in np.arange(start,last):
     for num in np.arange(1,pm.ens_mem()+1):
         numch='%03d'%num
         inputlist.append([yyyy,mm,dd,numch])
-        print (yyyy,mm,dd,numch)
+        #print (yyyy,mm,dd,numch)
 #----------------------
 # function to read data
 def read_data(inputlist):
@@ -250,7 +255,7 @@ epix=(180+east)*4
 cmap=mbar.colormap("H01")
 cmap.set_under("w",alpha=0)
 cmapL=cmap #cm.get_cmap("rainbow_r")
-vmin=-1.0
+vmin=0.0
 vmax=1.0
 norm=Normalize(vmin=vmin,vmax=vmax)
 #------
@@ -269,14 +274,15 @@ m = Basemap(projection='cyl',llcrnrlat=south,urcrnrlat=north,llcrnrlon=west,urcr
 #m.drawcoastlines( linewidth=0.1, color='k' )
 m.fillcontinents(color=land,lake_color=water,zorder=99)
 #m.drawmapboundary(fill_color=water,zorder=100)
-im=plt.scatter([],[],c=[],cmap=cmap,s=0.1,vmin=vmin,vmax=vmin,norm=norm,zorder=101)
+im=plt.scatter([],[],c=[],cmap=cmap,s=0.1,vmin=vmin,vmax=vmax,norm=norm,zorder=101)
 im.set_visible(False)
 m.drawparallels(np.arange(south,north+0.1,5), labels = [1,0,0,0], fontsize=10,linewidth=0,zorder=102)
 m.drawmeridians(np.arange(west,east+0.1,5), labels = [0,0,0,1], fontsize=10,linewidth=0,zorder=102)
 #--
 box="%f %f %f %f"%(west,east,north,south) 
 os.system("./bin/txt_vector "+box+" "+pm.CaMa_dir()+" "+pm.mapname()+" > tmp1.txt") 
-map(vec_par,np.arange(1,10+1,1))
+#map(vec_par,np.arange(1,10+1,1))
+map(vec_par,np.arange(2,10+1,1))
 #--
 for point in np.arange(pnum):
     org=grdc.grdc_dis(staid[point],syear,eyear-1)
@@ -289,10 +295,12 @@ for point in np.arange(pnum):
     if NSEopn==1.00:
         #print (NSEopn)
         continue
-    NSEAI=(NSEasm-NSEopn)/(1.0-NSEopn+1.0e-20)
+    NSEAI=(NSEasm-NSEopn)/(1.0-NSEopn+1.0e-20) 
     #NSEAI=NSEasm
     ix=xlist[point]
     iy=ylist[point]
+    if rivermap[iy,ix] !=1.0:
+        continue
     #--------------
     #lon=lon0+ix*gsize
     #lat=lat0-iy*gsize
@@ -300,9 +308,14 @@ for point in np.arange(pnum):
     lat=lonlat[1,iy,ix]
     c=cmapL(norm(NSEAI))
     #print (lon,lat,NSEAI) #,NSEasm,NSEopn)
+    # if NSEAI > 0.0:
+    #     print lon,lat, "%3.2f %3.2f %3.2f"%(NSEAI, NSEasm, NSEopn)
     ax.scatter(lon,lat,s=10,marker="o",edgecolors=c, facecolors=c,zorder=106)
+    if NSEAI < 0.0:
+        print staid[point], pname[point]
+        ax.scatter(lon,lat,s=10,marker="o",edgecolors="k", facecolors="k",zorder=106)
 #--
-cbar=m.colorbar(im,"right",size="2%")
+cbar=m.colorbar(im,"right",size="2%",ticks=np.arange(vmin,vmax+0.001,0.2))
 #plt.title(stitle)
 plt.savefig(assim_out+"/figures/NSEAI/NSEAIscatter.png",dpi=300,bbox_inches="tight", pad_inches=0.05)
 os.system("rm -r tmp*.txt")
