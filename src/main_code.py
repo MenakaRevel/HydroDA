@@ -1477,41 +1477,63 @@ def prepare_input():
         #--
         # dist std for ensembles
         #distopen_ranges={}
-        distopen_range=np.zeros([pm.ens_mem(),nYY,nXX],np.float32)
-        fname="../../dat/std_runoff_E2O_1980-2000.bin"
-        #print fname
-        std_runoff=np.fromfile(fname,np.float32).reshape(nYY,nXX)
-        fname="../../dat/mean_runoff_E2O_1980-2000.bin"
-        #print "L1481",fname
-        mean_runoff=np.fromfile(fname,np.float32).reshape(nYY,nXX)
-        #print mean_runoff
-        std_runoff=ma.masked_where(std_runoff==-9999.0,std_runoff).filled(0.0)
-        mean_runoff=ma.masked_where(mean_runoff==-9999.0,mean_runoff).filled(0.0)
-        for iXX in range(nXX):
-            for iYY in range(nYY):
-                #distopen_range[:,iYY,iXX]=np.sort(rd.normal(distopen,std_runoff[iYY,iXX],pm.ens_mem()))
-                #Log-normal model
-                #sk=np.sort(rd.normal(distopen,diststd,pm.ens_mem()))
-                sk=np.sort(rd.normal(distopen,diststd,pm.ens_mem()))
-                beta=0.0
-                E=std_runoff[iYY,iXX]/(mean_runoff[iYY,iXX]+1.0e-20)
-                #E=diststd
-                distopen_range[:,iYY,iXX]=((1+beta)/math.sqrt(E**2+1))*np.exp(math.sqrt(math.log(E**2+1))*sk)
-                #distopen_range[:,iYY,iXX]=np.sort(rd.normal(distopen,E,pm.ens_mem()))
-                #distopen_range[:,iYY,iXX]=np.sort(rd.normal(distopen,diststd,pm.ens_mem()))
+        # for 12 months
+        distopen_range=np.zeros([12,pm.ens_mem(),nYY,nXX],np.float32)
+        # fname="../../dat/std_runoff_E2O_1980-2000.bin"
+        # #print fname
+        # std_runoff=np.fromfile(fname,np.float32).reshape(nYY,nXX)
+        # fname="../../dat/mean_runoff_E2O_1980-2000.bin"
+        # #print "L1481",fname
+        # mean_runoff=np.fromfile(fname,np.float32).reshape(nYY,nXX)
+        # #print mean_runoff
+        # std_runoff=ma.masked_where(std_runoff==-9999.0,std_runoff).filled(0.0)
+        # mean_runoff=ma.masked_where(mean_runoff==-9999.0,mean_runoff).filled(0.0)
+        for mon in range(12): # for 12 months
+            mm="%02d"%(mon)
+            fname="../../dat/std_month_runoff_E2O_"+mm+".bin"
+            #print fname
+            std_runoff=np.fromfile(fname,np.float32).reshape(nYY,nXX)
+            fname="../../dat/mean_month_runoff_E2O_"+mm+".bin"
+            #print "L1481",fname
+            mean_runoff=np.fromfile(fname,np.float32).reshape(nYY,nXX)
+            #print mean_runoff
+            std_runoff=ma.masked_where(std_runoff==-9999.0,std_runoff).filled(0.0)
+            mean_runoff=ma.masked_where(mean_runoff==-9999.0,mean_runoff).filled(0.0)
+            for iXX in range(nXX):
+                for iYY in range(nYY):
+                    #distopen_range[:,iYY,iXX]=np.sort(rd.normal(distopen,std_runoff[iYY,iXX],pm.ens_mem()))
+                    #Log-normal model
+                    #sk=np.sort(rd.normal(distopen,diststd,pm.ens_mem()))
+                    sk=np.sort(rd.normal(distopen,diststd,pm.ens_mem()))
+                    beta=0.0
+                    E=std_runoff[iYY,iXX]/(mean_runoff[iYY,iXX]+1.0e-20)
+                    #E=diststd
+                    #distopen_range[mon,:,iYY,iXX]=((1+beta)/math.sqrt(E**2+1))*np.exp(math.sqrt(math.log(E**2+1))*sk)
+                    distopen_range[mon,:,iYY,iXX]=np.sort(rd.normal(distopen,E,pm.ens_mem()))
+                    #distopen_range[:,iYY,iXX]=np.sort(rd.normal(distopen,diststd,pm.ens_mem()))
         #----------
         for day in np.arange(start,last):
             target_dt=start_dt+datetime.timedelta(days=day)
+            mon=int(target_dt.month)
             yyyy='%04d' % (target_dt.year)
             mm='%02d' % (target_dt.month)
             dd='%02d' % (target_dt.day)
             iname=pm.DA_dir()+"/inp/"+runname+"/Roff/Roff____"+yyyy+mm+dd+".one"
             #print iname
             #roff=np.ones([nYY,nXX],np.float32)*-9999.0
+            fname="../../dat/std_runoff_E2O_1980-2000.bin"
+            #print fname
+            std_runoff=np.fromfile(fname,np.float32).reshape(nYY,nXX)
+            fname="../../dat/mean_runoff_E2O_1980-2000.bin"
+            #print "L1481",fname
+            mean_runoff=np.fromfile(fname,np.float32).reshape(nYY,nXX)
+            #print mean_runoff
+            std_runoff=ma.masked_where(std_runoff==-9999.0,std_runoff).filled(0.0)
+            mean_runoff=ma.masked_where(mean_runoff==-9999.0,mean_runoff).filled(0.0)
             roff=np.fromfile(iname,np.float32).reshape(nYY,nXX)
             for ens_num in np.arange(pm.ens_mem()):
                 ens_char="C%03d"%(ens_num+1)
-                roffc=roff+distopen_range[ens_num,:,:] #*mean_runoff #*std_runoff #
+                roffc=roff+distopen_range[mon,ens_num,:,:]*mean_runoff #*std_runoff #
                 oname="./CaMa_in/"+runname+"/Roff_CORR/Roff__"+yyyy+mm+dd+ens_char+".one"
                 roffc.tofile(oname)
     #--------------
