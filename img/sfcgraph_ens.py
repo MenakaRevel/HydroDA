@@ -29,7 +29,7 @@ import cal_stat as stat
 #argvs = sys.argv
 
 #experiment="E2O_HydroWeb22"
-experiment="VIC_BC_HydroWeb08"
+experiment="VIC_BC_HydroWeb09"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 assim_out=pm.DA_dir()+"/out/"+experiment

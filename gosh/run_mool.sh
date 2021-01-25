@@ -35,7 +35,7 @@ cd $HydroDA
 
 # experiment : edit the experiment name in here it will be written in $HydroDA/$EXP/exp.txt
 # before running run_mool.sh , please edit the nessary experimental settings in params.py
-EXP="VIC_BC_HydroWeb08"
+EXP="VIC_BC_HydroWeb09"
 # EXP="E2O_HydroWeb22"
 #IFACTOR="1.08"
 
