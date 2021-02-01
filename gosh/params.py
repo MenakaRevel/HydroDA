@@ -97,13 +97,35 @@ def err_expansion():
 def mode():
     return 3
     # parameter to change assimilation mode
+    # runoff ensembles will change accordingly.
     # 1: Earth2Obs, 2: ERA20CM, 3: VIC_BC, 4: -25% baised (ELSE_KIM2009/E2O/ERA20CM)
 
-def input():
-    #return "E2O"
-    # return "ERA20CM"
-    return "VIC_BC"
-    # E2O/ERA20CM
+def runname(num):
+    if num == 1:
+        return "E2O"
+
+    if num == 2:
+        return "ERA20CM"
+
+    if num == 3:
+        return "VIC_BC"
+
+    if num == 4: #biased runoff experiment
+        #return "ELSE_KIM2009"
+        return "E2O"
+        #return "ERA20CM"
+
+def input(num=mode()):
+
+    if num==1:
+        return "E2O"
+
+    if num==2:
+        return "ERA20CM"
+
+    if num==3:
+        return "VIC_BC"
+    # define the runoff data type.
 
 def experiment():
     f=open("./exp.txt","r")
@@ -130,21 +152,6 @@ def run_flag():
     # 1 run only corrupted and assimilated simulations
     # 2 run only true and assimilated simulations
     # 3 run only assimilated simulation
-
-def runname(num):
-    if num == 1:
-        return "E2O"
-
-    if num == 2:
-        return "ERA20CM"
-
-    if num == 3:
-        return "VIC_BC"
-
-    if num == 4: #biased runoff experiment
-        #return "ELSE_KIM2009"
-        return "E2O"
-        #return "ERA20CM"
 
 def true_run(num):
     if num == 1:

@@ -145,7 +145,7 @@ rivnum=np.fromfile(rivnum,np.int32).reshape(ny,nx)
 rivermap=((nextxy[0]>0)*(rivnum==1))*1.0
 #----
 syear,smonth,sdate=2003,1,1 #spm.starttime()#2004#1991  2004,1,1 #
-eyear,emonth,edate=pm.endtime() #2005,1,1 #
+eyear,emonth,edate=2005,1,1 #pm.endtime()
 #month=1
 #date=1
 start_dt=datetime.date(syear,smonth,sdate)
@@ -287,13 +287,13 @@ map(vec_par,np.arange(2,10+1,1))
 for point in np.arange(pnum):
     org=grdc.grdc_dis(staid[point],syear,eyear-1)
     org=np.array(org)
-    if sum(ma.masked_where(org!=-99.9,org))==0.0:
-        #print (sum(ma.masked_where(org!=-99.9,org)))
+    if np.sum(ma.masked_where(org!=-99.9,org))==0.0:
+        print ("no obs", np.sum(ma.masked_where(org!=-99.9,org)))
         continue
     NSEasm=NS(np.mean(asm[:,:,point],axis=1),org)
     NSEopn=NS(np.mean(opn[:,:,point],axis=1),org)
     if NSEopn==1.00:
-        #print (NSEopn)
+        print (NSEopn, staid[point], pname[point])
         continue
     NSEAI=(NSEasm-NSEopn)/(1.0-NSEopn+1.0e-20) 
     #NSEAI=NSEasm
@@ -310,10 +310,11 @@ for point in np.arange(pnum):
     #print (lon,lat,NSEAI) #,NSEasm,NSEopn)
     # if NSEAI > 0.0:
     #     print lon,lat, "%3.2f %3.2f %3.2f"%(NSEAI, NSEasm, NSEopn)
-    ax.scatter(lon,lat,s=10,marker="o",edgecolors=c, facecolors=c,zorder=106)
-    if NSEAI < 0.0:
+    if NSEAI > 0.01:
+        ax.scatter(lon,lat,s=10,marker="o",edgecolors=c, facecolors=c,zorder=106)
+    if NSEAI < 0.01:
         print staid[point], pname[point]
-        ax.scatter(lon,lat,s=10,marker="o",edgecolors="k", facecolors="k",zorder=106)
+        #ax.scatter(lon,lat,s=10,marker="o",edgecolors="k", facecolors="k",zorder=106)
 #--
 cbar=m.colorbar(im,"right",size="2%",ticks=np.arange(vmin,vmax+0.001,0.2))
 #plt.title(stitle)
