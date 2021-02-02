@@ -32,6 +32,148 @@ def slink(src,dst):
         else:
             raise
 ###########################
+def copy_runoff(inputlist): #do it parallel
+    iname=inputlist[0]
+    oname=inputlist[1]
+    distopen=float(inputlist[2])
+    runoff=np.fromfile(iname,np.float32)*distopen
+    runoff.tofile(oname)
+    return 0
+###########################
+def cal_monthly_mean_ens(ens_num): #start_year,end_year,ens_num,months=24):
+    # calc monthly mean value for two years
+    start_year=pm.spinup_end_year()
+    end_year,end_month,end_date=pm.starttime()
+    #start_year=pm.start_year() #inputlist[0]
+    #end_year=pm.end_year() #inputlist[1]
+    #ens_num=inputlist[2]
+    months=24 #inputlist[3]
+    #threshold=inputlist[4]
+    runname=pm.runname(pm.mode())
+    if runname=="E2O":
+        nx=1440
+        ny=720
+        threshold=0.1
+    else:
+        nx=360
+        ny=180
+        threshold=1.0e-8
+    #os.system("rm -Rf ./CaMa_in/ELSE_GPCC/mean_month/*")
+    mkdir("./CaMa_in/"+runname+"/mean_month")
+    #os.system("rm -Rf ./CaMa_in/ELSE_KIM2009/mean_month/*")
+    #threshold=0.1
+
+    start_dt=datetime.date(start_year,1,1)
+    end_dt=datetime.date(end_year,12,31)
+    ens_char="%03d"%(ens_num)
+    for month in np.arange(months):
+        ynow=int(start_year+int(month/12))
+        ychar="%04d"%(ynow)
+        mchar="%02d"%((month%12)+1)
+        #print ychar, mchar
+        roff_mon=np.zeros([ny,nx],np.float32)#.reshape([180,360])
+        count=np.zeros([ny,nx],np.float32)#.reshape([180,360])
+        for day in np.arange(month*30,(month+1)*30):
+            day_num=day-month*30
+            running_dt=start_dt+datetime.timedelta(days=day)
+            yyyy='%04d' % (running_dt.year)
+            mm='%02d' % (running_dt.month)
+            dd='%02d' % (running_dt.day)
+            roff=np.fromfile(pm.DA_dir()+"/inp/"+runname+"/Roff/Roff__"+str(yyyy)+str(mm)+str(dd)+ens_char+".one",np.float32).reshape([ny,nx])
+            roff_mon=roff_mon+roff*(roff>threshold)
+            count=count+(roff>threshold)
+        roff_mean=roff_mon/(count+1e-20)
+        roff_mean=roff_mean.astype(np.float32)
+        roff_mean=roff_mean+threshold
+        roff_mean.tofile("./CaMa_in/"+runname+"/mean_month/mean_"+ychar+mchar+ens_char+".bin")
+###########################
+def cal_monthly_total(start_year,end_year,months=24,threshold=0.1):
+    # calc monthly mean value for two years
+    runname=pm.runname(pm.mode())
+    true_run=pm.true_run(pm.mode())
+    if runname=="ELSE_KIM2009":
+        nx,ny=360,180
+        prefix="Roff____"
+        suffix=".one"
+    if runname=="E2O":
+        nx,ny=1440,720
+        prefix="Roff__"
+        suffix="%03d.one"%(true_run)
+    if runname=="ERA20CM":
+        nx,ny=360,180
+        prefix="Roff__"
+        suffix="%03d.one"%(true_run)
+    mkdir("./CaMa_in/"+runname+"/total_month")
+    #os.system("rm -Rf ./CaMa_in/ELSE_GPCC/mean_month/*")
+    #os.system("rm -Rf ./CaMa_in/"+runname+"/total_month/*")
+    #threshold=0.1
+    start_dt=datetime.date(start_year,1,1)
+    end_dt=datetime.date(end_year,12,31)
+    for month in np.arange(months):
+        ynow=int(start_year+int(month/12))
+        ychar="%04d"%(ynow)
+        mchar="%02d"%((month%12)+1)
+        #print ychar, mchar
+        roff_mon=np.zeros([ny,nx],np.float32)#.reshape([180,360])
+        #count=np.zeros([ny,nx],np.float32)#.reshape([180,360])
+        for day in np.arange(month*30,(month+1)*30):
+            day_num=day-month*30
+            running_dt=start_dt+datetime.timedelta(days=day)
+            yyyy='%04d' % (running_dt.year)
+            mm='%02d' % (running_dt.month)
+            dd='%02d' % (running_dt.day)
+            roff=np.fromfile("./CaMa_in/"+runname+"/Roff/"+prefix+str(yyyy)+str(mm)+str(dd)+suffix,np.float32).reshape([ny,nx]) 
+            roff_mon=roff_mon+roff*(roff>threshold)
+            #count=count+(roff>threshold)
+        roff_total=roff_mon #/(count+1e-20)
+        roff_total=roff_total.astype(np.float32)
+        roff_total=roff_total+threshold
+        roff_total.tofile("./CaMa_in/"+runname+"/total_month/total_"+ychar+mchar+".bin")
+###########################
+def cal_monthly_mean(start_year,end_year,months=24):
+    # calc monthly mean value for two years
+    runname=pm.runname(pm.mode())
+    true_run=pm.true_run(pm.mode())
+    if runname=="ELSE_KIM2009":
+        nx,ny=360,180
+        prefix="Roff____"
+        suffix=".one"
+    if runname=="E2O":
+        nx,ny=1440,720
+        prefix="Roff__"
+        suffix="%03d.one"%(true_run)
+    if runname=="ERA20CM":
+        nx,ny=360,180
+        prefix="Roff__"
+        suffix="%03d.one"%(true_run)
+    #os.system("rm -Rf ./CaMa_in/ELSE_GPCC/mean_month/*")
+    mkdir("./CaMa_in/"+runname+"/mean_month")
+    #os.system("rm -Rf ./CaMa_in/ELSE_KIM2009/mean_month/*")
+    threshold=0.1
+
+    start_dt=datetime.date(start_year,1,1)
+    end_dt=datetime.date(end_year,12,31)
+    for month in np.arange(months):
+        ynow=int(start_year+int(month/12))
+        ychar="%04d"%(ynow)
+        mchar="%02d"%((month%12)+1)
+        #print ychar, mchar
+        roff_mon=np.zeros([ny,nx],np.float32)#.reshape([180,360])
+        count=np.zeros([ny,nx],np.float32)#.reshape([180,360])
+        for day in np.arange(month*30,(month+1)*30):
+            day_num=day-month*30
+            running_dt=start_dt+datetime.timedelta(days=day)
+            yyyy='%04d' % (running_dt.year)
+            mm='%02d' % (running_dt.month)
+            dd='%02d' % (running_dt.day)
+            roff=np.fromfile("./CaMa_in/"+runname+"/Roff/"+prefix+str(yyyy)+str(mm)+str(dd)+suffix,np.float32).reshape([ny,nx]) 
+            roff_mon=roff_mon+roff*(roff>threshold)
+            count=count+(roff>threshold)
+        roff_mean=roff_mon/(count+1e-20)
+        roff_mean=roff_mean.astype(np.float32)
+        roff_mean=roff_mean+threshold
+        roff_mean.tofile("./CaMa_in/"+runname+"/mean_month/mean_"+ychar+mchar+".bin")
+###########################
 def prepare_input():
     # spinup start_year
     # simulation end_year
@@ -476,8 +618,11 @@ def make_initial_infl():
     mm='%02d' % (start_month)
     dd='%02d' % (start_date)
     parm_infl.tofile(pm.DA_dir()+"/out/"+pm.experiment()+"/inflation/parm_infl"+yyyy+mm+dd+".bin")
+    return 0
 ###########################
+def make_anomaly_data():
 
+###########################
 # make necessary directories
 print "initial"
 initial()
