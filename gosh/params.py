@@ -116,7 +116,6 @@ def runname(num):
         #return "ERA20CM"
 
 def input(num=mode()):
-
     if num==1:
         return "E2O"
 

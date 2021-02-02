@@ -54,10 +54,16 @@ cp -r "$HydroDA/gosh/params.py" "$HydroDA/out/$EXP/params.py"
 
 cp -r $HydroDA"/src/"run.py $HydroDA"/out/"$EXP"/"run.py
 ln -sf $HydroDA"/src/"main_code.py $HydroDA"/out/"$EXP"/"main_code.py
+ln -sf $HydroDA"/src/"prep_init.py $HydroDA"/out/"$EXP"/"prep_init.py
 
 cd $HydroDA"/out/"$EXP
 #python run.py
 # run the main code using virtual environment
+
+# prepare input
+/home/menaka/miniconda3/envs/pydef/bin/python2.7 prep_init.py
+
+# run main code
 /home/menaka/miniconda3/envs/pydef/bin/python2.7 run.py &
 
 wait

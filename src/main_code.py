@@ -43,24 +43,6 @@ def main_act():
     print pm.version()
     print pm.runname(pm.mode())
 
-    # make necessary directories
-    print "initial"
-    initial()
-
-    # copy settings to ./assim_out/
-    shutil.copy("params.py","./assim_out/")
-
-    # make random samples
-    #make_rand(pm.diststd())
-
-    # prepare input runoff files for simulations
-    print "prepare input"
-    prepare_input()
-
-    # initial inflation parameter rho for assimilation 2018/11/15@Menaka
-    print "make intial inflation"
-    make_initial_infl()
-
     # Set Time
     print "Set Time"
     timestep=pm.timestep() #time step for assimilation
@@ -70,14 +52,6 @@ def main_act():
     # Spin-up Simulation
     print "spin up simulation"
     spin_up()
-
-    # Calculate mean for anomaly assimilation ### NEW
-    #print "calculate mean of %04d"%(pm.spinup_end_year())
-    #calc_mean()
-
-    # Calculate mean for anomaly assimilation ### NEW
-    print "save long-term mean and standard deviation"
-    save_statistic()
 
     # make initial restart
     print "make intial restart"
@@ -97,8 +71,8 @@ def main_act():
         mm='%02d' % (running_dt.month)
         dd='%02d' % (running_dt.day)
 
-        if dd=="01" and pm.slack_notification()==1:
-            os.system("source src/sendslack.sh python_notification DA in progress "+yyyy+" "+mm+" "+dd)
+        # if dd=="01" and pm.slack_notification()==1:
+        #     os.system("source src/sendslack.sh python_notification DA in progress "+yyyy+" "+mm+" "+dd)
 
         one_day_loop(yyyy,mm,dd,day)
 
@@ -288,20 +262,6 @@ def one_day_sim(inputlist):
     exp_dir=pm.DA_dir()+"/out/"+pm.experiment()
     mapname=pm.mapname()
     os.system("source "+pm.DA_dir()+"/src/oneday_sim.sh "+yyyy+" "+mm+" "+dd+" "+ens_num+" "+dir2+" "+looptype+" "+str(cpunums)+" "+str(run_name)+" "+str(exp_dir)+" "+str(mapname))
-
-#    if looptype=="true":
-#        # copying "restart file" to ./CaMa_in/
-#        thisday=datetime.date(int(yyyy),int(mm),int(dd))
-#        nxt_day=thisday+datetime.timedelta(days=1)
-#        orgrestf="CaMa_out/"+yyyy+mm+dd+"T"+ens_num+"/restart"+'%04d'%(nxt_day.year)+'%02d'%(nxt_day.month)+'%02d'%(nxt_day.day)+".bin"
-#        newrestf="CaMa_in/restart/"+looptype+"/restart"+'%04d'%(nxt_day.year)+'%02d'%(nxt_day.month)+'%02d'%(nxt_day.day)+"T000.bin"
-#        #os.system("cp "+orgrestf+" "+newrestf)
-#        copy_stoonly(orgrestf,newrestf)
-#
-#        # copying "WSE" as "xa_m" in ./assim_out
-#        oldfname="CaMa_out/"+yyyy+mm+dd+"T"+ens_num+"/sfcelv"+yyyy+".bin"
-#        newfname="assim_out/xa_m/"+looptype+"/"+yyyy+mm+dd+"_xam.bin"
-#        os.system("cp "+oldfname+" "+newfname)
 
     return 0
 ########################### # modified to run paralle @Menaka 
