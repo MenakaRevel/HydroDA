@@ -19,8 +19,18 @@ def endtime():
     return (2005,1,1) # end date: [year,month,date]
                       # *note: this date is not included
 
-def ens_mem():
-    return 20
+def ens_mem(mode=mode()):
+    if mode == 1:
+        return 21
+    
+    if mode == 2:
+        return 20
+
+    if mode == 3:
+        return 20
+
+    if mode == 3:
+        return 20
     # number of ensemble members
 
 def max_lat():

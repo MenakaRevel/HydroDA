@@ -620,7 +620,18 @@ def make_initial_infl():
     parm_infl.tofile(pm.DA_dir()+"/out/"+pm.experiment()+"/inflation/parm_infl"+yyyy+mm+dd+".bin")
     return 0
 ###########################
-def make_anomaly_data():
+def make_anomaly_data(mode==pm.mode()):
+    # copy the anomaly files
+
+# !fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/meansfcelvT000.bin"
+# !fname=trim(adjustl(DAdir))//"/dat/mean_sfcelv_1958-2013.bin"
+# !fname=trim(adjustl(DAdir))//"/dat/mean_sfcelv_E2O_1980-2014.bin"
+# !fname=trim(adjustl(DAdir))//"/dat/mean_sfcelv_E2O_amz_06min_1980-2014.bin"
+# !fname=trim(adjustl(DAdir))//"/dat/mean_sfcelv_VIC_BC_1980-2014.bin"
+# !fname=trim(adjustl(DAdir))//"/dat/mean_sfcelv_VIC_BC_amz_06min_1980-2014.bin"
+    if mode == 1:
+        fname=pm.DA_dir()+"/dat/mean_sfcelv_E2O_"+pm.mapname()+"_1980-2014.bin"
+        oname=pm.DA_dir()+"/out/"+pm.experimet_name()+"/assim_out/"
 
 ###########################
 # make necessary directories
