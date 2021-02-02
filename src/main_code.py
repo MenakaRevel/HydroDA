@@ -1506,10 +1506,11 @@ def prepare_input():
                     #sk=np.sort(rd.normal(distopen,diststd,pm.ens_mem()))
                     sk=np.sort(rd.normal(distopen,diststd,pm.ens_mem()))
                     beta=0.0
-                    E=3*std_runoff[iYY,iXX]/(mean_runoff[iYY,iXX]+1.0e-20)
+                    E=std_runoff[iYY,iXX]/(mean_runoff[iYY,iXX]+1.0e-20)
                     #E=diststd
                     #distopen_range[mon,:,iYY,iXX]=((1+beta)/math.sqrt(E**2+1))*np.exp(math.sqrt(math.log(E**2+1))*sk)
-                    distopen_range[mon-1,:,iYY,iXX]=np.sort(rd.normal(distopen,E,pm.ens_mem()))
+                    #distopen_range[mon-1,:,iYY,iXX]=np.sort(rd.normal(distopen,E,pm.ens_mem()))
+                    distopen_range[mon-1,:,iYY,iXX]=rd.normal(distopen,E,pm.ens_mem())
                     #distopen_range[:,iYY,iXX]=np.sort(rd.normal(distopen,diststd,pm.ens_mem()))
         #----------
         for day in np.arange(start,last):
