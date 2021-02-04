@@ -16,8 +16,16 @@ def starttime():
     return (2002,1,1) # start date: [year,month,date]
 
 def endtime():
-    return (2005,1,1) # end date: [year,month,date]
+    return (2004,1,1) # end date: [year,month,date]
                       # *note: this date is not included
+def spinup_end_year():
+    return 2001
+
+def spinup_end_month():
+    return 12
+
+def spinup_end_date():
+    return 31
 
 def ens_mem(mode=mode()):
     if mode == 1:
@@ -214,15 +222,6 @@ def spinup_mode():
     # 2: do spin up only at true simulation
     # 3: no spinup simulation at all
     ### if initial restart file is ready, spinup simulation is no need
-
-def spinup_end_year():
-    return 2001
-
-def spinup_end_month():
-    return 12
-
-def spinup_end_date():
-    return 31
 
 def ovs_err():
     return 0.100000
