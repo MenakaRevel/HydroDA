@@ -1,10 +1,19 @@
 program data_assim
 !$ use omp_lib
-!**************************
-! Data Assimilation using LETKF and empircal local patches [Revel et al,. (2019,2020)]
+!*************************************************************************************
+! Data Assimilation using LETKF and empircal local patches [Revel et al,. (2019,2021)]
+! ====================================================================================
+! Reference:
+! 1. Revel, M., Ikeshima, D., Yamazaki, D., & Kanae, S. (2020). A framework for estimating 
+! global‐scale river discharge by assimilating satellite altimetry. Water Resources Research, 
+! 1–34. https://doi.org/10.1029/2020wr027876
+! 2. Revel, M., Ikeshima, D., Yamazaki, D., & Kanae, S. (2019). A Physically Based Empirical 
+! Localization Method for Assimilating Synthetic SWOT Observations of a Continental-Scale River: 
+! A Case Study in the Congo Basin,Water, 11(4), 829. https://doi.org/10.3390/w11040829
+! ====================================================================================
 ! created by Ikeshima & Menaka
 ! Menaka@IIS 2020
-!**************************
+!*************************************************************************************
 implicit none
 character(len=128)              :: fname,buf,camadir,expdir,DAdir,patchdir,hydrowebdir,mapname
 character(len=8)                :: yyyymmdd,nxtyyyymmdd
@@ -202,29 +211,15 @@ open(73,file=fname,status='replace')
 fname=trim(adjustl(expdir))//"/logout/ensembles_"//yyyymmdd//".log"
 open(74,file=fname,status='replace')
 
+! I/O realted error will be written in /logout/error_{yyyymmdd}.log
 fname=trim(adjustl(expdir))//"/logout/error_"//yyyymmdd//".log"
 open(82,file=fname,status='replace')
+write(82,*) "File I/O Errors"
 
 allocate(rivwth(lonpx,latpx),rivlen(lonpx,latpx),nextdst(lonpx,latpx),lons(lonpx,latpx),lats(lonpx,latpx))
 allocate(elevtn(lonpx,latpx),weightage(lonpx,latpx),storage(lonpx,latpx),parm_infl(lonpx,latpx))
 allocate(nextX(lonpx,latpx),nextY(lonpx,latpx),ocean(lonpx,latpx),countp(lonpx,latpx),targetp(lonpx,latpx))
 
-! read storage (for making ocean mask)
-!allocate(ocean(lonpx,latpx))
-!fname=trim(adjustl(expdir))//"/CaMa_out/"//yyyymmdd//"T000/storge"//yyyymmdd(1:4)//".bin"
-!open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
-!if(ios==0)then
-!    read(34,rec=1) storage
-!else
-!    write(*,*) "no file storage"
-!end if
-!close(34)
-!
-!write(*,*) "read storage"
-
-! make ocean mask from storage data (1 is ocean; 0 is not ocean)
-!ocean = (storage>1e18) * (-1)
-write(82,*) "File I/O Errors"
 ! read river width
 fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivwth_gwdlr.bin"
 !print *, fname
@@ -305,76 +300,8 @@ else
 end if
 close(34)
 
-!--
-! read SWOT observation distance data
-!allocate(swot_obs(1440,640))
-!swot_obs=0
-!fname=trim(adjustl(DAdir))//"/sat/mesh_day"//swot_day//".bin"
-!open(34,file=fname,form="unformatted",access="direct",recl=4*lonpx*640,status="old",iostat=ios)
-!if(ios==0)then
-!    read(34,rec=1) swot_obs
-!else
-!    write(*,*) "no swot"
-!end if
-!close(34)
-
-! obs_mask is a mask for considering if there is observation in local patch at that date
-!allocate(obs_mask(lonpx,latpx))
-!obs_mask=0 ! 0 means no observations in local patch
-!fname=trim(adjustl(DAdir))//"/ava_obs/obs"//swot_day//".bin"
-!open(34,file=fname,form="unformatted",access="direct",recl=4*lonpx*latpx,status="old",iostat=ios)
-!if(ios==0)then
-!    read(34,rec=1) obs_mask
-!else
-!    write(*,*) "no obs_mask"
-!end if
-!close(34)
-
 !read observations and observation error variance
 allocate(obs(lonpx,latpx),obs_err(lonpx,latpx),altitude(lonpx,latpx),mean_obs(lonpx,latpx),std_obs(lonpx,latpx))
-! fname=trim(adjustl(hydrowebdir))//"/bin/hydroweb"//yyyymmdd//".bin"
-! open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
-! if(ios==0)then
-!     read(34,rec=1) obs
-!     read(34,rec=2) obs_err
-! else
-!     write(*,*) "no file ", fname
-!     write(82,*) "no file :", fname
-! end if
-! close(34)
-
-! ! altitude
-! fname=trim(adjustl(hydrowebdir))//"/bin/HydroWeb_altitude.bin"
-! open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
-! if(ios==0)then
-!     read(34,rec=1) altitude
-! else
-!     write(*,*) "no file ", fname
-!     write(82,*) "no file :", fname
-! end if
-! close(34)
-
-! ! mean observation
-! fname=trim(adjustl(hydrowebdir))//"/bin/HydroWeb_mean.bin"
-! open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
-! if(ios==0)then
-!     read(34,rec=1) mean_obs
-! else
-!     write(*,*) "no file ", fname
-!     write(82,*) "no file :", fname
-! end if
-! close(34)
-
-! ! std observation
-! fname=trim(adjustl(hydrowebdir))//"/bin/HydroWeb_std.bin"
-! open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
-! if(ios==0)then
-!     read(34,rec=1) std_obs
-! else
-!     write(*,*) "no file ", fname
-!     write(82,*) "no file :", fname
-! end if
-! close(34)
 
 !----
 !read HydroWeb data
@@ -907,7 +834,7 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
             write(*,*) "~~~ m<ens_num ~~~ m=",m,info
             write(*,*) real(ens_num-1.)*UNI/rho+HETRHE
             !xa=xf
-            write(36,*) lat,lon,"error",errflg,"info",info
+            write(82,*) lat,lon,"error",errflg,"info",info ! bugfix file name
             goto 9999 
         end if
         allocate(U(m,m),la(m))

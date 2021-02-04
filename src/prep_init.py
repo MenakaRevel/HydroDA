@@ -294,8 +294,8 @@ def prepare_input():
     # VIC BC
     if pm.input()=="VIC_BC": #VIC BC
         nXX,nYY=1440,720
-        distopen=0.0 #pm.distopen(3)
-        diststd=1.0 #pm.diststd(3)
+        distopen=1.0 #pm.distopen(3)
+        diststd=0.25 #pm.diststd(3)
         true_run=pm.true_run(3) # for true ensemble
         runname=pm.runname(3) # get runoff name
         # make courrpted runoff
@@ -337,11 +337,11 @@ def prepare_input():
                     #sk=np.sort(rd.normal(distopen,diststd,pm.ens_mem()))
                     sk=np.sort(rd.normal(distopen,diststd,pm.ens_mem()))
                     beta=0.0
-                    E=std_runoff[iYY,iXX]/(mean_runoff[iYY,iXX]+1.0e-20)
-                    #E=diststd
+                    #E=std_runoff[iYY,iXX]/(mean_runoff[iYY,iXX]+1.0e-20)
+                    E=diststd
                     #distopen_range[mon,:,iYY,iXX]=((1+beta)/math.sqrt(E**2+1))*np.exp(math.sqrt(math.log(E**2+1))*sk)
-                    #distopen_range[mon-1,:,iYY,iXX]=np.sort(rd.normal(distopen,E,pm.ens_mem()))
-                    distopen_range[mon-1,:,iYY,iXX]=rd.normal(distopen,E,pm.ens_mem())
+                    distopen_range[mon-1,:,iYY,iXX]=np.sort(rd.normal(distopen,E,pm.ens_mem()))
+                    # distopen_range[mon-1,:,iYY,iXX]=rd.normal(distopen,E,pm.ens_mem())
                     #distopen_range[:,iYY,iXX]=np.sort(rd.normal(distopen,diststd,pm.ens_mem()))
         #----------
         for day in np.arange(start,last):
@@ -366,6 +366,7 @@ def prepare_input():
             for ens_num in np.arange(pm.ens_mem()):
                 ens_char="C%03d"%(ens_num+1)
                 roffc=roff+distopen_range[mon-1,ens_num,:,:]*mean_runoff #*std_runoff #
+                roffc=roff*distopen_range[mon-1,ens_num,:,:] #*mean_runoff
                 oname=pm.DA_dir()+"/out/"+pm.experiment()+"/CaMa_in/"+runname+"/Roff_CORR/Roff__"+yyyy+mm+dd+ens_char+".one"
                 roffc.tofile(oname)
     #--------------
@@ -621,18 +622,39 @@ def make_initial_infl():
     return 0
 ###########################
 def make_anomaly_data(mode==pm.mode()):
+    # make directory for mean sfcelv
+    mkdir(pm.DA_dir()+"/out/"+pm.experimet_name()+"/assim_out/mean_sfcelv/")
     # copy the anomaly files
-
-# !fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/meansfcelvT000.bin"
-# !fname=trim(adjustl(DAdir))//"/dat/mean_sfcelv_1958-2013.bin"
-# !fname=trim(adjustl(DAdir))//"/dat/mean_sfcelv_E2O_1980-2014.bin"
-# !fname=trim(adjustl(DAdir))//"/dat/mean_sfcelv_E2O_amz_06min_1980-2014.bin"
-# !fname=trim(adjustl(DAdir))//"/dat/mean_sfcelv_VIC_BC_1980-2014.bin"
-# !fname=trim(adjustl(DAdir))//"/dat/mean_sfcelv_VIC_BC_amz_06min_1980-2014.bin"
     if mode == 1:
-        fname=pm.DA_dir()+"/dat/mean_sfcelv_E2O_"+pm.mapname()+"_1980-2014.bin"
-        oname=pm.DA_dir()+"/out/"+pm.experimet_name()+"/assim_out/"
+        # for mean
+        iname=pm.DA_dir()+"/dat/mean_sfcelv_E2O_"+pm.mapname()+"_1980-2014.bin"
+        oname=pm.DA_dir()+"/out/"+pm.experimet_name()+"/assim_out/mean_sfcelv/mean_sfcelv.bin"
+        os.system("cp "+iname+" "+oname)
+        # for std
+        iname=pm.DA_dir()+"/dat/std_sfcelv_E2O_"+pm.mapname()+"_1980-2014.bin"
+        oname=pm.DA_dir()+"/out/"+pm.experimet_name()+"/assim_out/mean_sfcelv/std_sfcelv.bin"
+        os.system("cp "+iname+" "+oname)
 
+    if mode == 2:
+        # for mean
+        iname=pm.DA_dir()+"/dat/mean_sfcelv_E2O_"+pm.mapname()+"_1980-2014.bin"
+        oname=pm.DA_dir()+"/out/"+pm.experimet_name()+"/assim_out/mean_sfcelv/mean_sfcelv.bin"
+        os.system("cp "+iname+" "+oname)
+        # for std
+        iname=pm.DA_dir()+"/dat/std_sfcelv_E2O_"+pm.mapname()+"_1980-2014.bin"
+        oname=pm.DA_dir()+"/out/"+pm.experimet_name()+"/assim_out/mean_sfcelv/std_sfcelv.bin"
+        os.system("cp "+iname+" "+oname)
+    
+    if mode == 3:
+        # for mean
+        iname=pm.DA_dir()+"/dat/mean_sfcelv_VIC_BC_"+pm.mapname()+"_1979-2013.bin"
+        oname=pm.DA_dir()+"/out/"+pm.experimet_name()+"/assim_out/mean_sfcelv/mean_sfcelv.bin"
+        os.system("cp "+iname+" "+oname)
+        # for std
+        iname=pm.DA_dir()+"/dat/std_sfcelv_VIC_BC_"+pm.mapname()+"_1979-2013.bin"
+        oname=pm.DA_dir()+"/out/"+pm.experimet_name()+"/assim_out/mean_sfcelv/std_sfcelv.bin"
+        os.system("cp "+iname+" "+oname)
+    return 0
 ###########################
 # make necessary directories
 print "initial"
