@@ -656,6 +656,19 @@ def make_anomaly_data(mode==pm.mode()):
         os.system("cp "+iname+" "+oname)
     return 0
 ###########################
+def save_statistic():
+    # copy mean and std of simulated WSE
+    mkdir("./assim_out/mean_sfcelv/")
+    if pm.input()=="E2O":
+        os.system("cp -r "+pm.DA_dir()+"/dat/mean_sfcelv_"+pm.input()+"_"+pm.mapname()+"_1980-2014.bin ./assim_out/mean_sfcelv/mean_sfcelv.bin")
+        os.system("cp -r "+pm.DA_dir()+"/dat/std_sfcelv_"+pm.input()+"_"+pm.mapname()+"_1980-2014.bin ./assim_out/mean_sfcelv/std_sfcelv.bin")
+        print "cp -r "+pm.DA_dir()+"/dat/mean_sfcelv_"+pm.input()+"_"+pm.mapname()+"_1980-2014.bin ./assim_out/mean_sfcelv/mean_sfcelv.bin"
+    if pm.input()=="VIC_BC":
+        os.system("cp -r "+pm.DA_dir()+"/dat/mean_sfcelv_"+pm.input()+"_"+pm.mapname()+"_1979-2013.bin ./assim_out/mean_sfcelv/mean_sfcelv.bin")
+        os.system("cp -r "+pm.DA_dir()+"/dat/std_sfcelv_"+pm.input()+"_"+pm.mapname()+"_1979-2013.bin ./assim_out/mean_sfcelv/std_sfcelv.bin")
+        print "cp -r "+pm.DA_dir()+"/dat/mean_sfcelv_"+pm.input()+"_"+pm.mapname()+"_1979-2013.bin ./assim_out/mean_sfcelv/mean_sfcelv.bin"
+    return 0
+###########################
 # make necessary directories
 print "initial"
 initial()
@@ -667,3 +680,7 @@ prepare_input()
 # initial inflation parameter rho for assimilation
 print "make intial inflation"
 make_initial_infl()
+
+# preapre the mean and std for anomaly/normalized assimilation
+print "save statistics"
+save_statistic()
