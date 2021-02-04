@@ -53,3 +53,6 @@ HydroDA.o*
 
 #.linux files
 */._Makefile
+
+# VS code 
+*/.vscode
