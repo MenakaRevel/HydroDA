@@ -12,7 +12,7 @@ program data_assim
 ! A Case Study in the Congo Basin,Water, 11(4), 829. https://doi.org/10.3390/w11040829
 ! ====================================================================================
 ! created by Ikeshima & Menaka
-! Menaka@IIS 2020
+! Menaka@IIS 2021
 !*************************************************************************************
 implicit none
 character(len=128)              :: fname,buf,camadir,expdir,DAdir,patchdir,hydrowebdir,mapname

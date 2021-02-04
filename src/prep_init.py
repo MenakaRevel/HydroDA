@@ -2,7 +2,23 @@
 # -*- coding: utf-8 -*-
 
 #libralies
-import os
+import sys
+import errno
+from multiprocessing import Pool
+from multiprocessing import Process
+import datetime
+import functools
+import numpy.random as rd
+import os.path
+import datetime as dt
+import glob
+import shutil
+import scipy.linalg as spla
+from numpy import ma
+import random
+import re
+import calendar
+import math
 
 #external python codes
 import params as pm
@@ -621,7 +637,7 @@ def make_initial_infl():
     parm_infl.tofile(pm.DA_dir()+"/out/"+pm.experiment()+"/inflation/parm_infl"+yyyy+mm+dd+".bin")
     return 0
 ###########################
-def make_anomaly_data(mode==pm.mode()):
+def make_anomaly_data(mode=pm.mode()):
     # make directory for mean sfcelv
     mkdir(pm.DA_dir()+"/out/"+pm.experimet_name()+"/assim_out/mean_sfcelv/")
     # copy the anomaly files
@@ -669,18 +685,18 @@ def save_statistic():
         print "cp -r "+pm.DA_dir()+"/dat/mean_sfcelv_"+pm.input()+"_"+pm.mapname()+"_1979-2013.bin ./assim_out/mean_sfcelv/mean_sfcelv.bin"
     return 0
 ###########################
-# make necessary directories
-print "initial"
-initial()
+# # make necessary directories
+# print "initial"
+# initial()
 
-# prepare runoff ensembles
-print "prepare input"
-prepare_input()
+# # prepare runoff ensembles
+# print "prepare input"
+# prepare_input()
 
-# initial inflation parameter rho for assimilation
-print "make intial inflation"
-make_initial_infl()
+# # initial inflation parameter rho for assimilation
+# print "make intial inflation"
+# make_initial_infl()
 
-# preapre the mean and std for anomaly/normalized assimilation
-print "save statistics"
-save_statistic()
+# # preapre the mean and std for anomaly/normalized assimilation
+# print "save statistics"
+# save_statistic()

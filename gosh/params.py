@@ -27,6 +27,45 @@ def spinup_end_month():
 def spinup_end_date():
     return 31
 
+def mode():
+    return 3
+    # parameter to change assimilation mode
+    # runoff ensembles will change accordingly.
+    # 1: Earth2Obs, 2: ERA20CM, 3: VIC_BC, 4: -25% baised (ELSE_KIM2009/E2O/ERA20CM)
+
+def runname(num):
+    if num == 1:
+        return "E2O"
+
+    if num == 2:
+        return "ERA20CM"
+
+    if num == 3:
+        return "VIC_BC"
+
+    if num == 4: #biased runoff experiment
+        #return "ELSE_KIM2009"
+        return "E2O"
+        #return "ERA20CM"
+
+def input(num=mode()):
+    if num==1:
+        return "E2O"
+
+    if num==2:
+        return "ERA20CM"
+
+    if num==3:
+        return "VIC_BC"
+    # define the runoff data type.
+
+def experiment():
+    f=open("./exp.txt","r")
+    line=f.readline()
+    exp =line.split("\n")[0]
+    f.close()
+    return exp
+    
 def ens_mem(mode=mode()):
     if mode == 1:
         return 21
@@ -111,45 +150,6 @@ def err_expansion():
     return 1.0
     # variance-covariance expansion
     # works well with 0.04
-
-def mode():
-    return 3
-    # parameter to change assimilation mode
-    # runoff ensembles will change accordingly.
-    # 1: Earth2Obs, 2: ERA20CM, 3: VIC_BC, 4: -25% baised (ELSE_KIM2009/E2O/ERA20CM)
-
-def runname(num):
-    if num == 1:
-        return "E2O"
-
-    if num == 2:
-        return "ERA20CM"
-
-    if num == 3:
-        return "VIC_BC"
-
-    if num == 4: #biased runoff experiment
-        #return "ELSE_KIM2009"
-        return "E2O"
-        #return "ERA20CM"
-
-def input(num=mode()):
-    if num==1:
-        return "E2O"
-
-    if num==2:
-        return "ERA20CM"
-
-    if num==3:
-        return "VIC_BC"
-    # define the runoff data type.
-
-def experiment():
-    f=open("./exp.txt","r")
-    line=f.readline()
-    exp =line.split("\n")[0]
-    f.close()
-    return exp
 
 def rivman_error():
     return 0
