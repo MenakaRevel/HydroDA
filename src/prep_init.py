@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 
 #libralies
+import os
+import itertools
+import numpy as np
 import sys
 import errno
 from multiprocessing import Pool
