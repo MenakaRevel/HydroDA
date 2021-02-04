@@ -1463,18 +1463,20 @@ def prepare_input():
     # VIC BC
     if pm.input()=="VIC_BC": #VIC BC
         nXX,nYY=1440,720
-        distopen=0.0 #pm.distopen(3)
+        distopen=1.0 #pm.distopen(3)
         diststd=1.0 #pm.diststd(3)
         true_run=pm.true_run(3) # for true ensemble
         runname=pm.runname(3) # get runoff name
         # make courrpted runoff
-        if(len(glob.glob("./CaMa_in/"+runname+"/Roff_CORR/Roff*"))!=0):
-            pass
+        # if(len(glob.glob("./CaMa_in/"+runname+"/Roff_CORR/Roff*"))!=0):
+        #     pass
         # corrupted input file is not ready
         # need preparation
         # make directories
         mkdir("./CaMa_in/"+runname+"/Roff_CORR")
         #--
+        mkdir("./assim_out/runoff_error")
+        f=open("./assim_out/runoff_error/ensemble.txt","w")
         # dist std for ensembles
         #distopen_ranges={}
         # for 12 months
@@ -1509,9 +1511,12 @@ def prepare_input():
                     E=std_runoff[iYY,iXX]/(mean_runoff[iYY,iXX]+1.0e-20)
                     #E=diststd
                     #distopen_range[mon,:,iYY,iXX]=((1+beta)/math.sqrt(E**2+1))*np.exp(math.sqrt(math.log(E**2+1))*sk)
-                    #distopen_range[mon-1,:,iYY,iXX]=np.sort(rd.normal(distopen,E,pm.ens_mem()))
+                    # distopen_range[mon-1,:,iYY,iXX]=np.sort(rd.normal(distopen,E,pm.ens_mem()))
                     distopen_range[mon-1,:,iYY,iXX]=rd.normal(distopen,E,pm.ens_mem())
                     #distopen_range[:,iYY,iXX]=np.sort(rd.normal(distopen,diststd,pm.ens_mem()))
+                    line="%05d  %05d  %02d  "%(iXX,iYY,mon) +'  '.join(['%8.7f'%(x) for x in distopen_range[mon-1,:,iYY,iXX]])+"\n"
+                    f.write(line)
+        f.close()
         #----------
         for day in np.arange(start,last):
             target_dt=start_dt+datetime.timedelta(days=day)
@@ -1534,7 +1539,8 @@ def prepare_input():
             mean_runoff=ma.masked_where(mean_runoff==-9999.0,mean_runoff).filled(0.0)
             for ens_num in np.arange(pm.ens_mem()):
                 ens_char="C%03d"%(ens_num+1)
-                roffc=roff+distopen_range[mon-1,ens_num,:,:]*mean_runoff #*std_runoff #
+                # roffc=roff+distopen_range[mon-1,ens_num,:,:]*mean_runoff #*std_runoff #
+                roffc=roff*distopen_range[mon-1,ens_num,:,:] #*mean_runoff
                 oname="./CaMa_in/"+runname+"/Roff_CORR/Roff__"+yyyy+mm+dd+ens_char+".one"
                 roffc.tofile(oname)
     #--------------

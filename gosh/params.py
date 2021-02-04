@@ -13,10 +13,10 @@ def timestep():
     return 86400 # outer timestep in seconds
 
 def starttime():
-    return (2002,1,1) # start date: [year,month,date]
+    return (2003,1,1) # start date: [year,month,date]
 
 def endtime():
-    return (2005,1,1) # end date: [year,month,date]
+    return (2004,1,1) # end date: [year,month,date]
                       # *note: this date is not included
 
 def ens_mem():
