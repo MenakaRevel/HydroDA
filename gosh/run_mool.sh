@@ -76,8 +76,8 @@ cp -r "$HydroDA/gosh/params.py" "$HydroDA/out/$EXP/params.py"
 #cp -r "$HydroDA/gosh/params.py" "$HydroDA/src/params.py"
 
 cp -r $HydroDA"/src/"run.py $HydroDA"/out/"$EXP"/"run.py
-ln -sf $HydroDA"/src/"main_code.py $HydroDA"/out/"$EXP"/"main_code.py
-ln -sf $HydroDA"/src/"prep_init.py $HydroDA"/out/"$EXP"/"prep_init.py
+cp -r $HydroDA"/src/"main_code.py $HydroDA"/out/"$EXP"/"main_code.py
+cp -r $HydroDA"/src/"prep_init.py $HydroDA"/out/"$EXP"/"prep_init.py
 
 cd $HydroDA"/out/"$EXP
 
