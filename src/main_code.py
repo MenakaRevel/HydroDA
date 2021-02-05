@@ -301,7 +301,10 @@ def assim_at_fort(yyyy,mm,dd,day): #previous --> used
     dir1=pm.CaMa_dir()+"/"
     thisday=datetime.date(int(yyyy),int(mm),int(dd))
     nxt_day=thisday+datetime.timedelta(days=1)
-    os.system(pm.DA_dir()+"/src/data_assim "+str(pm.assimN())+" "+str(pm.assimS())+" "+str(pm.assimW())+" "+str(pm.assimE())+" "+yyyy+mm+dd+" "+str('%02d'%SWOT_day(yyyy,mm,dd))+" "+str(pm.patch_size())+" "+str(pm.ens_mem())+" "+str(day)+" "+str('%04d'%(nxt_day.year)+'%02d'%(nxt_day.month)+'%02d'%(nxt_day.day))+" "+str(pm.err_expansion())+" "+dir1)
+    os.system(pm.DA_dir()+"/src/data_assim "+str(pm.assimN())+" "+str(pm.assimS())+" "+\
+    str(pm.assimW())+" "+str(pm.assimE())+" "+yyyy+mm+dd+" "+str('%02d'%SWOT_day(yyyy,mm,dd))\
+    +" "+str(pm.patch_size())+" "+str(pm.patch_name())+" "+str(pm.ens_mem())+" "+str(day)+" "\
+    +str('%04d'%(nxt_day.year)+'%02d'%(nxt_day.month)+'%02d'%(nxt_day.day))+" "+str(pm.err_expansion())+" "+dir1)
     return 0
 ###########################
 def data_assim(yyyy,mm,dd,day): # new data assimilation function (2020/05/18)
@@ -317,7 +320,10 @@ def data_assim(yyyy,mm,dd,day): # new data assimilation function (2020/05/18)
     nmon=nxt_day.month
     nday=nxt_day.day
     nxtyyyymmdd="%04d%02d%02d"%(nyear,nmon,nday)
-    os.system(pm.DA_dir()+"/src/data_assim "+str(pm.assimN())+" "+str(pm.assimS())+" "+str(pm.assimW())+" "+str(pm.assimE())+" "+pm.mapname()+" "+yyyy+mm+dd+" "+str(pm.patch_size())+" "+str(pm.ens_mem())+" "+nxtyyyymmdd+" "+pm.CaMa_dir()+" "+str(pm.thersold())+" "+exp_dir+" "+pm.DA_dir()+" "+pm.patch_dir()+" "+pm.HydroWeb_dir()+" "+str(pm.rho())+" "+str(pm.sigma_b()))
+    os.system(pm.DA_dir()+"/src/data_assim "+yyyy+mm+dd+" "+pm.mapname()+" "\
+    +str(pm.patch_size())+" "+str(pm.ens_mem())+" "+nxtyyyymmdd+" "+pm.CaMa_dir()\
+    +" "+str(pm.thersold())+" "+exp_dir+" "+pm.DA_dir()+" "+pm.patch_dir()+" "\
+    +str(pm.patch_name())+" "+pm.HydroWeb_dir()+" "+str(pm.rho())+" "+str(pm.sigma_b()))
     return 0
 ###########################
 def make_init_storge():

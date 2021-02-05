@@ -15,7 +15,7 @@ program data_assim
 ! Menaka@IIS 2021
 !*************************************************************************************
 implicit none
-character(len=128)              :: fname,buf,camadir,expdir,DAdir,patchdir,hydrowebdir,mapname
+character(len=128)              :: fname,buf,camadir,expdir,DAdir,patchdir,hydrowebdir,mapname,patchname
 character(len=8)                :: yyyymmdd,nxtyyyymmdd
 real                            :: assimN,assimS,assimW,assimE,lat,lon
 !character(len=2)                :: swot_day
@@ -82,72 +82,48 @@ real,allocatable                :: obs(:,:),obs_err(:,:),altitude(:,:),mean_obs(
 real                            :: pslamch
 !external pslamch
 write(*,*) "data_assim"
+
 call getarg(1,buf)
-read(buf,*) assimN
-
-call getarg(2,buf)
-read(buf,*) assimS
-
-call getarg(3,buf)
-read(buf,*) assimW
-
-call getarg(4,buf)
-read(buf,*) assimE
-
-call getarg(5,buf)
-read(buf,*) mapname ! name of the map
-
-call getarg(6,buf)
 read(buf,*) yyyymmdd
 
-!call getarg(7,buf)
-!read(buf,*) swot_day
+call getarg(2,buf)
+read(buf,*) mapname ! name of the map
 
-call getarg(7,buf)
+call getarg(3,buf)
 read(buf,*) patch_size ! radius
 
-call getarg(8,buf)
+call getarg(4,buf)
 read(buf,*) ens_num ! number of ensemble
 
-!call getarg(10,buf)
-!read(buf,*) day ! number of date; start from 0
-
-call getarg(9,buf)
+call getarg(5,buf)
 read(buf,*) nxtyyyymmdd
 
-!call getarg(9,buf)
-!read(buf,*) errexp
-
-call getarg(10,buf)
+call getarg(6,buf)
 read(buf,"(A)") camadir
 write(*,*) camadir
 
-!call getarg(12,buf)
-!read(buf,*) errrand
-!write(*,*) errrand
-
-!call getarg(10,buf)
-!read(buf,*) errfix
-
-call getarg(11,buf)
+call getarg(7,buf)
 read(buf,*) thresold
 
-call getarg(12,buf)
+call getarg(8,buf)
 read(buf,"(A)") expdir
 
-call getarg(13,buf)
+call getarg(9,buf)
 read(buf,"(A)") DAdir
 
-call getarg(14,buf)
+call getarg(10,buf)
 read(buf,"(A)") patchdir
 
-call getarg(15,buf)
+call getarg(11,buf)
+read(buf,"(A)") patchname
+
+call getarg(12,buf)
 read(buf,"(A)") hydrowebdir
 
-call getarg(16,buf)
+call getarg(13,buf)
 read(buf,*) rho_fixed
 
-call getarg(17,buf)
+call getarg(14,buf)
 read(buf,*) sigma_b
 
 !==
@@ -162,6 +138,11 @@ read(11,*) east
 read(11,*) south
 read(11,*) north
 close(11)
+! update the assimilation domain
+assimN = min( north,   80.0 )
+assimS = max( south,  -60.0 )
+assimW = max( west , -180.0 )
+assimE = min( east ,  180.0 )
 !-------
 ! format 
 20 format(i4.4,2x,i4.4,2x,f8.4,2x,f8.4,2x,f8.4)
@@ -552,7 +533,7 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         allocate(lag(patch_nums),xlist(countnumber),ylist(countnumber),wgt(countnumber))
         write(llon,'(i4.4)') lon_cent
         write(llat,'(i4.4)') lat_cent
-        fname=trim(adjustl(patchdir))//"/patch"//trim(llon)//trim(llat)//".txt"
+        fname=trim(adjustl(patchdir))//"/"//trim(patchname)//"/patch"//trim(llon)//trim(llat)//".txt"
         !write(*,*) fname
         open(34,file=fname,status='old',access='sequential',form='formatted',action='read')!
         do i=1, countnumber
