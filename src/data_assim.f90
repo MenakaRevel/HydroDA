@@ -387,7 +387,7 @@ do num=1,ens_num
     if(ios==0)then
         read(34,rec=1) globalx(:,:,num)
     else
-        write(*,*) "no x"
+        write(*,*) "no x :", fname
         write(82,*) "no file :", fname
     end if
     close(34)

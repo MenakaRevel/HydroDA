@@ -258,7 +258,7 @@ def MKLdir():
     # for more information --> https://software.intel.com/en-us/qualify-for-free-software/academicresearcher
 
 def output_er():
-    return 1
+    return 0
     # setting for saving or deleting intermediate files
     # 0 for saving & 1 for deleting
     # those files may be more than 400GB, so erasing is recommended if not necessary
