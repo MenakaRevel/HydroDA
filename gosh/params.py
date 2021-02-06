@@ -243,7 +243,7 @@ def initial_infl():
 
 def rho():
     return -1.0
-    # -1.0 : adaptive inflation will be used Myoshi et al (2011)
+    # -1.0 : adaptive inflation will be used as in Myoshi et al (2011)
     # positive : fixed inflation parameter will be used
 
 def sigma_b():

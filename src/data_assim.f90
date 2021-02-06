@@ -138,11 +138,13 @@ read(11,*) east
 read(11,*) south
 read(11,*) north
 close(11)
+
 ! update the assimilation domain
 assimN = min( north,   80.0 )
 assimS = max( south,  -60.0 )
 assimW = max( west , -180.0 )
 assimE = min( east ,  180.0 )
+print* , assimN, assimS, assimW, assimE
 !-------
 ! format 
 20 format(i4.4,2x,i4.4,2x,f8.4,2x,f8.4,2x,f8.4)
@@ -422,14 +424,14 @@ end do
 ! read countnum
 !fname=trim(adjustl(expdir))//"/local_patch/countnum.bin"
 !fname="../covariance/local_patch_0.90/countnum.bin"
-fname=trim(adjustl(patchdir))//"/countnum.bin"
+fname=trim(adjustl(patchdir))//"/"//trim(patchname)//"/countnum.bin"
 !print *, fname
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) countp
     read(34,rec=2) targetp
 else
-    write(*,*) "countp , target"
+    write(*,*) "no file :countp , target", fname
     write(82,*) "no file :", fname
 end if
 close(34)
@@ -796,7 +798,7 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         !   end do
 
         ! Eigon value decomposition
-        ! Diagonalizate VDVT to calculate inverse matrix
+        ! Diagonalized VDVT to calculate inverse matrix
         !call ssyevx("V","A","U",ens_num,VDVT,ens_num,1e-5,1e5,1,2,1.2e-38*2.,m,la_p,U_p,ens_num,work,1000,iwork,ifail,info)
         !call ssyevx("V","A","U",ens_num,VDVT,ens_num,-1e20,1e20,1,ens_num,-1.0,m,la_p,U_p,ens_num,work,1000,iwork,ifail,info)
         !call ssyevx("V","I","U",ens_num,VDVT,ens_num,-1e20,1e20,1,ens_num,-1.0,m,la_p,U_p,ens_num,work,1000,iwork,ifail,info)
@@ -891,12 +893,12 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         !write(*,*) "xa:",xa
         ! check center pixel ====================================
         !write(*,*) "errfix:", errfix, obserrrand(lon_cent,lat_cent)
-        write(*,*) "true   :",xt(target_pixel)
+        ! write(*,*) "true   :",xt(target_pixel)
         write(*,*) "forcast:",sum(xf(target_pixel,:))/(ens_num+1e-20)
         write(*,*) "assimil:",sum(xa(target_pixel,:))/(ens_num+1e-20)
 
 
-        write(78,*) "true   :",xt(target_pixel)
+        ! write(78,*) "true   :",xt(target_pixel)
         write(78,*) "forcast:",sum(xf(target_pixel,:))/(ens_num+1e-20)
         write(78,*) "assimil:",sum(xa(target_pixel,:))/(ens_num+1e-20)
         ! check K_ value (should be between 0-1) =======================================
