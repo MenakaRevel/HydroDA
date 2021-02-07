@@ -145,7 +145,7 @@ rivnum=np.fromfile(rivnum,np.int32).reshape(ny,nx)
 rivermap=((nextxy[0]>0)*(rivnum==1))*1.0
 #----
 syear,smonth,sdate=2003,1,1 #spm.starttime()#2004#1991  2004,1,1 #
-eyear,emonth,edate=2005,1,1 #pm.endtime()
+eyear,emonth,edate=pm.endtime() #2005,1,1 #
 #month=1
 #date=1
 start_dt=datetime.date(syear,smonth,sdate)

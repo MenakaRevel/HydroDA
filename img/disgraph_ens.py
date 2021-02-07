@@ -96,7 +96,7 @@ ny     = int(filter(None, re.split(" ",lines[1]))[0])
 gsize  = float(filter(None, re.split(" ",lines[3]))[0])
 #----
 syear,smonth,sdate=2003,1,1 #pm.starttime()#2004#1991
-eyear,emonth,edate=2005,1,1 #pm.endtime()
+eyear,emonth,edate=pm.endtime() #2005,1,1 #
 #month=1
 #date=1
 start_dt=datetime.date(syear,smonth,sdate)
