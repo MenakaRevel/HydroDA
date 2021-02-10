@@ -16,6 +16,7 @@ out/*/params.py
 make_restart
 data_assim
 calc_stat
+make_restart_dis
 
 #img/bin
 *print_flddpth*
