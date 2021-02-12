@@ -571,17 +571,20 @@ def make_restart(inputlist):
     print "built in hold"
     print "press enter"
 
-    # get the date of one day before
-    bef_y=calc_odb(yyyy,mm,dd,"year")
-    bef_m=calc_odb(yyyy,mm,dd,"month")
-    bef_d=calc_odb(yyyy,mm,dd,"date")
+    # now date
+    nowdate=dt.datetime(int(yyyy),int(mm),int(dd))
 
-    yyyy_b="%04d"%bef_y
-    mm_b="%02d"%bef_m
-    dd_b="%02d"%bef_d
+    # get the date of one day before
+    prevdate=nextdate=nowdate-dt.timedelta(days=1)
+    # bef_y=calc_odb(yyyy,mm,dd,"year")
+    # bef_m=calc_odb(yyyy,mm,dd,"month")
+    # bef_d=calc_odb(yyyy,mm,dd,"date")
+
+    yyyy_b="%04d"%prevdate.year
+    mm_b="%02d"%prevdate.month
+    dd_b="%02d"%prevdate.day
 
     # get the date of one day after
-    nowdate=dt.datetime(int(yyyy),int(mm),int(dd))
     nextdate=nowdate+dt.timedelta(days=1)
     yyyy_n="%04d"%nextdate.year
     mm_n="%02d"%nextdate.month
@@ -589,8 +592,9 @@ def make_restart(inputlist):
 
     # calculate other variables from water storage
     exp_dir=pm.DA_dir()+"/out/"+pm.experiment()
-    os.system(pm.DA_dir()+"/src/make_restart "+yyyy+mm+dd+" "+yyyy_b+mm_b+dd_b+" "+yyyy_n+mm_n+dd_n+" "+loop+" "+pm.CaMa_dir()+" "+pm.mapname()+" "+str(pm.ens_mem())+" "+numch+" "+exp_dir)
-
+    #os.system(pm.DA_dir()+"/src/make_restart "+yyyy+mm+dd+" "+yyyy_b+mm_b+dd_b+" "+yyyy_n+mm_n+dd_n+" "+loop+" "+pm.CaMa_dir()+" "+pm.mapname()+" "+str(pm.ens_mem())+" "+numch+" "+exp_dir)
+    # same function is used for make restart using discharge 
+    os.system(pm.DA_dir()+"/src/make_restart_dis "+yyyy+mm+dd+" "+yyyy_b+mm_b+dd_b+" "+yyyy_n+mm_n+dd_n+" "+loop+" "+pm.CaMa_dir()+" "+pm.mapname()+" "+str(pm.ens_mem())+" "+numch+" "+exp_dir)
     print "finish restarting",numch
 ###########################
 def make_rivout(inputlist):

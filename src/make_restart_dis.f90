@@ -34,7 +34,8 @@ real                            :: disin,disout,predisin,predisout
 
 real                            :: stopre, wthpre, dphpre, wthinc
 real                            :: stonow, wthnow
-real,allocatable                :: fldstomax(:), fldgrd(:)
+real,allocatable                :: fldstomax(:), fldgrd(:),ifldhgt(:)
+integer                         :: dd,dim
 
 ! how the restart file is made
 !   rivsto,fldsto => recalculation
@@ -91,42 +92,43 @@ if(trim(adjustl(loop))=="assim") loopchar="A"
 fname=trim(adjustl(expdir))//"/logout/restartError_"//yyyymmdd//loopchar//num_name//".log"
 open(82,file=fname,status='replace')
 write(82,*) "make_restart.f90 Errors"
-
+print*, "L95"
 ! read assimilated xa
 ! this should be discharge
 allocate(xa(lonpx,latpx))
-fname=trim(adjustl(expdir))//"/assim_out/ens_xa/"//trim(adjustl(loop))//"/"//yyyymmdd//"_"//num_name//"_xa.bin"
+! fname=trim(adjustl(expdir))//"/assim_out/ens_xa/"//trim(adjustl(loop))//"/"//yyyymmdd//"_"//num_name//"_xa.bin"
+fname=trim(adjustl(expdir))//"/CaMa_out/"//yyyymmdd//trim(loopchar)//num_name//"/outflw"//yyyymmdd(1:4)//".bin" !! should be outflw
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) xa
 else
-    write(*,*) "no file at xa"
+    write(*,*) "no file at xa", fname
     write(82,*) "no file xa",fname
 end if
 close(34)
 
 ! read discahrge before assimilation
 allocate(xf(lonpx,latpx))
-fname=trim(adjustl(expdir))//"/CaMa_out/"//yyyymmdd//trim(loopchar)//num_name//"/outflw"//yyyymmdd(1:4)//".bin"
+fname=trim(adjustl(expdir))//"/CaMa_out/"//yyyymmdd//trim(loopchar)//num_name//"/outflw"//yyyymmdd(1:4)//".bin" !! should be outflw
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) xf
 else
-    write(*,*) "no file at xf"
+    write(*,*) "no file at xf", fname
     write(82,*) "no file xf",fname
 end if
 close(34)
 
 ! read prestorage 
 allocate(prerivsto(lonpx,latpx),prefldsto(lonpx,latpx))
-fname=trim(adjustl(expdir))//"/CaMa_out/"//yyyymmdd//trim(loopchar)//num_name//"/restart"//yyyymmdd//".bin"
+fname=trim(adjustl(expdir))//"/CaMa_out/"//yyyymmdd//trim(loopchar)//num_name//"/restart"//onedayaft//".bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) prerivsto
     read(34,rec=2) prefldsto
 else
-    write(*,*) "no file at xf"
-    write(82,*) "no file xf",fname
+    write(*,*) "no file at previous sto", fname
+    write(82,*) "no file previous sto",fname
 end if
 close(34)
 
@@ -252,30 +254,32 @@ close(34)
 ! allocate
 allocate(presto(lonpx,latpx),sto(lonpx,latpx),rivsto_max(lonpx,latpx),oceanmask(lonpx,latpx),fldstage(lonpx,latpx))
 allocate(fldfrac(lonpx,latpx),rivdph(lonpx,latpx),rivsto(lonpx,latpx),flddph(lonpx,latpx),fldsto(lonpx,latpx))
-allocate(xlist(8),ylist(8),fldstomax(nflp),fldgrd(nflp))
+dd=5
+dim=(2*dd+1)**2
+allocate(xlist(dim),ylist(dim),fldstomax(nflp),fldgrd(nflp),ifldhgt(nflp))
 presto= rivsto+ fldsto
 sto= presto
 ! make calculation
 do ix=1,lonpx
     do iy=1,latpx
-        if (nextX(i,j) == -9999.0) then
+        if (nextX(ix,iy) == -9999.0) then
             cycle
         end if
         !----
         ! upstram inflow
         xlist=-9999
         ylist=-9999
-        predisin=-9999.0
-        predisout=-9999.0
-        disin=-9999.0
-        disout=-9999.0
+        predisin=0.0
+        predisout=0.0
+        disin=0.0
+        disout=0.0
         if (rivseq(ix,iy)==1) then
-            print*, "rivseq : 1"
+            ! print*, "rivseq : 1"
             predisin=0.0*dt
             disin=0.0*dt
         elseif (rivseq(ix,iy)>1) then
-            call upgrids(ix,iy,lonpx,latpx,nextX,nextY,xlist,ylist,k)
-            predisin=0.0
+            call upgrids(ix,iy,dd,lonpx,latpx,nextX,nextY,xlist,ylist,k)
+            ! predisin=0.0
             do i=1,k
                 iix=xlist(i)
                 iiy=ylist(i)
@@ -286,6 +290,7 @@ do ix=1,lonpx
         predisout=xf(ix,iy)*dt
         disout=xa(ix,iy)*dt
         sto(ix,iy) = presto(ix,iy) + disin - predisin - (disout - predisout)
+        ! print*, disin - predisin - (disout - predisout), disin , predisin , disout , predisout
     end do
 end do        
 
@@ -293,16 +298,19 @@ end do
 rivsto_max = rivlen*rivwth*rivhgt
 do ix=1,lonpx
     do iy=1,latpx
-        if (nextX(i,j) == -9999.0) then
+        if (nextX(ix,iy) == -9999.0) then
             cycle
         end if
+        ifldhgt=fldhgt(ix,iy,:)
+        !print*, nflp, ifldhgt !fldhgt(ix,iy,:)
+        call calc_fldstg(rivsto_max(ix,iy),grid_area(ix,iy),rivlen(ix,iy),rivwth(ix,iy),nflp,ifldhgt,fldstomax,fldgrd)
         if (sto(ix,iy) > rivsto_max(ix,iy)) then
             i=1
             stopre = rivsto_max(ix,iy)
             wthpre = rivwth(ix,iy)
             dphpre = 0.0
             wthinc = (grid_area(ix,iy)/rivlen(ix,iy))*(1.0/real(nflp))
-            call calc_fldstg(rivsto_max(ix,iy),grid_area(ix,iy),rivlen(ix,iy),rivwth(ix,iy),nflp,fldhgt(ix,iy,:),fldstomax,fldgrd)
+            ! call calc_fldstg(rivsto_max(ix,iy),grid_area(ix,iy),rivlen(ix,iy),rivwth(ix,iy),nflp,fldhgt(ix,iy,:),fldstomax,fldgrd)
             do while (sto(ix,iy) > fldstomax(i) .and. i<=nflp)
                 stopre = fldstomax(i)
                 wthpre = wthpre + wthinc
@@ -346,24 +354,27 @@ close(82)
 deallocate(xa,rivlen,rivwth,rivhgt,fldhgt)
 deallocate(elevtn,nextX,nextY,nextdst,grid_area)
 deallocate(rivdph,rivsto,flddph,fldsto)
+deallocate(xlist,ylist,fldstomax,fldgrd,ifldhgt)
 end program make_restart_dis  
-!=======================================================
-subroutine upgrids(i,j,nx,ny,nextX,nextY,xlist,ylist,k)
+!***************************************************
+subroutine upgrids(i,j,dd,nx,ny,nextX,nextY,xlist,ylist,k)
 implicit none
 ! calculate nearst upstream grids
-integer                           :: i,j,nx,ny
+integer                           :: i,j,nx,ny,dd
 integer,dimension(nx,ny)          :: nextX,nextY
-integer,dimension(8)              :: xlist,ylist
+integer,dimension((2*dd+1)**2)    :: xlist,ylist
 integer                           :: k
 
-integer                           :: ix,iy,dd
+integer                           :: ix,iy,iix,iiy
 
-dd=1
+!dd=1
+k=1
 do ix=i-dd,i+dd
     do iy=j-dd,j+dd
-        if (nextX(ix,iy) == i .and. nextY(ix,iy)==j) then
-            xlist(k)=ix
-            ylist(k)=iy 
+        call ixy2iixy(ix,iy, nx, ny, iix, iiy)
+        if (nextX(iix,iiy) == i .and. nextY(iix,iiy)==j) then
+            xlist(k)=iix
+            ylist(k)=iiy 
             k=k+1
         end if
     end do
@@ -371,7 +382,7 @@ end do
 k=k-1
 return
 end subroutine upgrids
-!=======================================================
+!***************************************************
 subroutine calc_fldstg(rivstomax,grarea,rivlen,rivwth,nflp,fldhgt,fldstomax,fldgrd)
 implicit none
 !* local variables
@@ -398,3 +409,41 @@ end do
 return
 !
 end subroutine calc_fldstg
+!***************************************************   
+function roundx(ix, nx)
+    implicit none
+    !-- for input -----------
+    integer                     ix, nx
+    !-- for output ----------
+    integer                     roundx
+    !------------------------
+    if (ix .ge. 1) then
+      roundx = ix - int((ix -1)/nx)*nx
+    else
+      roundx = nx - abs(mod(ix,nx))
+    end if 
+    return
+    end function roundx
+    !*****************************************************************
+    subroutine ixy2iixy(ix,iy, nx, ny, iix, iiy)
+    implicit none
+    !- for input -----------------
+    integer                   ix, iy, nx, ny
+    !- for output ----------------
+    integer                   iix, iiy,roundx
+    !-----------------------------
+    if (iy .lt. 1) then
+      iiy = 2 - iy
+      iix = ix + int(nx/2.0)
+      iix = roundx(iix, nx)
+    else if (iy .gt. ny) then
+      iiy = 2*ny -iy
+      iix = ix + int(nx/2.0)
+      iix = roundx(iix, nx)
+    else
+      iiy = iy
+      iix = roundx(ix, nx)
+    end if
+    return
+    end subroutine ixy2iixy
+    !*****************************************************************
