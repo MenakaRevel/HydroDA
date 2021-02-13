@@ -96,7 +96,7 @@ def prepare_obs():
     stds=np.std(sim,axis=0)
     #-------
     inputlist=[]
-    for day in np.arange(start,last+1):
+    for day in np.arange(start,last):
         target_dt=start_dt+datetime.timedelta(days=day)
         yyyy='%04d' % (target_dt.year)
         mm='%02d' % (target_dt.month)
