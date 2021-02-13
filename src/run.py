@@ -24,7 +24,8 @@
 
 import sys
 import main_code
-import prep_init as init 
+import prep_init as init
+import prep_obs as obs
 #exp=sys.argv[1]
 #ifact=sys.argv[2]
 
@@ -41,7 +42,11 @@ try:
   print "make intial inflation"
   init.make_initial_infl()
 
-  # preapre the mean and std for anomaly/normalized assimilation
+  # prepare observations [for data_assim.f90 code]
+  print "make observations"
+  obs.prepare_obs()
+
+  # preapare the mean and std for anomaly/normalized assimilation
   print "save statistics"
   init.save_statistic()
 

@@ -82,6 +82,7 @@ character(len=4)                :: llon,llat
 ! observations
 real,allocatable                :: obs(:,:),obs_err(:,:),altitude(:,:),mean_obs(:,:),std_obs(:,:)!, obserrrand(:,:)
 real                            :: pslamch
+logical                         :: logflag
 !external pslamch
 write(*,*) "data_assim"
 
@@ -128,6 +129,7 @@ read(buf,*) rho_fixed
 call getarg(14,buf)
 read(buf,*) sigma_b
 
+logflag =.FALSE.
 !==
 fname=trim(camadir)//"/map/"//trim(mapname)//"/params.txt"
 open(11,file=fname,form='formatted')
@@ -600,7 +602,10 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
                 write(79,*) "Observations"
                 write(79,*) i_m,j_m,obs(i_m,j_m) !,mean_obs(i_m,j_m),std_obs(i_m,j_m) !,stdglobaltrue(i_m,j_m) , meanglobaltrue(i_m,j_m)
                 print*, "observation converstion"
-                ! print*,i_m,j_m, xt(j),obs(i_m,j_m),mean_obs(i_m,j_m),std_obs(i_m,j_m)!,stdglobaltrue(i_m,j_m) , meanglobaltrue(i_m,j_m)
+                if (logflag) then
+                    xt(j)=log10(obs(i_m,j_m))
+                end if
+                print*,i_m,j_m, xt(j),obs(i_m,j_m) !,mean_obs(i_m,j_m),std_obs(i_m,j_m)!,stdglobaltrue(i_m,j_m) , meanglobaltrue(i_m,j_m)
                 local_err(j)=obs_err(i_m,j_m) !max(obs_err(i_m,j_m),0.30)
             else
                 local_sat(j)=-9999.0
@@ -636,9 +641,13 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
             j_m=ylist(i)
             !xf(j,:)=globalx(i_m,j_m,:)!-meanglobaltrue(i_m,j_m)
             do num=1, ens_num
+                xf(j,num)=globalx(i_m,j_m,num)
+                if (logflag) then
+                    xt(j)=log10(globalx(i_m,j_m,num))
+                end if
                 !xf(j,num)=globalx(i_m,j_m,num)-meanglobalx(i_m,j_m,num)
                 !xf(j,num)=(globalx(i_m,j_m,num)-meanglobalx(i_m,j_m,num))/(stdglobalx(i_m,j_m,num)+1.0e-20)
-                xf(j,num)=(globalx(i_m,j_m,num)-meanglobaltrue(i_m,j_m))/stdglobaltrue(i_m,j_m) !meanglobalx(i_m,j_m,num)
+                ! xf(j,num)=(globalx(i_m,j_m,num)-meanglobaltrue(i_m,j_m))/stdglobaltrue(i_m,j_m) !meanglobalx(i_m,j_m,num)
             !    !print*, "L611",globalx(i_m,j_m,num)-meanglobaltrue(i_m,j_m)
             end do
         j=j+1
@@ -657,9 +666,9 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
             write(82,*) lat,lon,"error",errflg
             goto 9999
         end if
-        !------------------------------------------------------------
+        !------------------------------------------------------------------------------------------------
         ! ========= reach here only when there is at least one observation inside the local patch =======
-        !------------------------------------------------------------
+        !------------------------------------------------------------------------------------------------
         write(78,*) "=========================================================="
         !write(78,*) "******************",lat,lon,"*******************"
         write(78,*) "******************",lon_cent,lat_cent," *******************"
@@ -954,8 +963,12 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         do num=1,ens_num
             !global_xa(lon_cent,lat_cent,num) = xa(target_pixel,num) + meanglobalx(lon_cent,lat_cent,num)!+ meanglobaltrue(lon_cent,lat_cent)
             !global_xa(lon_cent,lat_cent,num) = xa(target_pixel,num)*stdglobalx(lon_cent,lat_cent,num) + meanglobalx(lon_cent,lat_cent,num)
-            global_xa(lon_cent,lat_cent,num) = xa(target_pixel,num)*stdglobaltrue(lon_cent,lat_cent) &
-                                                & + meanglobaltrue(lon_cent,lat_cent)
+            ! global_xa(lon_cent,lat_cent,num) = xa(target_pixel,num)*stdglobaltrue(lon_cent,lat_cent) &
+                                                ! & + meanglobaltrue(lon_cent,lat_cent)
+            global_xa(lon_cent,lat_cent,num) = xa(target_pixel,num)
+            if (logflag) then
+                global_xa(lon_cent,lat_cent,num) = 10**xa(target_pixel,num)
+            end if
             end do
         global_null(lon_cent,lat_cent) = 1.0
 !        if (sum(K_) > real(ens_num)) then 
@@ -1090,10 +1103,10 @@ std_obs=-9999.0
         goto 1090
     end if
 1000 continue
-    read(11,*,end=1090) ix, iy, pointobs, mean, std, sat
-    print*, yyyymmdd, ix, iy, pointobs, trim(sat)
+    read(11,*,end=1090) ix, iy, pointobs, mean, std !, sat
+    print*, yyyymmdd, ix, iy, pointobs, mean, std
     obs(ix,iy)=pointobs
-    obs_err(ix,iy)=obs_error(sat)
+    obs_err(ix,iy)=0.1*mean !obs_error(sat)
     mean_obs(ix,iy)=mean
     std_obs(ix,iy)=std
     goto 1000
@@ -1279,7 +1292,7 @@ flag=0
     !--
     if (ix==iix .and. iy==iiy) then
         if (abs(ele_diff) <= threshold) then
-            call read_HydroWeb(sta,yyyymmdd,hydrowebdir,rwse,rstd,rflag)
+            call read_HydroWeb_data(sta,yyyymmdd,hydrowebdir,rwse,rstd,rflag)
             if (rflag==1) then
                 station=sta
                 wse=rwse

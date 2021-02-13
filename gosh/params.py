@@ -266,6 +266,11 @@ def output_er():
 def HydroWeb_dir():
     return "/cluster/data6/menaka/HydroWeb"
 
+def obs_dir():
+    return "/cluster/data6/menaka/ensemble_org/CaMa_out/AMZE2O003" # Amazon E2O 03 [HTESSEL ECMWF]
+    # observations directory
+    # virtual true simulation directory
+
 def make_log():
     return 1
     # setting for making log files

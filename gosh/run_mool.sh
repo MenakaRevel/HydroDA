@@ -23,7 +23,7 @@
 ################################################################################################
 
 ### SET "mool PBS" @ IIS U-Tokyo
-#PBS -q F40
+#PBS -q E40
 #PBS -l select=1:ncpus=40:mem=60gb
 #PBS -l place=scatter
 #PBS -j oe
@@ -59,8 +59,9 @@ cd $HydroDA
 # experiment : edit the experiment name in here it will be written in $HydroDA/$EXP/exp.txt
 # before running run_mool.sh , please edit the necessary experimental settings in params.py
 
-EXP="VIC_BC_HydroWeb11"
-#EXP="E2O_HydroWeb23"
+# EXP="VIC_BC_HydroWeb11"
+# EXP="E2O_HydroWeb23"
+EXP="test_dis"
 #IFACTOR="1.08"
 
 mkdir -p $HydroDA"/out/"$EXP
@@ -78,6 +79,7 @@ cp -r "$HydroDA/gosh/params.py" "$HydroDA/out/$EXP/params.py"
 cp -r $HydroDA"/src/"run.py $HydroDA"/out/"$EXP"/"run.py
 cp -r $HydroDA"/src/"main_code.py $HydroDA"/out/"$EXP"/"main_code.py
 cp -r $HydroDA"/src/"prep_init.py $HydroDA"/out/"$EXP"/"prep_init.py
+cp -r $HydroDA"/src/"prep_obs.py $HydroDA"/out/"$EXP"/"prep_obs.py
 
 cd $HydroDA"/out/"$EXP
 

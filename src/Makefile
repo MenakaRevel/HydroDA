@@ -2,7 +2,9 @@
 include ../gosh/Mkinclude
 #=========
 TARGETS=\
+data_assim_dis\
 data_assim\
+make_restart_dis\
 make_restart
 
 # Suffix

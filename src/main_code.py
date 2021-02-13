@@ -320,7 +320,12 @@ def data_assim(yyyy,mm,dd,day): # new data assimilation function (2020/05/18)
     nmon=nxt_day.month
     nday=nxt_day.day
     nxtyyyymmdd="%04d%02d%02d"%(nyear,nmon,nday)
-    os.system(pm.DA_dir()+"/src/data_assim "+yyyy+mm+dd+" "+pm.mapname()+" "\
+    # os.system(pm.DA_dir()+"/src/data_assim "+yyyy+mm+dd+" "+pm.mapname()+" "\
+    # +str(pm.patch_size())+" "+str(pm.ens_mem())+" "+nxtyyyymmdd+" "+pm.CaMa_dir()\
+    # +" "+str(pm.thersold())+" "+exp_dir+" "+pm.DA_dir()+" "+pm.patch_dir()+" "\
+    # +str(pm.patch_name())+" "+pm.HydroWeb_dir()+" "+str(pm.rho())+" "+str(pm.sigma_b()))
+    # data assimilation using river discharge
+    os.system(pm.DA_dir()+"/src/data_assim_dis "+yyyy+mm+dd+" "+pm.mapname()+" "\
     +str(pm.patch_size())+" "+str(pm.ens_mem())+" "+nxtyyyymmdd+" "+pm.CaMa_dir()\
     +" "+str(pm.thersold())+" "+exp_dir+" "+pm.DA_dir()+" "+pm.patch_dir()+" "\
     +str(pm.patch_name())+" "+pm.HydroWeb_dir()+" "+str(pm.rho())+" "+str(pm.sigma_b()))
@@ -525,6 +530,11 @@ def store_out(yyyy,mm,dd):
         for num in np.arange(1,pm.ens_mem()+1):
             numch = '%03d' % num 
             shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/outflw"+yyyy+".bin","./assim_out/outflw/"+looptype+"/outflw"+yyyy+mm+dd+"_"+numch+".bin")
+
+        # storing sfcelv
+        for num in np.arange(1,pm.ens_mem()+1):
+            numch = '%03d' % num 
+            shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/sfcelv"+yyyy+".bin","./assim_out/sfcelv/"+looptype+"/sfcelv"+yyyy+mm+dd+"_"+numch+".bin")
 
 #        # storing fldout
 #        for num in np.arange(1,pm.ens_mem()+1):
