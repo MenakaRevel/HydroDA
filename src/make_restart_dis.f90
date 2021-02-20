@@ -96,8 +96,8 @@ print*, "L95"
 ! read assimilated xa
 ! this should be discharge
 allocate(xa(lonpx,latpx))
-! fname=trim(adjustl(expdir))//"/assim_out/ens_xa/"//trim(adjustl(loop))//"/"//yyyymmdd//"_"//num_name//"_xa.bin"
-fname=trim(adjustl(expdir))//"/CaMa_out/"//yyyymmdd//trim(loopchar)//num_name//"/outflw"//yyyymmdd(1:4)//".bin" !! should be outflw
+fname=trim(adjustl(expdir))//"/assim_out/ens_xa/"//trim(adjustl(loop))//"/"//yyyymmdd//"_"//num_name//"_xa.bin"
+! fname=trim(adjustl(expdir))//"/CaMa_out/"//yyyymmdd//trim(loopchar)//num_name//"/outflw"//yyyymmdd(1:4)//".bin" !! should be outflw
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) xa
@@ -254,10 +254,10 @@ close(34)
 ! allocate
 allocate(presto(lonpx,latpx),sto(lonpx,latpx),rivsto_max(lonpx,latpx),oceanmask(lonpx,latpx),fldstage(lonpx,latpx))
 allocate(fldfrac(lonpx,latpx),rivdph(lonpx,latpx),rivsto(lonpx,latpx),flddph(lonpx,latpx),fldsto(lonpx,latpx))
-dd=5
+dd=10
 dim=(2*dd+1)**2
 allocate(xlist(dim),ylist(dim),fldstomax(nflp),fldgrd(nflp),ifldhgt(nflp))
-presto= rivsto+ fldsto
+presto= prerivsto + prefldsto
 sto= presto
 ! make calculation
 do ix=1,lonpx
@@ -285,12 +285,20 @@ do ix=1,lonpx
                 iiy=ylist(i)
                 predisin=predisin+xf(iix,iiy)*dt
                 disin=disin+xa(iix,iiy)*dt
+                ! print*, disin, xa(iix,iiy), xf(iix,iiy)
             end do
         end if
         predisout=xf(ix,iy)*dt
         disout=xa(ix,iy)*dt
+        ! print*, xa(ix,iy), xf(ix,iy)
         sto(ix,iy) = presto(ix,iy) + disin - predisin - (disout - predisout)
-        ! print*, disin - predisin - (disout - predisout), disin , predisin , disout , predisout
+        if (sto(ix,iy) <= 0.0) then
+            sto(ix,iy) = presto(ix,iy)
+        end if
+        ! print*,"=============================================================================="
+        ! print*, sto(ix,iy), presto(ix,iy) 
+        ! print*, disin - predisin - (disout - predisout)
+        ! print*, disin , predisin , disout , predisout
     end do
 end do        
 
@@ -334,6 +342,8 @@ do ix=1,lonpx
             rivsto(ix,iy)=sto(ix,iy)
             fldsto(ix,iy)=0.0
         end if
+        ! print*,"===================",ix ,iy ,"=========================="
+        ! print*, sto(ix,iy), rivsto_max(ix,iy), rivsto(ix,iy), fldsto(ix,iy)
     end do
 end do  
 ! =================================================
@@ -372,7 +382,8 @@ k=1
 do ix=i-dd,i+dd
     do iy=j-dd,j+dd
         call ixy2iixy(ix,iy, nx, ny, iix, iiy)
-        if (nextX(iix,iiy) == i .and. nextY(iix,iiy)==j) then
+        if (nextX(iix,iiy) == i .and. nextY(iix,iiy) == j) then
+            ! print*, k, iix, iiy
             xlist(k)=iix
             ylist(k)=iiy 
             k=k+1
@@ -411,39 +422,39 @@ return
 end subroutine calc_fldstg
 !***************************************************   
 function roundx(ix, nx)
-    implicit none
-    !-- for input -----------
-    integer                     ix, nx
-    !-- for output ----------
-    integer                     roundx
-    !------------------------
-    if (ix .ge. 1) then
-      roundx = ix - int((ix -1)/nx)*nx
-    else
-      roundx = nx - abs(mod(ix,nx))
-    end if 
-    return
-    end function roundx
-    !*****************************************************************
-    subroutine ixy2iixy(ix,iy, nx, ny, iix, iiy)
-    implicit none
-    !- for input -----------------
-    integer                   ix, iy, nx, ny
-    !- for output ----------------
-    integer                   iix, iiy,roundx
-    !-----------------------------
-    if (iy .lt. 1) then
-      iiy = 2 - iy
-      iix = ix + int(nx/2.0)
-      iix = roundx(iix, nx)
-    else if (iy .gt. ny) then
-      iiy = 2*ny -iy
-      iix = ix + int(nx/2.0)
-      iix = roundx(iix, nx)
-    else
-      iiy = iy
-      iix = roundx(ix, nx)
-    end if
-    return
-    end subroutine ixy2iixy
-    !*****************************************************************
+implicit none
+!-- for input -----------
+integer                     ix, nx
+!-- for output ----------
+integer                     roundx
+!------------------------
+if (ix .ge. 1) then
+    roundx = ix - int((ix -1)/nx)*nx
+else
+    roundx = nx - abs(mod(ix,nx))
+end if 
+return
+end function roundx
+!*****************************************************************
+subroutine ixy2iixy(ix,iy, nx, ny, iix, iiy)
+implicit none
+!- for input -----------------
+integer                   ix, iy, nx, ny
+!- for output ----------------
+integer                   iix, iiy,roundx
+!-----------------------------
+if (iy .lt. 1) then
+    iiy = 2 - iy
+    iix = ix + int(nx/2.0)
+    iix = roundx(iix, nx)
+else if (iy .gt. ny) then
+    iiy = 2*ny -iy
+    iix = ix + int(nx/2.0)
+    iix = roundx(iix, nx)
+else
+    iiy = iy
+    iix = roundx(ix, nx)
+end if
+return
+end subroutine ixy2iixy
+!*****************************************************************

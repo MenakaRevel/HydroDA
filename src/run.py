@@ -30,25 +30,25 @@ import prep_obs as obs
 #ifact=sys.argv[2]
 
 try:
-  # make necessary directories
-  print "initial"
-  init.initial()
+  # # make necessary directories
+  # print ("initial")
+  # init.initial()
 
-  # prepare runoff ensembles
-  print "prepare input"
-  init.prepare_input()
+  # # prepare runoff ensembles
+  # print ("prepare input")
+  # init.prepare_input()
 
-  # initial inflation parameter rho for assimilation
-  print "make intial inflation"
-  init.make_initial_infl()
+  # # initial inflation parameter rho for assimilation
+  # print ("make intial inflation")
+  # init.make_initial_infl()
 
-  # prepare observations [for data_assim.f90 code]
-  print "make observations"
-  obs.prepare_obs()
+  # # prepare observations [for data_assim.f90 code]
+  # print ("make observations")
+  # obs.prepare_obs()
 
-  # preapare the mean and std for anomaly/normalized assimilation
-  print "save statistics"
-  init.save_statistic()
+  # # preapare the mean and std for anomaly/normalized assimilation
+  # print ("save statistics")
+  # init.save_statistic()
 
   # run main code
   main_code.main_act()#exp,ifact)

@@ -48,7 +48,7 @@ def get_GRDC():
         if int(line[5])!=-9999:
             continue
         #------
-        print (river, station)
+        # print (river, station)
         lname.append(station)
         rivnm.append(river)
         xlist.append(ix)
@@ -121,7 +121,7 @@ def write_text(inputlist):
     with open(txtfile,"w") as txtf:
         for point in np.arange(pnum):
             #### ix    iy    value    mean    std
-            line="%04d    %04d    %8.4f    %8.4f    %8.4f\n"%(xlist[point],ylist[point],sim[day,point],means[point],stds[point])
+            line="%04d    %04d    %10.4f    %10.4f    %10.4f\n"%(xlist[point],ylist[point],sim[day,point],means[point],stds[point])
             txtf.write(line)
             print (line)
 #########################

@@ -29,7 +29,8 @@ import cal_stat as stat
 #argvs = sys.argv
 
 #experiment="E2O_HydroWeb22"
-experiment="VIC_BC_HydroWeb11"
+# experiment="VIC_BC_HydroWeb11"
+experiment="test_dis"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 assim_out=pm.DA_dir()+"/out/"+experiment
@@ -296,12 +297,13 @@ def read_data(inputlist):
     target_dt=datetime.date(year,mon,day)
     dt=(target_dt-start_dt).days
     # corrpted
-    fname=assim_out+"/assim_out/ens_xa/open/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
-    #fname=assim_out+"/assim_out/outflw/open/outflw"+yyyy+mm+dd+"_"+numch+".bin"
+    # fname=assim_out+"/assim_out/ens_xa/open/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
+    fname=assim_out+"/assim_out/sfcelv/open/sfcelv"+yyyy+mm+dd+"_"+numch+".bin"
     #fname=assim_out+"/assim_out/rivout/open/rivout"+yyyy+mm+dd+"_"+numch+".bin"
     opnfile=np.fromfile(fname,np.float32).reshape([ny,nx])
     # assimilated
-    fname=assim_out+"/assim_out/ens_xa/assim/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
+    fname=assim_out+"/assim_out/sfcelv/assim/sfcelv"+yyyy+mm+dd+"_"+numch+".bin"
+    # fname=assim_out+"/assim_out/ens_xa/assim/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
     #fname=assim_out+"/assim_out/outflw/assim/outflw"+yyyy+mm+dd+"_"+numch+".bin"
     #fname=assim_out+"/assim_out/rivout/assim/rivout"+yyyy+mm+dd+"_"+numch+".bin"
     asmfile=np.fromfile(fname,np.float32).reshape([ny,nx])

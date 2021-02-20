@@ -501,7 +501,7 @@ global_null = 0.0
 ! !HydroWeb data refer
 !!allocate(VSrefer(lonpx,latpx))
 write(82,*) "====================================="
-write(82,*) "Calculation Errors"
+write(82,*) "         Calculation Errors          "
 ! parallel calculation
 
 !$omp parallel default(none)&
@@ -591,8 +591,8 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
             j_m=ylist(i)
             if (obs(i_m,j_m)/=-9999.0) then
                 !print*, obs(i_m,j_m),altitude(i_m,j_m)
-                print*,"^^^^^^^^^^^^^^^^^"
-                print*,lon_cent,lat_cent,patch_start,patch_end,targetpixel,countnumber
+                ! print*,"^^^^^^^^^^^^^^^^^"
+                ! print*,lon_cent,lat_cent,patch_start,patch_end,targetpixel,countnumber
                 local_sat(j)=1.0
                 xt(j)=obs(i_m,j_m)
                 !xt(i)=obs(i_m,j_m) - altitude(i_m,j_m) + elevtn(i_m,j_m)
@@ -605,6 +605,7 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
                 if (logflag) then
                     xt(j)=log10(obs(i_m,j_m))
                 end if
+                print*,"=========== Observations ================"
                 print*,i_m,j_m, xt(j),obs(i_m,j_m) !,mean_obs(i_m,j_m),std_obs(i_m,j_m)!,stdglobaltrue(i_m,j_m) , meanglobaltrue(i_m,j_m)
                 local_err(j)=obs_err(i_m,j_m) !max(obs_err(i_m,j_m),0.30)
             else
@@ -669,10 +670,10 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         !------------------------------------------------------------------------------------------------
         ! ========= reach here only when there is at least one observation inside the local patch =======
         !------------------------------------------------------------------------------------------------
-        write(78,*) "=========================================================="
+        write(78,*) "==============================================================="
         !write(78,*) "******************",lat,lon,"*******************"
         write(78,*) "******************",lon_cent,lat_cent," *******************"
-        write(78,*) "=========================================================="
+        write(78,*) "==============================================================="
         !=========
         write(*,*) "******************",lon_cent,lat_cent,"*******************"
         write(78,*) "size",countnum
@@ -906,7 +907,7 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         !write(*,*) "xa:",xa
         ! check center pixel ====================================
         !write(*,*) "errfix:", errfix, obserrrand(lon_cent,lat_cent)
-        ! write(*,*) "true   :",xt(target_pixel)
+        write(*,*) "true   :",xt(target_pixel)
         write(*,*) "forcast:",sum(xf(target_pixel,:))/(ens_num+1e-20)
         write(*,*) "assimil:",sum(xa(target_pixel,:))/(ens_num+1e-20)
 
@@ -969,7 +970,7 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
             if (logflag) then
                 global_xa(lon_cent,lat_cent,num) = 10**xa(target_pixel,num)
             end if
-            end do
+        end do
         global_null(lon_cent,lat_cent) = 1.0
 !        if (sum(K_) > real(ens_num)) then 
 !            global_null(lon_cent,lat_cent) = 0.0

@@ -150,16 +150,21 @@ def one_day_loop(yyyy,mm,dd,day):
     # make forecasted value for assimilated simulation
     # do assimilation (LETKF)
     data_assim(yyyy,mm,dd,day)
-    #direct_insert(yyyy,mm,dd,day)
+    # direct_insert(yyyy,mm,dd,day)
 
     # make restart MODIFIED v.1.1.0
     mkrestart=[]
+    cprestart=[]
     for ens_num in np.arange(1,pm.ens_mem()+1):
         mkrestart.append([yyyy,mm,dd,"assim",'%03d'%ens_num])
-
+        cprestart.append([yyyy,mm,dd,"assim",'%03d'%ens_num])
     # Modify the restart file
+    # p=Pool(pm.para_nums())
+    # p.map(make_restart,mkrestart)
+    # p.terminate()
+
     p=Pool(pm.para_nums())
-    p.map(make_restart,mkrestart)
+    p.map(copy_restart,cprestart)
     p.terminate()
 
     # store river variable files
@@ -251,7 +256,7 @@ def one_day_sim(inputlist):
     bef_mm='%02d' %bef_dt.month
     bef_dd='%02d' %bef_dt.day
 
-    print "oneday loop for",yyyy,mm,dd,ens_num,looptype
+    print "oneday loop for ",yyyy,mm,dd,ens_num,looptype
     dir2=pm.CaMa_dir()
     #if looptype=="true":
     #    distopen="1.0"
@@ -276,20 +281,47 @@ def copy_corrupted_sfcelv(inputlist):
     os.system("cp "+fname+" ./assim_out/ens_xa/open/"+yyyy+mm+dd+"_"+numch+"_xa.bin")
     return 0
 ########################### # modified not calculate restart again/ no chage in WSE in corrupted @Menaka
-def copy_corrupted_restart(inputlist):
+def copy_corrupted_restart(inputlist,loop="open"):
     yyyy = inputlist[0]
     mm   = inputlist[1]
     dd   = inputlist[2]
     num  = inputlist[3]
+    if loop=="open":
+        loopchar="C"
+    else:
+        loopchar="A"
     nxt_day = datetime.date(int(yyyy),int(mm),int(dd)) + datetime.timedelta(days=1)
     n_yyyy='%04d' % (nxt_day.year)
     n_mm='%02d' % (nxt_day.month)
     n_dd='%02d' % (nxt_day.day)
     numch='%03d'%num
-    fname="./CaMa_out/"+yyyy+mm+dd+"C"+numch+"/restart"+n_yyyy+n_mm+n_dd+".bin"
+    fname="./CaMa_out/"+yyyy+mm+dd+loopchar+numch+"/restart"+n_yyyy+n_mm+n_dd+".bin"
     #os.system("cp "+fname+" ./CaMa_in/restart/open/restart"+n_yyyy+n_mm+n_dd+"C"+numch+".bin")
-    copy_stoonly(fname,"./CaMa_in/restart/open/restart"+n_yyyy+n_mm+n_dd+"C"+numch+".bin")
-    print "copy restart",n_yyyy,n_mm,n_dd,"C"+numch
+    copy_stoonly(fname,"./CaMa_in/restart/"+loop+"/restart"+n_yyyy+n_mm+n_dd+loopchar+numch+".bin")
+    print ("copy restart",n_yyyy,n_mm,n_dd,loopchar+numch)
+    return 0
+###########################
+def copy_restart(inputlist):
+    yyyy = inputlist[0]
+    mm   = inputlist[1]
+    dd   = inputlist[2]
+    loop = inputlist[3]
+    num  = inputlist[4]
+    ###################
+    if loop=="open":
+        loopchar="C"
+    else:
+        loopchar="A"
+    
+    nxt_day = datetime.date(int(yyyy),int(mm),int(dd)) + datetime.timedelta(days=1)
+    n_yyyy='%04d' % (nxt_day.year)
+    n_mm='%02d' % (nxt_day.month)
+    n_dd='%02d' % (nxt_day.day)
+    numch='%03d'% (int(num))
+    fname="./CaMa_out/"+yyyy+mm+dd+loopchar+numch+"/restart"+n_yyyy+n_mm+n_dd+".bin"
+    #os.system("cp "+fname+" ./CaMa_in/restart/open/restart"+n_yyyy+n_mm+n_dd+"C"+numch+".bin")
+    copy_stoonly(fname,"./CaMa_in/restart/"+loop+"/restart"+n_yyyy+n_mm+n_dd+loopchar+numch+".bin")
+    print ("copy restart",n_yyyy,n_mm,n_dd,loopchar+numch)
     return 0
 ###########################
 def copy_stoonly(iname,oname): # for CaMa_Flood v395b
@@ -923,22 +955,36 @@ def cal_monthly_mean(start_year,end_year,months=24):
         roff_mean.tofile("./CaMa_in/"+runname+"/mean_month/mean_"+ychar+mchar+".bin")
 ###########################
 def direct_insert(yyyy,mm,dd,day):
-    oday="%02d"%(SWOT_day(int(yyyy),int(mm),int(dd)))
-    mesh_in=np.zeros([720,1440],np.float32)
-    rivwth=np.fromfile(pm.CaMa_dir()+"/map/glb_15min/rivwth.bin",np.float32).reshape(720,1440)
-    mesh_in[40:680,:]=np.fromfile("data/mesh_day"+oday+".bin",np.float32).reshape(640,1440)
-    mesh=(rivwth>50.0)*(mesh_in>=10)*(mesh_in<=60)*1.0
-    mesh=mesh.astype(np.float32)
-    #--
-    rand=rd.normal(0,pm.ovs_err(),pm.ens_mem())
-    rand=rand.astype(np.float32)
-    sfcelv=np.fromfile("CaMa_out/"+yyyy+mm+dd+"T000/sfcelv"+yyyy+".bin",np.float32).reshape(720,1440)
+    # oday="%02d"%(SWOT_day(int(yyyy),int(mm),int(dd)))
+    # mesh_in=np.zeros([720,1440],np.float32)
+    # rivwth=np.fromfile(pm.CaMa_dir()+"/map/glb_15min/rivwth.bin",np.float32).reshape(720,1440)
+    # mesh_in[40:680,:]=np.fromfile("data/mesh_day"+oday+".bin",np.float32).reshape(640,1440)
+    # mesh=(rivwth>50.0)*(mesh_in>=10)*(mesh_in<=60)*1.0
+    # mesh=mesh.astype(np.float32)
+    # #--
+    # rand=rd.normal(0,pm.ovs_err(),pm.ens_mem())
+    # rand=rand.astype(np.float32)
+    # sfcelv=np.fromfile("CaMa_out/"+yyyy+mm+dd+"T000/sfcelv"+yyyy+".bin",np.float32).reshape(720,1440)
+    # for ens_num in np.arange(1,pm.ens_mem()+1):
+    #     ens_char="%03d"%(ens_num)
+    #     forcst=np.fromfile("CaMa_out/"+yyyy+mm+dd+"A"+ens_char+"/sfcelv"+yyyy+".bin",np.float32).reshape(720,1440) 
+    #     assim=forcst*(1.0-mesh)+((sfcelv*mesh))#+rand[ens_num-1])
+    #     print np.shape(assim)
+    #     assim.tofile("assim_out/ens_xa/assim/"+yyyy+mm+dd+"_"+ens_char+"_xa.bin")
     for ens_num in np.arange(1,pm.ens_mem()+1):
         ens_char="%03d"%(ens_num)
-        forcst=np.fromfile("CaMa_out/"+yyyy+mm+dd+"A"+ens_char+"/sfcelv"+yyyy+".bin",np.float32).reshape(720,1440) 
-        assim=forcst*(1.0-mesh)+((sfcelv*mesh))#+rand[ens_num-1])
-        print np.shape(assim)
-        assim.tofile("assim_out/ens_xa/assim/"+yyyy+mm+dd+"_"+ens_char+"_xa.bin")
+        nx, ny, gzise = pm.map_dimension()
+        assim=np.fromfile("./CaMa_out/"+yyyy+mm+dd+"A"+ens_char+"/outflw"+yyyy+".bin",np.float32).reshape(ny,nx)
+        with open("./assim_out/obs/"+yyyy+mm+dd+".txt", "r") as obsf:
+            lines=obsf.readlines()
+        for line in lines:
+            line  =  filter(None, re.split(" ",line))
+            ix    =  int(line[0]) - 1
+            iy    =  int(line[1]) - 1
+            dis   =  float(line[2])
+            assim[iy,ix] = dis
+            print (ix, iy, dis)
+        assim.tofile("./assim_out/ens_xa/assim/"+yyyy+mm+dd+"_"+ens_char+"_xa.bin")
 #################################################################################
 def make_rivman():
     nx=1440

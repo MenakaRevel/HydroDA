@@ -1,4 +1,3 @@
-#!/opt/local/bin/python
 # -*- coding: utf-8 -*-
 
 import numpy as np
@@ -16,6 +15,7 @@ from multiprocessing import sharedctypes
 from numpy import ma
 import re
 import math
+# import warnings;warnings.filterwarnings('ignore')
 
 #sys.path.append('../assim_out/')
 os.system("ln -sf ../gosh/params.py params.py")
@@ -29,11 +29,12 @@ import cal_stat as stat
 #argvs = sys.argv
 
 # experiment="E2O_HydroWeb23"
-experiment="VIC_BC_HydroWeb11"
+# experiment="VIC_BC_HydroWeb11"
+experiment="test_dis"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 assim_out=pm.DA_dir()+"/out/"+experiment
-print assim_out
+print (assim_out)
 #assim_out="assim_out_E2O_wmc"
 #assim_out="assim_out_E2O_womc_0"
 #assim_out="assim_out_ECMWF_womc_baised_0"
@@ -95,7 +96,7 @@ nx     = int(filter(None, re.split(" ",lines[0]))[0])
 ny     = int(filter(None, re.split(" ",lines[1]))[0])
 gsize  = float(filter(None, re.split(" ",lines[3]))[0])
 #----
-syear,smonth,sdate=2003,1,1 #pm.starttime()#2004#1991
+syear,smonth,sdate=2002,1,1 #pm.starttime()#2004#1991
 eyear,emonth,edate=pm.endtime() #2005,1,1 #
 #month=1
 #date=1
@@ -154,7 +155,7 @@ for rivername in rivernames:
 #   mk_dir(path)
   #station_loc,x_list,y_list = grdc.get_grdc_loc(rivername,"b")
   grdc_id,station_loc,x_list,y_list = grdc.get_grdc_loc_v396(rivername)
-  print rivername, grdc_id,station_loc
+#   print rivername, grdc_id,station_loc
   river.append([rivername]*len(station_loc))
   staid.append(grdc_id)
   pname.append(station_loc)
@@ -212,7 +213,7 @@ for rivername in rivernames:
 river=([flatten for inner in river for flatten in inner])
 staid=([flatten for inner in staid for flatten in inner])
 pname=([flatten for inner in pname for flatten in inner])
-print len(pname), len(xlist)
+print (len(pname), len(xlist))
 xlist=([flatten for inner in xlist for flatten in inner])
 ylist=([flatten for inner in ylist for flatten in inner])
 
@@ -223,10 +224,11 @@ org=[]
 opn=[]
 asm=[]
 
-swt={}
-for point in np.arange(pnum):
-    swt[point] = []
+# swt={}
+# for point in np.arange(pnum):
+#     swt[point] = []
 # multiprocessing array
+print ("multiprocessing array")
 # result       = np.ctypeslib.as_ctypes(np.zeros((size, size)))
 # shared_array = sharedctypes.RawArray(result._type_, result)
 opn=np.ctypeslib.as_ctypes(np.zeros([N,pm.ens_mem(),pnum],np.float32))
@@ -243,7 +245,7 @@ for day in np.arange(start,last):
     for num in np.arange(1,pm.ens_mem()+1):
         numch='%03d'%num
         inputlist.append([yyyy,mm,dd,numch])
-        #print (yyyy,mm,dd,numch)
+        print (yyyy,mm,dd,numch)
 
 def read_data(inputlist):
     yyyy = inputlist[0]
@@ -269,7 +271,8 @@ def read_data(inputlist):
     #fname=assim_out+"/assim_out/rivout/open/rivout"+yyyy+mm+dd+"_"+numch+".bin"
     opnfile=np.fromfile(fname,np.float32).reshape([ny,nx])
     # assimilated
-    fname=assim_out+"/assim_out/outflw/assim/outflw"+yyyy+mm+dd+"_"+numch+".bin"
+    # fname=assim_out+"/assim_out/outflw/assim/outflw"+yyyy+mm+dd+"_"+numch+".bin"
+    fname=assim_out+"/assim_out/ens_xa/assim/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
     #fname=assim_out+"/assim_out/rivout/assim/rivout"+yyyy+mm+dd+"_"+numch+".bin"
     asmfile=np.fromfile(fname,np.float32).reshape([ny,nx])
     #-------------
@@ -281,6 +284,7 @@ def read_data(inputlist):
         else:
             tmp_opn[dt,num,point]=opnfile[iy1,ix1]+opnfile[iy2,ix2]
             tmp_asm[dt,num,point]=asmfile[iy1,ix1]+asmfile[iy2,ix2]
+        # print (tmp_asm[dt,num,point])
 #--------
 p   = Pool(20)
 res = p.map(read_data, inputlist)
@@ -418,6 +422,7 @@ def make_fig(point):
     # draw mean of ensembles
     lines.append(ax1.plot(np.arange(start,last),np.mean(opn[:,:,point],axis=1),label="corrupted",color="blue",linewidth=1.0,alpha=1,zorder=104)[0])
     lines.append(ax1.plot(np.arange(start,last),np.mean(asm[:,:,point],axis=1),label="assimilated",color="red",linewidth=1.0,alpha=1,zorder=106)[0])
+    print (np.mean(asm[:,:,point],axis=1))
     #    plt.ylim(ymin=)
     # Make the y-axis label, ticks and tick labels match the line color.
     ax1.set_ylabel('discharge (m$^3$/s)', color='k')
@@ -532,7 +537,7 @@ def make_fig(point):
     plt.legend(lines,labels,ncol=1,loc='upper right') #, bbox_to_anchor=(1.0, 1.0),transform=ax1.transAxes)
     station_loc_list=pname[point].split("/")
     station_name="-".join(station_loc_list) 
-    print 'save',river[point] , station_name
+    print ('save',river[point] , station_name)
     plt.savefig(assim_out+"/figures/disgraph/"+river[point]+"-"+station_name+".png",dpi=500)
     return 0
 
@@ -556,8 +561,8 @@ def make_fig(point):
 
 
 
-#para_flag=1
-para_flag=0
+para_flag=1
+# para_flag=0
 #--
 if para_flag==1:
     p=Pool(20)
