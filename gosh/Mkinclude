@@ -1,0 +1,11 @@
+## Fortran Compiler
+FC  = ifort
+
+# Compiler options
+#FFLAGS = -O3 -warn all -assume byterecl -heap-arrays -nogen-interfaces
+#FFLAGS = -O3 -assume byterecl -heap-arrays -nogen-interfaces -mcmodel=large -fPIC -shared-intel -g -traceback -lpthread -mkl -parallel
+FFLAGS = -O3 -assume byterecl -heap-arrays -nogen-interfaces -mcmodel=large -fPIC -shared-intel -g -traceback -lpthread -mkl=parallel -parallel
+
+## include library
+INC = -I/opt/intel/include -I/opt/local/include
+LIB = -L/opt/intel/lib -L/opt/intel/mkl/lib -L/opt/local/lib

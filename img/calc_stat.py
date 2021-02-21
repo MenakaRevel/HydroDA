@@ -42,13 +42,13 @@ slink("../gosh/params.py", "params.py")
 import params as pm
 # define values
 N=366 #2004
-exp="E2O_womc_MS"
+exp="E2O_womc_anomalyDA_if3.0"
 outdir=pm.DA_dir()+"/out/"+exp
 # mkdir stat
 mk_dir(outdir+"/assim_out/stat")
 # make list of days
 #make_yearlist(2004,1,1,N=366)
 # compile
-os.system("ifort calc_stat.f90 -o calc_stat -O3 -assume byterecl -heap-arrays  -g -traceback -free -parallel")
+#os.system("ifort calc_stat.f90 -o calc_stat -O3 -assume byterecl -heap-arrays  -g -traceback -free -parallel")
 # run calc_stat
 os.system("./calc_stat "+str(N)+" "+str(pm.ens_mem())+" "+outdir+" "+pm.CaMa_dir())

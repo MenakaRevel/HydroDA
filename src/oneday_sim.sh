@@ -43,6 +43,8 @@ runname=$8
 
 EXP_DIR=$9
 
+mapname=${10}
+
 echo "looptype" $looptype
 #=================================================
 #cd ${CAMADIR}/gosh
@@ -149,6 +151,8 @@ elif [ $runname = "ERA20CM" ];then
      DROFUNIT="1000"   # [mm/day->m/s]      # runoff unit conversion
 elif [ $runname = "ELSE_KIM2009" ];then
      DROFUNIT="86400000"   # [mm/day->m/s]  # runoff unit conversion
+elif [ $runname = "VIC_BC" ];then
+     DROFUNIT="86400000"   # [mm/day->m/s]  # runoff unit conversion
 fi
 
 #----- for plain binary runoff forcing
@@ -192,7 +196,7 @@ LROSPLIT=".FALSE."                          # .TRUE. for sub-surface runoff
 
 #============================
 #*** 1f. river map & topography
-FMAP="${BASE}/map/glb_15min"                # map directory
+FMAP="${BASE}/map/${mapname}"                # map directory
 CDIMINFO="${FMAP}/diminfo_test-1deg.txt"    # dimention information file
 CINPMAT="${FMAP}/inpmat_test-1deg.bin"        # runoff input matrix for interporlation
 #CDIMINFO="${FMAP}/diminfo_test-15min_nc.txt" # dimention information file
@@ -200,14 +204,17 @@ CINPMAT="${FMAP}/inpmat_test-1deg.bin"        # runoff input matrix for interpor
 #CDIMINFO="${FMAP}/diminfo_test-15min.txt" # dimention information file
 #CINPMAT=${FMAP}/inpmat_test-15min.bin     # runoff input matrix for interporlation
 if [ $runname = "E2O" ] ; then
-    CDIMINFO="${FMAP}/diminfo_test-15min.txt" # dimention information file
-    CINPMAT="${FMAP}/inpmat_test-15min.bin"     # runoff input matrix for interporlation
+    CDIMINFO="${FMAP}/diminfo-15min.txt" # dimention information file
+    CINPMAT="${FMAP}/inpmat-15min.bin"     # runoff input matrix for interporlation
 elif [ $runname = "ERA20CM" ] ; then
-	CDIMINFO="${FMAP}/diminfo_test-1deg.txt"  # dimention information file
-    CINPMAT="${FMAP}/inpmat_test-1deg.bin"      # runoff input matrix for interporlation
+	  CDIMINFO="${FMAP}/diminfo-1deg.txt"  # dimention information file
+    CINPMAT="${FMAP}/inpmat-1deg.bin"      # runoff input matrix for interporlation
 elif [ $runname = "ELSE_KIM2009" ] ; then
-	CDIMINFO="${FMAP}/diminfo_test-1deg.txt"  # dimention information file
-    CINPMAT="${FMAP}/inpmat_test-1deg.bin"      # runoff input matrix for interporlation
+	  CDIMINFO="${FMAP}/diminfo-1deg.txt"  # dimention information file
+    CINPMAT="${FMAP}/inpmat-1deg.bin"      # runoff input matrix for interporlation
+elif [ $runname = "VIC_BC" ] ; then
+	  CDIMINFO="${FMAP}/diminfo-15min.txt"  # dimention information file
+    CINPMAT="${FMAP}/inpmat-15min.bin"      # runoff input matrix for interporlation
 fi
 
 #----- for plain binary map input
@@ -225,11 +232,13 @@ CFLDHGT="${FMAP}/fldhgt.bin"                # floodplain elevation profile (heig
 CRIVWTH="${FMAP}/rivwth_gwdlr.bin"          # channel width [m] (GWD-LR + filled with empirical)
 CRIVHGT="${FMAP}/rivhgt.bin"                # channel depth [m] (empirical power-low)
 CRIVMAN="${FMAP}/rivman.bin"                # manning coefficient river (The one in flood plain is a global parameter; set $PMANFLD below.)
-if [ $looptype = "true" ] ; then
-    CRIVMAN="${FMAP}/rivmanTRUE.bin"
-else
-    CRIVMAN="${FMAP}/rivmanCORR.bin"
-fi
+#if [ $looptype = "true" ] ; then
+#    CRIVMAN="${INBASE}/assim_out/rivman/rivmanTRUE.bin"
+#    #CRIVMAN="${FMAP}/rivmanTRUE.bin"
+#else
+#    CRIVMAN="${INBASE}/assim_out/rivman/rivmanCORR.bin"
+#    #CRIVMAN="${FMAP}/rivmanCORR.bin"
+#fi
 echo $CRIVMAN
 
 #** bifurcation channel info
@@ -276,7 +285,7 @@ COUTDIR="./"                                # output directory
 #CVARSOUT="outflw,storge,fldfrc,maxdph,flddph" # list output variable (comma separated)
 #CVARSOUT="rivout,rivsto,rivdph,rivvel,fldout,fldsto,flddph,fldfrc,fldare,sfcelv,outflw,storge,pthflw,pthout,maxsto,maxflw,maxdph" # list output variable (comma separated)
 #CVARSOUT="rivout,rivsto,rivdph,fldout,flddph,fldfrc,fldare,sfcelv,outflw,storge,maxsto,maxflw,maxdph" # list output variable (comma separated)
-CVARSOUT="rivout,rivsto,sfcelv,outflw,storge" # list output variable (comma separated)
+CVARSOUT="rivout,rivsto,fldout,flddph,fldfrc,sfcelv,outflw,storge,maxsto,maxflw,maxdph" # list output variable (comma separated)
 COUTTAG=""  # see (3) set each year         #   output tag $(COUTDIR)/$(VARNAME)$(OUTTAG).bin
 
 ##### Model Parameters ################

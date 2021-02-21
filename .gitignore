@@ -5,6 +5,8 @@ dat
 
 #params file at out folder
 out/*/params.py
+*/img/params.py
+*/sat/params.py
 
 #binary files
 *.one
@@ -12,7 +14,20 @@ out/*/params.py
 
 #fortan excutbles
 make_restart
+make_restart_dis
 data_assim
+data_assim_dis
+calc_stat
+
+#img/bin
+*print_flddpth*
+*print_flddpth.o
+*print_grid*
+*print_grid.o
+*print_rivvec
+*print_rivvec.o
+*txt_vector
+*txt_vector.o
 
 #.pyc files
 *.pyc
@@ -25,6 +40,21 @@ HydroDA.o*
 *.png
 *.jpg
 
+#text files
+*.txt
+
+#log files
+*.log
+
 #temporary opened files
 *.swp
 *.swo
+
+#vscode
+.vscode
+
+#.linux files
+*/._Makefile
+
+# VS code 
+*/.vscode

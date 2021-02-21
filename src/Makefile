@@ -8,7 +8,7 @@ make_restart
 # Suffix
 .SUFFIXES : .f90
 .f90:
-	$(FC) ${FFLAGS} $^ -o $@
+	$(FC) ${FFLAGS} ${INC} ${LIB} $^ -o $@
 
 # commands
 all: $(TARGETS)
