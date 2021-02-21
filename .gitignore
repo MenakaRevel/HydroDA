@@ -14,7 +14,9 @@ out/*/params.py
 
 #fortan excutbles
 make_restart
+make_restart_dis
 data_assim
+data_assim_dis
 calc_stat
 
 #img/bin

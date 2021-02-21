@@ -80,6 +80,8 @@ character(len=4)                :: llon,llat
 ! observations
 real,allocatable                :: obs(:,:),obs_err(:,:),altitude(:,:),mean_obs(:,:),std_obs(:,:)!, obserrrand(:,:)
 real                            :: pslamch
+integer                         :: conflag
+
 !external pslamch
 write(*,*) "data_assim"
 
@@ -126,6 +128,8 @@ read(buf,*) rho_fixed
 call getarg(14,buf)
 read(buf,*) sigma_b
 
+call getarg(15,buf)
+read(buf,*) conflag
 !==
 fname=trim(camadir)//"/map/"//trim(mapname)//"/params.txt"
 open(11,file=fname,form='formatted')
@@ -288,7 +292,7 @@ allocate(obs(lonpx,latpx),obs_err(lonpx,latpx),altitude(lonpx,latpx),mean_obs(lo
 
 !----
 !read HydroWeb data
-call read_HydroWeb(yyyymmdd,hydrowebdir,lonpx,latpx,obs,obs_err,mean_obs,std_obs)
+call read_observation(yyyymmdd,hydrowebdir,lonpx,latpx,obs,obs_err,mean_obs,std_obs)
 
 ! inflation parameter
 fname=trim(adjustl(expdir))//"/inflation/parm_infl"//yyyymmdd//".bin"
@@ -589,15 +593,30 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
                 print*,"^^^^^^^^^^^^^^^^^"
                 print*,lon_cent,lat_cent,patch_start,patch_end,targetpixel,countnumber
                 local_sat(j)=1.0
+                !!! observation converstions 
+                !  1 - Directly values 
+                !  2 - Anomalies
+                !  3 - Normalized values
+                !  4 - Log converted values
+                if (conflag == 1) then
+                    xt(j)=obs(i_m,j_m)
+                else if (conflag == 2) then
+                    xt(j)=obs(i_m,j_m)-mean_obs(i_m,j_m)
+                else if (conflag == 3) then
+                    xt(j)=(obs(i_m,j_m)-mean_obs(i_m,j_m))/(std_obs(i_m,j_m)+1.0e-20)
+                else if (conflag == 4) then
+                    xt(j)=log10(obs(i_m,j_m))
+                end if
+                local_err(j)=obs_err(i_m,j_m)
                 !xt(i)=obs(i_m,j_m) - altitude(i_m,j_m) + elevtn(i_m,j_m)
                 !xt(j)=obs(i_m,j_m) - mean_obs(i_m,j_m) !+ meanglobaltrue(i_m,j_m)
                 !xt(j)=((obs(i_m,j_m) - mean_obs(i_m,j_m))/std_obs(i_m,j_m))*stdglobaltrue(i_m,j_m) + meanglobaltrue(i_m,j_m)
-                xt(j)=(obs(i_m,j_m)-mean_obs(i_m,j_m))/(std_obs(i_m,j_m)+1.0e-20)
+                ! xt(j)=(obs(i_m,j_m)-mean_obs(i_m,j_m))/(std_obs(i_m,j_m)+1.0e-20)
                 write(79,*) "Observations"
-                write(79,*) i_m,j_m,obs(i_m,j_m),mean_obs(i_m,j_m),std_obs(i_m,j_m) !,stdglobaltrue(i_m,j_m) , meanglobaltrue(i_m,j_m)
+                write(79,*) i_m,j_m, conflag, xt(j) !    obs(i_m,j_m),mean_obs(i_m,j_m),std_obs(i_m,j_m) !,stdglobaltrue(i_m,j_m) , meanglobaltrue(i_m,j_m)
                 print*, "observation converstion"
-                print*,i_m,j_m, xt(j),obs(i_m,j_m),mean_obs(i_m,j_m),std_obs(i_m,j_m)!,stdglobaltrue(i_m,j_m) , meanglobaltrue(i_m,j_m)
-                local_err(j)=obs_err(i_m,j_m) !max(obs_err(i_m,j_m),0.30)
+                print*,i_m,j_m, conflag, xt(j) !,obs(i_m,j_m),mean_obs(i_m,j_m),std_obs(i_m,j_m)!,stdglobaltrue(i_m,j_m) , meanglobaltrue(i_m,j_m)
+                !max(obs_err(i_m,j_m),0.30)
             else
                 local_sat(j)=-9999.0
                 xt(j)=-9999.0
@@ -634,8 +653,17 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
             do num=1, ens_num
                 !xf(j,num)=globalx(i_m,j_m,num)-meanglobalx(i_m,j_m,num)
                 !xf(j,num)=(globalx(i_m,j_m,num)-meanglobalx(i_m,j_m,num))/(stdglobalx(i_m,j_m,num)+1.0e-20)
-                xf(j,num)=(globalx(i_m,j_m,num)-meanglobaltrue(i_m,j_m))/stdglobaltrue(i_m,j_m) !meanglobalx(i_m,j_m,num)
+                ! xf(j,num)=(globalx(i_m,j_m,num)-meanglobaltrue(i_m,j_m))/stdglobaltrue(i_m,j_m) !meanglobalx(i_m,j_m,num)
             !    !print*, "L611",globalx(i_m,j_m,num)-meanglobaltrue(i_m,j_m)
+                if (conflag == 1) then
+                    xf(j,num)=globalx(i_m,j_m,num)
+                else if (conflag == 2) then
+                    xf(j,num)=globalx(i_m,j_m,num)-meanglobaltrue(i_m,j_m)
+                else if (conflag == 3) then
+                    xf(j,num)=(globalx(i_m,j_m,num)-meanglobaltrue(i_m,j_m))/(stdglobaltrue(i_m,j_m)+1.0e-20)
+                else if (conflag == 4) then
+                    xf(j,num)=log10(globalx(i_m,j_m,num))
+                end if
             end do
         j=j+1
         end do
@@ -952,7 +980,18 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
             !global_xa(lon_cent,lat_cent,num) = xa(target_pixel,num)*stdglobalx(lon_cent,lat_cent,num) + meanglobalx(lon_cent,lat_cent,num)
             global_xa(lon_cent,lat_cent,num) = xa(target_pixel,num)*stdglobaltrue(lon_cent,lat_cent) &
                                                 & + meanglobaltrue(lon_cent,lat_cent)
-            end do
+            if (conflag == 1) then
+                global_xa(lon_cent,lat_cent,num) = xa(target_pixel,num)
+            else if (conflag == 2) then
+                global_xa(lon_cent,lat_cent,num) = xa(target_pixel,num)&
+                                                & + meanglobaltrue(lon_cent,lat_cent)
+            else if (conflag == 3) then
+                global_xa(lon_cent,lat_cent,num) = xa(target_pixel,num)*stdglobaltrue(lon_cent,lat_cent) &
+                                                & + meanglobaltrue(lon_cent,lat_cent)
+            else if (conflag == 4) then
+                global_xa(lon_cent,lat_cent,num) = 10**xa(target_pixel,num)
+            end if
+        end do
         global_null(lon_cent,lat_cent) = 1.0
 !        if (sum(K_) > real(ens_num)) then 
 !            global_null(lon_cent,lat_cent) = 0.0
@@ -1067,7 +1106,7 @@ deallocate(global_xa,globalx,ens_xa,global_null)!,obs_mask)
 deallocate(meanglobalx,stdglobalx,meanglobaltrue,stdglobaltrue)
 end program data_assim
 !*****************************************************************
-subroutine read_HydroWeb(yyyymmdd,hydrowebdir,nx,ny,obs,obs_err,mean_obs,std_obs)
+subroutine read_observation(yyyymmdd,hydrowebdir,nx,ny,obs,obs_err,mean_obs,std_obs)
 implicit none
 !---
 integer                             :: ix,iy,nx,ny,ios
@@ -1080,7 +1119,7 @@ obs=-9999.0
 obs_err=-9999.0
 mean_obs=-9999.0
 std_obs=-9999.0
-    fname=trim(adjustl(hydrowebdir))//"/txt/HydroWeb"//trim(yyyymmdd)//".txt"
+    fname=".assim_out/obs/"//trim(yyyymmdd)//".txt"
     open(11, file=fname, form='formatted',iostat=ios)
     if (ios /= 0) then 
         goto 1090
@@ -1095,7 +1134,7 @@ std_obs=-9999.0
     goto 1000
 1090 continue
 return
-end subroutine read_HydroWeb
+end subroutine read_observation
 !*****************************************************************
 subroutine lag_distance(i,j,x,y,nx,ny,nextX,nextY,nextdst,lag_dist)
 implicit none 
@@ -1247,95 +1286,95 @@ end if
 return
 end subroutine ixy2iixy
 !*****************************************************************
-subroutine get_virtualstation(ix,iy,yyyymmdd,threshold,hydrowebdir,mapname,station,wse,std,flag)
-implicit none
-! for input-----------------------
-integer                    :: ix,iy
-real                       :: threshold
-character*8                :: yyyymmdd
-character*128              :: hydrowebdir,mapname
-! for output----------------------
-character*128              :: station
-integer                    :: flag
-!--
-character*128              :: rfile,sta,sat
-character*8                :: stime,etime
-real                       :: lon0,lat0,ele_diff
-integer                    :: id,iix,iiy,str2int,rflag
-real                       :: rwse,wse,rstd,std
-flag=0
-! read HydroWeb list
-    rfile=trim(hydrowebdir)//"/HydroWeb_alloc_"//trim(mapname)//".txt"
-    !print *,rfile
-    open(11, file=rfile, form='formatted')
-    read(11,*)
-1000 continue
-    read(11,*,end=1090)id, sta, lon0,&
-    & lat0,iix,iiy,ele_diff,stime,etime, sat
-    !--
-    if (ix==iix .and. iy==iiy) then
-        if (abs(ele_diff) <= threshold) then
-            call read_HydroWeb(sta,yyyymmdd,hydrowebdir,rwse,rstd,rflag)
-            if (rflag==1) then
-                station=sta
-                wse=rwse
-                std=rstd
-                flag=1
-                goto 1090
-            end if
-        end if
-    end if
-    goto 1000
-1090 continue
-    close(11)
-return
-end subroutine get_virtualstation
-!*********************************************************************
-subroutine read_HydroWeb_data(station,yyyymmdd,hydrowebdir,wse,std,flag)
-implicit none
-! for input--------------------------
-character*128              :: station,hydrowebdir
-character*8                :: yyyymmdd
-! for output-------------------------
-real                       :: wse,std
-!--
-integer                    :: ryear,rmon,rday,i,str2int,flag
-integer                    :: nyear,nmon,nday
-real                       :: rwse,rstd
-character(len=128)         :: rfile
-character*10               :: date
-character*5                :: time
-!--
-ryear=str2int(yyyymmdd(1:4))
-rmon =str2int(yyyymmdd(5:6))
-rday =str2int(yyyymmdd(7:8))
-wse=-9999.0
-std=-9999.0
-flag=0
-! read HydroWeb list
-    rfile=trim(hydrowebdir)//"/data/hydroprd_"//trim(station)//".txt"
-    open(12, file=rfile, form='formatted')
-    ! read headers
-    do i=1,33
-        read(12,*)
-    end do
-1000 continue
-    read(12,*,end=1090) date, time, rwse, rstd
-    ! get date
-    nyear=str2int(date(1:4))
-    nmon =str2int(date(6:7))
-    nday =str2int(date(9:10))
-    if ((nyear==ryear) .and. (nmon==rmon) .and. (nday==rday)) then
-        wse=rwse
-        std=rstd
-        flag=1
-        goto 1090
-    end if
-    goto 1000
-1090 continue
-    close(12)
-return
-end subroutine read_HydroWeb_data
+! subroutine get_virtualstation(ix,iy,yyyymmdd,threshold,hydrowebdir,mapname,station,wse,std,flag)
+! implicit none
+! ! for input-----------------------
+! integer                    :: ix,iy
+! real                       :: threshold
+! character*8                :: yyyymmdd
+! character*128              :: hydrowebdir,mapname
+! ! for output----------------------
+! character*128              :: station
+! integer                    :: flag
+! !--
+! character*128              :: rfile,sta,sat
+! character*8                :: stime,etime
+! real                       :: lon0,lat0,ele_diff
+! integer                    :: id,iix,iiy,str2int,rflag
+! real                       :: rwse,wse,rstd,std
+! flag=0
+! ! read HydroWeb list
+!     rfile=trim(hydrowebdir)//"/HydroWeb_alloc_"//trim(mapname)//".txt"
+!     !print *,rfile
+!     open(11, file=rfile, form='formatted')
+!     read(11,*)
+! 1000 continue
+!     read(11,*,end=1090)id, sta, lon0,&
+!     & lat0,iix,iiy,ele_diff,stime,etime, sat
+!     !--
+!     if (ix==iix .and. iy==iiy) then
+!         if (abs(ele_diff) <= threshold) then
+!             call read_HydroWeb_data(sta,yyyymmdd,hydrowebdir,rwse,rstd,rflag)
+!             if (rflag==1) then
+!                 station=sta
+!                 wse=rwse
+!                 std=rstd
+!                 flag=1
+!                 goto 1090
+!             end if
+!         end if
+!     end if
+!     goto 1000
+! 1090 continue
+!     close(11)
+! return
+! end subroutine get_virtualstation
+! !*********************************************************************
+! subroutine read_HydroWeb_data(station,yyyymmdd,hydrowebdir,wse,std,flag)
+! implicit none
+! ! for input--------------------------
+! character*128              :: station,hydrowebdir
+! character*8                :: yyyymmdd
+! ! for output-------------------------
+! real                       :: wse,std
+! !--
+! integer                    :: ryear,rmon,rday,i,str2int,flag
+! integer                    :: nyear,nmon,nday
+! real                       :: rwse,rstd
+! character(len=128)         :: rfile
+! character*10               :: date
+! character*5                :: time
+! !--
+! ryear=str2int(yyyymmdd(1:4))
+! rmon =str2int(yyyymmdd(5:6))
+! rday =str2int(yyyymmdd(7:8))
+! wse=-9999.0
+! std=-9999.0
+! flag=0
+! ! read HydroWeb list
+!     rfile=trim(hydrowebdir)//"/data/hydroprd_"//trim(station)//".txt"
+!     open(12, file=rfile, form='formatted')
+!     ! read headers
+!     do i=1,33
+!         read(12,*)
+!     end do
+! 1000 continue
+!     read(12,*,end=1090) date, time, rwse, rstd
+!     ! get date
+!     nyear=str2int(date(1:4))
+!     nmon =str2int(date(6:7))
+!     nday =str2int(date(9:10))
+!     if ((nyear==ryear) .and. (nmon==rmon) .and. (nday==rday)) then
+!         wse=rwse
+!         std=rstd
+!         flag=1
+!         goto 1090
+!     end if
+!     goto 1000
+! 1090 continue
+!     close(12)
+! return
+! end subroutine read_HydroWeb_data
 !*****************************
 function str2int(str)
 implicit none
@@ -1359,7 +1398,9 @@ character*128                :: sat
 real                         :: obs_error
 !==================================================
 ! observation errors are from Breada et al,. (2019)
-!Brêda, J. P. L. F., Paiva, R. C. D., Bravo, J. M., Passaia, O. A., & Moreira, D. M. (2019). Assimilation of Satellite Altimetry Data for Effective River Bathymetry. Water Resources Research, 55(9), 7441–7463. doi:10.1029/2018WR024010
+! Brêda, J. P. L. F., Paiva, R. C. D., Bravo, J. M., Passaia, O. A., & Moreira, D. M. (2019). 
+! Assimilation of Satellite Altimetry Data for Effective River Bathymetry. Water Resources Research, 
+! 55(9), 7441–7463. doi:10.1029/2018WR024010
 !--------------------------------------------------
 ! Satellite  |  Error (m)
 ! -----------------------
@@ -1368,10 +1409,17 @@ real                         :: obs_error
 !JASON3      |   0.28
 !SENTINEL3A  |   0.30*
 !------------------------
-! *1.Watson, C.; Legresy, B.; King, M.; Deane, A. Absolute altimeter bias results from Bass Strait, Australia.In Proceedings of the Ocean Surface Topography Science Team Meeting 2018, Ponta Delgada, Portugal,24–29 September 2018.
-! *2.Bonnefond, P.; Exertier, P.; Laurain, O.; Guinle, T.; Féménias, P. Corsica:  A 20-Yr multi-mission absolutealtimeter calibration site.  In Proceedings of the Ocean Surface Topography Science Team Meeting 2018,Ponta Delgada, Portugal, 24–29 September 2018.
-! *3.Garcia-Mondejar, A.; Zhao, Z.; Rhines, P. Sentinel-3 Range and Datation Calibration with Crete transponder.In Proceedings of the 25 Years of Progress in Radar Altimetry, Ponta Delgada, Portugal, 24–29 September 2018.
-! *4.Mertikas, S.; Donlon, C.; Féménias, P.; Mavrocordatos, C.; Galanakis, D.; Tripolitsiotis, A.; Frantzis, X.; Kokolakis, C.; Tziavos, I.N.; Vergos, G.; Guinle, T. Absolute Calibration of the European Sentinel-3A Surface Topography Mission over the Permanent Facility for Altimetry Calibration in west Crete, Greece. Remote Sens. 2018, 10, 1808.
+! *1.Watson, C.; Legresy, B.; King, M.; Deane, A. Absolute altimeter bias results from Bass Strait, 
+! Australia.In Proceedings of the Ocean Surface Topography Science Team Meeting 2018, Ponta Delgada, 
+! Portugal,24–29 September 2018.
+! *2.Bonnefond, P.; Exertier, P.; Laurain, O.; Guinle, T.; Féménias, P. Corsica:  
+! A 20-Yr multi-mission absolutealtimeter calibration site.  In Proceedings of the Ocean Surface 
+! Topography Science Team Meeting 2018,Ponta Delgada, Portugal, 24–29 September 2018.
+! *3.Garcia-Mondejar, A.; Zhao, Z.; Rhines, P. Sentinel-3 Range and Datation Calibration with Crete transponder.
+! In Proceedings of the 25 Years of Progress in Radar Altimetry, Ponta Delgada, Portugal, 24–29 September 2018.
+! *4.Mertikas, S.; Donlon, C.; Féménias, P.; Mavrocordatos, C.; Galanakis, D.; Tripolitsiotis, A.; Frantzis, X.; 
+! Kokolakis, C.; Tziavos, I.N.; Vergos, G.; Guinle, T. Absolute Calibration of the European Sentinel-3A Surface 
+! Topography Mission over the Permanent Facility for Altimetry Calibration in west Crete, Greece. Remote Sens. 2018, 10, 1808.
 ! =================================================
 obs_error=0.30
 if (trim(sat) == "ENVISAT") obs_error=0.30

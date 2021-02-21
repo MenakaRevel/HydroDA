@@ -41,21 +41,21 @@ import params as pm
 ############
 def main_act():
 
-    print pm.version()
-    print pm.runname(pm.mode())
+    print (pm.version())
+    print (pm.runname(pm.mode()))
 
     # Set Time
-    print "Set Time"
+    print ("Set Time")
     timestep=pm.timestep() #time step for assimilation
     start_year,start_month,start_date=pm.starttime() # Start year month date
     end_year,end_month,end_date=pm.endtime() # End year month date
 
     # Spin-up Simulation
-    print "spin up simulation"
+    print ("spin up simulation")
     spin_up()
 
     # make initial restart
-    print "make intial restart"
+    print ("make intial restart")
     make_initial_restart()
     #make_initial_restart_one()
 
@@ -149,7 +149,7 @@ def one_day_loop(yyyy,mm,dd,day):
 
     # make forecasted value for assimilated simulation
     # do assimilation (LETKF)
-    data_assim(yyyy,mm,dd,day)
+    data_assim(yyyy,mm,dd)
     #direct_insert(yyyy,mm,dd,day)
 
     # make restart MODIFIED v.1.1.0
@@ -307,13 +307,13 @@ def assim_at_fort(yyyy,mm,dd,day): #previous --> used
     +str('%04d'%(nxt_day.year)+'%02d'%(nxt_day.month)+'%02d'%(nxt_day.day))+" "+str(pm.err_expansion())+" "+dir1)
     return 0
 ###########################
-def data_assim(yyyy,mm,dd,day): # new data assimilation function (2020/05/18)
+def data_assim(yyyy,mm,dd): # new data assimilation function (2020/05/18)
     #print '%02d'%(nxt_day.day)
     parallels="%d"%(pm.para_nums()*pm.cpu_nums())
     os.environ['OMP_NUM_THREADS']=parallels
     #os.system("export $OMP_NUM_THREADS=%d"%(pm.para_nums()*pm.cpu_nums()))
     exp_dir=pm.DA_dir()+"/out/"+pm.experiment()
-    print pm.ens_mem()
+    print (pm.ens_mem(pm.mode()))
     thisday=datetime.date(int(yyyy),int(mm),int(dd))
     nxt_day=thisday+datetime.timedelta(days=1)
     nyear=nxt_day.year
@@ -321,9 +321,10 @@ def data_assim(yyyy,mm,dd,day): # new data assimilation function (2020/05/18)
     nday=nxt_day.day
     nxtyyyymmdd="%04d%02d%02d"%(nyear,nmon,nday)
     os.system(pm.DA_dir()+"/src/data_assim "+yyyy+mm+dd+" "+pm.mapname()+" "\
-    +str(pm.patch_size())+" "+str(pm.ens_mem())+" "+nxtyyyymmdd+" "+pm.CaMa_dir()\
+    +str(pm.patch_size())+" "+str(pm.ens_mem(pm.mode()))+" "+nxtyyyymmdd+" "+pm.CaMa_dir()\
     +" "+str(pm.thersold())+" "+exp_dir+" "+pm.DA_dir()+" "+pm.patch_dir()+" "\
-    +str(pm.patch_name())+" "+pm.HydroWeb_dir()+" "+str(pm.rho())+" "+str(pm.sigma_b()))
+    +str(pm.patch_name())+" "+pm.HydroWeb_dir()+" "+str(pm.rho())+" "+str(pm.sigma_b())\
+    +" "+str(pm.conflag()))
     return 0
 ###########################
 def make_init_storge():

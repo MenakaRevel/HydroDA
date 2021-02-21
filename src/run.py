@@ -16,15 +16,17 @@
 # Menaka@IIS 2021
 #*************************************************************************************
 
-#####################################
+########################################
 #
-# this program run the whole program
+# This program runs the whole algorithm
 #
-#####################################
+########################################
 
 import sys
 import main_code
 import prep_init as init 
+import prep_runoff as inpt
+import prep_obs as obs
 #exp=sys.argv[1]
 #ifact=sys.argv[2]
 
@@ -35,7 +37,11 @@ try:
 
   # prepare runoff ensembles
   print "prepare input"
-  init.prepare_input()
+  inpt.prepare_input()
+
+  # prepare observations
+  print "prepare observation"
+  obs.prepare_obs()
 
   # initial inflation parameter rho for assimilation
   print "make intial inflation"
@@ -55,6 +61,6 @@ except Exception as e:
 ## check before run ################
 #
 # 1. compile CaMa-Flood
-# 2. set parameters params.py@gosh
+# 2. set parameters params.py@gosh directory
 # 3. set local patches folder
-# 4. compile fortran codes in ./src folder compile.sh "yes"
+# 4. compile fortran codes in ./src folder %sh compile.sh "yes"
