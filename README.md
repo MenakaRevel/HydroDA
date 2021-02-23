@@ -1,38 +1,40 @@
-# HydroDA
+# HydroDA folder strucutre
     -src
     -out
     -inp
     -dat 
     -img
 
-#   src : source codes
+   src : contains source codes
 
-#   out
+   out : output folder
         -experiment_name
             -assim_out
             -cama_out
             -cama_in
 
-#   inp
+   inp : input runoff forcing
         -data name
             -Roff
 
-#   dat : river realted data
+   dat : river realted data
         -river basin
         -HydroWeb station data
 
-#   img : codes for preapring images
+   img : codes for preapring images
 ********************
-simple steps for HydroDA run
-1. Download and compile CaMa-Flood (Yamazaki et al 2011) model
-2. Prepare observation data (HydroWeb) : add the path to params file
+# Simple steps for HydroDA run
+1. Download and compile CaMa-Flood (http://hydro.iis.u-tokyo.ac.jp/~yamadai/cama-flood/index.html) (Yamazaki et al 2011) model
+2. Prepare observation data (e.g.: HydroWeb) : add the path to params file
 3. Prepare runoff data in HydroDA/inp folder
-4. Check river related data at HydroDA/dat folder
+4. Check river related data at HydroDA/dat folder {specially for anomaly or normalized assimilation}
 5. Edit the settings at params.py and run_mool.sh at HydroDA/gosh
 6. Compile HydroDA fortran codes using compile.sh
+```bash
+sh compile.sh "yes"
+```
 7. Edit the experiment name in run_mool.sh
 8. Run run_mool.sh
-
 ```bash
 qsub run_mool.sh
 ```
