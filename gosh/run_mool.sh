@@ -23,9 +23,8 @@
 ################################################################################################
 
 ### SET "mool PBS" @ IIS U-Tokyo
-#PBS -q E20
-#PBS -l select=1:ncpus=20:mem=60gb
-#PBS -l place=scatter
+#PBS -q E40
+#PBS -l select=1:ncpus=40:mem=100gb
 #PBS -j oe
 #PBS -m ea
 #PBS -M menaka@rainbow.iis.u-tokyo.ac.jp
@@ -86,7 +85,7 @@ cd $HydroDA"/out/"$EXP
 
 # run the main code using virtual environment
 # run main code
-python run.py
+python run.py &
 
 wait
 

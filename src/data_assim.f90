@@ -292,7 +292,8 @@ allocate(obs(lonpx,latpx),obs_err(lonpx,latpx),altitude(lonpx,latpx),mean_obs(lo
 
 !----
 !read HydroWeb data
-call read_observation(yyyymmdd,hydrowebdir,lonpx,latpx,obs,obs_err,mean_obs,std_obs)
+print*, "read observations"
+call read_observation(yyyymmdd,lonpx,latpx,obs,obs_err,mean_obs,std_obs)
 
 ! inflation parameter
 fname=trim(adjustl(expdir))//"/inflation/parm_infl"//yyyymmdd//".bin"
@@ -1106,11 +1107,11 @@ deallocate(global_xa,globalx,ens_xa,global_null)!,obs_mask)
 deallocate(meanglobalx,stdglobalx,meanglobaltrue,stdglobaltrue)
 end program data_assim
 !*****************************************************************
-subroutine read_observation(yyyymmdd,hydrowebdir,nx,ny,obs,obs_err,mean_obs,std_obs)
+subroutine read_observation(yyyymmdd,nx,ny,obs,obs_err,mean_obs,std_obs)
 implicit none
 !---
 integer                             :: ix,iy,nx,ny,ios
-character(len=128)                  :: hydrowebdir,fname,sat
+character(len=128)                  :: fname,sat
 character(len=8)                    :: yyyymmdd
 real,dimension(nx,ny)               :: obs,obs_err,mean_obs,std_obs
 real                                :: wse,mean,std,obs_error
@@ -1119,9 +1120,11 @@ obs=-9999.0
 obs_err=-9999.0
 mean_obs=-9999.0
 std_obs=-9999.0
-    fname=".assim_out/obs/"//trim(yyyymmdd)//".txt"
+    fname="./assim_out/obs/"//trim(yyyymmdd)//".txt"
+    print*, fname
     open(11, file=fname, form='formatted',iostat=ios)
     if (ios /= 0) then 
+        print*, "no observations: ", fname, ios
         goto 1090
     end if
 1000 continue

@@ -265,9 +265,6 @@ def CaMa_dir():
     # directory of CaMa-Flood
     # indicate the directory of ./map or ./src and other folders
 
-
-
-
 def MKLdir():
     return "/opt/intel/compilers_and_libraries_2016.3.170/mac/mkl"
     # directory of Intel MKL files

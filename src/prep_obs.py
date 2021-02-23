@@ -68,6 +68,7 @@ def get_HydroWeb():
 		EGM08   = float(line[8])
 		EGM96   = float(line[9])
 		sat     = line[10].split()[0]
+		# print (riv,station,sat)
 		#------
 		lname.append(station)
 		xlist.append(ix)
@@ -77,65 +78,82 @@ def get_HydroWeb():
 		satellite.append(sat)
 	return lname, xlist, ylist, lEGM08, lEGM96, satellite
 #########################
+def read_HydroWeb(yyyy,mm,dd,name,EGM08,EGM96):
+	target_dt=datetime.date(int(yyyy),int(mm),int(dd))
+	HydroWeb_dir="/cluster/data6/menaka/HydroWeb"
+	#print name
+	lwse=[]
+	wseo=-9999.0
+	#--read HydroWeb data
+	iname=HydroWeb_dir+"/data/hydroprd_"+name+".txt"
+	# print (iname)
+	with open(iname,"r") as f_hyd:
+		l_hyd=f_hyd.readlines()
+	for ll_hyd in l_hyd[33::]:
+		ll_hyd = re.split(" ",ll_hyd)
+		ll_hyd = list(filter(None, ll_hyd))
+		date = ll_hyd[0]
+		date = re.split("-",date)
+		year = int(date[0])
+		mon  = int(date[1])
+		day  = int(date[2])
+		wse  = float(ll_hyd[2]) + EGM08 - EGM96
+		lwse.append(wse)
+		now  = datetime.date(year,mon,day)
+		# print (yyyy, mm, dd)
+		# print (year,mon,day)
+		if now == target_dt:
+			wseo=wse
+	if wseo==-9999.0:
+		mean_wse=-9999.0
+		std_wse=-9999.0
+	else:
+		mean_wse=np.mean(np.array(lwse))
+		std_wse=np.std(np.array(lwse))
+	return wseo, mean_wse, std_wse
+#########################
 def write_txt(inputlist):
 	yyyy=inputlist[0]
 	mm=inputlist[1]
 	dd=inputlist[2]
-	HydroWeb_dir=inputlist[3]
+	obs_dir="/cluster/data6/menaka/HydroWeb"
+	if pm.obs_name() == "HydroWeb":
+		obs_dir="/cluster/data6/menaka/HydroWeb"
+	# HydroWeb_dir=inputlist[3]
 	target_dt=datetime.date(int(yyyy),int(mm),int(dd))
 	txtfile=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out/obs/"+yyyy+mm+dd+".txt"
 	# print txtfile
 	pnum=len(lname)
+	print (pnum)
 	# print pnum
 	with open(txtfile,"w") as txtf:
 		for point in np.arange(pnum):
-			#--
-			#print name
-			lwse=[]
-			wseo=-9999.0
-			#--read HydroWeb data
-			iname=HydroWeb_dir+"/data/hydroprd_"+lname[point]+".txt"
-			with open(iname,"r") as f_hyd:
-				l_hyd=f_hyd.readlines()
-			for ll_hyd in l_hyd[33::]:
-				ll_hyd = re.split(" ",ll_hyd)
-				ll_hyd = list(filter(None, ll_hyd))
-				date = ll_hyd[0]
-				date = re.split("-",date)
-				year = int(date[0])
-				mon  = int(date[1])
-				da   = int(date[2])
-				wse  = float(ll_hyd[2]) + lEGM08[point] - lEGM96[point]
-				lwse.append(wse)
-				now  = datetime.date(year,mon,da)
-				if now == target_dt:
-					wseo=wse
+			wseo, mean_wse, std_wse = read_HydroWeb(yyyy,mm,dd,lname[point],lEGM08[point],lEGM96[point])
+			print (point, lname[point], wseo)
 			if wseo == -9999.0:
 				continue
-			# write txt file
 			iix=xlist[point]
 			iiy=ylist[point]
-			mean_wse=np.mean(np.array(lwse))
-			std_wse=np.std(np.array(lwse))
+			# mean_wse=np.mean(np.array(lwse))
+			# std_wse=np.std(np.array(lwse))
 			sat=satellite[point]
 			line="%04d	%04d	%10.4f	%10.4f	%10.4f	%s\n"%(iix,iiy,wseo,mean_wse,std_wse,sat)
 			txtf.write(line)
-			# print (line)
-			return 0
+			print (line)
+	return 0
 #########################
 def prepare_obs():
 	#
 	global lname, xlist, ylist, lEGM08, lEGM96, satellite
 	lname, xlist, ylist, lEGM08, lEGM96, satellite = get_HydroWeb()
+	# print (len(lname))
 	syear,smon,sday=pm.starttime()
 	eyear,emon,eday=pm.endtime()
-	start_dt=datetime.date(syear,smon,eday)
+	start_dt=datetime.date(syear,smon,sday)
 	end_dt=datetime.date(eyear,emon,eday)
-	obs_dir="/cluster/data6/menaka/HydroWeb"
-	if pm.obs_name() == "HydroWeb":
-		obs_dir="/cluster/data6/menaka/HydroWeb"
 	start=0
 	last=(end_dt-start_dt).days
+	# print (start,last)
 	#-------
 	inputlist=[]
 	for day in np.arange(start,last):
@@ -143,13 +161,14 @@ def prepare_obs():
 		yyyy='%04d' % (target_dt.year)
 		mm='%02d' % (target_dt.month)
 		dd='%02d' % (target_dt.day)
-		print yyyy,mm,dd,obs_dir
-		inputlist.append([yyyy,mm,dd,obs_dir])
+		# print yyyy,mm,dd,obs_dir
+		inputlist.append([yyyy,mm,dd])
 	# write text files parallel
 	p=Pool(20)
 	p.map(write_txt,inputlist)
 	p.terminate()
+	# map(write_txt,inputlist)
 	return 0
 ####################################
-# if __name__ == "__main__":
-#     prepare_obs()
+if __name__ == "__main__":
+    prepare_obs()

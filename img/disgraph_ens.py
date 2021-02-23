@@ -18,6 +18,7 @@ import re
 import math
 
 #sys.path.append('../assim_out/')
+# Link the params.py in the experiment dir
 os.system("ln -sf ../gosh/params.py params.py")
 import params as pm
 import read_grdc as grdc
@@ -26,10 +27,12 @@ import cal_stat as stat
 #from matplotlib.font_manager import FontProperties
 #fp = FontProperties(fname="jap.ttc",size=15)
 
+# os.system("rm -rf params.py")
 #argvs = sys.argv
 
 # experiment="E2O_HydroWeb23"
-experiment="VIC_BC_HydroWeb11"
+# experiment="VIC_BC_HydroWeb11"
+experiment="test_wse"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 assim_out=pm.DA_dir()+"/out/"+experiment
@@ -52,6 +55,8 @@ print assim_out
 #assim_out="assim_out_biased_wmc"
 #os.system("mkdir ../assim_out/img")
 #os.system("mkdir ../assim_out/img/disgraph")
+
+
 #----
 def SWOT_day(yyyy,mm,dd):
   st_year,st_month,st_date=pm.starttime()
@@ -123,36 +128,10 @@ xlist=[]
 ylist=[]
 river=[]
 #--
-# rivername="AMAZON"
-# path = assim_out+"/figures/disgraph/%s"%(rivername)
-# print path
-# mk_dir(path)
 #rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZON","MEKONG","IRRAWADDY","VOLGA", "NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
 #rivernames  = ["AMAZON"]
 rivernames = grdc.grdc_river_name_v396()
-#rivernames = grdc.grdc_river_name()
-#for rivername in rivernames:
-#  #station_loc,x_list,y_list = grdc.get_grdc_loc(rivername,"b")
-#  station_loc,x_list,y_list = grdc.get_grdc_station_v396(rivername)
-#  #print rivername, station_loc
-#  for station in station_loc:
-#    gid=grdc.get_id(station)
-#    if gid== -9999:
-#      continue
-#    path = "../"+assim_out+"/figures/disgraph/%s"%(rivername)
-#    #print path
-#    mk_dir(path)
-#    ix, iy = grdc.get_loc_v394(gid)
-#    print station,gid, ix ,iy
-#    river.append(rivername)
-#    pname.append(station)
-#    xlist.append(ix)
-#    ylist.append(iy)
 for rivername in rivernames:
-#   path = assim_out+"/figures/disgraph/%s"%(rivername)
-#   print path
-#   mk_dir(path)
-  #station_loc,x_list,y_list = grdc.get_grdc_loc(rivername,"b")
   grdc_id,station_loc,x_list,y_list = grdc.get_grdc_loc_v396(rivername)
   print rivername, grdc_id,station_loc
   river.append([rivername]*len(station_loc))
@@ -161,54 +140,6 @@ for rivername in rivernames:
   xlist.append(x_list)
   ylist.append(y_list)
 #--
-#for rivername in ["LENA","NIGER","INDUS","CONGO","OB","MISSISSIPPI","MEKONG","AMAZONAS"]:
-#for rivername in ["MEKONG","AMAZONAS"]:
-#  if rivername=="LENA":
-#      pname.append(["L1","L2","L3"])
-#      xlist.append([1233,1218,1206])
-#      ylist.append([  71,  98, 117])
-#      river.append([rivername,rivername,rivername])
-#  if rivername=="NIGER":
-#      pname.append(["N1","N2","N3","N4","N5","N6"])
-#     xlist.append([744,744,732,712,704,700])
-#      ylist.append([342,324,310,292,295,303])
-#     river.append([rivername,rivername,rivername,rivername,rivername,rivername])
-# if rivername=="AMAZONAS":
-#      pname.append(["B","E","F","G"])
-#      xlist.append([515,447,464,420])
-#      ylist.append([364,366,416,367])
-#      river.append([rivername,rivername,rivername,rivername])
-#  if rivername=="MEKONG":
-#      pname.append(["Me_D","Me_M","Me_U"])
-#      xlist.append([1143,1139,1127])
-#      ylist.append([ 319, 293, 282])
-#      river.append([rivername,rivername,rivername])
-#  if rivername=="MISSISSIPPI":
-#      pname.append(["Mi_D","Mi_M","Mi_U","Mi_U2"]) #最後はミズーリ川
-#      xlist.append([361,362,345,308])
-#      ylist.append([241,214,137,167])
-#      river.append([rivername,rivername,rivername,rivername])
-#  if rivername=="OB":
-#      pname.append(["O_D","O_M","O_U"])
-#      xlist.append([995,996,1048])
-#      ylist.append([ 92,121, 159])
-#      river.append([rivername,rivername,rivername])
-#  if rivername=="CONGO":
-#      pname.append(["C_D","C_M","C_U"])#,"C1","C2","C3","C4","C5","C6","C7","C8"])
-#      xlist.append([772,813,834])#,769,784,789,809,821,824,802,794])
-#      ylist.append([383,353,397])#,383,372,363,343,359,376,379,342])
-#      river.append([rivername,rivername,rivername])#,rivername,rivername,rivername,rivername,rivername,rivername,rivername,rivername])
-#  if rivername=="INDUS":
-#      pname.append(["I_D","I_Sub","I_M"])
-#      xlist.append([992,995,1003])
-#      ylist.append([251,252,233])
-#      river.append([rivername,rivername,rivername])
-#  if rivername=="CONGO":
-#    river.append([rivername]*12)
-#    pname.append(["C4","C1","C10","C9","C7","C5","C3","C2","C8","C6","C11","C12"])
-#    xlist.append([813,834,772,784,789,809,821,824,802,794,808,806])
-#    ylist.append([353,397,383,372,363,343,359,376,379,342,351,351])
-
 river=([flatten for inner in river for flatten in inner])
 staid=([flatten for inner in staid for flatten in inner])
 pname=([flatten for inner in pname for flatten in inner])
