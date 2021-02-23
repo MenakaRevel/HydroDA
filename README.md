@@ -1,27 +1,27 @@
-HydroDA
+# HydroDA
     -src
     -out
     -inp
     -dat 
     -img
 
-    src : source codes
+#   src : source codes
 
-    out
+#   out
         -experiment_name
             -assim_out
             -cama_out
             -cama_in
 
-    inp
+#   inp
         -data name
             -Roff
 
-    dat : river realted data
+#   dat : river realted data
         -river basin
         -HydroWeb station data
 
-    img : codes for preapring images
+#   img : codes for preapring images
 ********************
 simple steps for HydroDA run
 1. Download and compile CaMa-Flood (Yamazaki et al 2011) model
