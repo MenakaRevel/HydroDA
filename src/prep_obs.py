@@ -51,7 +51,7 @@ def get_HydroWeb():
 	lEGM08=[]
 	lEGM96=[]
 	satellite=[]
-	fname="/cluster/data6/menaka/HydroWeb/HydroWeb_alloc_"+pm.mapname()+".txt"
+	fname=pm.DA_dir()+"/dat/HydroWeb_alloc_"+pm.mapname()+".txt"
 	with open(fname,"r") as f:
 		lines=f.readlines()
 	for line in lines[1::]:
@@ -116,9 +116,9 @@ def write_txt(inputlist):
 	yyyy=inputlist[0]
 	mm=inputlist[1]
 	dd=inputlist[2]
-	obs_dir="/cluster/data6/menaka/HydroWeb"
-	if pm.obs_name() == "HydroWeb":
-		obs_dir="/cluster/data6/menaka/HydroWeb"
+	# obs_dir="/cluster/data6/menaka/HydroWeb"
+	# if pm.obs_name() == "HydroWeb":
+	# 	obs_dir="/cluster/data6/menaka/HydroWeb"
 	# HydroWeb_dir=inputlist[3]
 	target_dt=datetime.date(int(yyyy),int(mm),int(dd))
 	txtfile=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out/obs/"+yyyy+mm+dd+".txt"
@@ -128,7 +128,12 @@ def write_txt(inputlist):
 	# print pnum
 	with open(txtfile,"w") as txtf:
 		for point in np.arange(pnum):
-			wseo, mean_wse, std_wse = read_HydroWeb(yyyy,mm,dd,lname[point],lEGM08[point],lEGM96[point])
+			# == read relevant observation data ==
+			if pm.obs_name() == "HydroWeb":
+				# == for HydroWeb data ==
+				wseo, mean_wse, std_wse = read_HydroWeb(yyyy,mm,dd,lname[point],lEGM08[point],lEGM96[point])
+			else:
+				wseo, mean_wse, std_wse = read_HydroWeb(yyyy,mm,dd,lname[point],lEGM08[point],lEGM96[point])
 			print (point, lname[point], wseo)
 			if wseo == -9999.0:
 				continue
@@ -164,7 +169,7 @@ def prepare_obs():
 		# print yyyy,mm,dd,obs_dir
 		inputlist.append([yyyy,mm,dd])
 	# write text files parallel
-	p=Pool(20)
+	p=Pool(pm.cpu_nums()*pm.para_nums())
 	p.map(write_txt,inputlist)
 	p.terminate()
 	# map(write_txt,inputlist)

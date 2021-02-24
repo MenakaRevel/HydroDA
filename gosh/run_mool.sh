@@ -23,8 +23,8 @@
 ################################################################################################
 
 ### SET "mool PBS" @ IIS U-Tokyo
-#PBS -q E40
-#PBS -l select=1:ncpus=40:mem=100gb
+#PBS -q F10
+#PBS -l select=1:ncpus=10:mem=100gb
 #PBS -j oe
 #PBS -m ea
 #PBS -M menaka@rainbow.iis.u-tokyo.ac.jp
@@ -42,7 +42,7 @@ which python
 
 # get number of cpus
 #export NCPUS=`cat ${PBS_NODEFILE} | wc -l`
-NCPUS=20
+NCPUS=10
 
 # OMP Settings
 export OMP_NUM_THREADS=$NCPUS

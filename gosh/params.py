@@ -42,6 +42,13 @@ def map_dimension():
     gsize  = float(filter(None, re.split(" ",lines[3]))[0])
     return nx,ny,gsize
 
+def experiment():
+    f=open("./exp.txt","r")
+    line=f.readline()
+    exp =line.split("\n")[0]
+    f.close()
+    return exp
+
 # **************************************************************
 # 2. Data assimilation related definitions
 def patch_size():
@@ -80,6 +87,7 @@ def rho():
     return -1.0
     # -1.0 : adaptive inflation will be used as in Myoshi et al (2011)
     # positive : fixed inflation parameter will be used
+    # [E.g. 1.08, 1.10]
 
 def sigma_b():
     return 0.0400000
@@ -114,7 +122,7 @@ def endtime():
 # **************************************************************
 # 4. Spinup options
 def spinup_mode():
-    return 0
+    return 3
     # 0: do spinup simulation for both (corrupted and true) simulation
     # 1: do spin up only at corrupted simulation
     # 2: do spin up only at true simulation
@@ -132,7 +140,7 @@ def spinup_end_date():
 
 # **************************************************************
 # 5. Runoff forcing 
-def runname(num):
+def runname(num=mode()):
     if num == 1:
         return "E2O"
 
@@ -157,13 +165,6 @@ def input(num=mode()):
     if num==3:
         return "VIC_BC"
     # define the runoff data type.
-
-def experiment():
-    f=open("./exp.txt","r")
-    line=f.readline()
-    exp =line.split("\n")[0]
-    f.close()
-    return exp
     
 def max_lat():
     return 80. # maximum latitude of assimilation
@@ -242,7 +243,7 @@ def rivman_error():
     # 7 : with manning error: Manning's n depend on
 
 def run_flag():
-    return 0
+    return 3
     # 0 run all simulations
     # 1 run only corrupted and assimilated simulations
     # 2 run only true and assimilated simulations
