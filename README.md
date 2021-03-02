@@ -1,3 +1,6 @@
+# HydroDA
+  Data assimilation algorithem developed for global-scale data assimilation using a physically based emperical localization technique.
+  
 # HydroDA folder strucutre
     -src
     -out

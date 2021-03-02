@@ -8,6 +8,12 @@ import re
 # parameters list
 #
 ########################
+# **************************************************************
+# 0. HydroDA version
+def version():
+    return "HydroDA version 1.0.0"#, Bathymetry"
+    # version for WSE assimilation / observation localization
+    # CaMa-Flood v396a used
 
 # **************************************************************
 # 1. experment type related definitions
@@ -18,7 +24,7 @@ def mode():
     # 1: Earth2Obs, 2: ERA20CM, 3: VIC_BC, 4: -25% baised (ELSE_KIM2009/E2O/ERA20CM)
 
 def conflag():
-    return 3
+    return 2
     # converstion flag for observation converstions 
     #  1 - Directly values 
     #  2 - Anomalies
@@ -51,6 +57,31 @@ def experiment():
 
 # **************************************************************
 # 2. Data assimilation related definitions
+def assimS():
+    return -20
+    #return -75
+    # data Assimilation's Region (South Edge at latitude)
+    # *note: should be larger or equal to -80
+
+def assimN():
+    return 5
+    #return 75
+    # data Assimilation's Region (North Edge at latitude)
+    # *note: should be smaller or equal to 80
+
+def assimW():
+    return -80
+    #return -170
+    #return -68.25 # use this for disabling west side of the Amazon basin's observation
+    # data Assimilation's Region (West Edge at latitude)
+    # *note: should be larger or equal to -170
+
+def assimE():
+    return -45
+    #return 170
+    # data Assimilation's Region (East Edge at latitude)
+    # *note: should be smaller or equal to 170
+
 def patch_size():
     #return 0
     return 100
@@ -84,7 +115,8 @@ def initial_infl():
     # initial inflation parameter
 
 def rho():
-    return -1.0
+    # return -1.0
+    return 1.00
     # -1.0 : adaptive inflation will be used as in Myoshi et al (2011)
     # positive : fixed inflation parameter will be used
     # [E.g. 1.08, 1.10]
@@ -116,13 +148,13 @@ def starttime():
     return (2002,1,1) # start date: [year,month,date]
 
 def endtime():
-    return (2004,1,1) # end date: [year,month,date]
+    return (2014,1,1) # end date: [year,month,date]
                       # *note: this date is not included
 
 # **************************************************************
 # 4. Spinup options
 def spinup_mode():
-    return 3
+    return 0
     # 0: do spinup simulation for both (corrupted and true) simulation
     # 1: do spin up only at corrupted simulation
     # 2: do spin up only at true simulation
@@ -200,31 +232,6 @@ def diststd(num):
     #return 1.0 # not needed for ERA20CM
     # noise to make runoff input to scatter ensembles
 
-def assimS():
-    return -20
-    #return -75
-    # data Assimilation's Region (South Edge at latitude)
-    # *note: should be larger or equal to -80
-
-def assimN():
-    return 5
-    #return 75
-    # data Assimilation's Region (North Edge at latitude)
-    # *note: should be smaller or equal to 80
-
-def assimW():
-    return -80
-    #return -170
-    #return -68.25 # use this for disabling west side of the Amazon basin's observation
-    # data Assimilation's Region (West Edge at latitude)
-    # *note: should be larger or equal to -170
-
-def assimE():
-    return -45
-    #return 170
-    # data Assimilation's Region (East Edge at latitude)
-    # *note: should be smaller or equal to 170
-
 def err_expansion():
     return 1.0
     # variance-covariance expansion
@@ -243,7 +250,7 @@ def rivman_error():
     # 7 : with manning error: Manning's n depend on
 
 def run_flag():
-    return 3
+    return 0
     # 0 run all simulations
     # 1 run only corrupted and assimilated simulations
     # 2 run only true and assimilated simulations
@@ -258,6 +265,10 @@ def true_run(num):
 
     if num == 3: # only one will be used
         return 3
+# **************************************************************
+# x. CaMa-Flood settings
+def CaMa_ver():
+    return "CaMa-Flood version 3.9.6"
 
 def CaMa_dir():
     return "/cluster/data6/menaka/CaMa-Flood_v396a_20200514"
@@ -274,7 +285,7 @@ def MKLdir():
     # for more information --> https://software.intel.com/en-us/qualify-for-free-software/academicresearcher
 
 def output_er():
-    return 0
+    return 1
     # setting for saving or deleting intermediate files
     # 0 for saving & 1 for deleting
     # those files may be more than 400GB, so erasing is recommended if not necessary
@@ -352,8 +363,3 @@ def cpu_nums():
     f.close()
     return ncpus/para_nums()
     # number of cpus used
-
-def version():
-    return "v5.0.0 CaMa-Flood and HydroWeb"#, Bathymetry"
-    # version for WSE assimilation / observation localization
-    # CaMa-Flood v396a used
