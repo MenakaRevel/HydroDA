@@ -22,45 +22,47 @@
 #
 ########################################
 
-import sys
-import main_code
-import prep_init as init 
-import prep_runoff as inpt
-import prep_obs as obs
-#exp=sys.argv[1]
-#ifact=sys.argv[2]
-
-try:
-  # make necessary directories
-  print "initial"
-  init.initial()
-
-  # prepare runoff ensembles
-  print "prepare input"
-  inpt.prepare_input()
-
-  # prepare observations
-  print "prepare observation"
-  obs.prepare_obs()
-
-  # initial inflation parameter rho for assimilation
-  print "make intial inflation"
-  init.make_initial_infl()
-
-  # preapre the mean and std for anomaly/normalized assimilation
-  print "save statistics"
-  init.save_statistic()
-
-  # run main code
-  main_code.main_act()#exp,ifact)
-
-except Exception as e:
-  print e
-
-
 ## check before run ################
 #
 # 1. compile CaMa-Flood
 # 2. set parameters params.py@gosh directory
 # 3. set local patches folder
 # 4. compile fortran codes in ./src folder %sh compile.sh "yes"
+
+import sys
+import main_code
+import prep_init as init 
+import prep_runoff as inpt
+import prep_obs as obs
+import wrt_expset as expset
+
+try:
+  # write the experimental settings in log file
+  print ("write experiment log file")
+  expset.write_text()
+
+  # make necessary directories
+  print ("initial")
+  init.initial()
+
+  # prepare runoff ensembles
+  print ("prepare input")
+  inpt.prepare_input()
+
+  # prepare observations
+  print ("prepare observation")
+  obs.prepare_obs()
+
+  # initial inflation parameter rho for assimilation
+  print ("make intial inflation")
+  init.make_initial_infl()
+
+  # preapre the mean and std for anomaly/normalized assimilation
+  print ("save statistics")
+  init.save_statistic()
+
+  # run main code
+  main_code.main_act()
+
+except Exception as e:
+  print e

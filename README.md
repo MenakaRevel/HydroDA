@@ -1,3 +1,6 @@
+# HydroDA
+  Data assimilation algorithem developed for global-scale data assimilation using a physically based emperical localization technique.
+  
 # HydroDA folder strucutre
     -src
     -out
@@ -22,6 +25,7 @@
         -HydroWeb station data
 
    img : codes for preapring images
+   
 ********************
 # Simple steps for HydroDA run
 1. Download and compile CaMa-Flood (http://hydro.iis.u-tokyo.ac.jp/~yamadai/cama-flood/index.html) (Yamazaki et al 2011) model
@@ -39,6 +43,7 @@ sh compile.sh "yes"
 qsub run_mool.sh
 ```
 ==========================================================
+
 Reference:
 1. Revel, M., Ikeshima, D., Yamazaki, D., & Kanae, S. (2020). A framework for estimating global‐scale river discharge by assimilating satellite altimetry. Water Resources Research, 1–34. https://doi.org/10.1029/2020wr027876
 2. Revel, M., Ikeshima, D., Yamazaki, D., & Kanae, S. (2019). A Physically Based Empirical Localization Method for Assimilating Synthetic SWOT Observations of a Continental-Scale River: A Case Study in the Congo Basin,Water, 11(4), 829. https://doi.org/10.3390/w11040829

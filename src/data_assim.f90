@@ -601,14 +601,18 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
                 !  4 - Log converted values
                 if (conflag == 1) then
                     xt(j)=obs(i_m,j_m)
+                    local_err(j)=obs_err(i_m,j_m)
                 else if (conflag == 2) then
                     xt(j)=obs(i_m,j_m)-mean_obs(i_m,j_m)
+                    local_err(j)=obs_err(i_m,j_m)
                 else if (conflag == 3) then
                     xt(j)=(obs(i_m,j_m)-mean_obs(i_m,j_m))/(std_obs(i_m,j_m)+1.0e-20)
+                    local_err(j)=obs_err(i_m,j_m)/(std_obs(i_m,j_m)+1.0e-20)
                 else if (conflag == 4) then
                     xt(j)=log10(obs(i_m,j_m))
+                    local_err(j)=sqrt(log10(obs_err(i_m,j_m)**2+1))
                 end if
-                local_err(j)=obs_err(i_m,j_m)
+                ! local_err(j)=obs_err(i_m,j_m)
                 !xt(i)=obs(i_m,j_m) - altitude(i_m,j_m) + elevtn(i_m,j_m)
                 !xt(j)=obs(i_m,j_m) - mean_obs(i_m,j_m) !+ meanglobaltrue(i_m,j_m)
                 !xt(j)=((obs(i_m,j_m) - mean_obs(i_m,j_m))/std_obs(i_m,j_m))*stdglobaltrue(i_m,j_m) + meanglobaltrue(i_m,j_m)
@@ -979,8 +983,8 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         do num=1,ens_num
             !global_xa(lon_cent,lat_cent,num) = xa(target_pixel,num) + meanglobalx(lon_cent,lat_cent,num)!+ meanglobaltrue(lon_cent,lat_cent)
             !global_xa(lon_cent,lat_cent,num) = xa(target_pixel,num)*stdglobalx(lon_cent,lat_cent,num) + meanglobalx(lon_cent,lat_cent,num)
-            global_xa(lon_cent,lat_cent,num) = xa(target_pixel,num)*stdglobaltrue(lon_cent,lat_cent) &
-                                                & + meanglobaltrue(lon_cent,lat_cent)
+            ! global_xa(lon_cent,lat_cent,num) = xa(target_pixel,num)*stdglobaltrue(lon_cent,lat_cent) &
+            !                                     & + meanglobaltrue(lon_cent,lat_cent)
             if (conflag == 1) then
                 global_xa(lon_cent,lat_cent,num) = xa(target_pixel,num)
             else if (conflag == 2) then

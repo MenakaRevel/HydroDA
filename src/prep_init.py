@@ -178,11 +178,12 @@ def make_anomaly_data(mode=pm.mode()):
 ###########################
 def save_statistic():
     # copy mean and std of simulated WSE
+    # for anomaly and normalized assimilations
     mkdir("./assim_out/mean_sfcelv/")
     if pm.input()=="E2O":
-        os.system("cp -r "+pm.DA_dir()+"/dat/mean_sfcelv_"+pm.input()+"_"+pm.mapname()+"_1980-2014.bin ./assim_out/mean_sfcelv/mean_sfcelv.bin")
-        os.system("cp -r "+pm.DA_dir()+"/dat/std_sfcelv_"+pm.input()+"_"+pm.mapname()+"_1980-2014.bin ./assim_out/mean_sfcelv/std_sfcelv.bin")
-        print "cp -r "+pm.DA_dir()+"/dat/mean_sfcelv_"+pm.input()+"_"+pm.mapname()+"_1980-2014.bin ./assim_out/mean_sfcelv/mean_sfcelv.bin"
+        os.system("cp -r "+pm.DA_dir()+"/dat/mean_sfcelv_"+pm.input()+"_"+pm.mapname()+"_2000-2014.bin ./assim_out/mean_sfcelv/mean_sfcelv.bin")
+        os.system("cp -r "+pm.DA_dir()+"/dat/std_sfcelv_"+pm.input()+"_"+pm.mapname()+"_2000-2014.bin ./assim_out/mean_sfcelv/std_sfcelv.bin")
+        print "cp -r "+pm.DA_dir()+"/dat/mean_sfcelv_"+pm.input()+"_"+pm.mapname()+"_2000-2014.bin ./assim_out/mean_sfcelv/mean_sfcelv.bin"
     if pm.input()=="VIC_BC":
         os.system("cp -r "+pm.DA_dir()+"/dat/mean_sfcelv_"+pm.input()+"_"+pm.mapname()+"_1979-2013.bin ./assim_out/mean_sfcelv/mean_sfcelv.bin")
         os.system("cp -r "+pm.DA_dir()+"/dat/std_sfcelv_"+pm.input()+"_"+pm.mapname()+"_1979-2013.bin ./assim_out/mean_sfcelv/std_sfcelv.bin")

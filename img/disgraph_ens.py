@@ -32,7 +32,8 @@ import cal_stat as stat
 
 # experiment="E2O_HydroWeb23"
 # experiment="VIC_BC_HydroWeb11"
-experiment="test_wse"
+# experiment="test_wse"
+experiment="DIR_WSE_E2O_HWEB_001"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 assim_out=pm.DA_dir()+"/out/"+experiment
