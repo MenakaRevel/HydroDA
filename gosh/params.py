@@ -24,7 +24,7 @@ def mode():
     # 1: Earth2Obs, 2: ERA20CM, 3: VIC_BC, 4: -25% baised (ELSE_KIM2009/E2O/ERA20CM)
 
 def conflag():
-    return 2
+    return 3
     # converstion flag for observation converstions 
     #  1 - Directly values 
     #  2 - Anomalies
@@ -237,17 +237,17 @@ def err_expansion():
     # variance-covariance expansion
     # works well with 0.04
 
-def rivman_error():
-    return 0
-    #define the experiment with or without rivman error
-    # 0 : with out manning error
-    # 1 : with manning error: Manning's n depend on river width
-    # 2 : with manning error: Manning's n depend spatial covarience
-    # 3 : with manning error: Manning's n randomly distributed subbasin
-    # 4 : with manning error: Manning's n randomly distributed
-    # 5 : with manning error: Manning's n depend on rivseq
-    # 6 : with manning error: Manning's n depend on uparea
-    # 7 : with manning error: Manning's n depend on
+# # def rivman_error():
+# #     return 0
+# #     #define the experiment with or without rivman error
+# #     # 0 : with out manning error
+# #     # 1 : with manning error: Manning's n depend on river width
+# #     # 2 : with manning error: Manning's n depend spatial covarience
+# #     # 3 : with manning error: Manning's n randomly distributed subbasin
+# #     # 4 : with manning error: Manning's n randomly distributed
+# #     # 5 : with manning error: Manning's n depend on rivseq
+# #     # 6 : with manning error: Manning's n depend on uparea
+# #     # 7 : with manning error: Manning's n depend on
 
 def run_flag():
     return 0
@@ -290,6 +290,9 @@ def output_er():
     # 0 for saving & 1 for deleting
     # those files may be more than 400GB, so erasing is recommended if not necessary
 
+# **************************************************************
+# y. observations settings
+
 def obs_name():
     return "HydroWeb"
 
@@ -304,11 +307,6 @@ def make_log():
     # setting for making log files
     # 1 is for making and 0 is for not making
 
-def para_nums():
-    return 10
-    # setting number of parallels to run CaMa-Flood Model
-    # defualt is 6, but may change depending on your system
-
 def slack_notification():
     return 0
     # setting for validating slack notification
@@ -317,44 +315,53 @@ def slack_notification():
     # if you turn it to 1, you need to edit sendslack.py
     # for more information refer https://api.slack.com/incoming-webhooks
 
-def ens_at_non():
-    return 1
-    # * At Recent version, ensemble generating random number is constant for full simulation.
-    # (For example, when ensemble 001 is corrupted with -0.1 at day 1, ensemble 001 will be always corrupted with 0.1 for full simulation period.)
-    # Previously, ensemble mean was used as an assimilated value for non-observed location.
-    # In this version, this treatment has changed and non-observed location is given with an ensemble value.
-    # To enable this new feature, set the return of params.py method “ens_at_non()”, “1”(DEFAULT SETTING).
-    # If you don’t want to use this, set it to “0”.
+######### Not currently in use
+# # def ens_at_non():
+# #     return 1
+# #     # * At Recent version, ensemble generating random number is constant for full simulation.
+# #     # (For example, when ensemble 001 is corrupted with -0.1 at day 1, ensemble 001 will be always corrupted with 0.1 for full simulation period.)
+# #     # Previously, ensemble mean was used as an assimilated value for non-observed location.
+# #     # In this version, this treatment has changed and non-observed location is given with an ensemble value.
+# #     # To enable this new feature, set the return of params.py method “ens_at_non()”, “1”(DEFAULT SETTING).
+# #     # If you don’t want to use this, set it to “0”.
 
-# functions for corrupting manning coeffcient ###################
-# this is for corrupting manning coefficient at Corrupted Simulation
-# manning coefficient will be corrupted with random numbers generated from following functions
-# the random number is generated for each ensemble member
-# random number is made by gaussian noise of average = corruptman_base(), stddev = corruptman_std()
-def corruptman_base():
-    return 0.03
+# # # functions for corrupting manning coeffcient ###################
+# # # this is for corrupting manning coefficient at Corrupted Simulation
+# # # manning coefficient will be corrupted with random numbers generated from following functions
+# # # the random number is generated for each ensemble member
+# # # random number is made by gaussian noise of average = corruptman_base(), stddev = corruptman_std()
+# # def corruptman_base():
+# #     return 0.03
 
-def corruptman_std():
-    return 0.015
+# # def corruptman_std():
+# #     return 0.015
 
-def rivman_base():
-    return 0.03
+# # def rivman_base():
+# #     return 0.03
 
-def rivman_min():
-    return 0.025
+# # def rivman_min():
+# #     return 0.025
 
-def rivman_max():
-    return 0.035
+# # def rivman_max():
+# #     return 0.035
 
-def corruptele_base():
-    return 0.5 # not needed for ERA20CM
+# # def corruptele_base():
+# #     return 0.5 # not needed for ERA20CM
 
-def corruptele_std():
-    return 0.25 # not needed for ERA20CM
+# # def corruptele_std():
+# #     return 0.25 # not needed for ERA20CM
 
-def non_hgt():
-    return 7.0 # not needed for ERA20CM
-    # nominal water height
+# # def non_hgt():
+# #     return 7.0 # not needed for ERA20CM
+# #     # nominal water height
+
+# **************************************************************
+# y. parallel run settings
+
+def para_nums():
+    return 10
+    # setting number of parallels to run CaMa-Flood Model
+    # defualt is 6, but may change depending on your system
 
 def cpu_nums():
     f=open("./ncpus.txt","r")

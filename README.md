@@ -11,20 +11,13 @@
    src : contains source codes
 
    out : output folder
-        -experiment_name
-            -assim_out
-            -cama_out
-            -cama_in
 
-   inp : input runoff forcing
-        -data name
-            -Roff
+   inp : folder containg input runoff forcing
 
-   dat : river realted data
-        -river basin
-        -HydroWeb station data
 
-   img : codes for preapring images
+   dat : folder containg river realted data
+
+   img : folder conatinag codes for preapring images
    
 ********************
 # Simple steps for HydroDA run

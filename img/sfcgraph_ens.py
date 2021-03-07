@@ -30,11 +30,15 @@ import cal_stat as stat
 
 #experiment="E2O_HydroWeb22"
 # experiment="VIC_BC_HydroWeb11"
-experiment="test_wse"
+# experiment="test_wse"
+# experiment="DIR_WSE_E2O_HWEB_001"
+experiment="ANO_WSE_E2O_HWEB_001"
+# experiment="NOM_WSE_E2O_HWEB_001"
+conflag=2
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 assim_out=pm.DA_dir()+"/out/"+experiment
-print assim_out
+print (assim_out)
 
 #assim_out="assim_out_E2O_womc"
 #assim_out="assim_out"
@@ -476,8 +480,13 @@ def make_fig(point):
     #data=(data-np.mean(data))+mean_sfcelv[ylist[point],xlist[point]]
     #---------
     #data=data-mean_obs[ylist[point],xlist[point]]+mean_sfcelv[ylist[point],xlist[point]]
-    data=((data-mean_obs[ylist[point],xlist[point]])/(std_obs[ylist[point],xlist[point]]+1.0e-20))*std_sfcelv[ylist[point],xlist[point]]+mean_sfcelv[ylist[point],xlist[point]]
-    lines=[ax1.plot(time,data,label="obs",marker="o",color="black",linewidth=0.0,zorder=101)[0]]
+    if conflag==1:
+        data0=data
+    elif conflag==2:
+        data0=(data-mean_obs[ylist[point],xlist[point]])+mean_sfcelv[ylist[point],xlist[point]]
+    elif conflag==3:
+        data0=((data-mean_obs[ylist[point],xlist[point]])/(std_obs[ylist[point],xlist[point]]+1.0e-20))*std_sfcelv[ylist[point],xlist[point]]+mean_sfcelv[ylist[point],xlist[point]]
+    lines=[ax1.plot(time,data0,label="obs",marker="o",color="black",linewidth=0.0,zorder=101)[0]]
 #    ax1.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7,zorder=101)
 #    ax1.plot(np.arange(start,last),m_sf[:,point],label="mean sfcelv",color="black",linewidth=0.7,linestyle="--",zorder=107)
 #    plt.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7)

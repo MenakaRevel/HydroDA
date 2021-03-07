@@ -73,7 +73,8 @@ cd $HydroDA
 # 4. Observation data [HydroWeb(HWEB)] 
 # 5. Number for identifying the experiment
 # EXP="DIR_WSE_E2O_HWEB_001"
-EXP="ANO_WSE_E2O_HWEB_001"
+# EXP="ANO_WSE_E2O_HWEB_001"
+EXP="NOM_WSE_E2O_HWEB_001"
 
 mkdir -p $HydroDA"/out/"$EXP
 

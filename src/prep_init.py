@@ -183,25 +183,13 @@ def save_statistic():
     if pm.input()=="E2O":
         os.system("cp -r "+pm.DA_dir()+"/dat/mean_sfcelv_"+pm.input()+"_"+pm.mapname()+"_2000-2014.bin ./assim_out/mean_sfcelv/mean_sfcelv.bin")
         os.system("cp -r "+pm.DA_dir()+"/dat/std_sfcelv_"+pm.input()+"_"+pm.mapname()+"_2000-2014.bin ./assim_out/mean_sfcelv/std_sfcelv.bin")
-        print "cp -r "+pm.DA_dir()+"/dat/mean_sfcelv_"+pm.input()+"_"+pm.mapname()+"_2000-2014.bin ./assim_out/mean_sfcelv/mean_sfcelv.bin"
+        print ("cp -r "+pm.DA_dir()+"/dat/mean_sfcelv_"+pm.input()+"_"+pm.mapname()+"_2000-2014.bin ./assim_out/mean_sfcelv/mean_sfcelv.bin")
     if pm.input()=="VIC_BC":
         os.system("cp -r "+pm.DA_dir()+"/dat/mean_sfcelv_"+pm.input()+"_"+pm.mapname()+"_1979-2013.bin ./assim_out/mean_sfcelv/mean_sfcelv.bin")
         os.system("cp -r "+pm.DA_dir()+"/dat/std_sfcelv_"+pm.input()+"_"+pm.mapname()+"_1979-2013.bin ./assim_out/mean_sfcelv/std_sfcelv.bin")
-        print "cp -r "+pm.DA_dir()+"/dat/mean_sfcelv_"+pm.input()+"_"+pm.mapname()+"_1979-2013.bin ./assim_out/mean_sfcelv/mean_sfcelv.bin"
+        print ("cp -r "+pm.DA_dir()+"/dat/mean_sfcelv_"+pm.input()+"_"+pm.mapname()+"_1979-2013.bin ./assim_out/mean_sfcelv/mean_sfcelv.bin")
     return 0
 ###########################
-# # make necessary directories
-# print "initial"
-# initial()
-
-# # prepare runoff ensembles
-# print "prepare input"
-# prepare_input()
-
-# # initial inflation parameter rho for assimilation
-# print "make intial inflation"
-# make_initial_infl()
-
-# # preapre the mean and std for anomaly/normalized assimilation
-# print "save statistics"
-# save_statistic()
+if __name__ == "__main__":
+    initial()
+    save_statistic()
