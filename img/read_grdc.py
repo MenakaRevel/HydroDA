@@ -279,7 +279,7 @@ def grdc_river_name_v396():
   
   rivername =  []
   
-  for line in lines:
+  for line in lines[1::]:
     line    = filter(None, re.split(";",line))
     grdc_id = line[0]
     river   = line[1].strip()
