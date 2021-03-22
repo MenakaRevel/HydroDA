@@ -11,7 +11,7 @@ import re
 # **************************************************************
 # 0. HydroDA version
 def version():
-    return "HydroDA version 1.0.0"#, Bathymetry"
+    return "HydroDA version 1.0.0"
     # version for WSE assimilation / observation localization
     # CaMa-Flood v396a used
 
@@ -101,13 +101,17 @@ def patch_dir():
     #return "/cluster/data6/menaka/covariance/local_patch_0.80"
 
 def patch_name():
-    return "amz_06min_S14FD"
+    # return "amz_06min_S14FD_60"
+    return "amz_06min_S14FD_40"
+    # return "amz_06min_S14FD_20"
 
 def patch_id():
-    return "0.60"
+    # return "0.60"
+    return "0.40"
 
 def thersold():
-    return 0.60
+    # return 0.60
+    return 0.40
     # thersold to define the local patch
 
 def initial_infl():

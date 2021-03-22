@@ -40,7 +40,9 @@ import cal_stat as stat
 # experiment="test_wse"
 # experiment="DIR_WSE_E2O_HWEB_001"
 # experiment="ANO_WSE_E2O_HWEB_001"
-experiment="NOM_WSE_E2O_HWEB_001"
+# experiment="NOM_WSE_E2O_HWEB_001"
+# experiment="NOM_WSE_E2O_HWEB_002"
+experiment="NOM_WSE_E2O_HWEB_003"
 
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
@@ -239,7 +241,7 @@ def read_data(inputlist):
             tmp_opn[dt,num,point]=opnfile[iy1,ix1]+opnfile[iy2,ix2]
             tmp_asm[dt,num,point]=asmfile[iy1,ix1]+asmfile[iy2,ix2]
 #--------
-p   = Pool(20)
+p   = Pool(40)
 res = p.map(read_data, inputlist)
 opn = np.ctypeslib.as_array(shared_array_opn)
 asm = np.ctypeslib.as_array(shared_array_asm)
@@ -315,11 +317,11 @@ for point in np.arange(pnum):
     #print (lon,lat,NSEAI) #,NSEasm,NSEopn)
     # if NSEAI > 0.0:
     #     print lon,lat, "%3.2f %3.2f %3.2f"%(NSEAI, NSEasm, NSEopn)
-    if NSEAI > 0.01:
+    if NSEAI >= 0.00:
         ax.scatter(lon,lat,s=10,marker="o",edgecolors=c, facecolors=c,zorder=106)
-    if NSEAI < 0.01:
+    if NSEAI < 0.00:
         print staid[point], pname[point]
-        #ax.scatter(lon,lat,s=10,marker="o",edgecolors="k", facecolors="k",zorder=106)
+        ax.scatter(lon,lat,s=10,marker="d",edgecolors="k", facecolors="k",zorder=106)
 #--
 cbar=m.colorbar(im,"right",size="2%",ticks=np.arange(vmin,vmax+0.001,0.2))
 #plt.title(stitle)

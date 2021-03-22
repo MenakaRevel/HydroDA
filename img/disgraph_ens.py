@@ -35,7 +35,9 @@ import cal_stat as stat
 # experiment="test_wse"
 # experiment="DIR_WSE_E2O_HWEB_001"
 # experiment="ANO_WSE_E2O_HWEB_001"
-experiment="NOM_WSE_E2O_HWEB_001"
+# experiment="NOM_WSE_E2O_HWEB_001"
+# experiment="NOM_WSE_E2O_HWEB_002"
+experiment="NOM_WSE_E2O_HWEB_003"
 
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
@@ -342,7 +344,7 @@ def make_fig(point):
     fig, ax1 = plt.subplots()
     org=grdc.grdc_dis(staid[point],syear,eyear-1)
     org=np.array(org)
-    lines=[ax1.plot(np.arange(start,last),ma.masked_less(org,0.0),label="GRDC",color="black",linewidth=1.5,zorder=101)[0]] #,marker = "o",markevery=swt[point])
+    lines=[ax1.plot(np.arange(start,last),ma.masked_less(org,0.0),label="GRDC",color="#34495e",linewidth=3.0,zorder=101)[0]] #,marker = "o",markevery=swt[point])
 #    ax1.plot(np.arange(start,last),hgt[:,point],label="true",color="gray",linewidth=0.7,linestyle="--",zorder=101)
 #    plt.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7)
     # for num in np.arange(0,pm.ens_mem()):
@@ -351,8 +353,8 @@ def make_fig(point):
 #        plt.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.3,alpha=0.5)
 #        plt.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.3,alpha=0.5)
     # draw mean of ensembles
-    lines.append(ax1.plot(np.arange(start,last),np.mean(opn[:,:,point],axis=1),label="corrupted",color="blue",linewidth=1.0,alpha=1,zorder=104)[0])
-    lines.append(ax1.plot(np.arange(start,last),np.mean(asm[:,:,point],axis=1),label="assimilated",color="red",linewidth=1.0,alpha=1,zorder=106)[0])
+    lines.append(ax1.plot(np.arange(start,last),np.mean(opn[:,:,point],axis=1),label="corrupted",color="#4dc7ec",linewidth=1.0,alpha=1,zorder=104)[0])
+    lines.append(ax1.plot(np.arange(start,last),np.mean(asm[:,:,point],axis=1),label="assimilated",color="#ff8021",linewidth=1.0,alpha=1,zorder=106)[0])
     #    plt.ylim(ymin=)
     # Make the y-axis label, ticks and tick labels match the line color.
     ax1.set_ylabel('discharge (m$^3$/s)', color='k')

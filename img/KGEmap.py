@@ -40,7 +40,9 @@ import cal_stat as stat
 # experiment="test_wse"
 # experiment="DIR_WSE_E2O_HWEB_001"
 # experiment="ANO_WSE_E2O_HWEB_001"
-experiment="NOM_WSE_E2O_HWEB_001"
+# experiment="NOM_WSE_E2O_HWEB_001"
+# experiment="NOM_WSE_E2O_HWEB_002"
+experiment="NOM_WSE_E2O_HWEB_003"
 
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
