@@ -114,6 +114,83 @@ def read_HydroWeb(yyyy,mm,dd,name,EGM08,EGM96, eledf=0.0):
 		mean_wse=np.mean(np.array(lwse))
 		std_wse=np.std(np.array(lwse))
 	return wseo, mean_wse, std_wse
+####################################
+def swot_data(yyyy,mm,dd):
+	# prepare sythetic observations using
+	# pre-simulated data
+	day=SWOT_day(yyyy,mm,dd)
+	SWOTDD="%02d"%(day)
+	fname="../../sat/mesh_day"+SWOTDD+".bin" # for glb_15min
+	mesh_in=np.fromfile(fname,np.float32).reshape([640,1440])
+	mesh=(mesh_in>=10)*(mesh_in<=60)
+	meshP=mesh-1000*(mesh<0.1)
+	fname=pm.CaMa_dir()+"/map/"+pm.mapname()+"/rivwth_gwdlr.bin"
+	rivwth=np.fromfile(fname,np.float32).reshape(720,1440)
+	obs=(meshP>=1.0)*(rivwth>=50.0)*1.0
+	lname =[]
+	xlist =[]
+	ylist =[]
+	l_wse =[]
+	m_wse =[]
+	s_wse =[]
+	l_sat =[]
+	# leledif, lEGM08, lEGM96, satellite
+	#===================================
+	fname="../CaMa_out/"+yyyy+mm+dd+"/sfcelv"+yyyy+".bin"
+	orgfile=np.fromfile(fname,np.float32).reshape([720,1440])
+	# obs_err=SWOT_observation_error()
+	for ix in np.arange(1440):
+		for iy in np.arange(720):
+			if obs[iy,ix] == 1.0:
+				wse=orgfile[iy,ix] + err_rand(ix,iy)
+				l_wse.append(wse)
+				xlist.append(ix+1)
+				ylist.append(iy+1)
+				m_wse.append(-9999.0)
+				s_wse.append(-9999.0)
+				l_sat.append("SWOT")
+	return xlist, ylist, l_wse, m_wse, s_wse, l_sat
+####################################
+def SWOT_day(yyyy,mm,dd):
+	st_year,st_month,st_date=pm.starttime()
+	start_time=datetime.date(st_year,st_month,st_date)
+	this_time=datetime.date(int(yyyy),int(mm),int(dd))
+	days=this_time-start_time
+	days=days.days
+	return days%21+1
+#########################
+def SWOT_observation_error():
+	"""observation error of WSE depending on the L*W of each pixel
+	used sigma*(1/l)*(1/w) l=k*L, w=q*W  Rodrigaz et al 2017:
+	According to CaMa k=0.25, q=0.85"""
+	k=1.00 # assume nearest part to the unit catchment
+	q=1.00 # used 1.0 -> river width variability is 30%
+	ovs_err = 0.10
+	rivlen=np.fromfile(pm.CaMa_dir()+"/map/glb_15min/rivlen.bin",np.float32).reshape(720,1440)
+	rivwth=np.fromfile(pm.CaMa_dir()+"/map/glb_15min/rivwth_gwdlr.bin",np.float32).reshape(720,1440)
+	nextx=(np.fromfile(pm.CaMa_dir()+"/map/glb_15min/nextxy.bin",np.int32).reshape(2,720,1440)[0]!=-9999)*1.0
+	rivlen=1.0 #rivlen*1.0e-3 #used as one kilometer
+	rivwth=rivwth*1.0e-3
+	area=(k*rivlen)*(q*rivwth)
+	obs_err=ovs_err*(1/(k*rivlen+1.0e-20))*(1/(q*rivwth+1.0e-20))*nextx
+	#obs_err=pm.ovs_err()*(1/(area+1.0e-20))*nextx
+	# if water area < 1.0 km2 -> 0.25
+	obs_err=obs_err*(area>=1.0)*1.0+0.25*(1/(k*rivlen+1.0e-20))*(1/(q*rivwth+1.0e-20))*nextx*(area<1.0)*1.0
+	obs_err=ma.masked_where(area<0.625,obs_err).filled(0.25) # 25cm for < 1km^2 water area
+	obs_err=obs_err*nextx
+	obs_err=obs_err.astype(np.float32)
+	# obs_err0=obs_err[iy,ix]
+	fname=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out/obs/obs_err.bin"
+	obs_err.tofile(fname)
+	return 0
+#########################
+def err_rand(ix,iy):
+	"""make random values to add to true values"""
+	fname=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out/obs/obs_err.bin"
+	obs_err=np.fromfile(fname,np.float32).reshape(720,1440)
+	obs_err=obs_err*((obs_err<=0.25)*1.0) + 0.25*((obs_err>0.25)*1.0)
+	rand = np.random.normal(0.0,obs_err[iy,ix],1)
+	return rand
 #########################
 def write_txt(inputlist):
 	yyyy=inputlist[0]
@@ -130,25 +207,67 @@ def write_txt(inputlist):
 	print (pnum)
 	# print pnum
 	with open(txtfile,"w") as txtf:
-		for point in np.arange(pnum):
-			# == read relevant observation data ==
-			if pm.obs_name() == "HydroWeb":
-				# == for HydroWeb data ==
-				wseo, mean_wse, std_wse = read_HydroWeb(yyyy,mm,dd,lname[point],lEGM08[point],lEGM96[point],leledif[point])
-			else:
-				wseo, mean_wse, std_wse = read_HydroWeb(yyyy,mm,dd,lname[point],lEGM08[point],lEGM96[point],leledif[point])
-			print (point, lname[point], wseo)
-			if wseo == -9999.0:
-				continue
-			iix=xlist[point]
-			iiy=ylist[point]
+		# for point in np.arange(pnum):
+		# 	# == read relevant observation data ==
+		# 	if pm.obs_name() == "HydroWeb":
+		# 		# == for HydroWeb data ==
+		# 		wseo, mean_wse, std_wse = read_HydroWeb(yyyy,mm,dd,lname[point],lEGM08[point],lEGM96[point],leledif[point])
+		# 	else:
+		# 		wseo, mean_wse, std_wse = read_HydroWeb(yyyy,mm,dd,lname[point],lEGM08[point],lEGM96[point],leledif[point])
+		# 	print (point, lname[point], wseo)
+		# 	if wseo == -9999.0:
+		# 		continue
+		# 	iix=xlist[point]
+		# 	iiy=ylist[point]
+		# == read relevant observation data ==
+	    if pm.obs_name() == "HydroWeb":
+			xlist, ylist, l_wse, m_wse, s_wse, l_sat = HydroWeb_data(yyyy,mm,dd)
+		if pm.obs_name() == "SWOT":
+			xlist, ylist, l_wse, m_wse, s_wse, l_sat = swot_data(yyyy,mm,dd) 
 			# mean_wse=np.mean(np.array(lwse))
 			# std_wse=np.std(np.array(lwse))
-			sat=satellite[point]
+			# sat=satellite[point]
+		pnum=len(xlist)
+		for point in pnum:
+			iix=xlist[point]
+			iiy=ylist[point]
+			wseo=l_wse[point]
+			mean_wse=m_wse[point]
+			std_wse=s_wse[point]
+			sat=l_sat[point]
 			line="%04d	%04d	%10.4f	%10.4f	%10.4f	%s\n"%(iix,iiy,wseo,mean_wse,std_wse,sat)
 			txtf.write(line)
 			print (line)
 	return 0
+#########################
+def HydroWeb_data(yyyy,mm,dd):
+	lname =[]
+	xlist =[]
+	ylist =[]
+	l_wse =[]
+	m_wse =[]
+	s_wse =[]
+	for point in np.arange(pnum):
+		# == read relevant observation data ==
+		if pm.obs_name() == "HydroWeb":
+			# == for HydroWeb data ==
+			wseo, mean_wse, std_wse = read_HydroWeb(yyyy,mm,dd,lname[point],lEGM08[point],lEGM96[point],leledif[point])
+		else:
+			wseo, mean_wse, std_wse = read_HydroWeb(yyyy,mm,dd,lname[point],lEGM08[point],lEGM96[point],leledif[point])
+		print (point, lname[point], wseo)
+		if wseo == -9999.0:
+			continue
+		iix=xlist[point]
+		iiy=ylist[point]
+		sat=satellite[point]
+		#====================
+		xlist.append(iix)
+		ylist.append(iiy)
+		l_wse.append(weso)
+		m_wse.append(mean_wse)
+		s_wse.append(std_wse)
+		l_sat.append(sat)
+	return xlist, ylist, l_wse, m_wse, s_wse, l_sat
 #########################
 def prepare_obs():
 	#
@@ -177,6 +296,8 @@ def prepare_obs():
 	p.terminate()
 	# map(write_txt,inputlist)
 	return 0
+####################################
+
 ####################################
 if __name__ == "__main__":
     prepare_obs()

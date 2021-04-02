@@ -1433,6 +1433,7 @@ if (trim(sat) == "ENVISAT") obs_error=0.30
 if (trim(sat) == "JASON2") obs_error=0.28
 if (trim(sat) == "JASON3") obs_error=0.28
 if (trim(sat) == "SENTINEL3A") obs_error=0.30
+if (trim(sat) == "SWOT") obs_error=0.10
 return
 end function obs_error
 !********************************
