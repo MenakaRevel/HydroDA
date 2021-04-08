@@ -24,7 +24,7 @@ def mode():
     # 1: Earth2Obs, 2: ERA20CM, 3: VIC_BC, 4: -25% baised (ELSE_KIM2009/E2O/ERA20CM)
 
 def conflag():
-    return 3
+    return 2
     # converstion flag for observation converstions 
     #  1 - Directly values 
     #  2 - Anomalies
@@ -101,20 +101,20 @@ def patch_dir():
     #return "/cluster/data6/menaka/covariance/local_patch_0.80"
 
 def patch_name():
-    return "amz_06min_S14FD_80"
-    # return "amz_06min_S14FD_60"
+    # return "amz_06min_S14FD_80"
+    return "amz_06min_S14FD_60"
     # return "amz_06min_S14FD_40"
     # return "amz_06min_S14FD_20"
 
 def patch_id():
-    return "0.80"
-    # return "0.60"
+    # return "0.80"
+    return "0.60"
     # return "0.40"
     # return "0.20"
 
 def thersold():
-    return 0.80
-    # return 0.60
+    # return 0.80
+    return 0.60
     # return 0.40
     # return 0.20
     # thersold to define the local patch
