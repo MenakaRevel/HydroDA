@@ -25,9 +25,10 @@ import cartopy.feature as cfeature
 import os
 
 #sys.path.append('../assim_out/')
-os.system("ln -sf ../gosh/params.py params.py")
+# os.system("ln -sf ../gosh/params.py params.py")
 import params as pm
 import read_grdc as grdc
+import read_hydroweb as hweb
 import cal_stat as stat
 #import plot_colors as pc
 #from matplotlib.font_manager import FontProperties
@@ -39,10 +40,10 @@ import cal_stat as stat
 # experiment="VIC_BC_HydroWeb11"
 # experiment="test_wse"
 # experiment="DIR_WSE_E2O_HWEB_001"
-experiment="DIR_WSE_E2O_HWEB_001"
+# experiment="DIR_WSE_E2O_HWEB_001"
 # experiment="ANO_WSE_E2O_HWEB_001"
 # experiment="ANO_WSE_E2O_HWEB_002"
-# experiment="NOM_WSE_E2O_HWEB_001"
+experiment="NOM_WSE_E2O_HWEB_001"
 # experiment="NOM_WSE_E2O_HWEB_002"
 # experiment="NOM_WSE_E2O_HWEB_003"
 # experiment="NOM_WSE_E2O_HWEB_004"
@@ -68,8 +69,8 @@ def filter_nan(s,o):
 #====================================================================
 def vec_par(LEVEL,ax=None):
     ax=ax or plt.gca()
-    txt="NSEAItmp_%02d.txt"%(LEVEL)
-    os.system("./bin/print_rivvec NSEAItmp1.txt 1 "+str(LEVEL)+" > "+txt)
+    txt="RMSEtmp_%02d.txt"%(LEVEL)
+    os.system("./bin/print_rivvec RMSEtmp1.txt 1 "+str(LEVEL)+" > "+txt)
     width=(float(LEVEL)**sup)*w
     #print LEVEL, width#, lon1,lat1,lon2-lon1,lat2-lat1#x1[0],y1[0],x1[1]-x1[0],y1[1]-y1[0]
     # open tmp2.txt
@@ -126,10 +127,27 @@ def NS(s,o):
     s=ma.masked_where(o<=0.0,s).filled(0.0)
     o=np.compress(o>0.0,o)
     s=np.compress(o>0.0,s) 
+    s,o = filter_nan(s,o)
     return 1 - sum((s-o)**2)/(sum((o-np.mean(o))**2)+1e-20)
-#====================================================================
+#==========================================================
+def RMSE(s,o):
+    """
+    Root Mean Squre Error
+    input:
+        s: simulated
+        o: observed
+    output:
+        RMSE: Root Mean Squre Error
+    """
+    o=ma.masked_where(o==-9999.0,o).filled(0.0)
+    s=ma.masked_where(o==-9999.0,s).filled(0.0)
+    o=np.compress(o>0.0,o)
+    s=np.compress(o>0.0,s)
+    s,o = filter_nan(s,o)
+    return np.sqrt(np.mean((s-o)**2))
+#==========================================================
 mk_dir(assim_out+"/figures")
-mk_dir(assim_out+"/figures/NSEAI")
+mk_dir(assim_out+"/figures/RMSE")
 #----
 fname=pm.CaMa_dir()+"/map/"+pm.mapname()+"/params.txt"
 f=open(fname,"r")
@@ -169,7 +187,7 @@ rivnum=np.fromfile(rivnum,np.int32).reshape(ny,nx)
 rivermap=((nextxy[0]>0)*(rivnum==1))*1.0
 #----
 syear,smonth,sdate=2003,1,1 #spm.starttime()#2004#1991  2004,1,1 #
-eyear,emonth,edate=pm.endtime() #2005,1,1 #
+eyear,emonth,edate=2005,1,1 #pm.endtime() #2005,1,1 #
 #month=1
 #date=1
 start_dt=datetime.date(syear,smonth,sdate)
@@ -183,27 +201,30 @@ N=int(last)
 green2="greenyellow"
 green ="green"
 #-------
-staid=[]
 pname=[]
 xlist=[]
 ylist=[]
 river=[]
-rivernames = grdc.grdc_river_name_v396()
+EGM08=[]
+EGM96=[]
+rivernames  = ["AMAZONAS"]
 for rivername in rivernames:
-    grdc_id,station_loc,x_list,y_list = grdc.get_grdc_loc_v396(rivername)
-    #print (rivername, grdc_id,station_loc)
-    river.append([rivername]*len(station_loc))
-    staid.append(grdc_id)
-    pname.append(station_loc)
-    xlist.append(x_list)
-    ylist.append(y_list)
+  path = assim_out+"/figures/sfcelv/%s"%(rivername)
+  station_loc,x_list,y_list,egm08,egm96 =hweb.get_hydroweb_loc(rivername,pm.mapname())
+  river.append([rivername]*len(station_loc))
+  pname.append(station_loc)
+  xlist.append(x_list)
+  ylist.append(y_list)
+  EGM08.append(egm08)
+  EGM96.append(egm96)
 #-----------------------
 river=([flatten for inner in river for flatten in inner])
-staid=([flatten for inner in staid for flatten in inner])
 pname=([flatten for inner in pname for flatten in inner])
-print (len(pname), len(xlist))
 xlist=([flatten for inner in xlist for flatten in inner])
 ylist=([flatten for inner in ylist for flatten in inner])
+EGM08=([flatten for inner in EGM08 for flatten in inner])
+EGM96=([flatten for inner in EGM96 for flatten in inner])
+pnum=len(pname)
 #########################################################
 pnum=len(pname)
 opn=np.ctypeslib.as_ctypes(np.zeros([N,pm.ens_mem(),pnum],np.float32))
@@ -241,24 +262,22 @@ def read_data(inputlist):
     target_dt=datetime.date(year,mon,day)
     dt=(target_dt-start_dt).days
     # corrpted
-    fname=assim_out+"/assim_out/outflw/open/outflw"+yyyy+mm+dd+"_"+numch+".bin"
+    fname=assim_out+"/assim_out/ens_xa/open/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
     #fname=assim_out+"/assim_out/rivout/open/rivout"+yyyy+mm+dd+"_"+numch+".bin"
     opnfile=np.fromfile(fname,np.float32).reshape([ny,nx])
     # assimilated
-    fname=assim_out+"/assim_out/outflw/assim/outflw"+yyyy+mm+dd+"_"+numch+".bin"
+    fname=assim_out+"/assim_out/ens_xa/assim/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
     #fname=assim_out+"/assim_out/rivout/assim/rivout"+yyyy+mm+dd+"_"+numch+".bin"
     asmfile=np.fromfile(fname,np.float32).reshape([ny,nx])
     #-------------
     for point in np.arange(pnum):
-        ix1,iy1,ix2,iy2=grdc.get_grdc_station_v396(pname[point])
-        if ix2 == -9999 or iy2 == -9999:
-            tmp_opn[dt,num,point]=opnfile[iy1,ix1]
-            tmp_asm[dt,num,point]=asmfile[iy1,ix1]
-        else:
-            tmp_opn[dt,num,point]=opnfile[iy1,ix1]+opnfile[iy2,ix2]
-            tmp_asm[dt,num,point]=asmfile[iy1,ix1]+asmfile[iy2,ix2]
+        ix1=xlist[point]
+        iy1=ylist[point]
+        tmp_opn[dt,num,point]=opnfile[iy1,ix1]
+        tmp_asm[dt,num,point]=asmfile[iy1,ix1]        
+        
 #--------
-p   = Pool(40)
+p   = Pool(20)
 res = p.map(read_data, inputlist)
 opn = np.ctypeslib.as_array(shared_array_opn)
 asm = np.ctypeslib.as_array(shared_array_asm)
@@ -276,10 +295,11 @@ wpix=(180+west)*4
 epix=(180+east)*4
 
 #cmap=make_colormap(colors_list)
-cmap=mbar.colormap("H01")
+# cmap=mbar.colormap("H01")
+cmap=cm.coolwarm
 cmap.set_under("w",alpha=0)
 cmapL=cmap #cm.get_cmap("rainbow_r")
-vmin=0.0
+vmin=-1.0
 vmax=1.0
 norm=Normalize(vmin=vmin,vmax=vmax)
 #------
@@ -304,22 +324,23 @@ m.drawparallels(np.arange(south,north+0.1,5), labels = [1,0,0,0], fontsize=10,li
 m.drawmeridians(np.arange(west,east+0.1,5), labels = [0,0,0,1], fontsize=10,linewidth=0,zorder=102)
 #--
 box="%f %f %f %f"%(west,east,north,south) 
-os.system("./bin/txt_vector "+box+" "+pm.CaMa_dir()+" "+pm.mapname()+" > NSEAItmp1.txt") 
+os.system("./bin/txt_vector "+box+" "+pm.CaMa_dir()+" "+pm.mapname()+" > RMSEtmp1.txt") 
 #map(vec_par,np.arange(1,10+1,1))
 map(vec_par,np.arange(2,10+1,1))
 #--
 for point in np.arange(pnum):
-    org=grdc.grdc_dis(staid[point],syear,eyear-1)
-    org=np.array(org)
-    if np.sum(ma.masked_where(org!=-99.9,org))==0.0:
-        print ("no obs", np.sum(ma.masked_where(org!=-99.9,org)))
+    # time,org=hweb.HydroWeb_WSE(pname[point],syear,eyear-1)
+    org=hweb.HydroWeb_continous_WSE(pname[point],syear,smonth,sdate,eyear-1,12,31,EGM08[point],EGM96[point])
+    org=np.array(org)+np.array(EGM08[point])-np.array(EGM96[point])
+    if np.sum(ma.masked_where(org!=-9999.0,org))==0.0:
+        print ("no obs", np.sum(ma.masked_where(org!=-9999.0,org)))
         continue
-    NSEasm=NS(np.mean(asm[:,:,point],axis=1),org)
-    NSEopn=NS(np.mean(opn[:,:,point],axis=1),org)
-    if NSEopn==1.00:
-        print (NSEopn, staid[point], pname[point])
+    RMSEasm=RMSE(np.mean(asm[:,:,point],axis=1),org)
+    RMSEopn=RMSE(np.mean(opn[:,:,point],axis=1),org)
+    if RMSEopn==0.0:
+        print (RMSEopn, pname[point])
         continue
-    NSEAI=(NSEasm-NSEopn)/(1.0-NSEopn+1.0e-20) 
+    rRMSE=(RMSEasm-RMSEopn)/(RMSEopn+1.0e-20) 
     #NSEAI=NSEasm
     ix=xlist[point]
     iy=ylist[point]
@@ -330,17 +351,18 @@ for point in np.arange(pnum):
     #lat=lat0-iy*gsize
     lon=lonlat[0,iy,ix]
     lat=lonlat[1,iy,ix]
-    c=cmapL(norm(NSEAI))
+    c=cmapL(norm(rRMSE))
     #print (lon,lat,NSEAI) #,NSEasm,NSEopn)
     # if NSEAI > 0.0:
     #     print lon,lat, "%3.2f %3.2f %3.2f"%(NSEAI, NSEasm, NSEopn)
-    if NSEAI >= 0.00:
-        ax.scatter(lon,lat,s=10,marker="o",edgecolors=c, facecolors=c,zorder=106)
-    if NSEAI < 0.00:
-        print staid[point], pname[point]
-        ax.scatter(lon,lat,s=10,marker="d",edgecolors="k", facecolors="k",zorder=106)
+    ax.scatter(lon,lat,s=10,marker="o",edgecolors=c, facecolors=c,zorder=106)
+    # if rRMSE >= 0.00:
+    #     ax.scatter(lon,lat,s=10,marker="o",edgecolors=c, facecolors=c,zorder=106)
+    # if rRMSE < 0.00:
+    #     print staid[point], pname[point]
+    #     ax.scatter(lon,lat,s=10,marker="d",edgecolors="k", facecolors="k",zorder=106)
 #--
 cbar=m.colorbar(im,"right",size="2%",ticks=np.arange(vmin,vmax+0.001,0.2))
 #plt.title(stitle)
-plt.savefig(assim_out+"/figures/NSEAI/NSEAIscatter.png",dpi=300,bbox_inches="tight", pad_inches=0.05)
-os.system("rm -r NSEAItmp*.txt")
+plt.savefig(assim_out+"/figures/RMSE/RMSEscatter.png",dpi=300,bbox_inches="tight", pad_inches=0.05)
+os.system("rm -r RMSEtmp*.txt")

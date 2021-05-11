@@ -33,9 +33,11 @@ import cal_stat as stat
 # experiment="E2O_HydroWeb23"
 # experiment="VIC_BC_HydroWeb11"
 # experiment="test_wse"
+experiment="test_virtual"
 # experiment="DIR_WSE_E2O_HWEB_001"
+# experiment="DIR_WSE_E2O_HWEB_002"
 # experiment="ANO_WSE_E2O_HWEB_001"
-experiment="ANO_WSE_E2O_HWEB_002"
+# experiment="ANO_WSE_E2O_HWEB_002"
 # experiment="ANO_WSE_E2O_HWEB_002"
 # experiment="NOM_WSE_E2O_HWEB_001"
 # experiment="NOM_WSE_E2O_HWEB_002"
@@ -43,6 +45,7 @@ experiment="ANO_WSE_E2O_HWEB_002"
 # experiment="NOM_WSE_E2O_HWEB_004"
 # experiment="NOM_WSE_E2O_HWEB_005"
 # experiment="NOM_WSE_E2O_HWEB_006"
+# experiment="NOM_WSE_E2O_HWEB_007"
 
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
@@ -111,7 +114,7 @@ nx     = int(filter(None, re.split(" ",lines[0]))[0])
 ny     = int(filter(None, re.split(" ",lines[1]))[0])
 gsize  = float(filter(None, re.split(" ",lines[3]))[0])
 #----
-syear,smonth,sdate=2003,1,1 #pm.starttime()#2004#1991
+syear,smonth,sdate=pm.starttime()#2004#1991 2003,1,1 #
 eyear,emonth,edate=pm.endtime() #2005,1,1 #
 #month=1
 #date=1

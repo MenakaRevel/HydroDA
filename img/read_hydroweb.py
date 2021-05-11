@@ -2,6 +2,7 @@
 import os
 import re
 import datetime
+import numpy as np
 ################################
 # Fuctions to read HydroWeb data
 ################################
@@ -114,6 +115,40 @@ def HydroWeb_WSE(station,syear,eyear,smon=1,emon=12,sday=1,eday=31):
         lag  = int((now-start).days)
         time.append(lag)
     return time, data
+#####################################
+def HydroWeb_continous_WSE(station,syear=2002,smon=10,sday=1,eyear=2020,emon=12,eday=31,egm08=0.0,egm96=0.0):
+    #
+    start=datetime.date(syear,smon,sday)
+    end=datetime.date(eyear,emon,eday)
+    # read hydroweb
+    #station="R_con_con_env_0429_01"
+    #satellite=station.split("_")[2]
+    #fname="/home/yamadai/data/Altimetry/HydroWeb_LEGOS/River/R_"+station
+    fname="/cluster/data6/menaka/HydroWeb/data/hydroprd_"+station+".txt"
+    f=open(fname,"r")
+    lines=f.readlines()
+    f.close()
+    head=33
+    #--
+    time=int((end-start).days + 1) # time in days
+    data=np.ones([time],np.float32)*-9999.0 # WSE in [m] # -9999.0 for no observations
+    for line in lines[head::]:
+        if line[0][0] == "#":
+            continue
+        line = re.split(" ",line)
+        date = line[0]
+        date = re.split("-",date)
+        yyyy = int(date[0])
+        mm   = int(date[1])
+        dd   = int(date[2])
+        wse  = float(line[2])
+        #print yyyy, mm, dd, wse
+        now  = datetime.date(yyyy,mm,dd)
+        #print yyyy, mm, dd, int((now-start).days), wse
+        if now > start and now < end:
+            nowtime=int((now-start).days)
+            data[nowtime]=wse+egm08-egm96
+    return data
 #####################################
 def altimetry(name,mapname="glb_15min"):
     # directory

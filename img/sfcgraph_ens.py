@@ -17,7 +17,7 @@ from numpy import ma
 import re
 import math
 
-os.system("ln -sf ../gosh/params.py params.py")
+# os.system("ln -sf ../gosh/params.py params.py")
 #sys.path.append('../assim_out/')
 import params as pm
 import read_grdc as grdc
@@ -32,8 +32,8 @@ import cal_stat as stat
 # experiment="VIC_BC_HydroWeb11"
 # experiment="test_wse"
 # experiment="DIR_WSE_E2O_HWEB_001"
-experiment="ANO_WSE_E2O_HWEB_001"
-# experiment="NOM_WSE_E2O_HWEB_001"
+# experiment="ANO_WSE_E2O_HWEB_001"
+experiment="NOM_WSE_E2O_HWEB_001"
 conflag=2
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
@@ -70,6 +70,34 @@ def mk_dir(sdir):
     os.makedirs(sdir)
   except:
     pass
+#====================================================================
+def filter_nan(s,o):
+    """
+    this functions removed the data  from simulated and observed data
+    where ever the observed data contains nan
+    """
+    data = np.array([s.flatten(),o.flatten()])
+    data = np.transpose(data)
+    data = data[~np.isnan(data).any(1)]
+
+    return data[:,0],data[:,1]
+#====================================================================
+def RMSE(s,o):
+    """
+    Root Mean Squre Error
+    input:
+        s: simulated
+        o: observed
+    output:
+        RMSE: Root Mean Squre Error
+    """
+    o=ma.masked_where(o==-9999.0,o).filled(0.0)
+    s=ma.masked_where(o==-9999.0,s).filled(0.0)
+    o=np.compress(o>0.0,o)
+    s=np.compress(o>0.0,s)
+    s,o = filter_nan(s,o)
+    return np.sqrt(np.mean((s-o)**2))
+#==========================================================
 #----
 mk_dir(assim_out+"/figures")
 mk_dir(assim_out+"/figures/sfcelv")
@@ -96,7 +124,7 @@ gsize  = float(filter(None, re.split(" ",lines[3]))[0])
 ###    last=366
 ###else:
 ###    last=365
-syear,smonth,sdate=2002,1,1 #pm.starttime()#2004#1991
+syear,smonth,sdate=2003,1,1 #pm.starttime()#2004#1991
 eyear,emonth,edate=pm.endtime() #2005,1,1 #
 #month=1
 #date=1

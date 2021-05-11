@@ -1386,11 +1386,11 @@ end subroutine ixy2iixy
 function str2int(str)
 implicit none
 ! for input
-character(len=*)            str
+character(len=*)            :: str
 ! for output
-integer                     str2int
+integer                     :: str2int
 !-
-integer                     stat
+integer                     :: stat
 !---
 read(str,*,iostat=stat)  str2int
 if (stat/=0) str2int=-9999
@@ -1420,7 +1420,7 @@ real                         :: obs_error
 ! Australia.In Proceedings of the Ocean Surface Topography Science Team Meeting 2018, Ponta Delgada, 
 ! Portugal,24–29 September 2018.
 ! *2.Bonnefond, P.; Exertier, P.; Laurain, O.; Guinle, T.; Féménias, P. Corsica:  
-! A 20-Yr multi-mission absolutealtimeter calibration site.  In Proceedings of the Ocean Surface 
+! A 20-Yr multi-mission absolute altimeter calibration site.  In Proceedings of the Ocean Surface 
 ! Topography Science Team Meeting 2018,Ponta Delgada, Portugal, 24–29 September 2018.
 ! *3.Garcia-Mondejar, A.; Zhao, Z.; Rhines, P. Sentinel-3 Range and Datation Calibration with Crete transponder.
 ! In Proceedings of the 25 Years of Progress in Radar Altimetry, Ponta Delgada, Portugal, 24–29 September 2018.

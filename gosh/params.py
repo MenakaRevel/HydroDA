@@ -24,7 +24,7 @@ def mode():
     # 1: Earth2Obs, 2: ERA20CM, 3: VIC_BC, 4: -25% baised (ELSE_KIM2009/E2O/ERA20CM)
 
 def conflag():
-    return 3
+    return 1
     # converstion flag for observation converstions 
     #  1 - Directly values 
     #  2 - Anomalies
@@ -32,7 +32,8 @@ def conflag():
     #  4 - Log converted values
 
 def mapname():
-    return "amz_06min"
+    # return "amz_06min"
+    return "glb_15min"
     # realted CaMa-Flood map directory
     # [e.g. : glb_15min, glb_06min, Mkg_06min, etc.]
     # Check 
@@ -58,27 +59,27 @@ def experiment():
 # **************************************************************
 # 2. Data assimilation related definitions
 def assimS():
-    return -20
-    #return -75
+    # return -20
+    return -80
     # data Assimilation's Region (South Edge at latitude)
     # *note: should be larger or equal to -80
 
 def assimN():
-    return 5
-    #return 75
+    # return 5
+    return 80
     # data Assimilation's Region (North Edge at latitude)
     # *note: should be smaller or equal to 80
 
 def assimW():
-    return -80
-    #return -170
+    # return -80
+    return -180
     #return -68.25 # use this for disabling west side of the Amazon basin's observation
     # data Assimilation's Region (West Edge at latitude)
     # *note: should be larger or equal to -170
 
 def assimE():
-    return -45
-    #return 170
+    # return -45
+    return 180
     # data Assimilation's Region (East Edge at latitude)
     # *note: should be smaller or equal to 170
 
@@ -102,9 +103,10 @@ def patch_dir():
 
 def patch_name():
     # return "amz_06min_S14FD_80"
-    return "amz_06min_S14FD_60"
+    # return "amz_06min_S14FD_60"
     # return "amz_06min_S14FD_40"
     # return "amz_06min_S14FD_20"
+    return "glb_15min_S14FD_60"
 
 def patch_id():
     # return "0.80"
@@ -125,8 +127,8 @@ def initial_infl():
 
 def rho():
     # return -1.0
-    # return 1.00
-    return 1.08
+    return 1.00
+    # return 1.08
     # -1.0 : adaptive inflation will be used as in Myoshi et al (2011)
     # positive : fixed inflation parameter will be used
     # [E.g. 1.08, 1.10]
@@ -155,10 +157,10 @@ def timestep():
     return 86400 # outer timestep in seconds
 
 def starttime():
-    return (2002,1,1) # start date: [year,month,date]
+    return (2004,1,1) # start date: [year,month,date]
 
 def endtime():
-    return (2014,1,1) # end date: [year,month,date]
+    return (2005,1,1) # end date: [year,month,date]
                       # *note: this date is not included
 
 # **************************************************************
@@ -172,7 +174,7 @@ def spinup_mode():
     ### if initial restart file is ready, spinup simulation is no need
 
 def spinup_end_year():
-    return 2001
+    return 2003
 
 def spinup_end_month():
     return 12
@@ -304,13 +306,15 @@ def output_er():
 # y. observations settings
 
 def obs_name():
-    return "HydroWeb"
+    # return "HydroWeb"
+    return "SWOT"
 
 def HydroWeb_dir():
     return "/cluster/data6/menaka/HydroWeb"
 
 def obs_dir():
-    return "/cluster/data6/menaka/HydroWeb"
+    # return "/cluster/data6/menaka/HydroWeb"
+    return "/cluster/data6/menaka/ensemble_org/CaMa_out/E2O003"
 
 def make_log():
     return 1
@@ -367,7 +371,6 @@ def slack_notification():
 
 # **************************************************************
 # y. parallel run settings
-
 def para_nums():
     return 10
     # setting number of parallels to run CaMa-Flood Model

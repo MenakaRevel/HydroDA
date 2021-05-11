@@ -153,6 +153,8 @@ def HydroWeb_data(yyyy,mm,dd):
 def swot_data(yyyy,mm,dd):
 	# prepare sythetic observations using
 	# pre-simulated data
+	# river width thershold
+	rivwdth_thr=50.0 #m
 	nx,ny,gsize = pm.map_dimension()
 	ny_swot = min(ny,640)
 	day=SWOT_day(yyyy,mm,dd)
@@ -161,9 +163,11 @@ def swot_data(yyyy,mm,dd):
 	mesh_in=np.fromfile(fname,np.float32).reshape([ny_swot,nx])
 	mesh=(mesh_in>=10)*(mesh_in<=60)
 	meshP=mesh-1000*(mesh<0.1)
+	SWOTmesh=np.zeros([ny,nx],np.float32)
+	SWOTmesh[40:680,:]=meshP
 	fname=pm.CaMa_dir()+"/map/"+pm.mapname()+"/rivwth_gwdlr.bin"
 	rivwth=np.fromfile(fname,np.float32).reshape(ny,nx)
-	obs=(meshP>=1.0)*(rivwth>=50.0)*1.0
+	obs=(SWOTmesh>=1.0)*(rivwth>=rivwdth_thr)*1.0
 	lname =[]
 	xlist =[]
 	ylist =[]
@@ -173,14 +177,28 @@ def swot_data(yyyy,mm,dd):
 	l_sat =[]
 	# leledif, lEGM08, lEGM96, satellite
 	#===================================
-	fname="../CaMa_out/"+yyyy+mm+dd+"/sfcelv"+yyyy+".bin"
-	orgfile=np.fromfile(fname,np.float32).reshape([ny,nx])
-	# obs_err=SWOT_observation_error()
-	for ix in np.arange(1440):
-		for iy in np.arange(720):
+	# odir="/cluster/data6/menaka/ensemble_org/CaMa_out/E2O003"
+	odir=pm.obs_dir()
+	fname=odir+"/sfcelv"+yyyy+".bin"
+	year=int(yyyy)
+	mon=int(mm)
+	day=int(dd)
+	if calendar.isleap(year):
+		nt=366
+	else:
+		nt=365
+	orgfile=np.fromfile(fname,np.float32).reshape([nt,ny,nx])
+	obs_err=SWOT_observation_error()
+	#-----------------------
+	start_dt=datetime.date(year,1,1)
+	target_dt=datetime.date(year,mon,day)
+	it=(target_dt-start_dt).days
+	for ix in np.arange(nx):
+		for iy in np.arange(ny):
 			if obs[iy,ix] == 1.0:
-				wse=orgfile[iy,ix] + err_rand(ix,iy)
-				l_wse.append(wse)
+				wse=orgfile[it,iy,ix] + err_rand(ix,iy)
+				# print (ix,iy,wse[0])
+				l_wse.append(wse[0])
 				xlist.append(ix+1)
 				ylist.append(iy+1)
 				m_wse.append(-9999.0)
@@ -200,27 +218,31 @@ def SWOT_observation_error():
 	"""observation error of WSE depending on the L*W of each pixel
 	used sigma*(1/l)*(1/w) l=k*L, w=q*W  Rodrigaz et al 2017:
 	According to CaMa k=0.25, q=0.85"""
-	nx,ny,gsize = pm.map_dimension()
-	k=1.00 # assume nearest part to the unit catchment
-	q=1.00 # used 1.0 -> river width variability is 30%
-	ovs_err = 0.10
-	rivlen=np.fromfile(pm.CaMa_dir()+"/map/glb_15min/rivlen.bin",np.float32).reshape(ny,nx)
-	rivwth=np.fromfile(pm.CaMa_dir()+"/map/glb_15min/rivwth_gwdlr.bin",np.float32).reshape(ny,nx)
-	nextx=(np.fromfile(pm.CaMa_dir()+"/map/glb_15min/nextxy.bin",np.int32).reshape(2,ny,nx)[0]!=-9999)*1.0
-	rivlen=1.0 #rivlen*1.0e-3 #used as one kilometer
-	rivwth=rivwth*1.0e-3
-	area=(k*rivlen)*(q*rivwth)
-	obs_err=ovs_err*(1/(k*rivlen+1.0e-20))*(1/(q*rivwth+1.0e-20))*nextx
-	#obs_err=pm.ovs_err()*(1/(area+1.0e-20))*nextx
-	# if water area < 1.0 km2 -> 0.25
-	obs_err=obs_err*(area>=1.0)*1.0+0.25*(1/(k*rivlen+1.0e-20))*(1/(q*rivwth+1.0e-20))*nextx*(area<1.0)*1.0
-	obs_err=ma.masked_where(area<0.625,obs_err).filled(0.25) # 25cm for < 1km^2 water area
-	obs_err=obs_err*nextx
-	obs_err=obs_err.astype(np.float32)
-	# obs_err0=obs_err[iy,ix]
 	fname=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out/obs/obs_err.bin"
-	obs_err.tofile(fname)
-	return 0
+	if os.path.isfile(fname):
+		return 0
+	else:
+		nx,ny,gsize = pm.map_dimension()
+		k=1.00 # assume nearest part to the unit catchment
+		q=1.00 # used 1.0 -> river width variability is 30%
+		ovs_err = 0.10
+		rivlen=np.fromfile(pm.CaMa_dir()+"/map/glb_15min/rivlen.bin",np.float32).reshape(ny,nx)
+		rivwth=np.fromfile(pm.CaMa_dir()+"/map/glb_15min/rivwth_gwdlr.bin",np.float32).reshape(ny,nx)
+		nextx=(np.fromfile(pm.CaMa_dir()+"/map/glb_15min/nextxy.bin",np.int32).reshape(2,ny,nx)[0]!=-9999)*1.0
+		rivlen=1.0 #rivlen*1.0e-3 #used as one kilometer
+		rivwth=rivwth*1.0e-3
+		area=(k*rivlen)*(q*rivwth)
+		obs_err=ovs_err*(1/(k*rivlen+1.0e-20))*(1/(q*rivwth+1.0e-20))*nextx
+		#obs_err=pm.ovs_err()*(1/(area+1.0e-20))*nextx
+		# if water area < 1.0 km2 -> 0.25
+		obs_err=obs_err*(area>=1.0)*1.0+0.25*(1/(k*rivlen+1.0e-20))*(1/(q*rivwth+1.0e-20))*nextx*(area<1.0)*1.0
+		obs_err=ma.masked_where(area<0.625,obs_err).filled(0.25) # 25cm for < 1km^2 water area
+		obs_err=obs_err*nextx
+		obs_err=obs_err.astype(np.float32)
+		# obs_err0=obs_err[iy,ix]
+		fname=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out/obs/obs_err.bin"
+		obs_err.tofile(fname)
+		return 0
 #########################
 def err_rand(ix,iy):
 	"""make random values to add to true values"""
@@ -235,7 +257,7 @@ def write_txt(inputlist):
 	yyyy=inputlist[0]
 	mm=inputlist[1]
 	dd=inputlist[2]
-	# print (yyyy,mm,dd)
+	print ("write text file: ",yyyy,mm,dd)
 	# obs_dir="/cluster/data6/menaka/HydroWeb"
 	# if pm.obs_name() == "HydroWeb":
 	# 	obs_dir="/cluster/data6/menaka/HydroWeb"
@@ -311,13 +333,14 @@ def prepare_obs():
 		# print (yyyy,mm,dd) #,obs_dir
 		inputlist.append([yyyy,mm,dd])
 	# write text files parallel
-	p=Pool(pm.cpu_nums()*pm.para_nums())
-	p.map(write_txt,inputlist)
-	p.terminate()
-	# map(write_txt,inputlist)
+	# p=Pool(pm.cpu_nums()*pm.para_nums())
+	# p.map(write_txt,inputlist)
+	# p.terminate()
+	map(write_txt,inputlist)
 	return 0
 ####################################
 
 ####################################
 if __name__ == "__main__":
-    prepare_obs()
+	print ("prepare observations")
+	prepare_obs()
