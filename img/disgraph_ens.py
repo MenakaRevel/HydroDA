@@ -19,10 +19,9 @@ import math
 
 #sys.path.append('../assim_out/')
 # Link the params.py in the experiment dir
-os.system("ln -sf ../gosh/params.py params.py")
-import params as pm
-import read_grdc as grdc
-import cal_stat as stat
+# os.system("ln -sf ../gosh/params_real.py params.py")
+# import params as pm
+
 #import plot_colors as pc
 #from matplotlib.font_manager import FontProperties
 #fp = FontProperties(fname="jap.ttc",size=15)
@@ -33,12 +32,13 @@ import cal_stat as stat
 # experiment="E2O_HydroWeb23"
 # experiment="VIC_BC_HydroWeb11"
 # experiment="test_wse"
-experiment="test_virtual"
+# experiment="test_virtual"
 # experiment="DIR_WSE_E2O_HWEB_001"
 # experiment="DIR_WSE_E2O_HWEB_002"
+experiment="DIR_WSE_E2O_HWEB_003"
 # experiment="ANO_WSE_E2O_HWEB_001"
 # experiment="ANO_WSE_E2O_HWEB_002"
-# experiment="ANO_WSE_E2O_HWEB_002"
+# experiment="ANO_WSE_E2O_HWEB_003"
 # experiment="NOM_WSE_E2O_HWEB_001"
 # experiment="NOM_WSE_E2O_HWEB_002"
 # experiment="NOM_WSE_E2O_HWEB_003"
@@ -46,10 +46,17 @@ experiment="test_virtual"
 # experiment="NOM_WSE_E2O_HWEB_005"
 # experiment="NOM_WSE_E2O_HWEB_006"
 # experiment="NOM_WSE_E2O_HWEB_007"
+# experiment="NOM_WSE_E2O_HWEB_008"
+# experiment="NOM_WSE_E2O_HWEB_009"
+# experiment="NOM_WSE_E2O_HWEB_010"
+# experiment="NOM_WSE_E2O_HWEB_011"
+# experiment="NOM_WSE_E2O_HWEB_012"
+# experiment="NOM_WSE_E2O_HWEB_013"
 
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
-assim_out=pm.DA_dir()+"/out/"+experiment
+# assim_out=pm.DA_dir()+"/out/"+experiment
+assim_out="../out/"+experiment
 print (assim_out)
 #assim_out="assim_out_E2O_wmc"
 #assim_out="assim_out_E2O_womc_0"
@@ -70,8 +77,25 @@ print (assim_out)
 #os.system("mkdir ../assim_out/img")
 #os.system("mkdir ../assim_out/img/disgraph")
 
+# os.system("ln -sf "+assim_out+"/params.py params.py")
+sys.path.append(assim_out)
+import params as pm
+import read_grdc as grdc
+import cal_stat as stat
+#========================================
+#====  functions for making figures  ====
+#========================================
+def filter_nan(s,o):
+    """
+    this functions removed the data  from simulated and observed data
+    where ever the observed data contains nan
+    """
+    data = np.array([s.flatten(),o.flatten()])
+    data = np.transpose(data)
+    data = data[~np.isnan(data).any(1)]
 
-#----
+    return data[:,0],data[:,1]
+#========================================
 def SWOT_day(yyyy,mm,dd):
   st_year,st_month,st_date=pm.starttime()
   start_time=datetime.date(st_year,st_month,st_date)
@@ -79,13 +103,13 @@ def SWOT_day(yyyy,mm,dd):
   days=this_time-start_time
   days=days.days
   return days%21+1
-#----
+#========================================
 def mk_dir(sdir):
   try:
     os.makedirs(sdir)
   except:
     pass
-#----
+#========================================
 def NS(s,o):
     """
     Nash Sutcliffe efficiency coefficient
@@ -95,13 +119,32 @@ def NS(s,o):
     output:
         ns: Nash Sutcliffe efficient coefficient
     """
-    #s,o = filter_nan(s,o)
+    s,o = filter_nan(s,o)
     o=ma.masked_where(o<=0.0,o).filled(0.0)
     s=ma.masked_where(o<=0.0,s).filled(0.0)
     o=np.compress(o>0.0,o)
     s=np.compress(o>0.0,s) 
     return 1 - sum((s-o)**2)/(sum((o-np.mean(o))**2)+1e-20)
-#----
+#========================================
+def KGE(s,o):
+    """
+	Kling Gupta Efficiency (Kling et al., 2012, http://dx.doi.org/10.1016/j.jhydrol.2012.01.011)
+	input:
+        s: simulated
+        o: observed
+    output:
+        KGE: Kling Gupta Efficiency
+    """
+    o=ma.masked_where(o<=0.0,o).filled(0.0)
+    s=ma.masked_where(o<=0.0,s).filled(0.0)
+    o=np.compress(o>0.0,o)
+    s=np.compress(o>0.0,s)
+    s,o = filter_nan(s,o)
+    B = np.mean(s) / np.mean(o)
+    y = (np.std(s) / np.mean(s)) / (np.std(o) / np.mean(o))
+    r = np.corrcoef(o, s)[0,1]
+    return 1 - np.sqrt((r - 1) ** 2 + (B - 1) ** 2 + (y - 1) ** 2)
+#========================================
 mk_dir(assim_out+"/figures")
 mk_dir(assim_out+"/figures/disgraph")
 #----
@@ -114,8 +157,8 @@ nx     = int(filter(None, re.split(" ",lines[0]))[0])
 ny     = int(filter(None, re.split(" ",lines[1]))[0])
 gsize  = float(filter(None, re.split(" ",lines[3]))[0])
 #----
-syear,smonth,sdate=pm.starttime()#2004#1991 2003,1,1 #
-eyear,emonth,edate=pm.endtime() #2005,1,1 #
+syear,smonth,sdate=2003,1,1 #pm.starttime()#2004#1991 
+eyear,emonth,edate=2004,1,1 #pm.endtime() #2005,1,1 #2004,1,1 #
 #month=1
 #date=1
 start_dt=datetime.date(syear,smonth,sdate)
@@ -195,7 +238,7 @@ def read_data(inputlist):
     mm   = inputlist[1]
     dd   = inputlist[2]
     numch= inputlist[3]
-    print (yyyy,mm,dd,numch)
+    # print (yyyy,mm,dd,numch)
     #--
     tmp_opn  = np.ctypeslib.as_array(shared_array_opn)
     tmp_asm  = np.ctypeslib.as_array(shared_array_asm)
@@ -389,14 +432,19 @@ def make_fig(point):
     # Nash-Sutcllf calcuation
     NS1=NS(np.mean(asm[:,:,point],axis=1),org)
     NS2=NS(np.mean(opn[:,:,point],axis=1),org)
+    KGE1=KGE(np.mean(asm[:,:,point],axis=1),org)
+    KGE2=KGE(np.mean(opn[:,:,point],axis=1),org)
     #1-((np.sum((org[:ed,point]-org_Q)**2))/(np.sum((org_Q-np.mean(org_Q))**2)))
     #print point,NS1,NS2
     Nash1="NS (assim):%4.2f"%(NS1)
     Nash2="NS (open):%4.2f"%(NS2)
+    kgeh1="KGE(assim):%4.2f"%(KGE1)
+    kgeh2="KGE(open):%4.2f"%(KGE2)
     #
     ax1.text(0.02,0.95,Nash1,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
     ax1.text(0.02,0.85,Nash2,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
-
+    ax1.text(0.42,0.95,kgeh1,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    ax1.text(0.42,0.85,kgeh2,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
 
 #    # twin axis
 #    ax2 = ax1.twinx()
@@ -477,7 +525,7 @@ def make_fig(point):
     plt.legend(lines,labels,ncol=1,loc='upper right') #, bbox_to_anchor=(1.0, 1.0),transform=ax1.transAxes)
     station_loc_list=pname[point].split("/")
     station_name="-".join(station_loc_list) 
-    print 'save',river[point] , station_name
+    print ('save',river[point] , station_name)
     plt.savefig(assim_out+"/figures/disgraph/"+river[point]+"-"+station_name+".png",dpi=500)
     return 0
 
@@ -501,11 +549,11 @@ def make_fig(point):
 
 
 
-#para_flag=1
-para_flag=0
+para_flag=1
+# para_flag=0
 #--
 if para_flag==1:
-    p=Pool(20)
+    p=Pool(6)
     p.map(make_fig,np.arange(pnum))
     p.terminate()
 else:

@@ -157,10 +157,10 @@ def timestep():
     return 86400 # outer timestep in seconds
 
 def starttime():
-    return (2004,1,1) # start date: [year,month,date]
+    return (2001,1,1) # start date: [year,month,date]
 
 def endtime():
-    return (2005,1,1) # end date: [year,month,date]
+    return (2002,1,1) # end date: [year,month,date]
                       # *note: this date is not included
 
 # **************************************************************
@@ -174,7 +174,7 @@ def spinup_mode():
     ### if initial restart file is ready, spinup simulation is no need
 
 def spinup_end_year():
-    return 2003
+    return 2000
 
 def spinup_end_month():
     return 12
@@ -316,7 +316,11 @@ def HydroWeb_dir():
 
 def obs_dir():
     # return "/cluster/data6/menaka/HydroWeb"
-    return "/cluster/data6/menaka/ensemble_org/CaMa_out/E2O003"
+    # return "/cluster/data6/menaka/ensemble_org/CaMa_out/E2O003"
+    return "/cluster/data6/menaka/dev_CaMa-Flood_v4/CaMa-Flood_v4/out/test-dev_HanazakiDam"
+
+def obs_list():
+    return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_amz.txt"
 
 def make_log():
     return 1

@@ -25,8 +25,6 @@ import cartopy.feature as cfeature
 import os
 
 #sys.path.append('../assim_out/')
-os.system("ln -sf ../gosh/params.py params.py")
-import params as pm
 import read_grdc as grdc
 import cal_stat as stat
 #import plot_colors as pc
@@ -39,9 +37,10 @@ import cal_stat as stat
 # experiment="VIC_BC_HydroWeb11"
 # experiment="test_wse"
 # experiment="DIR_WSE_E2O_HWEB_001"
-experiment="DIR_WSE_E2O_HWEB_002"
+# experiment="DIR_WSE_E2O_HWEB_002"
 # experiment="ANO_WSE_E2O_HWEB_001"
 # experiment="ANO_WSE_E2O_HWEB_002"
+# experiment="ANO_WSE_E2O_HWEB_003"
 # experiment="NOM_WSE_E2O_HWEB_001"
 # experiment="NOM_WSE_E2O_HWEB_002"
 # experiment="NOM_WSE_E2O_HWEB_003"
@@ -49,11 +48,19 @@ experiment="DIR_WSE_E2O_HWEB_002"
 # experiment="NOM_WSE_E2O_HWEB_005"
 # experiment="NOM_WSE_E2O_HWEB_006"
 # experiment="NOM_WSE_E2O_HWEB_007"
+# experiment="NOM_WSE_E2O_HWEB_008"
+# experiment="NOM_WSE_E2O_HWEB_009"
+experiment="NOM_WSE_E2O_HWEB_010"
 
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
-assim_out=pm.DA_dir()+"/out/"+experiment
+# assim_out=pm.DA_dir()+"/out/"+experiment
+assim_out="../out/"+experiment
 print (assim_out)
+
+# os.system("ln -sf "+assim_out+"/params.py params.py")
+sys.path.append(assim_out)
+import params as pm
 #----
 def filter_nan(s,o):
     """
@@ -197,6 +204,7 @@ uparea = np.fromfile(uparea,np.float32).reshape(ny,nx)
 rivnum="../dat/rivnum_"+pm.mapname()+".bin"
 rivnum=np.fromfile(rivnum,np.int32).reshape(ny,nx)
 rivermap=((nextxy[0]>0)*(rivnum==1))*1.0
+rivermap=rivermap*(uparea>1e11)*1.0
 #----
 syear,smonth,sdate=2003,1,1 #spm.starttime()#2004#1991  2004,1,1 #
 eyear,emonth,edate=pm.endtime() #2005,1,1 #
@@ -288,7 +296,7 @@ def read_data(inputlist):
             tmp_opn[dt,num,point]=opnfile[iy1,ix1]+opnfile[iy2,ix2]
             tmp_asm[dt,num,point]=asmfile[iy1,ix1]+asmfile[iy2,ix2]
 #--------
-p   = Pool(20)
+p   = Pool(10)
 res = p.map(read_data, inputlist)
 opn = np.ctypeslib.as_array(shared_array_opn)
 asm = np.ctypeslib.as_array(shared_array_asm)

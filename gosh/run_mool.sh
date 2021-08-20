@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 #***********************************************************************************************
 # Data Assimilation using LETKF and empircal local patches [Revel et al,. (2019,2021)]
 # ==============================================================================================
@@ -71,11 +71,13 @@ cd $HydroDA
 # 2. Observation variable [WSE/DIS]
 # 3. Runoff Data [E2O/VICBC]
 # 4. Observation data [HydroWeb(HWEB)] 
-# 5. Number for identifying the experiment
-# EXP="DIR_WSE_E2O_HWEB_002"
-# EXP="ANO_WSE_E2O_HWEB_002"
-# EXP="NOM_WSE_E2O_HWEB_007"
-EXP="test_virtual"
+# 5. Number for identifying the experiment [e.g. 001]
+
+EXP="DIR_WSE_E2O_HWEB_003"
+# EXP="ANO_WSE_E2O_HWEB_003"
+# EXP="NOM_WSE_E2O_HWEB_013"
+# EXP="test_virtual"
+# EXP="test_wse"
 
 mkdir -p $HydroDA"/out/"$EXP
 
@@ -86,7 +88,9 @@ echo $EXP > $HydroDA"/out/"$EXP"/exp.txt"
 echo $NCPUS > $HydroDA"/out/"$EXP"/ncpus.txt"
 
 # copy params.py
-cp -r $HydroDA/gosh/params.py     $HydroDA/out/$EXP/params.py
+# cp -r $HydroDA/gosh/params.py     $HydroDA/out/$EXP/params.py
+# cp -r $HydroDA/gosh/params_virt.py     $HydroDA/out/$EXP/params.py
+cp -r $HydroDA/gosh/params_real.py     $HydroDA/out/$EXP/params.py
 
 # copy running realted files
 cp -r $HydroDA/src/run.py           $HydroDA/out/$EXP/run.py
@@ -100,6 +104,7 @@ cd $HydroDA"/out/"$EXP
 
 # run the main code using virtual environment
 # run main code
+touch ./__init__.py &
 python run.py &
 
 wait

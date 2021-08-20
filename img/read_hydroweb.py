@@ -68,8 +68,8 @@ def get_hydroweb_loc(rivername,mapname="glb_15min"):
         #print line
         station = line[1]
         riv     = re.split("_",station)[1]
-        ix      = int(line[4])-1
-        iy      = int(line[5])-1
+        ix      = int(line[5])-1
+        iy      = int(line[6])-1
         EGM08   = float(line[8])
         EGM96   = float(line[9])
         if rivername==riv:

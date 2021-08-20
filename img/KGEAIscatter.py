@@ -26,6 +26,8 @@ import os
 
 #sys.path.append('../assim_out/')
 
+import read_grdc as grdc
+import cal_stat as stat
 #import plot_colors as pc
 #from matplotlib.font_manager import FontProperties
 #fp = FontProperties(fname="jap.ttc",size=15)
@@ -50,7 +52,7 @@ import os
 # experiment="NOM_WSE_E2O_HWEB_008"
 # experiment="NOM_WSE_E2O_HWEB_009"
 # experiment="NOM_WSE_E2O_HWEB_010"
-experiment="NOM_WSE_E2O_HWEB_013"
+experiment="NOM_WSE_E2O_HWEB_011"
 
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
@@ -59,12 +61,8 @@ assim_out="../out/"+experiment
 print (assim_out)
 
 # os.system("ln -sf "+assim_out+"/params.py params.py")
-# os.system(rm -r params.py)
-os.system("touch "+assim_out+"/__init__.py")
 sys.path.append(assim_out)
 import params as pm
-import read_grdc as grdc
-import cal_stat as stat
 #====================================================================
 def filter_nan(s,o):
     """
@@ -79,8 +77,8 @@ def filter_nan(s,o):
 #====================================================================
 def vec_par(LEVEL,ax=None):
     ax=ax or plt.gca()
-    txt="NSEAItmp_%02d.txt"%(LEVEL)
-    os.system("./bin/print_rivvec NSEAItmp1.txt 1 "+str(LEVEL)+" > "+txt)
+    txt="KGEAItmp_%02d.txt"%(LEVEL)
+    os.system("./bin/print_rivvec KGEAItmp1.txt 1 "+str(LEVEL)+" > "+txt)
     width=(float(LEVEL)**sup)*w
     #print LEVEL, width#, lon1,lat1,lon2-lon1,lat2-lat1#x1[0],y1[0],x1[1]-x1[0],y1[1]-y1[0]
     # open tmp2.txt
@@ -149,9 +147,29 @@ def NS(s,o):
     o=np.compress(o>0.0,o)
     s=np.compress(o>0.0,s) 
     return 1 - sum((s-o)**2)/(sum((o-np.mean(o))**2)+1e-20)
+#========================================
+def KGE(s,o):
+    """
+	Kling Gupta Efficiency (Kling et al., 2012, http://dx.doi.org/10.1016/j.jhydrol.2012.01.011)
+	input:
+        s: simulated
+        o: observed
+    output:
+        KGE: Kling Gupta Efficiency
+    """
+    o=ma.masked_where(o<=0.0,o).filled(0.0)
+    s=ma.masked_where(o<=0.0,s).filled(0.0)
+    o=np.compress(o>0.0,o)
+    s=np.compress(o>0.0,s)
+    s,o = filter_nan(s,o)
+    B = np.mean(s) / np.mean(o)
+    y = (np.std(s) / np.mean(s)) / (np.std(o) / np.mean(o))
+    r = np.corrcoef(o, s)[0,1]
+    return 1 - np.sqrt((r - 1) ** 2 + (B - 1) ** 2 + (y - 1) ** 2)
+#========================================
 #====================================================================
 mk_dir(assim_out+"/figures")
-mk_dir(assim_out+"/figures/NSEAI")
+mk_dir(assim_out+"/figures/KGEAI")
 #----
 fname=pm.CaMa_dir()+"/map/"+pm.mapname()+"/params.txt"
 f=open(fname,"r")
@@ -189,10 +207,10 @@ uparea = np.fromfile(uparea,np.float32).reshape(ny,nx)
 rivnum="../dat/rivnum_"+pm.mapname()+".bin"
 rivnum=np.fromfile(rivnum,np.int32).reshape(ny,nx)
 rivermap=((nextxy[0]>0)*(rivnum==1))*1.0
-# rivermap=rivermap*(uparea>1e12)*1.0
+rivermap=rivermap*(uparea>1e12)*1.0
 #----
 syear,smonth,sdate=2003,1,1 # pm.starttime()#2004#1991  2004,1,1 #
-eyear,emonth,edate=2004,1,1 #pm.endtime() # 2010,1,1 #2014,1,1 #
+eyear,emonth,edate=pm.endtime() #2005,1,1 #
 #month=1
 #date=1
 start_dt=datetime.date(syear,smonth,sdate)
@@ -300,7 +318,7 @@ epix=(180+east)*4
 
 #cmap=make_colormap(colors_list)
 # cmap=mbar.colormap("H01")
-cmap=cm.get_cmap("bwr")
+cmap=cm.get_cmap("coolwarm_r")
 cmap.set_under("w",alpha=0)
 cmapL=cmap #cm.get_cmap("rainbow_r")
 vmin=-1.0
@@ -328,24 +346,23 @@ m.drawparallels(np.arange(south,north+0.1,5), labels = [1,0,0,0], fontsize=10,li
 m.drawmeridians(np.arange(west,east+0.1,5), labels = [0,0,0,1], fontsize=10,linewidth=0,zorder=102)
 #--
 box="%f %f %f %f"%(west,east,north,south) 
-os.system("./bin/txt_vector "+box+" "+pm.CaMa_dir()+" "+pm.mapname()+" > NSEAItmp1.txt") 
+os.system("./bin/txt_vector "+box+" "+pm.CaMa_dir()+" "+pm.mapname()+" > KGEAItmp1.txt") 
 #map(vec_par,np.arange(1,10+1,1))
-# map(vec_par,np.arange(2,10+1,1))
-map(vec_par,np.arange(3,10+1,1))
+map(vec_par,np.arange(2,10+1,1))
 #--
 for point in np.arange(pnum):
     org=grdc.grdc_dis(staid[point],syear,eyear-1)
     org=np.array(org)
     if np.sum(ma.masked_where(org!=-99.9,org))==0.0:
-        # print ("no obs", np.sum(ma.masked_where(org!=-99.9,org)))
+        print ("no obs", np.sum(ma.masked_where(org!=-99.9,org)))
         continue
-    NSEasm=NS(np.mean(asm[:,:,point],axis=1),org)
-    NSEopn=NS(np.mean(opn[:,:,point],axis=1),org)
-    if NSEopn==1.00:
-        # print (NSEopn, staid[point], pname[point])
+    KGEasm=KGE(np.mean(asm[:,:,point],axis=1),org)
+    KGEopn=KGE(np.mean(opn[:,:,point],axis=1),org)
+    if KGEopn==1.00 or KGEopn==np.nan:
+        print (KGEopn, staid[point], pname[point])
         continue
-    NSEAI=(NSEasm-NSEopn)/((1.0-NSEopn)+1.0e-20) 
-    #NSEAI=NSEasm
+    KGEAI=(KGEasm-KGEopn)/(1.0-KGEopn+1.0e-20) 
+    #KGEAI=KGEasm
     ix=xlist[point]
     iy=ylist[point]
     if rivermap[iy,ix] !=1.0:
@@ -355,18 +372,17 @@ for point in np.arange(pnum):
     #lat=lat0-iy*gsize
     lon=lonlat[0,iy,ix]
     lat=lonlat[1,iy,ix]
-    c=cmapL(norm(NSEAI))
-    ax.scatter(lon,lat,s=10,marker="o",edgecolors="k", facecolors=c,zorder=106)
-    print (pname[point],lon,lat,NSEAI) #,NSEasm,NSEopn)
-    # if NSEAI > 0.0:
-    #     print lon,lat, "%3.2f %3.2f %3.2f"%(NSEAI, NSEasm, NSEopn)
-    # if NSEAI >= 0.00:
-    #     ax.scatter(lon,lat,s=10,marker="o",edgecolors=c, facecolors=c,zorder=106)
-    # if NSEAI < 0.00:
-    #     print staid[point], pname[point]
-    #     ax.scatter(lon,lat,s=10,marker="d",edgecolors=c, facecolors="k",zorder=106)
+    c=cmapL(norm(KGEAI))
+    #print (lon,lat,KGEAI) #,NSEasm,NSEopn)
+    # if KGEAI > 0.0:
+    #     print lon,lat, "%3.2f %3.2f %3.2f"%(KGEAI, NSEasm, NSEopn)
+    if KGEAI >= 0.00:
+        ax.scatter(lon,lat,s=10,marker="o",edgecolors=c, facecolors=c,zorder=106)
+    if KGEAI < 0.00:
+        print staid[point], pname[point]
+        ax.scatter(lon,lat,s=10,marker="d",edgecolors=c, facecolors="k",zorder=106)
 #--
 cbar=m.colorbar(im,"right",size="2%",ticks=np.arange(vmin,vmax+0.001,0.2))
 #plt.title(stitle)
-plt.savefig(assim_out+"/figures/NSEAI/NSEAIscatter.png",dpi=500,bbox_inches="tight", pad_inches=0.05)
-os.system("rm -r NSEAItmp*.txt")
+plt.savefig(assim_out+"/figures/KGEAI/KGEAIscatter.png",dpi=300,bbox_inches="tight", pad_inches=0.05)
+os.system("rm -r KGEAItmp*.txt")

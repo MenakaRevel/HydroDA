@@ -189,7 +189,7 @@ close(34)
 
 ! read grid area
 !fname=trim(adjustl(camadir))//"map/"//trim(mapname)//"/grdare.bin"
-fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/ctmare.bin" ! after CaMa v3.9
+fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/ctmare.bin" ! after CaMa-Flood v3.9
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) grid_area

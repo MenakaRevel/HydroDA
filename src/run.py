@@ -62,7 +62,9 @@ try:
   init.save_statistic()
 
   # run main code
+  print ("running main assimilation code....")
   main_code.main_act()
 
+  print ("HydroDA completed.")
 except Exception as e:
-  print e
+  print (e)

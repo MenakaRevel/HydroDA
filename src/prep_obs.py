@@ -44,7 +44,7 @@ def slink(src,dst):
       raise
 #########################
 def get_HydroWeb():
-	#---
+	#=============
 	lname=[]
 	xlist=[]
 	ylist=[]
@@ -52,7 +52,11 @@ def get_HydroWeb():
 	lEGM08=[]
 	lEGM96=[]
 	satellite=[]
-	fname=pm.DA_dir()+"/dat/HydroWeb_alloc_"+pm.mapname()+".txt"
+	# fname=pm.DA_dir()+"/dat/HydroWeb_alloc_"+pm.mapname()+".txt"
+	# fname=pm.DA_dir()+"/dat/HydroWeb_alloc_"+pm.mapname()+"_new.txt"
+	# fname=pm.DA_dir()+"/dat/HydroWeb_alloc_"+pm.mapname()+"_amz.txt"
+	fname=pm.obs_list()
+	#=========================
 	with open(fname,"r") as f:
 		lines=f.readlines()
 	for line in lines[1::]:
@@ -274,6 +278,7 @@ def write_txt(inputlist):
 		xlist, ylist, l_wse, m_wse, s_wse, l_sat = HydroWeb_data(yyyy,mm,dd)
 	if pm.obs_name() == "SWOT":
 		xlist, ylist, l_wse, m_wse, s_wse, l_sat = swot_data(yyyy,mm,dd) 
+	#--------------
 	pnum=len(xlist)
 	# print ('xlist:',pnum, "l_wse:",len(l_wse))
 	with open(txtfile,"w") as txtf:
@@ -333,10 +338,10 @@ def prepare_obs():
 		# print (yyyy,mm,dd) #,obs_dir
 		inputlist.append([yyyy,mm,dd])
 	# write text files parallel
-	# p=Pool(pm.cpu_nums()*pm.para_nums())
-	# p.map(write_txt,inputlist)
-	# p.terminate()
-	map(write_txt,inputlist)
+	p=Pool(pm.cpu_nums()*pm.para_nums())
+	p.map(write_txt,inputlist)
+	p.terminate()
+	# map(write_txt,inputlist)
 	return 0
 ####################################
 

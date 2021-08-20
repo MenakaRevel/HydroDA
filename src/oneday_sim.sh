@@ -204,17 +204,17 @@ CINPMAT="${FMAP}/inpmat_test-1deg.bin"        # runoff input matrix for interpor
 #CDIMINFO="${FMAP}/diminfo_test-15min.txt" # dimention information file
 #CINPMAT=${FMAP}/inpmat_test-15min.bin     # runoff input matrix for interporlation
 if [ $runname = "E2O" ] ; then
-    CDIMINFO="${FMAP}/diminfo-15min.txt" # dimention information file
-    CINPMAT="${FMAP}/inpmat-15min.bin"     # runoff input matrix for interporlation
+     CDIMINFO="${FMAP}/diminfo-15min.txt" # dimention information file
+     CINPMAT="${FMAP}/inpmat-15min.bin"     # runoff input matrix for interporlation
 elif [ $runname = "ERA20CM" ] ; then
-	  CDIMINFO="${FMAP}/diminfo-1deg.txt"  # dimention information file
-    CINPMAT="${FMAP}/inpmat-1deg.bin"      # runoff input matrix for interporlation
+     CDIMINFO="${FMAP}/diminfo-1deg.txt"  # dimention information file
+     CINPMAT="${FMAP}/inpmat-1deg.bin"      # runoff input matrix for interporlation
 elif [ $runname = "ELSE_KIM2009" ] ; then
-	  CDIMINFO="${FMAP}/diminfo-1deg.txt"  # dimention information file
-    CINPMAT="${FMAP}/inpmat-1deg.bin"      # runoff input matrix for interporlation
+     CDIMINFO="${FMAP}/diminfo-1deg.txt"  # dimention information file
+     CINPMAT="${FMAP}/inpmat-1deg.bin"      # runoff input matrix for interporlation
 elif [ $runname = "VIC_BC" ] ; then
-	  CDIMINFO="${FMAP}/diminfo-15min.txt"  # dimention information file
-    CINPMAT="${FMAP}/inpmat-15min.bin"      # runoff input matrix for interporlation
+     CDIMINFO="${FMAP}/diminfo-15min.txt"  # dimention information file
+     CINPMAT="${FMAP}/inpmat-15min.bin"      # runoff input matrix for interporlation
 fi
 
 #----- for plain binary map input
@@ -230,7 +230,8 @@ CFLDHGT="${FMAP}/fldhgt.bin"                # floodplain elevation profile (heig
 #** channel parameter
 ###CRIVWTH=${FMAP}/rivwth.bin"              # channel width [m] (empirical power-low)
 CRIVWTH="${FMAP}/rivwth_gwdlr.bin"          # channel width [m] (GWD-LR + filled with empirical)
-CRIVHGT="${FMAP}/rivhgt.bin"                # channel depth [m] (empirical power-low)
+# CRIVHGT="${FMAP}/rivhgt.bin"                # channel depth [m] (empirical power-low)
+CRIVHGT="${FMAP}/rivhgt_Xudong.bin"         # channel depth [m] (Xudong et al 2021)
 CRIVMAN="${FMAP}/rivman.bin"                # manning coefficient river (The one in flood plain is a global parameter; set $PMANFLD below.)
 #if [ $looptype = "true" ] ; then
 #    CRIVMAN="${INBASE}/assim_out/rivman/rivmanTRUE.bin"

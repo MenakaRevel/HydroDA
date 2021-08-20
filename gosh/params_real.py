@@ -1,6 +1,6 @@
 #!/opt/local/bin/python
 # -*- coding: utf-8 -*-
-import numpy as np
+# import numpy as np
 import re
 
 ########################
@@ -21,7 +21,7 @@ def mode():
     return 1
     # parameter to change assimilation mode
     # runoff ensembles will change accordingly.
-    # 1: Earth2Obs, 2: ERA20CM, 3: VIC_BC, 4: -25% baised (ELSE_KIM2009/E2O/ERA20CM)
+    # 1: Earth2Obs, 2: ERA20CM, 3: VIC_BC, 4: -25% baised (ELSE_KIM2009/E2O/ERA20CM), 5: ERA5
 
 def conflag():
     return 1
@@ -32,9 +32,9 @@ def conflag():
     #  4 - Log converted values
 
 def mapname():
-    # return "amz_06min"
-    return "glb_15min"
-    # realted CaMa-Flood map directory
+    return "amz_06min"
+    # return "glb_15min"
+    # related CaMa-Flood map directory
     # [e.g. : glb_15min, glb_06min, Mkg_06min, etc.]
     # Check 
 
@@ -59,33 +59,33 @@ def experiment():
 # **************************************************************
 # 2. Data assimilation related definitions
 def assimS():
-    # return -20
-    return -80
+    return -20
+    # return -80
     # data Assimilation's Region (South Edge at latitude)
     # *note: should be larger or equal to -80
 
 def assimN():
-    # return 5
-    return 80
+    return 5
+    # return 80
     # data Assimilation's Region (North Edge at latitude)
     # *note: should be smaller or equal to 80
 
 def assimW():
-    # return -80
-    return -180
+    return -80
+    # return -180
     #return -68.25 # use this for disabling west side of the Amazon basin's observation
     # data Assimilation's Region (West Edge at latitude)
     # *note: should be larger or equal to -170
 
 def assimE():
-    # return -45
-    return 180
+    return -45
+    # return 180
     # data Assimilation's Region (East Edge at latitude)
     # *note: should be smaller or equal to 170
 
 def patch_size():
-    # return 0
-    return 100
+    return 0
+    # return 100
     # the size of the local patch of LETKF(Local ** EnKF)
     # 0: only 1 pixel (the pixel itself) belongs to its local patch
     # 100: empirical local patch
@@ -96,7 +96,8 @@ def DA_dir():
     # where src, dat, sat, out exsits
 
 def patch_dir():
-    return "/cluster/data6/menaka/Empirical_LocalPatch/local_patch"
+    # return "/cluster/data6/menaka/Empirical_LocalPatch/local_patch"
+    return "/cluster/data6/menaka/Empirical_LocalPatch/local_patchMS"
     #return "/cluster/data6/menaka/covariance/local_patch"
     #return "/cluster/data6/menaka/covariance/local_patchMS"
     #return "/cluster/data6/menaka/covariance/local_patch_0.80"
@@ -104,9 +105,10 @@ def patch_dir():
 def patch_name():
     # return "amz_06min_S14FD_80"
     # return "amz_06min_S14FD_60"
+    return "amz_06min_S14FD_60 Main Stream"
     # return "amz_06min_S14FD_40"
     # return "amz_06min_S14FD_20"
-    return "glb_15min_S14FD_60"
+    # return "glb_15min_S14FD_60"
 
 def patch_id():
     # return "0.80"
@@ -126,8 +128,8 @@ def initial_infl():
     # initial inflation parameter
 
 def rho():
-    # return -1.0
-    return 1.00
+    return -1.0
+    # return 1.00
     # return 1.08
     # -1.0 : adaptive inflation will be used as in Myoshi et al (2011)
     # positive : fixed inflation parameter will be used
@@ -157,10 +159,10 @@ def timestep():
     return 86400 # outer timestep in seconds
 
 def starttime():
-    return (2004,1,1) # start date: [year,month,date]
+    return (2002,1,1) # start date: [year,month,date]
 
 def endtime():
-    return (2005,1,1) # end date: [year,month,date]
+    return (2004,1,1) # end date: [year,month,date]
                       # *note: this date is not included
 
 # **************************************************************
@@ -174,7 +176,7 @@ def spinup_mode():
     ### if initial restart file is ready, spinup simulation is no need
 
 def spinup_end_year():
-    return 2003
+    return 2001
 
 def spinup_end_month():
     return 12
@@ -195,9 +197,12 @@ def runname(num=mode()):
         return "VIC_BC"
 
     if num == 4: #biased runoff experiment
-        #return "ELSE_KIM2009"
-        return "E2O"
-        #return "ERA20CM"
+        return "ELSE_KIM2009"
+        # return "E2O"
+        # return "ERA20CM"
+
+    if num == 5:
+        return "ERA5"
 
 def input(num=mode()):
     if num==1:
@@ -208,6 +213,12 @@ def input(num=mode()):
 
     if num==3:
         return "VIC_BC"
+
+    if num==4: #biased runoff experiment
+        return "ELSE_KIM2009"
+
+    if num==5:
+        return "ERA5"
     # define the runoff data type.
     
 def max_lat():
@@ -224,6 +235,12 @@ def distopen(num):
 
     if num == 3:
         return 1.0
+
+    if num == 4:
+        return 1.0
+
+    if num == 5:
+        return 1.0
     #return 0.75 # not needed for ERA20CM
     # corrupted runoff's percentage
     # 0.75 for original Data Assimilation simulation (25% reduced)
@@ -239,6 +256,12 @@ def diststd(num):
         return 0.25
 
     if num == 3:
+        return 0.25
+
+    if num == 4:
+        return 0.25
+
+    if num == 5:
         return 0.25
 
     #return 1.0 # not needed for ERA20CM
@@ -308,15 +331,19 @@ def output_er():
 # 7. observations settings
 
 def obs_name():
-    # return "HydroWeb"
-    return "SWOT"
+    return "HydroWeb"
+    # return "SWOT"
 
 def HydroWeb_dir():
     return "/cluster/data6/menaka/HydroWeb"
 
 def obs_dir():
-    # return "/cluster/data6/menaka/HydroWeb"
-    return "/cluster/data6/menaka/ensemble_org/CaMa_out/E2O003"
+    return "/cluster/data6/menaka/HydroWeb"
+    # return "/cluster/data6/menaka/ensemble_org/CaMa_out/E2O003"
+
+def obs_list():
+    return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+".txt"
+    # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_amz.txt"
 
 def make_log():
     return 1

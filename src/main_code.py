@@ -54,6 +54,10 @@ def main_act():
     print ("spin up simulation")
     spin_up()
 
+    # # # preapre the mean and std for anomaly/normalized assimilation
+    # # print ("calculation of mean/std sfcelv")
+    # # calc_mean()
+
     # make initial restart
     print ("make intial restart")
     make_initial_restart()
@@ -693,7 +697,7 @@ def make_corrupt_man():
   # make multivariate normal distribution if corrupted manning
   rivnum = "./data/rivnum.bin"
   rivnum = np.fromfile(rivnum,np.int32).reshape(720,1440)
-#--
+  #--
   corr_ens=np.ones([pm.manning_mem(),720,1440],np.float32)
   print np.max(rivnum),np.shape(corr_ens)
   for num in np.arange(1,np.max(rivnum)):
@@ -1746,10 +1750,12 @@ def sfcelv_mean(ens):
     yyyy="%04d"%(year)
     mm="%2d"%(mon)
     dd="%2d"%(day)
-    sfcelv=pm.DA_dir()+"/out/"+pm.experiment()+"/CaMa_out/"+yyyy+mm+dd+ens+"/sfcelv"+yyyy+".bin"
-    sfcelv=np.fromfile(sfcelv,np.float32).reshape(dz,ny,nx)
-    sf_mean=np.mean(sfcelv,axis=0)
-    sf_std=np.std(sfcelv,axis=0)
+    # sfcelv=pm.DA_dir()+"/out/"+pm.experiment()+"/CaMa_out/"+yyyy+mm+dd+ens+"/sfcelv"+yyyy+".bin"
+    # sfcelv=np.fromfile(sfcelv,np.float32).reshape(dz,ny,nx)
+    # sf_mean=np.mean(sfcelv,axis=0)
+    # sf_std=np.std(sfcelv,axis=0)
+    sfcelv=pm.DA_dir()+"/inp/"
+    sfcelv=np.fromfile(sfcelv,np.float32).reshape(ny,nx)
     mkdir(pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out/mean_sfcelv")
     fname=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out/mean_sfcelv/meansfcelv"+ens+".bin"
     sf_mean.tofile(fname)
