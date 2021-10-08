@@ -30,10 +30,14 @@ import math
 # experiment="test_wse"
 # experiment="DIR_WSE_E2O_HWEB_001"
 # experiment="DIR_WSE_E2O_HWEB_002"
-experiment="DIR_WSE_E2O_HWEB_003"
+# experiment="DIR_WSE_E2O_HWEB_003"
+# experiment="DIR_WSE_E2O_HWEB_004"
 # experiment="ANO_WSE_E2O_HWEB_001"
 # experiment="ANO_WSE_E2O_HWEB_003"
-# experiment="NOM_WSE_E2O_HWEB_001"
+# experiment="ANO_WSE_E2O_HWEB_004"
+experiment="NOM_WSE_E2O_HWEB_001"
+# experiment="NOM_WSE_E2O_HWEB_002"
+# experiment="NOM_WSE_E2O_HWEB_004"
 # experiment="NOM_WSE_E2O_HWEB_008"
 # experiment="NOM_WSE_E2O_HWEB_009"
 # experiment="NOM_WSE_E2O_HWEB_010"
@@ -62,7 +66,6 @@ print (assim_out)
 #assim_out="assim_out_biased_wmc"
 
 sys.path.append(assim_out)
-
 import params as pm
 import read_grdc as grdc
 import read_hydroweb as hweb
@@ -139,7 +142,7 @@ gsize  = float(filter(None, re.split(" ",lines[3]))[0])
 ###    last=366
 ###else:
 ###    last=365
-syear,smonth,sdate=2003,1,1 #pm.starttime()#2004#1991 
+syear,smonth,sdate=pm.starttime()#2004#1991 #2003,1,1 #
 eyear,emonth,edate=pm.endtime() #2005,1,1 #2004,1,1 #2010,1,1 #
 # print pm.endtime()
 #month=1
@@ -202,6 +205,19 @@ std_obs = 0.0 #pm.HydroWeb_dir()+"/bin/HydroWeb_std.bin"
 #     std_obss[num-1]=std_corr
 # mean_sfcelv=np.mean(mean_obss,axis=0)
 # std_sfcelv=np.std(std_obss,axis=0)
+
+#-------
+# mean & std from previous year
+mean_obss=np.zeros([pm.ens_mem(),ny,nx])
+std_obss=np.zeros([pm.ens_mem(),ny,nx])
+for num in np.arange(1,int(pm.ens_mem())+1):
+    numch='%03d'%num
+    fname=assim_out+"/assim_out/mean_sfcelv/meansfcelvC"+numch+".bin"
+    mean_corr=np.fromfile(fname,np.float32).reshape([ny,nx])
+    mean_obss[num-1,:,:]=mean_corr
+    fname=assim_out+"/assim_out/mean_sfcelv/stdsfcelvC"+numch+".bin"
+    std_corr=np.fromfile(fname,np.float32).reshape([ny,nx])
+    std_obss[num-1,:,:]=std_corr
 ###------
 pname=[]
 xlist=[]
@@ -552,6 +568,20 @@ def make_fig(point):
     #ax1.set_ylim(ymin=0,ymax=250.)
     ax1.set_xlim(xmin=0,xmax=last+1)
     ax1.tick_params('y', colors='k')
+
+    meanch="mean (long-term): %5.2f"%(np.mean(mean_obss[:,ylist[point],xlist[point]],axis=0))
+    stdch="std (long-term):%5.2f"%(np.mean(std_obss[:,ylist[point],xlist[point]],axis=0))
+    omch="mean (obs): %5.2f"%(np.mean(data))
+    osch="std (obs): %5.2f"%(np.std(data))
+    cmch="mean (cor): %5.2f"%(np.mean(opn[:,:,point]))
+    csch="std (cor): %5.2f"%(np.std(opn[:,:,point]))
+    ax1.text(0.02,0.9,meanch,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    ax1.text(0.02,0.8,stdch,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    ax1.text(0.02,0.7,omch,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    ax1.text(0.02,0.6,osch,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    ax1.text(0.02,0.5,cmch,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    ax1.text(0.02,0.4,csch,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+
     # xxlist=np.linspace(15,N-15,int(N/30))
     # xxlab=[calendar.month_name[i][:3] for i in range(1,13)]
     #ax1.set_xticks(xxlist)

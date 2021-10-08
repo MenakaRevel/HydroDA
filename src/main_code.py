@@ -84,6 +84,7 @@ def main_act():
     # clean all intermediate files
     if pm.output_er()==1:
         os.system("rm -Rf ./CaMa_out/"+yyyy+"*")
+        os.system("rm -Rf ./CaMa_in/"+pm.input()+"/Roff_CORR/Roff__"+yyyy+"*")
 
 ################
 ## single loop program
@@ -235,8 +236,10 @@ def spinup_loop(inputlist):
     run_name=pm.runname(mode)
     exp_dir=pm.DA_dir()+"/out/"+pm.experiment()
     mapname=pm.mapname()
+    cal=pm.calibrate()
     print  "%s for %03d"%(loop,int(ens_num))
-    os.system("source "+pm.DA_dir()+"/src/spin_up.sh "+str(yyyy)+" "+str(loop)+" "+ens_num+" "+dir2+" "+str(cpunums)+" "+str(run_name)+" "+str(exp_dir)+" "+str(mapname))
+    os.system("source "+pm.DA_dir()+"/src/spin_up.sh "+str(yyyy)+" "+str(loop)+" "+ens_num+" "
+    +dir2+" "+str(cpunums)+" "+str(run_name)+" "+str(exp_dir)+" "+str(mapname)+" "+str(cal))
     return 0
 ###########################
 def one_day_sim(inputlist):
@@ -266,7 +269,9 @@ def one_day_sim(inputlist):
     cpunums = pm.cpu_nums()
     exp_dir=pm.DA_dir()+"/out/"+pm.experiment()
     mapname=pm.mapname()
-    os.system("source "+pm.DA_dir()+"/src/oneday_sim.sh "+yyyy+" "+mm+" "+dd+" "+ens_num+" "+dir2+" "+looptype+" "+str(cpunums)+" "+str(run_name)+" "+str(exp_dir)+" "+str(mapname))
+    cal=pm.calibrate()
+    os.system("source "+pm.DA_dir()+"/src/oneday_sim.sh "+yyyy+" "+mm+" "+dd+" "+ens_num+" "+dir2
+    +" "+looptype+" "+str(cpunums)+" "+str(run_name)+" "+str(exp_dir)+" "+str(mapname)+" "+str(cal))
 
     return 0
 ########################### # modified to run paralle @Menaka 
@@ -594,7 +599,7 @@ def make_restart(inputlist):
 
     # calculate other variables from water storage
     exp_dir=pm.DA_dir()+"/out/"+pm.experiment()
-    os.system(pm.DA_dir()+"/src/make_restart "+yyyy+mm+dd+" "+yyyy_b+mm_b+dd_b+" "+yyyy_n+mm_n+dd_n+" "+loop+" "+pm.CaMa_dir()+" "+pm.mapname()+" "+str(pm.ens_mem())+" "+numch+" "+exp_dir)
+    os.system(pm.DA_dir()+"/src/make_restart "+yyyy+mm+dd+" "+yyyy_b+mm_b+dd_b+" "+yyyy_n+mm_n+dd_n+" "+loop+" "+pm.CaMa_dir()+" "+pm.mapname()+" "+str(pm.ens_mem())+" "+numch+" "+exp_dir+" "+pm.calibrate())
 
     print "finish restarting",numch
 ###########################

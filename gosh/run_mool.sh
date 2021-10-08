@@ -50,7 +50,7 @@ export OMP_NUM_THREADS=$NCPUS
 # got to working dirctory
 HydroDA="/cluster/data6/menaka/HydroDA"
 
-#--
+#----------
 cd $HydroDA
 #cd $PBS_O_WORKDIR
 #cd $swotda
@@ -73,9 +73,9 @@ cd $HydroDA
 # 4. Observation data [HydroWeb(HWEB)] 
 # 5. Number for identifying the experiment [e.g. 001]
 
-EXP="DIR_WSE_E2O_HWEB_003"
-# EXP="ANO_WSE_E2O_HWEB_003"
-# EXP="NOM_WSE_E2O_HWEB_013"
+# EXP="DIR_WSE_E2O_HWEB_001"
+EXP="ANO_WSE_E2O_HWEB_002"
+# EXP="NOM_WSE_E2O_HWEB_002"
 # EXP="test_virtual"
 # EXP="test_wse"
 

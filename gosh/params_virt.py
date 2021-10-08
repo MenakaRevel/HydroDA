@@ -322,6 +322,9 @@ def obs_dir():
 def obs_list():
     return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_amz.txt"
 
+def stat_name():
+    return "sfcelv_E2O_amz_06min_2009-2009"
+
 def make_log():
     return 1
     # setting for making log files

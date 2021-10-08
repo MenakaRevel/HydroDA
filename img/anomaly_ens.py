@@ -27,11 +27,16 @@ import math
 #argvs = sys.argv
 
 # experiment="E2O_HydroWeb5"
-experiment="DIR_WSE_E2O_HWEB_003"
+# experiment="DIR_WSE_E2O_HWEB_001"
+# experiment="DIR_WSE_E2O_HWEB_003"
+# experiment="DIR_WSE_E2O_HWEB_004"
 # experiment="NOM_WSE_E2O_HWEB_009"
 # experiment="ANO_WSE_E2O_HWEB_003"
 # experiment="ANO_WSE_E2O_HWEB_003"
-# experiment="NOM_WSE_E2O_HWEB_010"
+# experiment="NOM_WSE_E2O_HWEB_001"
+experiment="NOM_WSE_E2O_HWEB_002"
+# experiment="NOM_WSE_E2O_HWEB_003"
+# experiment="NOM_WSE_E2O_HWEB_004"
 # experiment="NOM_WSE_E2O_HWEB_011"
 # experiment="NOM_WSE_E2O_HWEB_013"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
@@ -61,6 +66,7 @@ import read_hydroweb as hweb
 import cal_stat as stat
 
 conflag=pm.conflag()
+print conflag
 #os.system("mkdir ../assim_out/fig")
 #os.system("mkdir ../assim_out/fig/anomaly")
 #====================================================================
@@ -123,8 +129,8 @@ gsize  = float(filter(None, re.split(" ",lines[3]))[0])
 # start_dt=datetime.date(year,month,date)
 # size=60
 
-syear,smonth,sdate=2003,1,1 #pm.starttime()#2004#1991 
-eyear,emonth,edate=pm.endtime() #2005,1,1 #
+syear,smonth,sdate=pm.starttime()#2004#1991 #2003,1,1 #
+eyear,emonth,edate=2012,1,1 #pm.endtime() #2005,1,1 #
 
 # start=0
 # #last=int(argvs[1])
@@ -537,8 +543,8 @@ def make_fig(point):
     lines.append(ax1.plot(np.arange(start,last),asm1,label="assimilated",color="#ff8021",linewidth=0.8,alpha=0.8,zorder=103)[0])
 #    ax1.plot(np.arange(start,last),np.mean(em_sf[:,:,point],axis=1),label="mean sfelv",color="blue",linewidth=0.5,linestyle="--",alpha=0.5,zorder=103)
 #    plt.ylim(ymin=)
-    meanch="mean (sim): %5.2f"%(np.mean(mean_obss[:,ylist[point],xlist[point]],axis=0))
-    stdch="std (sim):%5.2f"%(np.mean(std_obss[:,ylist[point],xlist[point]],axis=0))
+    meanch="mean (long-term): %5.2f"%(np.mean(mean_obss[:,ylist[point],xlist[point]],axis=0))
+    stdch="std (long-term):%5.2f"%(np.mean(std_obss[:,ylist[point],xlist[point]],axis=0))
     omch="mean (obs): %5.2f"%(np.mean(data))
     osch="std (obs): %5.2f"%(np.std(data))
     cmch="mean (cor): %5.2f"%(np.mean(opn[:,:,point]))

@@ -257,7 +257,9 @@ def prepare_input():
         # #             inputlist.append([iname,oname,str(abs(dist))])
         # #             ens_num=ens_num+1
         distopen_ranges={}
-        with open(pm.DA_dir()+"/dat/random_ensemble_E2O.txt","r") as f:
+        # fname="random_ensemble_E2O.txt"
+        fname="random_ensemble_E2O_49.txt"
+        with open(pm.DA_dir()+"/dat/"+fname,"r") as f:
             lines=f.readlines()
         for line in lines:
             line   = filter(None,re.split(" ", line))
@@ -282,7 +284,7 @@ def prepare_input():
                 iname=pm.DA_dir()+"/inp/"+runname+"/Roff/Roff__"+yyyy+mm+dd+run_num+".one"
                 # distopens=distopen_ranges[run_num]
                 # for dist in distopens:
-                for _ in np.arange(1,3+1):
+                for _ in np.arange(1,7+1):
                     ens_char="C%03d"%(ens_num)
                     dist=distopen_ranges[ens_char]
                     oname=pm.DA_dir()+"/out/"+pm.experiment()+"/CaMa_in/"+runname+"/Roff_CORR/Roff__"+yyyy+mm+dd+ens_char+".one"

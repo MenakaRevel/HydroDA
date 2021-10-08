@@ -24,12 +24,6 @@ from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 import cartopy.feature as cfeature
 import os
 
-#sys.path.append('../assim_out/')
-# os.system("ln -sf ../gosh/params.py params.py")
-import params as pm
-import read_grdc as grdc
-import read_hydroweb as hweb
-import cal_stat as stat
 #import plot_colors as pc
 #from matplotlib.font_manager import FontProperties
 #fp = FontProperties(fname="jap.ttc",size=15)
@@ -55,6 +49,13 @@ experiment="NOM_WSE_E2O_HWEB_001"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 assim_out=pm.DA_dir()+"/out/"+experiment
 print (assim_out)
+
+sys.path.append('../assim_out/')
+# os.system("ln -sf ../gosh/params.py params.py")
+import params as pm
+import read_grdc as grdc
+import read_hydroweb as hweb
+import cal_stat as stat
 #====================================================================
 def filter_nan(s,o):
     """

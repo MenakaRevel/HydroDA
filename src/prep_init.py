@@ -198,12 +198,14 @@ def save_statistic():
     for ens in np.arange(1,pm.ens_mem(pm.mode())+1):
         ens_char="%03d"%(ens)
         if pm.input()=="E2O":
+            iname = pm.DA_dir()+"/dat/mean_"+pm.stat_name()+"_"+ens_char+".bin"
             # iname = pm.DA_dir()+"/dat/mean_sfcelv_E2O_"+pm.mapname()+"_2000-2010_"+ens_char+".bin"
-            iname = pm.DA_dir()+"/dat/mean_sfcelv_cal_E2O_"+pm.mapname()+"_2000-2010_"+ens_char+".bin"
+            # iname = pm.DA_dir()+"/dat/mean_sfcelv_cal_E2O_"+pm.mapname()+"_2000-2010_"+ens_char+".bin"
             oname = "./assim_out/mean_sfcelv/meansfcelvC"+ens_char+".bin"
         if pm.input()=="VIC_BC":
+            iname = pm.DA_dir()+"/dat/mean_"+pm.stat_name()+"_"+ens_char+".bin"
             # iname = pm.DA_dir()+"/dat/mean_sfcelv_VIC_BC_"+pm.mapname()+"_2000-2010_"+ens_char+".bin"
-            iname = pm.DA_dir()+"/dat/mean_sfcelv_cal_VIC_BC_"+pm.mapname()+"_2000-2010_"+ens_char+".bin"
+            # iname = pm.DA_dir()+"/dat/mean_sfcelv_cal_VIC_BC_"+pm.mapname()+"_2000-2010_"+ens_char+".bin"
             oname = "./assim_out/mean_sfcelv/meansfcelvC"+ens_char+".bin"
         inputlist.append([iname,oname])
 
@@ -218,12 +220,14 @@ def save_statistic():
     for ens in np.arange(1,pm.ens_mem(pm.mode())+1):
         ens_char="%03d"%(ens)
         if pm.input()=="E2O":
+            iname = pm.DA_dir()+"/dat/std_"+pm.stat_name()+"_"+ens_char+".bin"
             # iname = pm.DA_dir()+"/dat/std_sfcelv_E2O_"+pm.mapname()+"_2000-2010_"+ens_char+".bin"
-            iname = pm.DA_dir()+"/dat/std_sfcelv_cal_E2O_"+pm.mapname()+"_2000-2010_"+ens_char+".bin"
+            # iname = pm.DA_dir()+"/dat/std_sfcelv_cal_E2O_"+pm.mapname()+"_2000-2010_"+ens_char+".bin"
             oname = "./assim_out/mean_sfcelv/stdsfcelvC"+ens_char+".bin"
         if pm.input()=="VIC_BC":
+            iname = pm.DA_dir()+"/dat/std_"+pm.stat_name()+"_"+ens_char+".bin"
             # iname = pm.DA_dir()+"/dat/std_sfcelv_VIC_BC_"+pm.mapname()+"_2000-2010_"+ens_char+".bin"
-            iname = pm.DA_dir()+"/dat/std_sfcelv_cal_VIC_BC_"+pm.mapname()+"_2000-2010_"+ens_char+".bin"
+            # iname = pm.DA_dir()+"/dat/std_sfcelv_cal_VIC_BC_"+pm.mapname()+"_2000-2010_"+ens_char+".bin"
             oname = "./assim_out/mean_sfcelv/stdsfcelvC"+ens_char+".bin"
         inputlist.append([iname,oname])
 

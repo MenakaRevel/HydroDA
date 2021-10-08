@@ -35,10 +35,12 @@ import math
 # experiment="test_virtual"
 # experiment="DIR_WSE_E2O_HWEB_001"
 # experiment="DIR_WSE_E2O_HWEB_002"
-experiment="DIR_WSE_E2O_HWEB_003"
+# experiment="DIR_WSE_E2O_HWEB_003"
+# experiment="DIR_WSE_E2O_HWEB_004"
 # experiment="ANO_WSE_E2O_HWEB_001"
-# experiment="ANO_WSE_E2O_HWEB_002"
+experiment="ANO_WSE_E2O_HWEB_002"
 # experiment="ANO_WSE_E2O_HWEB_003"
+# experiment="ANO_WSE_E2O_HWEB_004"
 # experiment="NOM_WSE_E2O_HWEB_001"
 # experiment="NOM_WSE_E2O_HWEB_002"
 # experiment="NOM_WSE_E2O_HWEB_003"
@@ -145,6 +147,27 @@ def KGE(s,o):
     r = np.corrcoef(o, s)[0,1]
     return 1 - np.sqrt((r - 1) ** 2 + (B - 1) ** 2 + (y - 1) ** 2)
 #========================================
+def correlation(s,o):
+    """
+    correlation coefficient
+    input:
+        s: simulated
+        o: observed
+    output:
+        correlation: correlation coefficient
+    """
+    s,o = filter_nan(s,o)
+    o=ma.masked_where(o<=0.0,o).filled(0.0)
+    s=ma.masked_where(o<=0.0,s).filled(0.0)
+    o=np.compress(o>0.0,o)
+    s=np.compress(o>0.0,s)
+    if s.size == 0:
+        corr = 0.0 #np.NaN
+    else:
+        corr = np.corrcoef(o, s)[0,1]
+        
+    return corr
+#====================================================================
 mk_dir(assim_out+"/figures")
 mk_dir(assim_out+"/figures/disgraph")
 #----
@@ -157,8 +180,8 @@ nx     = int(filter(None, re.split(" ",lines[0]))[0])
 ny     = int(filter(None, re.split(" ",lines[1]))[0])
 gsize  = float(filter(None, re.split(" ",lines[3]))[0])
 #----
-syear,smonth,sdate=2003,1,1 #pm.starttime()#2004#1991 
-eyear,emonth,edate=2004,1,1 #pm.endtime() #2005,1,1 #2004,1,1 #
+syear,smonth,sdate=pm.starttime()#2004#1991 #2003,1,1 # 2009,1,1 #
+eyear,emonth,edate=pm.endtime() #2005,1,1 #2004,1,1 # 2004,1,1 # 2010,1,1 # 2012,1,1 #
 #month=1
 #date=1
 start_dt=datetime.date(syear,smonth,sdate)
@@ -190,7 +213,7 @@ river=[]
 rivernames = grdc.grdc_river_name_v396()
 for rivername in rivernames:
   grdc_id,station_loc,x_list,y_list = grdc.get_grdc_loc_v396(rivername)
-  print rivername, grdc_id,station_loc
+# #   print rivername, grdc_id,station_loc
   river.append([rivername]*len(station_loc))
   staid.append(grdc_id)
   pname.append(station_loc)
@@ -276,6 +299,9 @@ opn = np.ctypeslib.as_array(shared_array_opn)
 asm = np.ctypeslib.as_array(shared_array_asm)
 p.terminate()
 
+# res = map(read_data, inputlist)
+# opn = np.ctypeslib.as_array(shared_array_opn)
+# asm = np.ctypeslib.as_array(shared_array_asm)
 # for day in np.arange(start,last):
 #     target_dt=start_dt+datetime.timedelta(days=day)
 #     yyyy='%04d' % (target_dt.year)
@@ -434,18 +460,23 @@ def make_fig(point):
     NS2=NS(np.mean(opn[:,:,point],axis=1),org)
     KGE1=KGE(np.mean(asm[:,:,point],axis=1),org)
     KGE2=KGE(np.mean(opn[:,:,point],axis=1),org)
+    COR1=correlation(np.mean(asm[:,:,point],axis=1),org)
+    COR2=correlation(np.mean(opn[:,:,point],axis=1),org)
     #1-((np.sum((org[:ed,point]-org_Q)**2))/(np.sum((org_Q-np.mean(org_Q))**2)))
     #print point,NS1,NS2
     Nash1="NS (assim):%4.2f"%(NS1)
     Nash2="NS (open):%4.2f"%(NS2)
     kgeh1="KGE(assim):%4.2f"%(KGE1)
     kgeh2="KGE(open):%4.2f"%(KGE2)
+    corr1="$r^2$(assim):%4.2f"%(COR1)
+    corr2="$r^2$(open):%4.2f"%(COR2)
     #
     ax1.text(0.02,0.95,Nash1,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
     ax1.text(0.02,0.85,Nash2,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
     ax1.text(0.42,0.95,kgeh1,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
     ax1.text(0.42,0.85,kgeh2,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
-
+    ax1.text(0.02,0.75,corr1,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    ax1.text(0.02,0.55,corr2,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
 #    # twin axis
 #    ax2 = ax1.twinx()
 #    #aiv = stat.AI(asm[:,:,point],opn[:,:,point],org[:,point])
@@ -514,7 +545,7 @@ def make_fig(point):
 
 
 #    ax2.plot(np.arange(start,last),aiv,color="green",zorder=104,marker = "o",alpha=0.3, markevery=swt[point])
-    #ax2.plot(np.arange(start,last),ma.masked_less_equal(aivn,1.0e-20),color="green",zorder=104,marker = "o", alpha=0.5,linewidth=0.5,markevery=swt[point])
+#    ax2.plot(np.arange(start,last),ma.masked_less_equal(aivn,1.0e-20),color="green",zorder=104,marker = "o", alpha=0.5,linewidth=0.5,markevery=swt[point])
 #    ax2.plot(np.arange(start,last),ma.masked_where(error<=0.1,aivn),color=green,marker = "o",markeredgecolor =green, alpha=1,linewidth=0.5,markevery=swt[point],markersize=3,zorder=100)#,label="AI")
 #    ax2.plot(np.arange(start,last),ma.masked_where(error>0.1,aivn),color=green2,marker = "o",markeredgecolor =green2, alpha=1,linewidth=0.5,markevery=swt[point],markersize=3,zorder=100)#,label="AI")
 #    ax2.set_ylabel('AI', color='green')
@@ -553,7 +584,7 @@ para_flag=1
 # para_flag=0
 #--
 if para_flag==1:
-    p=Pool(6)
+    p=Pool(20)
     p.map(make_fig,np.arange(pnum))
     p.terminate()
 else:

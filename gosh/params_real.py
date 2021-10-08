@@ -24,7 +24,7 @@ def mode():
     # 1: Earth2Obs, 2: ERA20CM, 3: VIC_BC, 4: -25% baised (ELSE_KIM2009/E2O/ERA20CM), 5: ERA5
 
 def conflag():
-    return 1
+    return 2
     # converstion flag for observation converstions 
     #  1 - Directly values 
     #  2 - Anomalies
@@ -40,9 +40,8 @@ def mapname():
 
 def map_dimension():
     fname=CaMa_dir()+"/map/"+mapname()+"/params.txt"
-    f=open(fname,"r")
-    lines=f.readlines()
-    f.close()
+    with open(fname,"r") as f:
+        lines=f.readlines()
     #-------
     nx     = int(filter(None, re.split(" ",lines[0]))[0])
     ny     = int(filter(None, re.split(" ",lines[1]))[0])
@@ -84,8 +83,8 @@ def assimE():
     # *note: should be smaller or equal to 170
 
 def patch_size():
-    return 0
-    # return 100
+    # return 0
+    return 100
     # the size of the local patch of LETKF(Local ** EnKF)
     # 0: only 1 pixel (the pixel itself) belongs to its local patch
     # 100: empirical local patch
@@ -96,27 +95,38 @@ def DA_dir():
     # where src, dat, sat, out exsits
 
 def patch_dir():
-    # return "/cluster/data6/menaka/Empirical_LocalPatch/local_patch"
-    return "/cluster/data6/menaka/Empirical_LocalPatch/local_patchMS"
-    #return "/cluster/data6/menaka/covariance/local_patch"
-    #return "/cluster/data6/menaka/covariance/local_patchMS"
-    #return "/cluster/data6/menaka/covariance/local_patch_0.80"
+    return "/cluster/data6/menaka/Empirical_LocalPatch/local_patch"
+    # return "/cluster/data6/menaka/Empirical_LocalPatch/local_patchMS"
+    # return "/cluster/data6/menaka/covariance/local_patch"
+    # return "/cluster/data6/menaka/covariance/local_patchMS"
+    # return "/cluster/data6/menaka/covariance/local_patch_0.80"
 
 def patch_name():
+    # return "amz_06min_S14FD_95"
+    # return "amz_06min_S14FD_92" 
+    # return "amz_06min_S14FD_90"
     # return "amz_06min_S14FD_80"
-    # return "amz_06min_S14FD_60"
-    return "amz_06min_S14FD_60 Main Stream"
+    return "amz_06min_S14FD_60"
     # return "amz_06min_S14FD_40"
     # return "amz_06min_S14FD_20"
     # return "glb_15min_S14FD_60"
 
 def patch_id():
+    # return "0.95MS"
+    # return "0.92MS"
+    # return "0.90MS"
+    # return "0.80MS"
+    # return "0.60MS"
+    # return "0.90"
     # return "0.80"
     return "0.60"
     # return "0.40"
     # return "0.20"
 
 def thersold():
+    # return 0.95
+    # return 0.92
+    # return 0.90
     # return 0.80
     return 0.60
     # return 0.40
@@ -128,9 +138,9 @@ def initial_infl():
     # initial inflation parameter
 
 def rho():
-    return -1.0
+    # return -1.0
     # return 1.00
-    # return 1.08
+    return 1.08
     # -1.0 : adaptive inflation will be used as in Myoshi et al (2011)
     # positive : fixed inflation parameter will be used
     # [E.g. 1.08, 1.10]
@@ -141,7 +151,8 @@ def sigma_b():
 
 def ens_mem(mode=mode()):
     if mode == 1:
-        return 21
+        # return 21
+        return 49
     
     if mode == 2:
         return 20
@@ -159,10 +170,10 @@ def timestep():
     return 86400 # outer timestep in seconds
 
 def starttime():
-    return (2002,1,1) # start date: [year,month,date]
+    return (2009,1,1) # start date: [year,month,date]
 
 def endtime():
-    return (2004,1,1) # end date: [year,month,date]
+    return (2015,1,1) # end date: [year,month,date]
                       # *note: this date is not included
 
 # **************************************************************
@@ -176,7 +187,7 @@ def spinup_mode():
     ### if initial restart file is ready, spinup simulation is no need
 
 def spinup_end_year():
-    return 2001
+    return 2008
 
 def spinup_end_month():
     return 12
@@ -314,6 +325,10 @@ def CaMa_dir():
     # directory of CaMa-Flood
     # indicate the directory of ./map or ./src and other folders
 
+def calibrate():
+    return "yes"
+    # return "no"
+
 def MKLdir():
     return "/opt/intel/compilers_and_libraries_2016.3.170/mac/mkl"
     # directory of Intel MKL files
@@ -329,7 +344,6 @@ def output_er():
 
 # **************************************************************
 # 7. observations settings
-
 def obs_name():
     return "HydroWeb"
     # return "SWOT"
@@ -342,8 +356,20 @@ def obs_dir():
     # return "/cluster/data6/menaka/ensemble_org/CaMa_out/E2O003"
 
 def obs_list():
-    return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+".txt"
+    # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+".txt"
     # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_amz.txt"
+    # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_QC.txt"
+    # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_QC1.txt"
+    return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_QC0.txt"
+
+def stat_name():
+    # return "sfcelv_49_E2O_amz_06min_2009-2014"
+    return "sfcelv_cal_49_E2O_amz_06min_2009-2014"
+    # return "sfcelv_49_E2O_amz_06min_2009-2010"
+    # return "sfcelv_E2O_amz_06min_2009-2010"
+    # eturn "sfcelv_E2O_amz_06min_2009-2009"
+    # return "sfcelv_E2O_amz_06min_2000-2010"
+    # return "sfcelv_cal_E2O_amz_06min_2000-2010"
 
 def make_log():
     return 1

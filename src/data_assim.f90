@@ -38,6 +38,7 @@ integer                         :: day!,E_retry
 !real,allocatable                :: randlist(:)
 real                            :: errexp
 real,allocatable                :: K_(:,:)
+integer                         :: lwork,liwork ! added for large ensemble size
 
 !integer,allocatable             :: obs_mask(:,:) ! NEW v.1.1.0
 real,allocatable                :: ens_xa(:,:,:)
@@ -169,6 +170,9 @@ patch_nums=patch_side**2
 rho=1.0d0
 ! weightgae thersold
 !thresold=0.8d0
+
+lwork=max(1,26*ens_num)
+liwork=max(1,10*ens_num)
 !---
 fname=trim(adjustl(expdir))//"/logout/errrand_"//yyyymmdd//".log"
 open(36,file=fname,status='replace')
@@ -829,7 +833,8 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         !write(78,*) "HETRHE:",HETRHE
         !write(78,*) "ET*E:",matmul(TRANSPOSE(Ef),Ef)
 
-        allocate(work(1000),iwork(1000),ifail(1000),isuppz(1000))
+        ! allocate(work(1000),iwork(1000),ifail(1000),isuppz(1000))
+        allocate(work(lwork),iwork(lwork),ifail(lwork),isuppz(lwork))
         work=0
         iwork=0
         ifail=0
@@ -856,9 +861,10 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         !call ssyevx("V","A","U",ens_num,VDVT,ens_num,-1e20,1e20,1,ens_num,-1.0,m,la_p,U_p,ens_num,work,1000,iwork,ifail,info)
         !call ssyevx("V","I","U",ens_num,VDVT,ens_num,-1e20,1e20,1,ens_num,-1.0,m,la_p,U_p,ens_num,work,1000,iwork,ifail,info)
         !call ssyevr("V","A","U",ens_num,VDVT,ens_num,-1e-20,1e20,1,ens_num,2.0*2.3e-38,m,la_p,U_p,ens_num,isuppz,work,1000,iwork,1000,info)
-        call ssyevr("V","A","U",ens_num,VDVT,ens_num,-1e20,1e20,1,ens_num,-1.0,m,la_p,U_p,ens_num,isuppz,work,1000,iwork,1000,info)
+        ! call ssyevr("V","A","U",ens_num,VDVT,ens_num,-1e20,1e20,1,ens_num,-1.0,m,la_p,U_p,ens_num,isuppz,work,1000,iwork,1000,info)
+        call ssyevr("V","A","U",ens_num,VDVT,ens_num,-1e20,1e20,1,ens_num,-1.0,m,la_p,U_p,ens_num,isuppz,work,lwork,iwork,lwork,info)
         !write(78,*) "m",m
-        !write(78,*) "ovs:",ovs
+        !write(78,*) "ovs:",ovss
         !write(78,*) "la_p",la_p
         !write(78,*) "U_p",U_p
         !write(78,*) "info",info
