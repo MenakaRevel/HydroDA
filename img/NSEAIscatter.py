@@ -42,8 +42,8 @@ import os
 # experiment="ANO_WSE_E2O_HWEB_002"
 # experiment="ANO_WSE_E2O_HWEB_003"
 # experiment="ANO_WSE_E2O_HWEB_004"
-experiment="NOM_WSE_E2O_HWEB_001"
-# experiment="NOM_WSE_E2O_HWEB_002"
+# experiment="NOM_WSE_E2O_HWEB_001"
+experiment="NOM_WSE_E2O_HWEB_002"
 # experiment="NOM_WSE_E2O_HWEB_003"
 # experiment="NOM_WSE_E2O_HWEB_004"
 # experiment="NOM_WSE_E2O_HWEB_005"
@@ -57,12 +57,13 @@ experiment="NOM_WSE_E2O_HWEB_001"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 # assim_out=pm.DA_dir()+"/out/"+experiment
-assim_out="../out/"+experiment
+# assim_out="../out/"+experiment
+assim_out="/cluster/data7/menaka/HydroDA/out/"+experiment
 print (assim_out)
 
 # os.system("ln -sf "+assim_out+"/params.py params.py")
 # os.system(rm -r params.py)
-os.system("touch "+assim_out+"/__init__.py")
+# os.system("touch "+assim_out+"/__init__.py")
 sys.path.append(assim_out)
 import params as pm
 import read_grdc as grdc

@@ -33,11 +33,11 @@ import os
 #experiment="E2O_HydroWeb22"
 # experiment="VIC_BC_HydroWeb11"
 # experiment="test_wse"
-# experiment="DIR_WSE_E2O_HWEB_001"
-# experiment="DIR_WSE_E2O_HWEB_001"
+experiment="DIR_WSE_E2O_HWEB_001"
+# experiment="DIR_WSE_E2O_HWEB_002"
 # experiment="ANO_WSE_E2O_HWEB_001"
 # experiment="ANO_WSE_E2O_HWEB_002"
-experiment="NOM_WSE_E2O_HWEB_001"
+# experiment="NOM_WSE_E2O_HWEB_001"
 # experiment="NOM_WSE_E2O_HWEB_002"
 # experiment="NOM_WSE_E2O_HWEB_003"
 # experiment="NOM_WSE_E2O_HWEB_004"
@@ -47,11 +47,13 @@ experiment="NOM_WSE_E2O_HWEB_001"
 
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
-assim_out=pm.DA_dir()+"/out/"+experiment
+# assim_out=pm.DA_dir()+"/out/"+experiment
+# assim_out="../out/"+experiment
+assim_out="/cluster/data7/menaka/HydroDA/out/"+experiment
 print (assim_out)
 
-sys.path.append('../assim_out/')
-# os.system("ln -sf ../gosh/params.py params.py")
+
+sys.path.append(assim_out)
 import params as pm
 import read_grdc as grdc
 import read_hydroweb as hweb
@@ -145,7 +147,8 @@ def RMSE(s,o):
     o=np.compress(o>0.0,o)
     s=np.compress(o>0.0,s)
     s,o = filter_nan(s,o)
-    return np.sqrt(np.mean((s-o)**2))
+    # return np.sqrt(np.mean((s-o)**2))
+    return np.sqrt(np.ma.mean(np.ma.masked_where(o<=0.0,(s-o)**2)))
 #==========================================================
 mk_dir(assim_out+"/figures")
 mk_dir(assim_out+"/figures/RMSE")
@@ -187,8 +190,8 @@ rivnum="../dat/rivnum_"+pm.mapname()+".bin"
 rivnum=np.fromfile(rivnum,np.int32).reshape(ny,nx)
 rivermap=((nextxy[0]>0)*(rivnum==1))*1.0
 #----
-syear,smonth,sdate=2003,1,1 #spm.starttime()#2004#1991  2004,1,1 #
-eyear,emonth,edate=2005,1,1 #pm.endtime() #2005,1,1 #
+syear,smonth,sdate=pm.starttime()#2004#1991  2004,1,1 # 2003,1,1 #
+eyear,emonth,edate=pm.endtime() #2005,1,1 # 2005,1,1 #
 #month=1
 #date=1
 start_dt=datetime.date(syear,smonth,sdate)
@@ -210,7 +213,7 @@ EGM08=[]
 EGM96=[]
 rivernames  = ["AMAZONAS"]
 for rivername in rivernames:
-  path = assim_out+"/figures/sfcelv/%s"%(rivername)
+#   path = assim_out+"/figures/sfcelv/%s"%(rivername)
   station_loc,x_list,y_list,egm08,egm96 =hweb.get_hydroweb_loc(rivername,pm.mapname())
   river.append([rivername]*len(station_loc))
   pname.append(station_loc)
@@ -296,12 +299,12 @@ wpix=(180+west)*4
 epix=(180+east)*4
 
 #cmap=make_colormap(colors_list)
-# cmap=mbar.colormap("H01")
-cmap=cm.coolwarm
+cmap=mbar.colormap("H01")
+# cmap=cm.coolwarm
 cmap.set_under("w",alpha=0)
 cmapL=cmap #cm.get_cmap("rainbow_r")
-vmin=-1.0
-vmax=1.0
+vmin=0.0
+vmax=10.0
 norm=Normalize(vmin=vmin,vmax=vmax)
 #------
 # river width
@@ -333,15 +336,16 @@ for point in np.arange(pnum):
     # time,org=hweb.HydroWeb_WSE(pname[point],syear,eyear-1)
     org=hweb.HydroWeb_continous_WSE(pname[point],syear,smonth,sdate,eyear-1,12,31,EGM08[point],EGM96[point])
     org=np.array(org)+np.array(EGM08[point])-np.array(EGM96[point])
-    if np.sum(ma.masked_where(org!=-9999.0,org))==0.0:
-        print ("no obs", np.sum(ma.masked_where(org!=-9999.0,org)))
+    # if np.sum(ma.masked_where(org!=-9999.0,org))==0.0:
+    if np.sum((org!=-9999.0)*1.0) == 0.0:
+        # print ("no obs", np.sum((org!=-9999.0)*1.0))
         continue
     RMSEasm=RMSE(np.mean(asm[:,:,point],axis=1),org)
-    RMSEopn=RMSE(np.mean(opn[:,:,point],axis=1),org)
-    if RMSEopn==0.0:
-        print (RMSEopn, pname[point])
+    # RMSEopn=RMSE(np.mean(opn[:,:,point],axis=1),org)
+    if RMSEasm==0.0:
+        # print (RMSEopn, pname[point])
         continue
-    rRMSE=(RMSEasm-RMSEopn)/(RMSEopn+1.0e-20) 
+    rRMSE=RMSEasm #(RMSEasm-RMSEopn)/(RMSEopn+1.0e-20) 
     #NSEAI=NSEasm
     ix=xlist[point]
     iy=ylist[point]
@@ -356,6 +360,7 @@ for point in np.arange(pnum):
     #print (lon,lat,NSEAI) #,NSEasm,NSEopn)
     # if NSEAI > 0.0:
     #     print lon,lat, "%3.2f %3.2f %3.2f"%(NSEAI, NSEasm, NSEopn)
+    print (pname[point],rRMSE)
     ax.scatter(lon,lat,s=10,marker="o",edgecolors=c, facecolors=c,zorder=106)
     # if rRMSE >= 0.00:
     #     ax.scatter(lon,lat,s=10,marker="o",edgecolors=c, facecolors=c,zorder=106)
@@ -363,7 +368,8 @@ for point in np.arange(pnum):
     #     print staid[point], pname[point]
     #     ax.scatter(lon,lat,s=10,marker="d",edgecolors="k", facecolors="k",zorder=106)
 #--
-cbar=m.colorbar(im,"right",size="2%",ticks=np.arange(vmin,vmax+0.001,0.2))
+cbar=m.colorbar(im,"right",size="2%",ticks=np.arange(vmin,vmax+0.001,2.0),extend="max")
+cbar.set_label("$RMSE$")
 #plt.title(stitle)
-plt.savefig(assim_out+"/figures/RMSE/RMSEscatter.png",dpi=300,bbox_inches="tight", pad_inches=0.05)
+plt.savefig(assim_out+"/figures/RMSE/RMSEassim_map.png",dpi=300,bbox_inches="tight", pad_inches=0.05)
 os.system("rm -r RMSEtmp*.txt")

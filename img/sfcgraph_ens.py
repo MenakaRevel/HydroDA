@@ -28,14 +28,14 @@ import math
 #experiment="E2O_HydroWeb22"
 # experiment="VIC_BC_HydroWeb11"
 # experiment="test_wse"
-# experiment="DIR_WSE_E2O_HWEB_001"
+experiment="DIR_WSE_E2O_HWEB_001"
 # experiment="DIR_WSE_E2O_HWEB_002"
 # experiment="DIR_WSE_E2O_HWEB_003"
 # experiment="DIR_WSE_E2O_HWEB_004"
 # experiment="ANO_WSE_E2O_HWEB_001"
 # experiment="ANO_WSE_E2O_HWEB_003"
 # experiment="ANO_WSE_E2O_HWEB_004"
-experiment="NOM_WSE_E2O_HWEB_001"
+# experiment="NOM_WSE_E2O_HWEB_001"
 # experiment="NOM_WSE_E2O_HWEB_002"
 # experiment="NOM_WSE_E2O_HWEB_004"
 # experiment="NOM_WSE_E2O_HWEB_008"
@@ -50,7 +50,8 @@ experiment="NOM_WSE_E2O_HWEB_001"
 # assim_out=pm.DA_dir()+"/out/"+experiment
 # print (assim_out)
 
-assim_out="../out/"+experiment
+# assim_out="../out/"+experiment
+assim_out="/cluster/data7/menaka/HydroDA/out/"+experiment
 print (assim_out)
 #assim_out="assim_out_E2O_womc"
 #assim_out="assim_out"
@@ -229,7 +230,7 @@ EGM96=[]
 #rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZONAS","MEKONG","IRRAWADDY","VOLGA", "NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
 rivernames  = ["AMAZONAS"]
 for rivername in rivernames:
-  path = assim_out+"/figures/sfcelv/%s"%(rivername)
+#   path = assim_out+"/figures/sfcelv/%s"%(rivername)
   #print path
   #mk_dir(path)
   #station_loc,x_list,y_list = grdc.get_grdc_loc(rivername,"b")

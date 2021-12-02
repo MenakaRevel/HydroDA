@@ -332,7 +332,8 @@ def grdc_dis(grdc_id,syear,eyear,smon=1,emon=12,sday=1,eday=31):
   #iid="%d"%(grdc_id)
   iid=grdc_id
   # read grdc q
-  grdc ="/cluster/data6/menaka/GRDC_2019/"+iid+"_Q_Day.Cmd.txt"
+  # grdc ="/cluster/data6/menaka/GRDC_2019/"+iid+"_Q_Day.Cmd.txt"
+  grdc ="/cluster/data7/menaka/GRDC_2021/"+iid+"_Q_Day.Cmd.txt" # updated GRDC 2021
   if not os.path.exists(grdc):
       return np.ones([last],np.float32)*-9999.0
   else:

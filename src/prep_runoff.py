@@ -192,7 +192,7 @@ def cal_monthly_mean(start_year,end_year,months=24):
         roff_mean=roff_mean+threshold
         roff_mean.tofile("./CaMa_in/"+runname+"/mean_month/mean_"+ychar+mchar+".bin")
 ###########################
-def prepare_input():
+def prepare_input_old():
     # spinup start_year
     # simulation end_year
     start_year=pm.spinup_end_year()
@@ -664,6 +664,13 @@ def prepare_input():
                 roffc=roff*distopen_range[mon-1,ens_num,:,:] #*mean_runoff
                 oname=pm.DA_dir()+"/out/"+pm.experiment()+"/CaMa_in/"+runname+"/Roff_CORR/Roff__"+yyyy+mm+dd+ens_char+".one"
                 roffc.tofile(oname)
+    return 0
+######################################
+def prepare_input():
+    "create a soft link to runoff data set"
+    if os.path.islink("./CaMa_in/"+pm.runname(pm.mode())):
+        os.system("rm -r ./CaMa_in/"+pm.runname(pm.mode()))
+    os.system("ln -sf "+pm.runoff_dir()+" ./CaMa_in/")
     return 0
 ######################################
 if __name__ == "__main__":

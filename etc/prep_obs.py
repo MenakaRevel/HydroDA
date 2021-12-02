@@ -23,8 +23,11 @@ import random
 import re
 import calendar
 import math
+import sys
 
 #external python codes
+dir_param="../gosh"
+sys.path.append(dir_param)
 import params as pm
 ###########################
 def mk_dir(sdir):
@@ -55,7 +58,7 @@ def get_HydroWeb():
 	# fname=pm.DA_dir()+"/dat/HydroWeb_alloc_"+pm.mapname()+".txt"
 	# fname=pm.DA_dir()+"/dat/HydroWeb_alloc_"+pm.mapname()+"_new.txt"
 	# fname=pm.DA_dir()+"/dat/HydroWeb_alloc_"+pm.mapname()+"_amz.txt"
-	fname=pm.obs_list()
+	fname=obs_list()
 	#=========================
 	with open(fname,"r") as f:
 		lines=f.readlines()
@@ -163,7 +166,7 @@ def swot_data(yyyy,mm,dd):
 	ny_swot = min(ny,640)
 	day=SWOT_day(yyyy,mm,dd)
 	SWOTDD="%02d"%(day)
-	fname="../../sat/mesh_day"+SWOTDD+".bin" # for glb_15min
+	fname="../sat/mesh_day"+SWOTDD+".bin" # for glb_15min
 	mesh_in=np.fromfile(fname,np.float32).reshape([ny_swot,nx])
 	mesh=(mesh_in>=10)*(mesh_in<=60)
 	meshP=mesh-1000*(mesh<0.1)
@@ -258,71 +261,39 @@ def err_rand(ix,iy):
 	return rand
 #########################
 def write_txt(inputlist):
-	yyyy=inputlist[0]
-	mm=inputlist[1]
-	dd=inputlist[2]
-	print ("write text file: ",yyyy,mm,dd)
-	# obs_dir="/cluster/data6/menaka/HydroWeb"
-	# if pm.obs_name() == "HydroWeb":
-	# 	obs_dir="/cluster/data6/menaka/HydroWeb"
-	# HydroWeb_dir=inputlist[3]
-	target_dt=datetime.date(int(yyyy),int(mm),int(dd))
-	txtfile=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out/obs/"+yyyy+mm+dd+".txt"
-	# print txtfile
-	# pnum=len(lname)
-	# print (pnum)
-	# print pnum
-	# == read relevant observation data ==
-	# print (yyyy,mm,dd,pm.obs_name())
-	if pm.obs_name() == "HydroWeb":
-		xlist, ylist, l_wse, m_wse, s_wse, l_sat = HydroWeb_data(yyyy,mm,dd)
-	if pm.obs_name() == "SWOT":
-		xlist, ylist, l_wse, m_wse, s_wse, l_sat = swot_data(yyyy,mm,dd) 
-	#--------------
-	pnum=len(xlist)
-	# print ('xlist:',pnum, "l_wse:",len(l_wse))
-	with open(txtfile,"w") as txtf:
-		# for point in np.arange(pnum):
-		# 	# == read relevant observation data ==
-		# 	if pm.obs_name() == "HydroWeb":
-		# 		# == for HydroWeb data ==
-		# 		wseo, mean_wse, std_wse = read_HydroWeb(yyyy,mm,dd,lname[point],lEGM08[point],lEGM96[point],leledif[point])
-		# 	else:
-		# 		wseo, mean_wse, std_wse = read_HydroWeb(yyyy,mm,dd,lname[point],lEGM08[point],lEGM96[point],leledif[point])
-		# 	print (point, lname[point], wseo)
-		# 	if wseo == -9999.0:
-		# 		continue
-		# 	iix=xlist[point]
-		# 	iiy=ylist[point]
-			# mean_wse=np.mean(np.array(lwse))
-			# std_wse=np.std(np.array(lwse))
-			# sat=satellite[point]
-		# pnum=len(xlist)
-		for point in np.arange(pnum):
-			iix=xlist[point]
-			iiy=ylist[point]
-			wseo=l_wse[point]
-			mean_wse=m_wse[point]
-			std_wse=s_wse[point]
-			sat=l_sat[point]
-			line="%04d	%04d	%10.4f	%10.4f	%10.4f	%s\n"%(iix,iiy,wseo,mean_wse,std_wse,sat)
-			txtf.write(line)
-			print (line)
-	return 0
+    yyyy=inputlist[0]
+    mm=inputlist[1]
+    dd=inputlist[2]
+    dir0=inputlist[3]
+    print ("write text file: ",yyyy,mm,dd)
+    target_dt=datetime.date(int(yyyy),int(mm),int(dd))
+    txtfile=dir0+"/"+yyyy+mm+dd+".txt"
+    if obs_name() == "HydroWeb":
+        xlist, ylist, l_wse, m_wse, s_wse, l_sat = HydroWeb_data(yyyy,mm,dd)
+    if obs_name() == "SWOT":
+        xlist, ylist, l_wse, m_wse, s_wse, l_sat = swot_data(yyyy,mm,dd) 
+    #--------------
+    pnum=len(xlist)
+    # print ('xlist:',pnum, "l_wse:",len(l_wse))
+    with open(txtfile,"w") as txtf:
+        for point in np.arange(pnum):
+            iix=xlist[point]
+            iiy=ylist[point]
+            wseo=l_wse[point]
+            mean_wse=m_wse[point]
+            std_wse=s_wse[point]
+            sat=l_sat[point]
+            line="%04d	%04d	%10.4f	%10.4f	%10.4f	%s\n"%(iix,iiy,wseo,mean_wse,std_wse,sat)
+            txtf.write(line)
+            print (line)
+    return 0
 #########################
-def prepare_obs_old():
+def prepare_obs(dir0="./"):
 	"""
 	Prepare observations as textfile
 	"""
-	# global lname, xlist, ylist, leledif, lEGM08, lEGM96, satellite
-	# if pm.obs_name() == "HydroWeb":
-	# 	lname, xlist, ylist, leledif, lEGM08, lEGM96, satellite = get_HydroWeb()
-	# 	print ("lname: ",len(lname))
-	# else:
-	# 	lname, xlist, ylist, leledif, lEGM08, lEGM96, satellite = get_HydroWeb()
-	# print (len(lname))
-	syear,smon,sday=pm.starttime()
-	eyear,emon,eday=pm.endtime()
+	syear,smon,sday=starttime()
+	eyear,emon,eday=endtime()
 	start_dt=datetime.date(syear,smon,sday)
 	end_dt=datetime.date(eyear,emon,eday)
 	start=0
@@ -336,23 +307,26 @@ def prepare_obs_old():
 		mm='%02d' % (target_dt.month)
 		dd='%02d' % (target_dt.day)
 		# print (yyyy,mm,dd) #,obs_dir
-		inputlist.append([yyyy,mm,dd])
+		inputlist.append([yyyy,mm,dd,dir0])
 	# write text files parallel
-	p=Pool(pm.cpu_nums()*pm.para_nums())
+	p=Pool(6)
 	p.map(write_txt,inputlist)
 	p.terminate()
 	# map(write_txt,inputlist)
 	return 0
 ####################################
-def prepare_obs():
-	"""
-	Link observation files
-	"""
-	if os.path.islink("./assim_out/obs"):
-		os.system("rm -r ./assim_out/obs")
-	os.system("ln -sf "+pm.obs_dir()+" ./assim_out/obs")
-	return 0
+def starttime():
+    return 2009,1,1
+####################################
+def endtime():
+    return 2015,1,1
+####################################
+def obs_list():
+    return "../dat/HydroWeb_alloc_amz_06min_QC0_simulation.txt"
+####################################
+def obs_name():
+    return "HydroWeb"
 ####################################
 if __name__ == "__main__":
 	print ("prepare observations")
-	prepare_obs()
+	prepare_obs("/cluster/data7/menaka/HydroDA/obs/HydroWeb")

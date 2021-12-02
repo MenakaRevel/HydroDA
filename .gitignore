@@ -18,6 +18,7 @@ make_restart_dis
 data_assim
 data_assim_dis
 calc_stat
+*.so
 
 #img/bin
 *print_flddpth*

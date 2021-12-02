@@ -34,11 +34,11 @@ import math
 # experiment="test_wse"
 # experiment="test_virtual"
 # experiment="DIR_WSE_E2O_HWEB_001"
-# experiment="DIR_WSE_E2O_HWEB_002"
+experiment="DIR_WSE_E2O_HWEB_002"
 # experiment="DIR_WSE_E2O_HWEB_003"
 # experiment="DIR_WSE_E2O_HWEB_004"
 # experiment="ANO_WSE_E2O_HWEB_001"
-experiment="ANO_WSE_E2O_HWEB_002"
+# experiment="ANO_WSE_E2O_HWEB_002"
 # experiment="ANO_WSE_E2O_HWEB_003"
 # experiment="ANO_WSE_E2O_HWEB_004"
 # experiment="NOM_WSE_E2O_HWEB_001"
@@ -58,7 +58,8 @@ experiment="ANO_WSE_E2O_HWEB_002"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 # assim_out=pm.DA_dir()+"/out/"+experiment
-assim_out="../out/"+experiment
+# assim_out="../out/"+experiment
+assim_out="/cluster/data7/menaka/HydroDA/out/"+experiment
 print (assim_out)
 #assim_out="assim_out_E2O_wmc"
 #assim_out="assim_out_E2O_womc_0"
@@ -167,6 +168,21 @@ def correlation(s,o):
         corr = np.corrcoef(o, s)[0,1]
         
     return corr
+#========================================
+def RMSE(s,o):
+    """
+    Root Mean Squre Error
+    input:
+        s: simulated
+        o: observed
+    output:
+        RMSE: Root Mean Squre Error
+    """
+    o=ma.masked_where(o<=0.0,o).filled(0.0)
+    s=ma.masked_where(o<=0.0,s).filled(0.0)
+    s,o = filter_nan(s,o)
+    # return np.sqrt(np.mean((s-o)**2))
+    return np.sqrt(np.ma.mean(np.ma.masked_where(o<=0.0,(s-o)**2)))
 #====================================================================
 mk_dir(assim_out+"/figures")
 mk_dir(assim_out+"/figures/disgraph")
@@ -181,7 +197,7 @@ ny     = int(filter(None, re.split(" ",lines[1]))[0])
 gsize  = float(filter(None, re.split(" ",lines[3]))[0])
 #----
 syear,smonth,sdate=pm.starttime()#2004#1991 #2003,1,1 # 2009,1,1 #
-eyear,emonth,edate=pm.endtime() #2005,1,1 #2004,1,1 # 2004,1,1 # 2010,1,1 # 2012,1,1 #
+eyear,emonth,edate=pm.endtime() #2005,1,1 #2004,1,1 # 2004,1,1 # 2010,1,1 # 2012,1,1 # 2011,1,1 #
 #month=1
 #date=1
 start_dt=datetime.date(syear,smonth,sdate)
@@ -424,9 +440,9 @@ def make_fig(point):
     lines=[ax1.plot(np.arange(start,last),ma.masked_less(org,0.0),label="GRDC",color="#34495e",linewidth=3.0,zorder=101)[0]] #,marker = "o",markevery=swt[point])
 #    ax1.plot(np.arange(start,last),hgt[:,point],label="true",color="gray",linewidth=0.7,linestyle="--",zorder=101)
 #    plt.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7)
-    # for num in np.arange(0,pm.ens_mem()):
-    #     ax1.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.1,alpha=0.1,zorder=102)
-    #     ax1.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.1,alpha=0.1,zorder=103)
+    for num in np.arange(0,pm.ens_mem()):
+        ax1.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.1,alpha=0.1,zorder=102)
+        ax1.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.1,alpha=0.1,zorder=103)
 #        plt.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.3,alpha=0.5)
 #        plt.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.3,alpha=0.5)
     # draw mean of ensembles
@@ -462,21 +478,35 @@ def make_fig(point):
     KGE2=KGE(np.mean(opn[:,:,point],axis=1),org)
     COR1=correlation(np.mean(asm[:,:,point],axis=1),org)
     COR2=correlation(np.mean(opn[:,:,point],axis=1),org)
+    RSE1=RMSE(np.mean(asm[:,:,point],axis=1),org)
+    RSE2=RMSE(np.mean(opn[:,:,point],axis=1),org)
     #1-((np.sum((org[:ed,point]-org_Q)**2))/(np.sum((org_Q-np.mean(org_Q))**2)))
     #print point,NS1,NS2
     Nash1="NS (assim):%4.2f"%(NS1)
     Nash2="NS (open):%4.2f"%(NS2)
     kgeh1="KGE(assim):%4.2f"%(KGE1)
     kgeh2="KGE(open):%4.2f"%(KGE2)
-    corr1="$r^2$(assim):%4.2f"%(COR1)
-    corr2="$r^2$(open):%4.2f"%(COR2)
+    corr1="$r$(assim):%4.2f"%(COR1)
+    corr2="$r$(open):%4.2f"%(COR2)
+    rmse1="RMSE: %4.2f"%(RSE1)
+    rmse2="RMSE: %4.2f"%(RSE2)
+    # #
+    # ax1.text(0.02,0.95,Nash1,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    # ax1.text(0.02,0.85,Nash2,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    # ax1.text(0.42,0.95,kgeh1,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    # ax1.text(0.42,0.85,kgeh2,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    # ax1.text(0.02,0.75,corr1,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    # ax1.text(0.02,0.55,corr2,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
     #
-    ax1.text(0.02,0.95,Nash1,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
-    ax1.text(0.02,0.85,Nash2,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
-    ax1.text(0.42,0.95,kgeh1,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
-    ax1.text(0.42,0.85,kgeh2,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
-    ax1.text(0.02,0.75,corr1,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
-    ax1.text(0.02,0.55,corr2,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    ax1.text(0.02,0.95,Nash1,ha="left",va="center",transform=ax1.transAxes,fontsize=8)
+    ax1.text(0.02,0.90,Nash2,ha="left",va="center",transform=ax1.transAxes,fontsize=8)
+    ax1.text(0.02,0.80,kgeh1,ha="left",va="center",transform=ax1.transAxes,fontsize=8)
+    ax1.text(0.02,0.75,kgeh2,ha="left",va="center",transform=ax1.transAxes,fontsize=8)
+    ax1.text(0.42,0.95,corr1,ha="left",va="center",transform=ax1.transAxes,fontsize=8)
+    ax1.text(0.42,0.90,corr2,ha="left",va="center",transform=ax1.transAxes,fontsize=8)
+    ax1.text(0.42,0.80,rmse1,ha="left",va="center",transform=ax1.transAxes,fontsize=8)
+    ax1.text(0.42,0.75,rmse2,ha="left",va="center",transform=ax1.transAxes,fontsize=8)
+
 #    # twin axis
 #    ax2 = ax1.twinx()
 #    #aiv = stat.AI(asm[:,:,point],opn[:,:,point],org[:,point])

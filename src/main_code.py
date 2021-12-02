@@ -234,7 +234,7 @@ def spinup_loop(inputlist):
     cpunums=pm.cpu_nums()
     mode=pm.mode()
     run_name=pm.runname(mode)
-    exp_dir=pm.DA_dir()+"/out/"+pm.experiment()
+    exp_dir="./" #pm.DA_dir()+"/out/"+pm.experiment()
     mapname=pm.mapname()
     cal=pm.calibrate()
     print  "%s for %03d"%(loop,int(ens_num))
@@ -258,20 +258,22 @@ def one_day_sim(inputlist):
     bef_mm='%02d' %bef_dt.month
     bef_dd='%02d' %bef_dt.day
 
-    print "oneday loop for",yyyy,mm,dd,ens_num,looptype
+    print ("oneday loop for",yyyy,mm,dd,ens_num,looptype)
     dir2=pm.CaMa_dir()
     #if looptype=="true":
     #    distopen="1.0"
     #else:
     #    distopen=str(pm.distopen())
 
-    print yyyy+" "+mm+" "+dd+" "+ens_num+" "+dir2+" "+looptype
+    print (yyyy+" "+mm+" "+dd+" "+ens_num+" "+dir2+" "+looptype)
     cpunums = pm.cpu_nums()
-    exp_dir=pm.DA_dir()+"/out/"+pm.experiment()
+    exp_dir="./" #pm.DA_dir()+"/out/"+pm.experiment()
     mapname=pm.mapname()
     cal=pm.calibrate()
+    DA_dir=pm.DA_dir()
     os.system("source "+pm.DA_dir()+"/src/oneday_sim.sh "+yyyy+" "+mm+" "+dd+" "+ens_num+" "+dir2
-    +" "+looptype+" "+str(cpunums)+" "+str(run_name)+" "+str(exp_dir)+" "+str(mapname)+" "+str(cal))
+    +" "+looptype+" "+str(cpunums)+" "+str(run_name)+" "+str(exp_dir)+" "+str(mapname)+" "+str(cal)
+    +" "+DA_dir)
 
     return 0
 ########################### # modified to run paralle @Menaka 
@@ -321,7 +323,7 @@ def data_assim(yyyy,mm,dd): # new data assimilation function (2020/05/18)
     parallels="%d"%(pm.para_nums()*pm.cpu_nums())
     os.environ['OMP_NUM_THREADS']=parallels
     #os.system("export $OMP_NUM_THREADS=%d"%(pm.para_nums()*pm.cpu_nums()))
-    exp_dir=pm.DA_dir()+"/out/"+pm.experiment()
+    exp_dir="./" #pm.DA_dir()+"/out/"+pm.experiment()
     print (pm.ens_mem(pm.mode()))
     thisday=datetime.date(int(yyyy),int(mm),int(dd))
     nxt_day=thisday+datetime.timedelta(days=1)
@@ -349,7 +351,7 @@ def make_initial_restart(): # updated the name
     yyyy="%04d"%(start_year)
     mm="%02d"%(start_month)
     dd="%02d"%(start_date)
-    exp_dir=pm.DA_dir()+"/out/"+pm.experiment()
+    exp_dir="./" #pm.DA_dir()+"/out/"+pm.experiment()
     #spinup_true="%04d%2d%02dT000"%(pm.spinup_end_year(),pm.spinup_end_month(),pm.spinup_end_date()) 
     #os.system("cp ./CaMa_out/"+spinup_true+"/restart"+yyyy+mm+dd+".bin ./CaMa_in/restart/true/restart"+yyyy+mm+dd+"T000.bin")
     #copy_stoonly(exp_dir+"/CaMa_out/"+spinup_true+"/restart"+yyyy+mm+dd+".bin",exp_dir+"/CaMa_in/restart/true/restart"+yyyy+mm+dd+"T000.bin")
@@ -360,8 +362,8 @@ def make_initial_restart(): # updated the name
         spinup_open="%04d%2d%02dC%03d"%(pm.spinup_end_year(),pm.spinup_end_month(),pm.spinup_end_date(),num) 
         #os.system("cp ./CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin ./CaMa_in/restart/open/restart"+yyyy+mm+dd+"C"+numch+".bin")
         #os.system("cp ./CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin ./CaMa_in/restart/assim/restart"+yyyy+mm+dd+"A"+numch+".bin")
-        copy_stoonly(exp_dir+"/CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin",exp_dir+"/CaMa_in/restart/open/restart"+yyyy+mm+dd+"C"+numch+".bin")
-        copy_stoonly(exp_dir+"/CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin",exp_dir+"/CaMa_in/restart/assim/restart"+yyyy+mm+dd+"A"+numch+".bin")
+        copy_stoonly(exp_dir+"CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin",exp_dir+"CaMa_in/restart/open/restart"+yyyy+mm+dd+"C"+numch+".bin")
+        copy_stoonly(exp_dir+"CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin",exp_dir+"CaMa_in/restart/assim/restart"+yyyy+mm+dd+"A"+numch+".bin")
 ###########################
 def make_initial_restart_one(): # updated the name
     # copy restartyyyymmddC001 as restart for all simulations 
@@ -541,15 +543,15 @@ def store_out(yyyy,mm,dd):
 #            numch = '%03d' % num 
 #            shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/fldout"+yyyy+".bin","assim_out/fldout/"+looptype+"/fldout"+yyyy+mm+dd+"_"+numch+".bin")
 #
-#        # storing flddph
-#        for num in np.arange(1,pm.ens_mem()+1):
-#            numch = '%03d' % num 
-#            shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/flddph"+yyyy+".bin","assim_out/flddph/"+looptype+"/flddph"+yyyy+mm+dd+"_"+numch+".bin")
-#
-#        # storing fldarea
-#        for num in np.arange(1,pm.ens_mem()+1):
-#            numch = '%03d' % num 
-#            shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/fldare"+yyyy+".bin","assim_out/fldarea/"+looptype+"/fldarea"+yyyy+mm+dd+"_"+numch+".bin")
+        # storing flddph
+        for num in np.arange(1,pm.ens_mem()+1):
+            numch = '%03d' % num 
+            shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/flddph"+yyyy+".bin","assim_out/flddph/"+looptype+"/flddph"+yyyy+mm+dd+"_"+numch+".bin")
+
+        # storing fldarea
+        for num in np.arange(1,pm.ens_mem()+1):
+            numch = '%03d' % num 
+            shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/fldare"+yyyy+".bin","assim_out/fldarea/"+looptype+"/fldarea"+yyyy+mm+dd+"_"+numch+".bin")
 
     return 0
 ###########################    
@@ -598,7 +600,7 @@ def make_restart(inputlist):
     dd_n="%02d"%nextdate.day
 
     # calculate other variables from water storage
-    exp_dir=pm.DA_dir()+"/out/"+pm.experiment()
+    exp_dir="./" #pm.DA_dir()+"/out/"+pm.experiment()
     os.system(pm.DA_dir()+"/src/make_restart "+yyyy+mm+dd+" "+yyyy_b+mm_b+dd_b+" "+yyyy_n+mm_n+dd_n+" "+loop+" "+pm.CaMa_dir()+" "+pm.mapname()+" "+str(pm.ens_mem())+" "+numch+" "+exp_dir+" "+pm.calibrate())
 
     print "finish restarting",numch

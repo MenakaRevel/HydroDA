@@ -54,7 +54,8 @@ def get_hydroweb_loc(rivername,mapname="glb_15min"):
     # directory
     # fname="/cluster/data6/menaka/HydroWeb/HydroWeb_alloc_"+mapname+".txt"
     # fname="../dat/HydroWeb_alloc_"+mapname+"_QC.txt"
-    fname="../dat/HydroWeb_alloc_"+mapname+"_QC1.txt"
+    # fname="../dat/HydroWeb_alloc_"+mapname+"_QC1.txt"
+    fname="../dat/HydroWeb_alloc_"+mapname+"_QCrmse.txt"
     #--
     #river=[]
     pname=[]

@@ -47,11 +47,13 @@ NCPUS=40
 # OMP Settings
 export OMP_NUM_THREADS=$NCPUS
 
-# got to working dirctory
+# go to working dirctory
 HydroDA="/cluster/data6/menaka/HydroDA"
+HydroDAout="/cluster/data7/menaka/HydroDA"
 
 #----------
-cd $HydroDA
+# cd $HydroDA
+cd $HydroDAout
 #cd $PBS_O_WORKDIR
 #cd $swotda
 
@@ -73,34 +75,48 @@ cd $HydroDA
 # 4. Observation data [HydroWeb(HWEB)] 
 # 5. Number for identifying the experiment [e.g. 001]
 
-# EXP="DIR_WSE_E2O_HWEB_001"
-EXP="ANO_WSE_E2O_HWEB_002"
+# EXP="DIR_WSE_E2O_HWEB_002"
+EXP="ANO_WSE_E2O_HWEB_001"
 # EXP="NOM_WSE_E2O_HWEB_002"
 # EXP="test_virtual"
 # EXP="test_wse"
 
-mkdir -p $HydroDA"/out/"$EXP
+# mkdir -p $HydroDA"/out/"$EXP
+mkdir -p $HydroDAout"/out/"$EXP
+
+# go to working directory
+# cd $HydroDA"/out/"$EXP
+cd $HydroDAout"/out/"$EXP
 
 #write experiment name
-echo $EXP > $HydroDA"/out/"$EXP"/exp.txt"
+# echo $EXP > $HydroDA"/out/"$EXP"/exp.txt"
+echo $EXP > "./exp.txt"
 
 #write NCPUS
-echo $NCPUS > $HydroDA"/out/"$EXP"/ncpus.txt"
+# echo $NCPUS > $HydroDA"/out/"$EXP"/ncpus.txt"
+echo $NCPUS > $"./ncpus.txt"
 
 # copy params.py
 # cp -r $HydroDA/gosh/params.py     $HydroDA/out/$EXP/params.py
 # cp -r $HydroDA/gosh/params_virt.py     $HydroDA/out/$EXP/params.py
-cp -r $HydroDA/gosh/params_real.py     $HydroDA/out/$EXP/params.py
+# cp -r $HydroDA/gosh/params_real.py     $HydroDA/out/$EXP/params.py
+cp -r $HydroDA/gosh/params_real.py     ./params.py
 
-# copy running realted files
-cp -r $HydroDA/src/run.py           $HydroDA/out/$EXP/run.py
-cp -r $HydroDA/src/main_code.py     $HydroDA/out/$EXP/main_code.py
-cp -r $HydroDA/src/prep_init.py     $HydroDA/out/$EXP/prep_init.py
-cp -r $HydroDA/src/prep_runoff.py   $HydroDA/out/$EXP/prep_runoff.py
-cp -r $HydroDA/src/prep_obs.py      $HydroDA/out/$EXP/prep_obs.py
-cp -r $HydroDA/src/wrt_expset.py    $HydroDA/out/$EXP/wrt_expset.py
+# copy running related files
+# cp -r $HydroDA/src/run.py           $HydroDA/out/$EXP/run.py
+# cp -r $HydroDA/src/main_code.py     $HydroDA/out/$EXP/main_code.py
+# cp -r $HydroDA/src/prep_init.py     $HydroDA/out/$EXP/prep_init.py
+# cp -r $HydroDA/src/prep_runoff.py   $HydroDA/out/$EXP/prep_runoff.py
+# cp -r $HydroDA/src/prep_obs.py      $HydroDA/out/$EXP/prep_obs.py
+# cp -r $HydroDA/src/wrt_expset.py    $HydroDA/out/$EXP/wrt_expset.py
 
-cd $HydroDA"/out/"$EXP
+cp -r $HydroDA/src/run.py           ./run.py
+cp -r $HydroDA/src/main_code.py     ./main_code.py
+cp -r $HydroDA/src/prep_init.py     ./prep_init.py
+cp -r $HydroDA/src/prep_runoff.py   ./prep_runoff.py
+cp -r $HydroDA/src/prep_obs.py      ./prep_obs.py
+cp -r $HydroDA/src/wrt_expset.py    ./wrt_expset.py
+
 
 # run the main code using virtual environment
 # run main code

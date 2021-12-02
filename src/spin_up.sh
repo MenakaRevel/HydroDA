@@ -64,8 +64,10 @@ fi
 
 #*** 0a. Set CaMa-Flood base directory
 BASE=$CAMADIR                         #   CaMa-Flood directory
-OUTBASE=$EXP_DIR					  #   base for output => CaMa_out
-INBASE=$EXP_DIR                       #   base for input => CaMa_in
+# OUTBASE=$EXP_DIR					            #   base for output => CaMa_out
+# INBASE=$EXP_DIR                       #   base for input => CaMa_in
+OUTBASE="${EXP_DIR}CaMa_out"					  #   base for output => CaMa_out
+INBASE="../../CaMa_in"                       #   base for input => CaMa_in
 
 echo $BASE
 
@@ -83,7 +85,7 @@ export OMP_NUM_THREADS=$cpunums        # OpenMP cpu num
 #============================
 #*** 1a. Experiment directory setting
 EXP=$ar_year$ar_month$ar_date$ar_ens        # experiment name (output directory name)
-RDIR=${OUTBASE}/CaMa_out/${EXP}             # directory to run CaMa-Flood
+RDIR=${OUTBASE}/${EXP}             # directory to run CaMa-Flood
 EXE="MAIN_cmf"                              # Execute file name
 PROG=${BASE}/src/${EXE}                     # location of Fortran main program
 NMLIST="./input_cmf.nam"                    # standard namelist
@@ -154,8 +156,8 @@ if [ $acttype = "true" ];then
 	CROFDIR="${INBASE}/CaMa_in/$runname/Roff_TRUE"    #   runoff directory
 	CROFSUF="T000.one" 
 else
-	CROFDIR="${INBASE}/CaMa_in/$runname/Roff_CORR"    #   runoff directory
-	CROFSUF="C$ens_num.one" 
+	CROFDIR="${INBASE}/$runname/Roff"    #   runoff directory
+	CROFSUF="$ens_num.one" 
 fi
 
  

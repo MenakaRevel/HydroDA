@@ -53,6 +53,12 @@ def inflation_para(rho):
     else:
         return "Inflation Parameter %3.2f"%(rho)
 ###########################
+def calibration(cal):
+    if cal=="yes":
+        return "calibrated (Xudong et al,. 2021)"
+    else:
+        return "not calibrated (Yamazaki et al,. 2011)"
+###########################
 def write_text():
     with open("./experimetal_settings.log", "w") as f:
         f.write("# Experimental Settings\n")
@@ -67,6 +73,8 @@ def write_text():
         # Time domain for analysis
         f.write("# Start Date: %04d-%02d-%02d\n"%(pm.starttime()))
         f.write("# End Date: %04d-%02d-%02d\n"%(pm.endtime()))
+        # Calibration
+        f.write("# Model Calibration: "+calibration(pm.calibrate())+"\n")
         # Assimilation Settings
         f.write("# Assimilation Mode: "+assimlation_mode(pm.conflag())+"\n")
         f.write("# Assimilation Domain: \n")

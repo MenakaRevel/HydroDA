@@ -197,6 +197,9 @@ def spinup_end_date():
 
 # **************************************************************
 # 5. Runoff forcing 
+def runoff_dir():
+    return "/cluster/data6/menaka/ensemble_simulations/CaMa_in/E2O"
+
 def runname(num=mode()):
     if num == 1:
         return "E2O"
@@ -326,8 +329,8 @@ def CaMa_dir():
     # indicate the directory of ./map or ./src and other folders
 
 def calibrate():
-    return "yes"
-    # return "no"
+    # return "yes"
+    return "no"
 
 def MKLdir():
     return "/opt/intel/compilers_and_libraries_2016.3.170/mac/mkl"
@@ -352,7 +355,8 @@ def HydroWeb_dir():
     return "/cluster/data6/menaka/HydroWeb"
 
 def obs_dir():
-    return "/cluster/data6/menaka/HydroWeb"
+    return "/cluster/data7/menaka/HydroDA/obs/HydroWeb"
+    # return "/cluster/data6/menaka/HydroWeb"
     # return "/cluster/data6/menaka/ensemble_org/CaMa_out/E2O003"
 
 def obs_list():
@@ -360,11 +364,19 @@ def obs_list():
     # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_amz.txt"
     # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_QC.txt"
     # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_QC1.txt"
-    return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_QC0.txt"
+    # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_QC0.txt"
+    # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_QCrmse.txt"
+    return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_QC0_simulation.txt"
 
-def stat_name():
+def stat_name(cal=calibrate()):
+    if cal=="yes":
+        return "cal_sfcelv_49_E2O_amz_06min_2009-2014"
+
+    if cal=="no":
+        return "sfcelv_49_E2O_amz_06min_2009-2014"
+
     # return "sfcelv_49_E2O_amz_06min_2009-2014"
-    return "sfcelv_cal_49_E2O_amz_06min_2009-2014"
+    # return "cal_sfcelv_49_E2O_amz_06min_2009-2014"
     # return "sfcelv_49_E2O_amz_06min_2009-2010"
     # return "sfcelv_E2O_amz_06min_2009-2010"
     # eturn "sfcelv_E2O_amz_06min_2009-2009"
