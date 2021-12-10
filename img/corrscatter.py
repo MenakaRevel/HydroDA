@@ -36,13 +36,13 @@ import os
 # experiment="VIC_BC_HydroWeb11"
 # experiment="test_wse"
 # experiment="DIR_WSE_E2O_HWEB_001"
-experiment="DIR_WSE_E2O_HWEB_002"
+# experiment="DIR_WSE_E2O_HWEB_002"
 # experiment="DIR_WSE_E2O_HWEB_004"
 # experiment="ANO_WSE_E2O_HWEB_001"
 # experiment="ANO_WSE_E2O_HWEB_002"
 # experiment="ANO_WSE_E2O_HWEB_003"
 # experiment="ANO_WSE_E2O_HWEB_004"
-# experiment="NOM_WSE_E2O_HWEB_001"
+experiment="NOM_WSE_E2O_HWEB_001"
 # experiment="NOM_WSE_E2O_HWEB_002" 
 # experiment="NOM_WSE_E2O_HWEB_003"
 # experiment="NOM_WSE_E2O_HWEB_004"
@@ -330,11 +330,12 @@ epix=(180+east)*4
 # cmap=mbar.colormap("H01")
 # cmap=cm.get_cmap("bwr")
 # cmap=cm.get_cmap("Spectral_r")
-cmap=cm.get_cmap("PiYG")
+# cmap=cm.get_cmap("PiYG")
+cmap=cm.get_cmap("PRGn")
 # cmap.set_under("w",alpha=0)
 cmapL=cmap #cm.get_cmap("rainbow_r")
-vmin=-1.0
-vmax=1.0
+vmin=-0.50
+vmax=0.50
 norm=Normalize(vmin=vmin,vmax=vmax)
 #------
 # river width
@@ -375,7 +376,8 @@ for point in np.arange(pnum):
     if CORopn==1.00:
         # print (NSEopn, staid[point], pname[point])
         continue
-    DCOR=(CORasm-CORopn)/(CORopn+1.0e-20) 
+    # DCOR=(CORasm-CORopn)/(CORopn+1.0e-20) 
+    DCOR=CORasm-CORopn
     #NSEAI=NSEasm
     ix=xlist[point]
     iy=ylist[point]
@@ -397,8 +399,9 @@ for point in np.arange(pnum):
     #     print staid[point], pname[point]
     #     ax.scatter(lon,lat,s=10,marker="d",edgecolors=c, facecolors="k",zorder=106)
 #--
-cbar=m.colorbar(im,"right",size="2%",ticks=np.arange(vmin,vmax+0.001,0.2))#,extend="both")
-cbar.set_label("$r $ $correlation$") #$(r_{assim} - r_{open})$")
+cbar=m.colorbar(im,"right",size="2%",ticks=np.arange(vmin,vmax+0.001,0.1),extend="both")
+cbar.set_label("$\Delta$$correlation$") #$(r_{assim} - r_{open})$")
+# cbar.set_label("$r $ $correlation$") #$(r_{assim} - r_{open})$")
 #plt.title(stitle)
 plt.savefig(assim_out+"/figures/corr/corrscatter.png",dpi=500,bbox_inches="tight", pad_inches=0.05)
 os.system("rm -r corrtmp*.txt")

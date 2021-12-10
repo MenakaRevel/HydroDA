@@ -103,7 +103,7 @@ def initial(): #used
 
     # observations folder
     # inside the assim_out folder
-    mkdir("assim_out/obs")
+    # mkdir("assim_out/obs") # no need as a softlink is made
 
     os.system("touch assim_out/__init__.py")
     mkdir("logout")

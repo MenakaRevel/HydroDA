@@ -76,8 +76,8 @@ cd $HydroDAout
 # 5. Number for identifying the experiment [e.g. 001]
 
 # EXP="DIR_WSE_E2O_HWEB_002"
-EXP="ANO_WSE_E2O_HWEB_001"
-# EXP="NOM_WSE_E2O_HWEB_002"
+# EXP="ANO_WSE_E2O_HWEB_002"
+EXP="NOM_WSE_E2O_HWEB_003"
 # EXP="test_virtual"
 # EXP="test_wse"
 

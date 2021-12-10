@@ -34,10 +34,11 @@ import os
 # experiment="VIC_BC_HydroWeb11"
 # experiment="test_wse"
 # experiment="DIR_WSE_E2O_HWEB_001"
-experiment="DIR_WSE_E2O_HWEB_002"
+# experiment="DIR_WSE_E2O_HWEB_002"
 # experiment="ANO_WSE_E2O_HWEB_001"
 # experiment="ANO_WSE_E2O_HWEB_002"
-# experiment="NOM_WSE_E2O_HWEB_001"
+# experiment="ANO_WSE_E2O_HWEB_003"
+experiment="NOM_WSE_E2O_HWEB_001"
 # experiment="NOM_WSE_E2O_HWEB_002"
 # experiment="NOM_WSE_E2O_HWEB_003"
 # experiment="NOM_WSE_E2O_HWEB_004"
@@ -58,7 +59,9 @@ import params as pm
 import read_grdc as grdc
 import read_hydroweb as hweb
 import cal_stat as stat
-#====================================================================
+#========================================
+#====  functions for making figures  ====
+#========================================
 def filter_nan(s,o):
     """
     this functions removed the data  from simulated and observed data
@@ -191,7 +194,7 @@ rivnum=np.fromfile(rivnum,np.int32).reshape(ny,nx)
 rivermap=((nextxy[0]>0)*(rivnum==1))*1.0
 #----
 syear,smonth,sdate=pm.starttime()#2004#1991  2004,1,1 # 2003,1,1 #
-eyear,emonth,edate=pm.endtime() #2005,1,1 # 2005,1,1 #
+eyear,emonth,edate=pm.endtime() #2005,1,1 # 2005,1,1 # 2010,1,1 #
 #month=1
 #date=1
 start_dt=datetime.date(syear,smonth,sdate)
@@ -300,8 +303,9 @@ epix=(180+east)*4
 
 #cmap=make_colormap(colors_list)
 # cmap=mbar.colormap("H01")
-cmap=cm.coolwarm
-cmap.set_under("w",alpha=0)
+cmap=mbar.colormap("H03")
+# cmap=cm.coolwarm
+# cmap.set_under("w",alpha=0)
 cmapL=cmap #cm.get_cmap("rainbow_r")
 vmin=-1.0
 vmax=1.0

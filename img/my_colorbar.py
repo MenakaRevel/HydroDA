@@ -35,5 +35,7 @@ def colormap(name):
         color_list=[c('xkcd:blood red'),c('xkcd:darkish red'),c('xkcd:orangered'),c('xkcd:orangeish'),c('xkcd:yellowish orange'),0.33,c('xkcd:yellowish orange'),c('xkcd:sunflower'),c('xkcd:butter'),c('xkcd:light beige'),0.67,c('xkcd:light beige'),c('xkcd:seaweed'),c('xkcd:cool green'),c('xkcd:viridian')]
     if name=="H02":
         color_list=[c('xkcd:sapphire'),c('xkcd:nice blue'),c('xkcd:cool blue'),0.2,c('xkcd:cool blue'),c('xkcd:indigo blue'),c('xkcd:heather'),c('xkcd:merlot'),0.4,c('xkcd:merlot'),c('xkcd:lipstick red'),c('xkcd:pink red'),c('xkcd:watermelon'),0.6,c('xkcd:watermelon'),c('xkcd:pale salmon'),c('xkcd:pale'),c('xkcd:very pale green'),0.8,c('xkcd:very pale green'),c('xkcd:pale teal'),c('xkcd:dark seafoam'),c('xkcd:deep teal')]
+    if name=="H03":
+        color_list=[c('#005a74'), c('#3a8494'), c('#68b0b5'), c('#a5d5d8'), c('#ffffff'), 0.5, c('#ffffff'), c('#ffbcaf'), c('#f4777f'), c('#cf3759'), c('#93003a')]
     return make_colormap(color_list)
 ###################

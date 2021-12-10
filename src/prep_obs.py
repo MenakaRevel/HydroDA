@@ -349,7 +349,7 @@ def prepare_obs():
 	Link observation files
 	"""
 	if os.path.islink("./assim_out/obs"):
-		os.system("rm -r ./assim_out/obs")
+		os.system("rm -rf ./assim_out/obs")
 	os.system("ln -sf "+pm.obs_dir()+" ./assim_out/obs")
 	return 0
 ####################################
