@@ -5,9 +5,11 @@ import re
 import shutil
 import os
 import datetime
+import sys
 #--
 #os.system("ln -sf ../params.py params.py")
 #shutil.copy("../gosh/params.py","params.py")
+sys.path.append("../gosh")
 import params as pm
 #--
 def get_grdc_loc(name,info = "a"):
@@ -84,12 +86,12 @@ def get_grdc_loc_dic(name,info = "a"):
   return station_loc   
 
 #----
-def grdc_river_name():
+def grdc_river_name(fname=pm.CaMa_dir() + "/map/"+pm.mapname()+"/grdc_loc.txt"):
     # get river names
-    grdc = pm.CaMa_dir() + "/map/"+pm.mapname()+"/grdc_loc.txt"
+    # grdc = pm.CaMa_dir() + "/map/"+pm.mapname()+"/grdc_loc.txt"
     #grdc = pm.CaMa_dir() + "/map/glb_15min/grdc_loc.txt"
     #grdc = "../data/grdc_loc.txt"
-    f = open(grdc,"r")
+    f = open(fname,"r")
     lines = f.readlines()
     f.close()
 
@@ -196,12 +198,12 @@ def get_loc_v394(gid):
   
   return ix,iy
 #--
-def get_grdc_loc_v396(name):
+def get_grdc_loc_v396(name,fname=pm.CaMa_dir() + "/map/"+pm.mapname()+"/grdc_loc.txt"):
   #--ask the river name and a or b
   #  all locations
   #grdc = pm.CaMa_dir() + "/map/glb_15min/grdc_loc.txt"
-  grdc = pm.CaMa_dir() + "/map/"+pm.mapname()+"/grdc_loc.txt"
-  f = open(grdc,"r")
+  # grdc = pm.CaMa_dir() + "/map/"+pm.mapname()+"/grdc_loc.txt"
+  f = open(fname,"r")
   lines = f.readlines()
   f.close()
   #--
@@ -270,10 +272,10 @@ def get_grdc_latlon_v396(name):
 
   return id_list,station_loc,x_list,y_list
 #------------
-def grdc_river_name_v396():
+def grdc_river_name_v396(fname=pm.CaMa_dir() + "/map/"+pm.mapname()+"/grdc_loc.txt"):
   #grdc = pm.CaMa_dir() + "/map/glb_15min/grdc_loc.txt"
-  grdc = pm.CaMa_dir() + "/map/"+pm.mapname()+"/grdc_loc.txt"
-  f = open(grdc,"r")
+  # grdc = pm.CaMa_dir() + "/map/"+pm.mapname()+"/grdc_loc.txt"
+  f = open(fname,"r")
   lines = f.readlines()
   f.close()
   
@@ -290,12 +292,12 @@ def grdc_river_name_v396():
 
   return rivername
 #--
-def get_grdc_station_v396(name):
+def get_grdc_station_v396(name,fname=pm.CaMa_dir() + "/map/"+pm.mapname()+"/grdc_loc.txt"):
   #--ask the river name and a or b
   #  all locations
   #grdc = pm.CaMa_dir() + "/map/glb_15min/grdc_loc.txt"
-  grdc = pm.CaMa_dir() + "/map/"+pm.mapname()+"/grdc_loc.txt"
-  f = open(grdc,"r")
+  # grdc = pm.CaMa_dir() + "/map/"+pm.mapname()+"/grdc_loc.txt"
+  f = open(fname,"r")
   lines = f.readlines()
   f.close()
 
@@ -349,7 +351,8 @@ def grdc_dis(grdc_id,syear,eyear,smon=1,emon=12,sday=1,eday=31):
         dd       = int(yyyymmdd[2])
         #---
         if start_dt <= datetime.date(yyyy,mm,dd) and last_dt  >= datetime.date(yyyy,mm,dd):
-          if float(line[2].strip()) == -99.9:
+          # if float(line[2].strip()) == -999.0:
+          if float(line[2])<=0.0: # updated
             dis[yyyy,mm,dd]=-9999.0
           else:
             dis[yyyy,mm,dd]=float(line[2].strip())

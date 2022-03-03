@@ -316,17 +316,19 @@ def prepare_obs(dir0="./"):
 	return 0
 ####################################
 def starttime():
-    return 2009,1,1
+    return 2002,1,1
 ####################################
 def endtime():
-    return 2015,1,1
+    return 2020,1,1
 ####################################
 def obs_list():
-    return "../dat/HydroWeb_alloc_amz_06min_QC0_simulation.txt"
+    # return "../dat/HydroWeb_alloc_amz_06min_QC0_simulation.txt"
+	return "../dat/HydroWeb_alloc_amz_06min_2002-2020.txt"
 ####################################
 def obs_name():
     return "HydroWeb"
 ####################################
 if __name__ == "__main__":
 	print ("prepare observations")
-	prepare_obs("/cluster/data7/menaka/HydroDA/obs/HydroWeb")
+	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/HydroWeb")
+	prepare_obs("/cluster/data7/menaka/HydroDA/obs/HydroWebAll")

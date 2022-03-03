@@ -11,7 +11,7 @@ from read_patchMS import upstream
 sys.path.append("../img")
 import read_hydroweb as hweb
 #
-area_thr = 1.0e11 #m2
+area_thr = 1.0e09 #m2
 slpe_thr = 1.0e20 #m
 elev_thr = 1.0e20 #m
 dist_thr = 100.0  #km
@@ -43,12 +43,12 @@ def slope(ix,iy,nextxy,uparea,elevtn,nxtdst,rivseq):
         slp2=0.0
     return slp1,slp2
 #===================
-syear=2009
-eyear=2014
+syear=2002
+eyear=2020
 #===================
 # CaMa_dir="/cluster/data6/menaka/CaMa-Flood_v396a_20200514"
 CaMa_dir="/cluster/data6/menaka/CaMa-Flood_v4"
-#map="glb_15min"
+# map="glb_15min"
 # map="glb_06min"
 map="amz_06min"
 fname=CaMa_dir+"/map/"+map+"/params.txt"
@@ -134,8 +134,9 @@ for item in rmse[1::]:
 # writef="/cluster/data6/menaka/HydroDA/dat/HydroWeb_alloc_"+map+"_amz.txt"
 # writef="/cluster/data6/menaka/HydroDA/dat/HydroWeb_alloc_"+map+"_QC.txt"
 # writef="/cluster/data6/menaka/HydroDA/dat/HydroWeb_alloc_"+map+"_QC1.txt"
-writef="/cluster/data6/menaka/HydroDA/dat/HydroWeb_alloc_"+map+"_QC0.txt"
+# writef="/cluster/data6/menaka/HydroDA/dat/HydroWeb_alloc_"+map+"_QC0.txt"
 # writef="/cluster/data6/menaka/HydroDA/dat/HydroWeb_alloc_"+map+"_QCrmse.txt"
+writef="/cluster/data6/menaka/HydroDA/dat/HydroWeb_alloc_"+map+"_2002-2020.txt"
 with open(writef, "w") as wf:
     header = "%13s%62s%8s%8s%8s%8s%12s%12s%12s%12s%17s\n"%("ID","station","lon","lat","ix","iy","elevation","ele_diff","EGM08","EGM96","satellite")
     wf.write(header)

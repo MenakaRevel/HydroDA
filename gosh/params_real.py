@@ -24,7 +24,7 @@ def mode():
     # 1: Earth2Obs, 2: ERA20CM, 3: VIC_BC, 4: -25% baised (ELSE_KIM2009/E2O/ERA20CM), 5: ERA5
 
 def conflag():
-    return 3
+    return 2
     # converstion flag for observation converstions 
     #  1 - Directly values 
     #  2 - Anomalies
@@ -370,11 +370,14 @@ def obs_list():
 
 def stat_name(cal=calibrate()):
     if cal=="yes":
-        return "cal_sfcelv_49_E2O_amz_06min_2009-2014" # for lon-term statistic simulation calibrated
+        return "cal_sfcelv_49_E2O_amz_06min_2000-2014" # for lon-term statistic simulation calibrated
+        # return "cal_sfcelv_49_E2O_amz_06min_2009-2014" # for lon-term statistic simulation calibrated
 
     if cal=="no":
-        # return "sfcelv_49_E2O_amz_06min_2009-2014" # for lon-term statistic simulation
-        return "sfcelv_49_E2O_amz_06min_2009-2009" # one year before statistic simulation
+        return "sfcelv_49_E2O_amz_06min_2000-2014" # for long-term statistic simulation
+        # return "sfcelv_49_E2O_amz_06min_2009-2014" # for long-term statistic simulation
+        # return "sfcelv_49_E2O_amz_06min_2008-2008" # one year before statistic simulation
+        # return "sfcelv_49_E2O_amz_06min_2004-2008" # five year before statistic simulation
 
     # return "sfcelv_49_E2O_amz_06min_2009-2014"
     # return "cal_sfcelv_49_E2O_amz_06min_2009-2014"

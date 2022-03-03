@@ -23,7 +23,7 @@
 ################################################################################################
 
 ### SET "mool PBS" @ IIS U-Tokyo
-#PBS -q F40
+#PBS -q E40
 #PBS -l select=1:ncpus=40:mem=100gb
 #PBS -j oe
 #PBS -m ea
@@ -76,8 +76,8 @@ cd $HydroDAout
 # 5. Number for identifying the experiment [e.g. 001]
 
 # EXP="DIR_WSE_E2O_HWEB_002"
-# EXP="ANO_WSE_E2O_HWEB_002"
-EXP="NOM_WSE_E2O_HWEB_003"
+EXP="ANO_WSE_E2O_HWEB_005"
+# EXP="NOM_WSE_E2O_HWEB_006"
 # EXP="test_virtual"
 # EXP="test_wse"
 

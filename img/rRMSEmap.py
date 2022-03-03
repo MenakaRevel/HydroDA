@@ -4,7 +4,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import datetime
-from matplotlib.colors import LogNorm,Normalize,ListedColormap
+from matplotlib.colors import LogNorm,Normalize,ListedColormap,BoundaryNorm
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from mpl_toolkits.basemap import Basemap
 import matplotlib.cm as cm
@@ -38,9 +38,9 @@ import os
 # experiment="ANO_WSE_E2O_HWEB_001"
 # experiment="ANO_WSE_E2O_HWEB_002"
 # experiment="ANO_WSE_E2O_HWEB_003"
-experiment="NOM_WSE_E2O_HWEB_001"
+# experiment="NOM_WSE_E2O_HWEB_001"
 # experiment="NOM_WSE_E2O_HWEB_002"
-# experiment="NOM_WSE_E2O_HWEB_003"
+experiment="NOM_WSE_E2O_HWEB_003"
 # experiment="NOM_WSE_E2O_HWEB_004"
 # experiment="NOM_WSE_E2O_HWEB_005"
 # experiment="NOM_WSE_E2O_HWEB_006"
@@ -92,11 +92,11 @@ def vec_par(LEVEL,ax=None):
         lon2 = float(line[3])
         lat2 = float(line[4])
 
-        # ix = int((lon1 + 180.)*(1/gsize))
-        # iy = int((-lat1 + 90.)*(1/gsize))
+        ix = int((lon1 - west0)*(1/gsize))
+        iy = int((-lat1 + north0)*(1/gsize))
 
-        # if rivermap[iy,ix] == 0:
-        #     continue
+        if rivermap[iy-1,ix-1] == 0:
+            continue
 
         if lon1-lon2 > 180.0:
             print (lon1, lon2)
@@ -105,7 +105,7 @@ def vec_par(LEVEL,ax=None):
             print (lon1,lon2)
             lon2=-180.0
         #--------
-        colorVal="w" 
+        colorVal="grey" 
         #print (lon1,lon2,lat1,lat2,width)
         plot_ax(lon1,lon2,lat1,lat2,width,colorVal,ax)
 #====================================================================
@@ -166,10 +166,10 @@ ny     = int(filter(None, re.split(" ",lines[1]))[0])
 gsize  = float(filter(None, re.split(" ",lines[3]))[0])
 lon0   = float(filter(None, re.split(" ",lines[4]))[0])
 lat0   = float(filter(None, re.split(" ",lines[7]))[0])
-west   = float(filter(None, re.split(" ",lines[4]))[0])
-east   = float(filter(None, re.split(" ",lines[5]))[0])
-south  = float(filter(None, re.split(" ",lines[6]))[0])
-north  = float(filter(None, re.split(" ",lines[7]))[0])
+west0  = float(filter(None, re.split(" ",lines[4]))[0])
+east0  = float(filter(None, re.split(" ",lines[5]))[0])
+south0 = float(filter(None, re.split(" ",lines[6]))[0])
+north0 = float(filter(None, re.split(" ",lines[7]))[0])
 #----
 nextxy = pm.CaMa_dir()+"/map/"+pm.mapname()+"/nextxy.bin"
 rivwth = pm.CaMa_dir()+"/map/"+pm.mapname()+"/rivwth_gwdlr.bin"
@@ -293,6 +293,11 @@ p.terminate()
 land="#C0C0C0"
 water="#FFFFFF"
 
+west=west0
+east=east0
+south=south0-2
+north=north0+2
+
 londiff=(east-west)*4
 latdiff=(north-south)*4
 
@@ -309,7 +314,8 @@ cmap=mbar.colormap("H03")
 cmapL=cmap #cm.get_cmap("rainbow_r")
 vmin=-1.0
 vmax=1.0
-norm=Normalize(vmin=vmin,vmax=vmax)
+# norm=Normalize(vmin=vmin,vmax=vmax)
+norm=BoundaryNorm(np.arange(vmin,vmax+0.1,0.1),cmapL.N)
 #------
 # river width
 sup=2
@@ -324,22 +330,30 @@ G = gridspec.GridSpec(1,1)
 ax=fig.add_subplot(G[0,0])
 m = Basemap(projection='cyl',llcrnrlat=south,urcrnrlat=north,llcrnrlon=west,urcrnrlon=east, lat_ts=0,resolution='c',ax=ax)
 #m.drawcoastlines( linewidth=0.1, color='k' )
-m.fillcontinents(color=land,lake_color=water,zorder=99)
+# m.fillcontinents(color=land,lake_color=water,zorder=99)
 #m.drawmapboundary(fill_color=water,zorder=100)
 im=plt.scatter([],[],c=[],cmap=cmap,s=0.1,vmin=vmin,vmax=vmax,norm=norm,zorder=101)
 im.set_visible(False)
-m.drawparallels(np.arange(south,north+0.1,5), labels = [1,0,0,0], fontsize=10,linewidth=0,zorder=102)
-m.drawmeridians(np.arange(west,east+0.1,5), labels = [0,0,0,1], fontsize=10,linewidth=0,zorder=102)
+# m.drawparallels(np.arange(south,north+0.1,5), labels = [1,0,0,0], fontsize=10,linewidth=0,zorder=102)
+# m.drawmeridians(np.arange(west,east+0.1,5), labels = [0,0,0,1], fontsize=10,linewidth=0,zorder=102)
+#--
+m.readshapefile('../dat/Amazon_basin/Amazon_boundry', 'Amazon_boundry', drawbounds = False)
+for info, shape in zip(m.Amazon_boundry, m.Amazon_boundry):
+    # if info['nombre'] == 'Amazon_boundry':
+    x, y = zip(*shape) 
+    m.plot(x, y, marker=None,color='grey',linewidth=1.0)
 #--
 box="%f %f %f %f"%(west,east,north,south) 
 os.system("./bin/txt_vector "+box+" "+pm.CaMa_dir()+" "+pm.mapname()+" > RMSEtmp1.txt") 
 #map(vec_par,np.arange(1,10+1,1))
 map(vec_par,np.arange(2,10+1,1))
 #--
+less1=0
+allst=0
 for point in np.arange(pnum):
     # time,org=hweb.HydroWeb_WSE(pname[point],syear,eyear-1)
     org=hweb.HydroWeb_continous_WSE(pname[point],syear,smonth,sdate,eyear-1,12,31,EGM08[point],EGM96[point])
-    org=np.array(org)+np.array(EGM08[point])-np.array(EGM96[point])
+    org=np.array(org)#+np.array(EGM08[point])-np.array(EGM96[point])
     # if np.sum(ma.masked_where(org!=-9999.0,org))==0.0:
     if np.sum((org!=-9999.0)*1.0) == 0.0:
         # print ("no obs", np.sum((org!=-9999.0)*1.0))
@@ -356,6 +370,10 @@ for point in np.arange(pnum):
     if rivermap[iy,ix] !=1.0:
         continue
     #--------------
+    if rRMSE < 0.0:
+        less1=less1+1
+    allst=allst+1
+    #--------------
     #lon=lon0+ix*gsize
     #lat=lat0-iy*gsize
     lon=lonlat[0,iy,ix]
@@ -365,15 +383,21 @@ for point in np.arange(pnum):
     # if NSEAI > 0.0:
     #     print lon,lat, "%3.2f %3.2f %3.2f"%(NSEAI, NSEasm, NSEopn)
     print (pname[point],rRMSE)
-    ax.scatter(lon,lat,s=10,marker="o",edgecolors=c, facecolors=c,zorder=106)
+    ax.scatter(lon,lat,s=10,marker="o",edgecolors="k", facecolors=c,linewidth=0.5,zorder=106)
     # if rRMSE >= 0.00:
     #     ax.scatter(lon,lat,s=10,marker="o",edgecolors=c, facecolors=c,zorder=106)
     # if rRMSE < 0.00:
     #     print staid[point], pname[point]
     #     ax.scatter(lon,lat,s=10,marker="d",edgecolors="k", facecolors="k",zorder=106)
+#===
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.spines['bottom'].set_visible(False)
+ax.spines['left'].set_visible(False)
 #--
 cbar=m.colorbar(im,"right",size="2%",ticks=np.arange(vmin,vmax+0.001,0.2))
 cbar.set_label("$r$$RMSE$")
 #plt.title(stitle)
 plt.savefig(assim_out+"/figures/RMSE/rRMSEmap.png",dpi=300,bbox_inches="tight", pad_inches=0.05)
 os.system("rm -r RMSEtmp*.txt")
+print (experiment, less1, allst)

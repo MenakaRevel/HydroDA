@@ -41,12 +41,12 @@ import math
 # experiment="ANO_WSE_E2O_HWEB_002"
 # experiment="ANO_WSE_E2O_HWEB_003"
 # experiment="ANO_WSE_E2O_HWEB_004"
-experiment="NOM_WSE_E2O_HWEB_001"
+# experiment="NOM_WSE_E2O_HWEB_001"
 # experiment="NOM_WSE_E2O_HWEB_002"
 # experiment="NOM_WSE_E2O_HWEB_003"
 # experiment="NOM_WSE_E2O_HWEB_004"
 # experiment="NOM_WSE_E2O_HWEB_005"
-# experiment="NOM_WSE_E2O_HWEB_006"
+experiment="NOM_WSE_E2O_HWEB_006"
 # experiment="NOM_WSE_E2O_HWEB_007"
 # experiment="NOM_WSE_E2O_HWEB_008"
 # experiment="NOM_WSE_E2O_HWEB_009"
@@ -420,7 +420,13 @@ p.terminate()
 def make_fig(point):
     plt.close()
     #labels=["GRDC","corrupted","assimilated"]
-    labels=["GRDC","simulated","assimilated"]
+    obstype=obs_name()
+    if obstype=="SWOT":
+        exptype="virtual"
+        labels=["true","simulated","assimilated"]
+    else:
+        exptype="real"
+        labels=["GRDC","simulated","assimilated"]
     #
     #print org[:,point]
     #for i in np.arange(start,last):
@@ -435,14 +441,17 @@ def make_fig(point):
 #
 #    plt.ylim(ymin=0)
     fig, ax1 = plt.subplots()
-    org=grdc.grdc_dis(staid[point],syear,eyear-1)
-    org=np.array(org)
+    if exptype=="virtual":
+        org=read_dis()
+    else:
+        org=grdc.grdc_dis(staid[point],syear,eyear-1)
+        org=np.array(org)
     lines=[ax1.plot(np.arange(start,last),ma.masked_less(org,0.0),label="GRDC",color="#34495e",linewidth=3.0,zorder=101)[0]] #,marker = "o",markevery=swt[point])
 #    ax1.plot(np.arange(start,last),hgt[:,point],label="true",color="gray",linewidth=0.7,linestyle="--",zorder=101)
 #    plt.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7)
-    for num in np.arange(0,pm.ens_mem()):
-        ax1.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.1,alpha=0.1,zorder=102)
-        ax1.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.1,alpha=0.1,zorder=103)
+    # for num in np.arange(0,pm.ens_mem()):
+    #     ax1.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.1,alpha=0.1,zorder=102)
+    #     ax1.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.1,alpha=0.1,zorder=103)
 #        plt.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.3,alpha=0.5)
 #        plt.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.3,alpha=0.5)
     # draw mean of ensembles
