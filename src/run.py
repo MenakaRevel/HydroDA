@@ -42,7 +42,7 @@ try:
   expset.write_text()
 
   # make necessary directories
-  print ("initial")
+  print ("initializing....")
   init.initial()
 
   # prepare runoff ensembles

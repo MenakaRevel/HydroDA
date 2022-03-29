@@ -667,7 +667,9 @@ def prepare_input_old():
     return 0
 ######################################
 def prepare_input():
-    "create a soft link to runoff data set"
+    """
+    link to runoff data set
+    """
     if os.path.islink("./CaMa_in/"+pm.runname(pm.mode())):
         os.system("rm -r ./CaMa_in/"+pm.runname(pm.mode()))
     os.system("ln -sf "+pm.runoff_dir()+" ./CaMa_in/")

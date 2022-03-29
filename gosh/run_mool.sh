@@ -76,10 +76,11 @@ cd $HydroDAout
 # 5. Number for identifying the experiment [e.g. 001]
 
 # EXP="DIR_WSE_E2O_HWEB_002"
-EXP="ANO_WSE_E2O_HWEB_005"
+# EXP="ANO_WSE_E2O_HWEB_005"
 # EXP="NOM_WSE_E2O_HWEB_006"
 # EXP="test_virtual"
 # EXP="test_wse"
+EXP="DIR_WSE_E2O_SWOT_001"
 
 # mkdir -p $HydroDA"/out/"$EXP
 mkdir -p $HydroDAout"/out/"$EXP
@@ -100,7 +101,8 @@ echo $NCPUS > $"./ncpus.txt"
 # cp -r $HydroDA/gosh/params.py     $HydroDA/out/$EXP/params.py
 # cp -r $HydroDA/gosh/params_virt.py     $HydroDA/out/$EXP/params.py
 # cp -r $HydroDA/gosh/params_real.py     $HydroDA/out/$EXP/params.py
-cp -r $HydroDA/gosh/params_real.py     ./params.py
+# cp -r $HydroDA/gosh/params_real.py     ./params.py
+cp -r $HydroDA/gosh/params_virt.py     ./params.py
 
 # copy running related files
 # cp -r $HydroDA/src/run.py           $HydroDA/out/$EXP/run.py

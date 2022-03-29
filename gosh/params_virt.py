@@ -139,7 +139,7 @@ def sigma_b():
 
 def ens_mem(mode=mode()):
     if mode == 1:
-        return 21
+        return 49
     
     if mode == 2:
         return 20
@@ -160,7 +160,7 @@ def starttime():
     return (2001,1,1) # start date: [year,month,date]
 
 def endtime():
-    return (2002,1,1) # end date: [year,month,date]
+    return (2015,1,1) # end date: [year,month,date]
                       # *note: this date is not included
 
 # **************************************************************
@@ -184,6 +184,9 @@ def spinup_end_date():
 
 # **************************************************************
 # 5. Runoff forcing 
+def runoff_dir():
+    return "/cluster/data6/menaka/ensemble_simulations/CaMa_in/E2O"
+
 def runname(num=mode()):
     if num == 1:
         return "E2O"
@@ -291,6 +294,10 @@ def CaMa_dir():
     # directory of CaMa-Flood
     # indicate the directory of ./map or ./src and other folders
 
+def calibrate():
+    # return "yes"
+    return "no"
+
 def MKLdir():
     return "/opt/intel/compilers_and_libraries_2016.3.170/mac/mkl"
     # directory of Intel MKL files
@@ -299,7 +306,7 @@ def MKLdir():
     # for more information --> https://software.intel.com/en-us/qualify-for-free-software/academicresearcher
 
 def output_er():
-    return 0
+    return 1
     # setting for saving or deleting intermediate files
     # 0 for saving & 1 for deleting
     # those files may be more than 400GB, so erasing is recommended if not necessary
@@ -317,13 +324,21 @@ def HydroWeb_dir():
 def obs_dir():
     # return "/cluster/data6/menaka/HydroWeb"
     # return "/cluster/data6/menaka/ensemble_org/CaMa_out/E2O003"
-    return "/cluster/data6/menaka/dev_CaMa-Flood_v4/CaMa-Flood_v4/out/test-dev_HanazakiDam"
+    # return "/cluster/data6/menaka/dev_CaMa-Flood_v4/CaMa-Flood_v4/out/test-dev_HanazakiDam"
+    return "/cluster/data7/menaka/HydroDA/obs/SWOTH08"
 
 def obs_list():
     return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_amz.txt"
 
-def stat_name():
-    return "sfcelv_E2O_amz_06min_2009-2009"
+def stat_name(cal=calibrate()):
+    if cal=="yes":
+        return "cal_sfcelv_49_E2O_amz_06min_2000-2014" # for lon-term statistic simulation calibrated
+        # return "cal_sfcelv_49_E2O_amz_06min_2009-2014" # for lon-term statistic simulation calibrated
+
+    if cal=="no":
+        return "sfcelv_49_E2O_amz_06min_2000-2014" # for long-term statistic simulation
+
+    # return "sfcelv_E2O_amz_06min_2009-2009"
 
 def make_log():
     return 1
