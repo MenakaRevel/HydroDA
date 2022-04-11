@@ -73,11 +73,11 @@ cd $HydroDAout
 # 2. Observation variable [WSE/DIS]
 # 3. Runoff Data [E2O/VICBC]
 # 4. Observation data [HydroWeb(HWEB)] 
-# 5. Number for identifying the experiment [e.g. 001]
+# 5. Number for identifying the experiment [e.g., 001]
 
-# EXP="DIR_WSE_E2O_HWEB_002"
-# EXP="ANO_WSE_E2O_HWEB_002"
-EXP="NOM_WSE_E2O_HWEB_003"
+# EXP="DIR_WSE_E2O_HWEB_003"
+# EXP="ANO_WSE_E2O_HWEB_006"
+EXP="NOM_WSE_E2O_HWEB_007"
 # EXP="test_virtual"
 # EXP="test_wse"
 

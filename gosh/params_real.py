@@ -18,10 +18,10 @@ def version():
 # **************************************************************
 # 1. experment type related definitions
 def mode():
-    return 1
+    return 4
     # parameter to change assimilation mode
     # runoff ensembles will change accordingly.
-    # 1: Earth2Obs, 2: ERA20CM, 3: VIC_BC, 4: -25% baised (ELSE_KIM2009/E2O/ERA20CM), 5: ERA5
+    # 1: Earth2Obs, 2: ERA20CM, 3: VIC_BC, 4: baised (ECMWF/ELSE_KIM2009/E2O/ERA20CM), 5: ERA5
 
 def conflag():
     return 3
@@ -147,21 +147,22 @@ def rho():
 
 def sigma_b():
     return 0.0400000
-    # bacground variance of inflation for adaptive inflation Myoshi et al (2011)
+    # background variance of inflation for adaptive inflation Myoshi et al (2011)
 
 def ens_mem(mode=mode()):
-    if mode == 1:
-        # return 21
-        return 49
+    return 49
+    # if mode == 1:
+    #     # return 21
+    #     return 49
     
-    if mode == 2:
-        return 20
+    # if mode == 2:
+    #     return 20
 
-    if mode == 3:
-        return 20
+    # if mode == 3:
+    #     return 20
 
-    if mode == 3:
-        return 20
+    # if mode == 4:
+    #     return 
     # number of ensemble members
 
 # **************************************************************
@@ -173,13 +174,13 @@ def starttime():
     return (2009,1,1) # start date: [year,month,date]
 
 def endtime():
-    return (2015,1,1) # end date: [year,month,date]
+    return (2010,1,1) # end date: [year,month,date]
                       # *note: this date is not included
 
 # **************************************************************
 # 4. Spinup options
 def spinup_mode():
-    return 0
+    return 1
     # 0: do spinup simulation for both (corrupted and true) simulation
     # 1: do spin up only at corrupted simulation
     # 2: do spin up only at true simulation
@@ -198,7 +199,8 @@ def spinup_end_date():
 # **************************************************************
 # 5. Runoff forcing 
 def runoff_dir():
-    return "/cluster/data6/menaka/ensemble_simulations/CaMa_in/E2O"
+    # return "/cluster/data6/menaka/ensemble_simulations/CaMa_in/E2O"
+    return "/cluster/data7/menaka/ensemble_simulations/CaMa_in/ECMWF050"
 
 def runname(num=mode()):
     if num == 1:
@@ -211,7 +213,8 @@ def runname(num=mode()):
         return "VIC_BC"
 
     if num == 4: #biased runoff experiment
-        return "ELSE_KIM2009"
+        return "ECMWF050"
+        # return "ELSE_KIM2009"
         # return "E2O"
         # return "ERA20CM"
 
@@ -229,7 +232,9 @@ def input(num=mode()):
         return "VIC_BC"
 
     if num==4: #biased runoff experiment
-        return "ELSE_KIM2009"
+        # return "ELSE_KIM2009" 
+        return "ECMWF050" #biased runoff experiment -50%
+        # return "ECMWF150" #biased runoff experiment +50%
 
     if num==5:
         return "ERA5"
@@ -251,7 +256,7 @@ def distopen(num):
         return 1.0
 
     if num == 4:
-        return 1.0
+        return 0.5
 
     if num == 5:
         return 1.0
@@ -314,6 +319,7 @@ def true_run(num):
 
     if num == 3: # only one will be used
         return 3
+
 # **************************************************************
 # 6. CaMa-Flood settings
 def CaMa_ver():
@@ -329,8 +335,8 @@ def CaMa_dir():
     # indicate the directory of ./map or ./src and other folders
 
 def calibrate():
-    return "yes"
-    # return "no"
+    # return "yes"
+    return "no"
 
 def MKLdir():
     return "/opt/intel/compilers_and_libraries_2016.3.170/mac/mkl"
@@ -370,11 +376,13 @@ def obs_list():
 
 def stat_name(cal=calibrate()):
     if cal=="yes":
-        return "cal_sfcelv_49_E2O_amz_06min_2009-2014" # for lon-term statistic simulation calibrated
+        # return "cal_sfcelv_49_E2O_amz_06min_2009-2014" # for long-term statistic simulation calibrated
+        return "cal_sfcelv_49_E2O_amz_06min_2000-2014" # for long-term statistic simulation calibrated
 
     if cal=="no":
-        # return "sfcelv_49_E2O_amz_06min_2009-2014" # for lon-term statistic simulation
-        return "sfcelv_49_E2O_amz_06min_2009-2009" # one year before statistic simulation
+        # return "sfcelv_49_E2O_amz_06min_2009-2014" # for long-term statistic simulation
+        # return "sfcelv_49_E2O_amz_06min_2009-2009" # one year before statistic simulation
+        return "sfcelv_49_ECMWF050_amz_06min_2000-2014" # -50% runoff statistic simulation
 
     # return "sfcelv_49_E2O_amz_06min_2009-2014"
     # return "cal_sfcelv_49_E2O_amz_06min_2009-2014"

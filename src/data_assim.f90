@@ -45,7 +45,7 @@ real,allocatable                :: ens_xa(:,:,:)
 !-map variables
 real                            :: gsize,west, north, east, south ! map boundries
 integer                         :: latpx,lonpx,nflp    ! pixel size, calculated
-real,allocatable                :: rivwth(:,:),rivlen(:,:),nextdst(:,:),lons(:,:),lats(:,:),elevtn(:,:)
+real,allocatable                :: rivwth(:,:),rivhgt(:,:),rivlen(:,:),nextdst(:,:),lons(:,:),lats(:,:),elevtn(:,:),fldhgt(:,:,:)
 real,allocatable                :: weightage(:,:),storage(:,:),parm_infl(:,:)
 integer,allocatable             :: nextX(:,:),nextY(:,:),ocean(:,:),countp(:,:),targetp(:,:)
 
@@ -182,6 +182,7 @@ close(36)
 
 fname=trim(adjustl(expdir))//"/logout/assimLog_"//yyyymmdd//".log"
 open(78,file=fname,status='replace')
+write(78,*) "File I/O Errors"
 
 fname=trim(adjustl(expdir))//"/logout/KLog_"//yyyymmdd//".log"
 open(84,file=fname,status='replace')
@@ -207,7 +208,7 @@ fname=trim(adjustl(expdir))//"/logout/error_"//yyyymmdd//".log"
 open(82,file=fname,status='replace')
 write(82,*) "File I/O Errors"
 
-allocate(rivwth(lonpx,latpx),rivlen(lonpx,latpx),nextdst(lonpx,latpx),lons(lonpx,latpx),lats(lonpx,latpx))
+allocate(rivwth(lonpx,latpx),rivhgt(lonpx,latpx),fldhgt(lonpx,latpx,10),rivlen(lonpx,latpx),nextdst(lonpx,latpx),lons(lonpx,latpx),lats(lonpx,latpx))
 allocate(elevtn(lonpx,latpx),weightage(lonpx,latpx),storage(lonpx,latpx),parm_infl(lonpx,latpx))
 allocate(nextX(lonpx,latpx),nextY(lonpx,latpx),ocean(lonpx,latpx),countp(lonpx,latpx),targetp(lonpx,latpx))
 
@@ -220,7 +221,34 @@ if(ios==0)then
     ! ocean is -9999
 else
     write(*,*) "no file rivwth"
-    write(82,*) "no file :", fname
+    write(82,*) "no file rivwth at:", fname
+    write(78,*) "no file rivwth at:", fname
+end if
+close(34)
+
+! read river channel depth
+fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivhgt.bin"
+open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+if(ios==0)then
+    read(34,rec=1) rivhgt
+    ! ocean is -9999
+else
+    write(*,*) "no file rivhgt"
+    write(82,*) "no file rivhgt at:",fname
+    write(78,*) "no file rivhgt at:", fname
+end if
+close(34)
+
+! read flood plain height
+fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/fldhgt.bin"
+open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx*10,status="old",iostat=ios)
+if(ios==0)then
+    read(34,rec=1) fldhgt
+    ! ocean is -9999
+else
+    write(*,*) "no file fldhgt"
+    write(82,*) "no file fldhgt at:",fname
+    write(78,*) "no file fldhgt at:", fname
 end if
 close(34)
 
@@ -234,7 +262,8 @@ if(ios==0)then
     read(34,rec=2) nextY
 else
     write(*,*) "no file nextXY at:",fname
-    write(82,*) "no file :", fname
+    write(82,*) "no file nextXY at:", fname
+    write(78,*) "no file nextXY at:", fname
 end if
 close(34)
 
@@ -246,8 +275,9 @@ if(ios==0)then
     read(34,rec=1) lons
     read(34,rec=2) lats
 else
-    write(*,*) "no file nextXY at:",fname
-    write(82,*) "no file :", fname
+    write(*,*) "no file lonlat at:",fname
+    write(82,*) "no file lonlat at:", fname
+    write(78,*) "no file lonlat at:", fname
 end if
 close(34)
 
@@ -263,8 +293,9 @@ if(ios==0)then
     read(34,rec=1) rivlen
     ! ocean is -9999
 else
-    write(*,*) "no file rivlen",fname
-    write(82,*) "no file :", fname
+    write(*,*) "no file rivlen at",fname
+    write(82,*) "no file rivlen at:", fname
+    write(78,*) "no file rivlen at:", fname
 end if
 close(34)
 
@@ -275,8 +306,9 @@ open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status=
 if(ios==0)then
     read(34,rec=1) nextdst
 else
-    write(*,*) "no file nextdst",fname
-    write(82,*) "no file :", fname
+    write(*,*) "no file nextdst at",fname
+    write(82,*) "no file nextdst at:", fname
+    write(78,*) "no file nextdst at:", fname
 end if
 close(34)
 
@@ -287,8 +319,9 @@ open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status=
 if(ios==0)then
     read(34,rec=1) elevtn
 else
-    write(*,*) "no file elevtn",fname
-    write(82,*) "no file :", fname
+    write(*,*) "no file elevtn at",fname
+    write(82,*) "no file elevtn at:", fname
+    write(78,*) "no file elevtn at:", fname
 end if
 close(34)
 
@@ -297,7 +330,9 @@ allocate(obs(lonpx,latpx),obs_err(lonpx,latpx),altitude(lonpx,latpx),mean_obs(lo
 
 !----
 !read HydroWeb data
+write(78,*) "========================================================="
 print*, "read observations"
+write(78,*) "read observations"
 call read_observation(yyyymmdd,lonpx,latpx,obs,obs_err,mean_obs,std_obs)
 
 ! inflation parameter
@@ -308,7 +343,8 @@ if(ios==0)then
     read(34,rec=1) parm_infl
 else
     write(*,*) "no parm_infl",fname
-    write(82,*) "no file :", fname
+    write(82,*) "no file parm_infl:", fname
+    write(78,*) "no file parm_infl at:", fname
 end if
 close(34)
 
@@ -324,7 +360,8 @@ do num=1,ens_num
         read(34,rec=1) meanglobalx(:,:,num)
     else
         write(*,*) "no mean x", fname
-        write(82,*) "no file :", fname
+        write(82,*) "no mean x at:", fname
+        write(78,*) "no mean x at:", fname
     end if
     close(34)
 end do
@@ -339,7 +376,8 @@ do num=1,ens_num
         read(34,rec=1) stdglobalx(:,:,num)
     else
         write(*,*) "no std x", fname
-        write(82,*) "no file :", fname
+        write(82,*) "no std x at:", fname
+        write(78,*) "no std x at:", fname
     end if
     close(34)
 end do
@@ -401,7 +439,8 @@ do num=1,ens_num
         read(34,rec=1) globalx(:,:,num)
     else
         write(*,*) "no x :", fname
-        write(82,*) "no file :", fname
+        write(82,*) "no x at:", fname
+        write(78,*) "no x at:", fname
     end if
     close(34)
 end do
@@ -443,7 +482,8 @@ if(ios==0)then
     read(34,rec=2) targetp
 else
     write(*,*) "no file :countp , target", fname
-    write(82,*) "no file :", fname
+    write(82,*) "no countnum at:", fname
+    write(78,*) "no countnum at:", fname
 end if
 close(34)
 
@@ -508,10 +548,12 @@ global_null = 0.0
 !!allocate(VSrefer(lonpx,latpx))
 write(82,*) "====================================="
 write(82,*) "Calculation Errors"
+write(78,*) "====================================="
+write(78,*) "Assimilation of each grid"
 ! parallel calculation
 ! errflg=0
 !$omp parallel default(none)&
-!$omp& shared(lon_cent,assimW,assimE,assimN,assimS,ocean,rivwth,obs_mask,patch_size,ens_num,&
+!$omp& shared(lon_cent,assimW,assimE,assimN,assimS,ocean,rivwth,rivhgt,obs_mask,patch_size,ens_num,&
 !$omp& patch_nums,nextX,nextY,nextdst,errfix, &
 !$omp& swot_obs,globalx,globaltrue,global_xa,global_null) &
 !$omp& private(lat_cent,lat,lon,llon,llat,fname,fn,ios,weightage, &
@@ -567,7 +609,8 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
             ! countnumber=1
             ! targetpixel=1
             print*, "no local patch file", fname
-            write(82,*) "no local patch file", fname
+            write(82,*) "no local patch file at:", fname
+            write(78,*) "no local patch file at:", fname
         end if
         !write(*,23) xlist,ylist,wgt
         close(34)
@@ -664,7 +707,7 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         local_obs=0
 
         ! satellite observation 
-        local_obs=(local_sat/=-9999.0)*(-1) ! .true.=1 of .false.=0
+        local_obs=(local_sat/=-9999.0)*(-1) ! .true.=1 or .false.=0
         write(72,*) lon_cent,lat_cent,lat,lon,local_obs
         write(79,*) "satellite observations",lon_cent,lat_cent,lat,lon,local_obs
 
@@ -720,7 +763,7 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         !=========
         write(*,*) "******************",lon_cent,lat_cent,"*******************"
         write(78,*) "size",countnum
-        write(78,*) "local obs",local_obs
+        write(78,*) "local obs",sum((local_obs/=0)*(-1))
 
         ! inflation parameter
         if (rho_fixed==-1.0) then
@@ -876,8 +919,10 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
             ! write(*,*) "~~~ m<ens_num ~~~ m=",m,info
             ! write(*,*) real(ens_num-1.)*UNI/rho+HETRHE
             print*, "====== ERROR m<ens_num ======"," m= ", m , errflg
+            print*, "forcast:",sum(xf(target_pixel,:))/(ens_num+1e-20), xf(target_pixel,:)
             !xa=xf
             write(82,*) lat,lon,"error",errflg,"info",info ! bugfix file name
+            write(78,*) "error:",errflg, "ssyevr: m<ens_num", "info:",info
             goto 9999 
         end if
         allocate(U(m,m),la(m))
@@ -906,8 +951,10 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
             if(info2/=0) then
                 errflg=3
                 !xa=xf
-                write(*,*) "====== ERROR cannot unpack Dsqr======",errflg
+                print*, "====== ERROR cannot unpack Dsqr======",errflg
+                print*, "forcast:",sum(xf(target_pixel,:))/(ens_num+1e-20)
                 write(82,*) lat,lon,"error",errflg
+                write(78,*) "error:",errflg, "spotrf: cannot unpack Dsqr", "info:",info2
                 goto 9999
             end if
             !write(78,*) "Dsqr",Dsqr
@@ -932,6 +979,7 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
             W=0
             errflg=4
             write(82,*) lat,lon,"error",errflg,"info:",info
+            write(78,*) "error:",errflg, "ssyevr: m<ens_num", "info:",info
             goto 9999
         end if
 
@@ -954,8 +1002,8 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         ! check center pixel ====================================
         !write(*,*) "errfix:", errfix, obserrrand(lon_cent,lat_cent)
         ! write(*,*) "true   :",xt(target_pixel)
-        write(*,*) "forcast:",sum(xf(target_pixel,:))/(ens_num+1e-20)
-        write(*,*) "assimil:",sum(xa(target_pixel,:))/(ens_num+1e-20)
+        print*, "forcast:",sum(xf(target_pixel,:))/(ens_num+1e-20)
+        print*, "assimil:",sum(xa(target_pixel,:))/(ens_num+1e-20)
 
 
         ! write(78,*) "true   :",xt(target_pixel)
@@ -1022,10 +1070,22 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
             else if (conflag == 3) then
                 ! global_xa(lon_cent,lat_cent,num) = xa(target_pixel,num)*stdglobaltrue(lon_cent,lat_cent) &
                 !                                 & + meanglobaltrue(lon_cent,lat_cent)
-                global_xa(lon_cent,lat_cent,num) = xa(target_pixel,num)*stdglobalx(lon_cent,lat_cent,num) &
+                global_xa(lon_cent,lat_cent,num) = xa(target_pixel,num)*stdglobalx(lon_cent,lat_cent,num)&
                                                  & + meanglobalx(lon_cent,lat_cent,num)
             else if (conflag == 4) then
                 global_xa(lon_cent,lat_cent,num) = 10**xa(target_pixel,num)
+            end if
+            !==added to fix large errors== 2022/04/10
+            !==stablize the data assimilation process==
+            if (global_xa(lon_cent,lat_cent,num) < (elevtn(lon_cent,lat_cent) - rivhgt(lon_cent,lat_cent)) ) then
+                print*, "water surface elevation is too small.....",global_xa(lon_cent,lat_cent,num),"<",(elevtn(lon_cent,lat_cent) - rivhgt(lon_cent,lat_cent))
+                write(78,*) "water surface elevation is too small: ",global_xa(lon_cent,lat_cent,num),"<",(elevtn(lon_cent,lat_cent) - rivhgt(lon_cent,lat_cent))
+                global_xa(lon_cent,lat_cent,num) = elevtn(lon_cent,lat_cent) - rivhgt(lon_cent,lat_cent) !globalx(lon_cent,lat_cent,num)
+            end if
+            if (global_xa(lon_cent,lat_cent,num) > (elevtn(lon_cent,lat_cent) + fldhgt(lon_cent,lat_cent,10)) ) then
+                print*, "water surface elevation is too large.....",global_xa(lon_cent,lat_cent,num),">",(elevtn(lon_cent,lat_cent) + fldhgt(lon_cent,lat_cent,10))
+                write(78,*) "water surface elevation is too large: ",global_xa(lon_cent,lat_cent,num),">",(elevtn(lon_cent,lat_cent) + fldhgt(lon_cent,lat_cent,10))
+                global_xa(lon_cent,lat_cent,num) = elevtn(lon_cent,lat_cent) + fldhgt(lon_cent,lat_cent,10) !globalx(lon_cent,lat_cent,num)
             end if
         end do
         global_null(lon_cent,lat_cent) = 1.0
@@ -1133,7 +1193,7 @@ close(73)
 close(74)
 close(82)
 
-deallocate(rivwth,rivlen,nextdst,lons,lats,elevtn,weightage,storage,parm_infl)
+deallocate(rivwth,rivhgt,fldhgt,rivlen,nextdst,lons,lats,elevtn,weightage,storage,parm_infl)
 deallocate(nextX,nextY,ocean,countp,targetp)
 deallocate(obs,obs_err,altitude,mean_obs,std_obs)
 deallocate(global_xa,globalx,ens_xa,global_null)!,obs_mask)
