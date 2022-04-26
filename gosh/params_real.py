@@ -174,7 +174,7 @@ def starttime():
     return (2009,1,1) # start date: [year,month,date]
 
 def endtime():
-    return (2010,1,1) # end date: [year,month,date]
+    return (2015,1,1) # end date: [year,month,date]
                       # *note: this date is not included
 
 # **************************************************************
