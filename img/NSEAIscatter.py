@@ -43,9 +43,9 @@ import os
 # experiment="ANO_WSE_E2O_HWEB_003"
 # experiment="ANO_WSE_E2O_HWEB_004"
 # experiment="NOM_WSE_E2O_HWEB_001"
-experiment="NOM_WSE_E2O_HWEB_002"
+# experiment="NOM_WSE_E2O_HWEB_002"
 # experiment="NOM_WSE_E2O_HWEB_003"
-# experiment="NOM_WSE_E2O_HWEB_004"
+experiment="NOM_WSE_E2O_HWEB_004"
 # experiment="NOM_WSE_E2O_HWEB_005"
 # experiment="NOM_WSE_E2O_HWEB_006"
 # experiment="NOM_WSE_E2O_HWEB_007"
@@ -376,7 +376,8 @@ for point in np.arange(pnum):
     #     print staid[point], pname[point]
     #     ax.scatter(lon,lat,s=10,marker="d",edgecolors=c, facecolors="k",zorder=106)
 #--
-cbar=m.colorbar(im,"right",size="2%",ticks=np.arange(vmin,vmax+0.001,0.2))
+# cbar=m.colorbar(im,"right",size="2%",ticks=np.arange(vmin,vmax+0.001,0.2))
+cbar=m.colorbar(im,"bottom",size="2%",ticks=np.arange(vmin,vmax+0.001,0.2))
 cbar.set_label("NSEAI")
 #plt.title(stitle)
 plt.savefig(assim_out+"/figures/NSEAI/NSEAIscatter.png",dpi=500,bbox_inches="tight", pad_inches=0.05)
