@@ -132,6 +132,8 @@ close(34)
 fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivhgt.bin"
 if (trim(cal)=="yes") then
     fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivhgt_Xudong.bin"
+elseif (trim(cal)=="corrupt") then
+    fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivhgt_corrupt.bin"
 else
     fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivhgt.bin"
 end if

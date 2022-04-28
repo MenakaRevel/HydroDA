@@ -335,7 +335,7 @@ def data_assim(yyyy,mm,dd): # new data assimilation function (2020/05/18)
     +str(pm.patch_size())+" "+str(pm.ens_mem(pm.mode()))+" "+nxtyyyymmdd+" "+pm.CaMa_dir()\
     +" "+str(pm.thersold())+" "+exp_dir+" "+pm.DA_dir()+" "+pm.patch_dir()+" "\
     +str(pm.patch_name())+" "+pm.HydroWeb_dir()+" "+str(pm.rho())+" "+str(pm.sigma_b())\
-    +" "+str(pm.conflag()))
+    +" "+str(pm.conflag())+" "+(pm.calibrate()))
     return 0
 ###########################
 def make_init_storge():

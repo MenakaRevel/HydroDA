@@ -15,7 +15,7 @@ program data_assim
 ! Menaka@IIS 2021
 !*************************************************************************************
 implicit none
-character(len=128)              :: fname,buf,camadir,expdir,DAdir,patchdir,hydrowebdir,mapname,patchname
+character(len=128)              :: fname,buf,camadir,expdir,DAdir,patchdir,hydrowebdir,mapname,patchname,cal
 character(len=8)                :: yyyymmdd,nxtyyyymmdd
 real                            :: assimN,assimS,assimW,assimE,lat,lon
 !character(len=2)                :: swot_day
@@ -131,6 +131,9 @@ read(buf,*) sigma_b
 
 call getarg(15,buf)
 read(buf,*) conflag
+
+call getarg(16,buf)
+read(buf,*) cal
 !==
 fname=trim(camadir)//"/map/"//trim(mapname)//"/params.txt"
 open(11,file=fname,form='formatted')
@@ -228,6 +231,13 @@ close(34)
 
 ! read river channel depth
 fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivhgt.bin"
+if (trim(cal)=="yes") then
+    fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivhgt_Xudong.bin"
+elseif (trim(cal)=="corrupt") then
+    fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivhgt_corrupt.bin"
+else
+    fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivhgt.bin"
+end if
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) rivhgt

@@ -40,7 +40,7 @@ import math
 # experiment="ANO_WSE_E2O_HWEB_001"
 # experiment="ANO_WSE_E2O_HWEB_002"
 # experiment="ANO_WSE_E2O_HWEB_003"
-# experiment="ANO_WSE_E2O_HWEB_004"
+experiment="ANO_WSE_E2O_HWEB_004"
 # experiment="ANO_WSE_E2O_HWEB_006"
 # experiment="NOM_WSE_E2O_HWEB_001"
 # experiment="NOM_WSE_E2O_HWEB_002"
@@ -48,7 +48,7 @@ import math
 # experiment="NOM_WSE_E2O_HWEB_004"
 # experiment="NOM_WSE_E2O_HWEB_005"
 # experiment="NOM_WSE_E2O_HWEB_006"
-experiment="NOM_WSE_E2O_HWEB_007"
+# experiment="NOM_WSE_E2O_HWEB_007"
 # experiment="NOM_WSE_E2O_HWEB_008"
 # experiment="NOM_WSE_E2O_HWEB_009"
 # experiment="NOM_WSE_E2O_HWEB_010"
@@ -226,7 +226,7 @@ ylist=[]
 river=[]
 #--
 #rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZON","MEKONG","IRRAWADDY","VOLGA", "NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
-#rivernames  = ["AMAZON"]
+# rivernames  = ["AMAZON"]
 rivernames = grdc.grdc_river_name_v396()
 for rivername in rivernames:
   grdc_id,station_loc,x_list,y_list = grdc.get_grdc_loc_v396(rivername)
@@ -461,7 +461,10 @@ def make_fig(point):
     #xxlist=np.linspace(0,N,(eyear-syear)+1)
     #xlab=np.arange(syear,eyear+1,1)
     #xxlab=[calendar.month_name[i][:3] for i in range(1,13)]
-    if eyear-syear > 5:
+    if eyear-syear > 8:
+        dtt=2
+        dt=int(math.ceil(((eyear-syear)+1)/5.0))
+    elif eyear-syear > 10:
         dtt=5
         dt=int(math.ceil(((eyear-syear)+1)/5.0))
     else:

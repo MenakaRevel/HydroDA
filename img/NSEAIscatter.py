@@ -68,6 +68,7 @@ sys.path.append(assim_out)
 import params as pm
 import read_grdc as grdc
 import cal_stat as stat
+import my_colorbar as mbar
 #====================================================================
 def filter_nan(s,o):
     """
@@ -99,11 +100,11 @@ def vec_par(LEVEL,ax=None):
         lon2 = float(line[3])
         lat2 = float(line[4])
 
-        # ix = int((lon1 + 180.)*(1/gsize))
-        # iy = int((-lat1 + 90.)*(1/gsize))
+        ix = int((lon1 - west)*(1/gsize))
+        iy = int((-lat1 + north)*(1/gsize))
 
-        # if rivermap[iy,ix] == 0:
-        #     continue
+        if rivermap[iy-1,ix-1] == 0:
+            continue
 
         if lon1-lon2 > 180.0:
             print (lon1, lon2)
@@ -112,7 +113,7 @@ def vec_par(LEVEL,ax=None):
             print (lon1,lon2)
             lon2=-180.0
         #--------
-        colorVal="w" 
+        colorVal="grey" #"w" 
         #print (lon1,lon2,lat1,lat2,width)
         plot_ax(lon1,lon2,lat1,lat2,width,colorVal,ax)
 #====================================================================
@@ -309,7 +310,9 @@ epix=(180+east)*4
 # cmap=mbar.colormap("H01")
 # cmap=cm.get_cmap("bwr_r")
 # cmap=cm.get_cmap("PRGn_r")
-cmap=cm.get_cmap("seismic_r")
+# cmap=cm.get_cmap("seismic_r")
+# cmap=mbar.colormap("H01")
+cmap=mbar.diverging_colormap()
 # cmap.set_under("w",alpha=0)
 cmapL=cmap #cm.get_cmap("rainbow_r")
 vmin=-1.0
@@ -327,14 +330,18 @@ resol=1
 fig=plt.figure()
 G = gridspec.GridSpec(1,1)
 ax=fig.add_subplot(G[0,0])
-m = Basemap(projection='cyl',llcrnrlat=south,urcrnrlat=north,llcrnrlon=west,urcrnrlon=east, lat_ts=0,resolution='c',ax=ax)
+m = Basemap(projection='cyl',llcrnrlat=south-2.0,urcrnrlat=north+2.0,llcrnrlon=west,urcrnrlon=east, lat_ts=0,resolution='c',ax=ax)
 #m.drawcoastlines( linewidth=0.1, color='k' )
-m.fillcontinents(color=land,lake_color=water,zorder=99)
+# m.fillcontinents(color=land,lake_color=water,zorder=99)
 #m.drawmapboundary(fill_color=water,zorder=100)
-im=plt.scatter([],[],c=[],cmap=cmap,s=0.1,vmin=vmin,vmax=vmax,norm=norm,zorder=101)
-im.set_visible(False)
-m.drawparallels(np.arange(south,north+0.1,5), labels = [1,0,0,0], fontsize=10,linewidth=0,zorder=102)
-m.drawmeridians(np.arange(west,east+0.1,5), labels = [0,0,0,1], fontsize=10,linewidth=0,zorder=102)
+# m.drawparallels(np.arange(south,north+0.1,5), labels = [1,0,0,0], fontsize=10,linewidth=0,zorder=102)
+# m.drawmeridians(np.arange(west,east+0.1,5), labels = [0,0,0,1], fontsize=10,linewidth=0,zorder=102)
+# Amazon basin boundry
+m.readshapefile('../dat/Amazon_basin/Amazon_boundry', 'Amazon_boundry', drawbounds = False)
+for info, shape in zip(m.Amazon_boundry, m.Amazon_boundry):
+# if info['nombre'] == 'Amazon_boundry':
+    x, y = zip(*shape) 
+    m.plot(x, y, marker=None,color='grey',linewidth=1.0)
 #--
 box="%f %f %f %f"%(west,east,north,south) 
 os.system("./bin/txt_vector "+box+" "+pm.CaMa_dir()+" "+pm.mapname()+" > NSEAItmp1.txt") 
@@ -346,7 +353,8 @@ for point in np.arange(pnum):
     org=grdc.grdc_dis(staid[point],syear,eyear-1)
     org=np.array(org)
     # if np.sum(ma.masked_where(org!=-99.9,org))==0.0:
-    if np.sum((org!=-9999.0)*1.0) == 0.0:
+    # if np.sum((org!=-9999.0)*1.0) == 0.0:
+    if np.sum((org!=-9999.0)*1.0) < 365*1:
         # print ("no obs", (org!=-9999.0)*1.0))
         continue
     NSEasm=NS(np.mean(asm[:,:,point],axis=1),org)
@@ -366,8 +374,8 @@ for point in np.arange(pnum):
     lon=lonlat[0,iy,ix]
     lat=lonlat[1,iy,ix]
     c=cmapL(norm(NSEAI))
-    ax.scatter(lon,lat,s=10,marker="o",edgecolors="k", facecolors=c,zorder=106)
-    print (pname[point],lon,lat,NSEAI) #,NSEasm,NSEopn)
+    ax.scatter(lon, lat, s=25, marker="o", edgecolors="k", linewidth=0.5, facecolors=c,zorder=106)
+    # print (pname[point],lon,lat,NSEAI) #,NSEasm,NSEopn)
     # if NSEAI > 0.0:
     #     print lon,lat, "%3.2f %3.2f %3.2f"%(NSEAI, NSEasm, NSEopn)
     # if NSEAI >= 0.00:
@@ -375,10 +383,19 @@ for point in np.arange(pnum):
     # if NSEAI < 0.00:
     #     print staid[point], pname[point]
     #     ax.scatter(lon,lat,s=10,marker="d",edgecolors=c, facecolors="k",zorder=106)
-#--
-# cbar=m.colorbar(im,"right",size="2%",ticks=np.arange(vmin,vmax+0.001,0.2))
-cbar=m.colorbar(im,"bottom",size="2%",ticks=np.arange(vmin,vmax+0.001,0.2))
+#========================
+# remove out lines
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.spines['bottom'].set_visible(False)
+ax.spines['left'].set_visible(False)
+#========================
+# make colorbar
+im=plt.scatter([],[],c=[],cmap=cmap,s=0.1,vmin=vmin,vmax=vmax,norm=norm,zorder=101)
+im.set_visible(False)
+cbar=m.colorbar(im,"right",size="2%",extend="min",ticks=np.arange(vmin,vmax+0.001,0.2))
+# cbar=m.colorbar(im,"bottom",size="2%",ticks=np.arange(vmin,vmax+0.001,0.2))
 cbar.set_label("NSEAI")
 #plt.title(stitle)
-plt.savefig(assim_out+"/figures/NSEAI/NSEAIscatter.png",dpi=500,bbox_inches="tight", pad_inches=0.05)
+plt.savefig(assim_out+"/figures/NSEAI/NSEAIscatter.jpg",dpi=500,bbox_inches="tight", pad_inches=0.05)
 os.system("rm -r NSEAItmp*.txt")

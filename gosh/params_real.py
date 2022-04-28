@@ -24,7 +24,7 @@ def mode():
     # 1: Earth2Obs, 2: ERA20CM, 3: VIC_BC, 4: baised (ECMWF/ELSE_KIM2009/E2O/ERA20CM), 5: ERA5
 
 def conflag():
-    return 3
+    return 1
     # converstion flag for observation converstions 
     #  1 - Directly values 
     #  2 - Anomalies
@@ -174,13 +174,13 @@ def starttime():
     return (2009,1,1) # start date: [year,month,date]
 
 def endtime():
-    return (2015,1,1) # end date: [year,month,date]
+    return (2010,1,1) # end date: [year,month,date]
                       # *note: this date is not included
 
 # **************************************************************
 # 4. Spinup options
 def spinup_mode():
-    return 1
+    return 0
     # 0: do spinup simulation for both (corrupted and true) simulation
     # 1: do spin up only at corrupted simulation
     # 2: do spin up only at true simulation
@@ -200,7 +200,8 @@ def spinup_end_date():
 # 5. Runoff forcing 
 def runoff_dir():
     # return "/cluster/data6/menaka/ensemble_simulations/CaMa_in/E2O"
-    return "/cluster/data7/menaka/ensemble_simulations/CaMa_in/ECMWF050"
+    return "/cluster/data7/menaka/ensemble_simulations/CaMa_in/ECMWF000"
+    # return "/cluster/data7/menaka/ensemble_simulations/CaMa_in/ECMWF050"
 
 def runname(num=mode()):
     if num == 1:
@@ -336,7 +337,8 @@ def CaMa_dir():
 
 def calibrate():
     # return "yes"
-    return "no"
+    # return "no"
+    return "corrupt"
 
 def MKLdir():
     return "/opt/intel/compilers_and_libraries_2016.3.170/mac/mkl"
