@@ -247,7 +247,7 @@ CRIVWTH="${FMAP}/rivwth_gwdlr.bin"          # channel width [m] (GWD-LR + filled
 CRIVHGT="${FMAP}/rivhgt.bin"                # channel depth [m] (empirical power-low)
 if [ $cal = "yes" ];then
   CRIVHGT="${FMAP}/rivhgt_Xudong.bin"         # channel depth [m] (Xudong et al 2021)
-elif [ $cal = "corr" ];then
+elif [ $cal = "corrupt" ];then
   CRIVHGT="${FMAP}/rivhgt_corrupt.bin"         # channel depth [m] (Corrupted rivhgt)
 fi
 CRIVMAN="${FMAP}/rivman.bin"                # manning coefficient river (The one in flood plain is a global parameter; set $PMANFLD below.)

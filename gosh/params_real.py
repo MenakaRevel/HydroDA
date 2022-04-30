@@ -200,8 +200,8 @@ def spinup_end_date():
 # 5. Runoff forcing 
 def runoff_dir():
     # return "/cluster/data6/menaka/ensemble_simulations/CaMa_in/E2O"
-    return "/cluster/data7/menaka/ensemble_simulations/CaMa_in/ECMWF000"
-    # return "/cluster/data7/menaka/ensemble_simulations/CaMa_in/ECMWF050"
+    # return "/cluster/data7/menaka/ensemble_simulations/CaMa_in/ECMWF000" # original runoff
+    return "/cluster/data7/menaka/ensemble_simulations/CaMa_in/ECMWF050" # biased runoff
 
 def runname(num=mode()):
     if num == 1:
@@ -214,6 +214,7 @@ def runname(num=mode()):
         return "VIC_BC"
 
     if num == 4: #biased runoff experiment
+        # return "ECMWF000"
         return "ECMWF050"
         # return "ELSE_KIM2009"
         # return "E2O"
@@ -234,6 +235,7 @@ def input(num=mode()):
 
     if num==4: #biased runoff experiment
         # return "ELSE_KIM2009" 
+        # return "ECMWF000"
         return "ECMWF050" #biased runoff experiment -50%
         # return "ECMWF150" #biased runoff experiment +50%
 
@@ -382,6 +384,11 @@ def stat_name(cal=calibrate()):
         return "cal_sfcelv_49_E2O_amz_06min_2000-2014" # for long-term statistic simulation calibrated
 
     if cal=="no":
+        # return "sfcelv_49_E2O_amz_06min_2009-2014" # for long-term statistic simulation
+        # return "sfcelv_49_E2O_amz_06min_2009-2009" # one year before statistic simulation
+        return "sfcelv_49_ECMWF050_amz_06min_2000-2014" # -50% runoff statistic simulation
+
+    if cal=="corrupt":
         # return "sfcelv_49_E2O_amz_06min_2009-2014" # for long-term statistic simulation
         # return "sfcelv_49_E2O_amz_06min_2009-2009" # one year before statistic simulation
         return "sfcelv_49_ECMWF050_amz_06min_2000-2014" # -50% runoff statistic simulation
