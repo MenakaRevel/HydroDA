@@ -15,7 +15,7 @@ program data_assim
 ! Menaka@IIS 2021
 !*************************************************************************************
 implicit none
-character(len=128)              :: fname,buf,camadir,expdir,DAdir,patchdir,hydrowebdir,mapname,patchname
+character(len=128)              :: fname,buf,camadir,expdir,DAdir,patchdir,hydrowebdir,mapname,patchname,cal
 character(len=8)                :: yyyymmdd,nxtyyyymmdd
 real                            :: assimN,assimS,assimW,assimE,lat,lon
 !character(len=2)                :: swot_day
@@ -38,13 +38,14 @@ integer                         :: day!,E_retry
 !real,allocatable                :: randlist(:)
 real                            :: errexp
 real,allocatable                :: K_(:,:)
+integer                         :: lwork,liwork ! added for large ensemble size
 
 !integer,allocatable             :: obs_mask(:,:) ! NEW v.1.1.0
 real,allocatable                :: ens_xa(:,:,:)
 !-map variables
 real                            :: gsize,west, north, east, south ! map boundries
 integer                         :: latpx,lonpx,nflp    ! pixel size, calculated
-real,allocatable                :: rivwth(:,:),rivlen(:,:),nextdst(:,:),lons(:,:),lats(:,:),elevtn(:,:)
+real,allocatable                :: rivwth(:,:),rivhgt(:,:),rivlen(:,:),nextdst(:,:),lons(:,:),lats(:,:),elevtn(:,:),fldhgt(:,:,:)
 real,allocatable                :: weightage(:,:),storage(:,:),parm_infl(:,:)
 integer,allocatable             :: nextX(:,:),nextY(:,:),ocean(:,:),countp(:,:),targetp(:,:)
 
@@ -130,6 +131,9 @@ read(buf,*) sigma_b
 
 call getarg(15,buf)
 read(buf,*) conflag
+
+call getarg(16,buf)
+read(buf,*) cal
 !==
 fname=trim(camadir)//"/map/"//trim(mapname)//"/params.txt"
 open(11,file=fname,form='formatted')
@@ -169,6 +173,9 @@ patch_nums=patch_side**2
 rho=1.0d0
 ! weightgae thersold
 !thresold=0.8d0
+
+lwork=max(1,26*ens_num)
+liwork=max(1,10*ens_num)
 !---
 fname=trim(adjustl(expdir))//"/logout/errrand_"//yyyymmdd//".log"
 open(36,file=fname,status='replace')
@@ -178,6 +185,7 @@ close(36)
 
 fname=trim(adjustl(expdir))//"/logout/assimLog_"//yyyymmdd//".log"
 open(78,file=fname,status='replace')
+write(78,*) "File I/O Errors"
 
 fname=trim(adjustl(expdir))//"/logout/KLog_"//yyyymmdd//".log"
 open(84,file=fname,status='replace')
@@ -203,7 +211,7 @@ fname=trim(adjustl(expdir))//"/logout/error_"//yyyymmdd//".log"
 open(82,file=fname,status='replace')
 write(82,*) "File I/O Errors"
 
-allocate(rivwth(lonpx,latpx),rivlen(lonpx,latpx),nextdst(lonpx,latpx),lons(lonpx,latpx),lats(lonpx,latpx))
+allocate(rivwth(lonpx,latpx),rivhgt(lonpx,latpx),fldhgt(lonpx,latpx,10),rivlen(lonpx,latpx),nextdst(lonpx,latpx),lons(lonpx,latpx),lats(lonpx,latpx))
 allocate(elevtn(lonpx,latpx),weightage(lonpx,latpx),storage(lonpx,latpx),parm_infl(lonpx,latpx))
 allocate(nextX(lonpx,latpx),nextY(lonpx,latpx),ocean(lonpx,latpx),countp(lonpx,latpx),targetp(lonpx,latpx))
 
@@ -216,7 +224,41 @@ if(ios==0)then
     ! ocean is -9999
 else
     write(*,*) "no file rivwth"
-    write(82,*) "no file :", fname
+    write(82,*) "no file rivwth at:", fname
+    write(78,*) "no file rivwth at:", fname
+end if
+close(34)
+
+! read river channel depth
+fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivhgt.bin"
+if (trim(cal)=="yes") then
+    fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivhgt_Xudong.bin"
+elseif (trim(cal)=="corrupt") then
+    fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivhgt_corrupt.bin"
+else
+    fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivhgt.bin"
+end if
+open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+if(ios==0)then
+    read(34,rec=1) rivhgt
+    ! ocean is -9999
+else
+    write(*,*) "no file rivhgt"
+    write(82,*) "no file rivhgt at:",fname
+    write(78,*) "no file rivhgt at:", fname
+end if
+close(34)
+
+! read flood plain height
+fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/fldhgt.bin"
+open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx*10,status="old",iostat=ios)
+if(ios==0)then
+    read(34,rec=1) fldhgt
+    ! ocean is -9999
+else
+    write(*,*) "no file fldhgt"
+    write(82,*) "no file fldhgt at:",fname
+    write(78,*) "no file fldhgt at:", fname
 end if
 close(34)
 
@@ -230,7 +272,8 @@ if(ios==0)then
     read(34,rec=2) nextY
 else
     write(*,*) "no file nextXY at:",fname
-    write(82,*) "no file :", fname
+    write(82,*) "no file nextXY at:", fname
+    write(78,*) "no file nextXY at:", fname
 end if
 close(34)
 
@@ -242,13 +285,15 @@ if(ios==0)then
     read(34,rec=1) lons
     read(34,rec=2) lats
 else
-    write(*,*) "no file nextXY at:",fname
-    write(82,*) "no file :", fname
+    write(*,*) "no file lonlat at:",fname
+    write(82,*) "no file lonlat at:", fname
+    write(78,*) "no file lonlat at:", fname
 end if
 close(34)
 
 ! make ocean mask from nextx (1 is ocean; 0 is not ocean)
-ocean = (nextX==-9999) * (-1)
+! ocean = (nextX==-9999) * (-1)
+ocean = (nextX<=0) * (-1)
 
 ! read river length
 fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivlen.bin"
@@ -258,8 +303,9 @@ if(ios==0)then
     read(34,rec=1) rivlen
     ! ocean is -9999
 else
-    write(*,*) "no file rivlen",fname
-    write(82,*) "no file :", fname
+    write(*,*) "no file rivlen at",fname
+    write(82,*) "no file rivlen at:", fname
+    write(78,*) "no file rivlen at:", fname
 end if
 close(34)
 
@@ -270,8 +316,9 @@ open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status=
 if(ios==0)then
     read(34,rec=1) nextdst
 else
-    write(*,*) "no file nextdst",fname
-    write(82,*) "no file :", fname
+    write(*,*) "no file nextdst at",fname
+    write(82,*) "no file nextdst at:", fname
+    write(78,*) "no file nextdst at:", fname
 end if
 close(34)
 
@@ -282,8 +329,9 @@ open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status=
 if(ios==0)then
     read(34,rec=1) elevtn
 else
-    write(*,*) "no file elevtn",fname
-    write(82,*) "no file :", fname
+    write(*,*) "no file elevtn at",fname
+    write(82,*) "no file elevtn at:", fname
+    write(78,*) "no file elevtn at:", fname
 end if
 close(34)
 
@@ -292,7 +340,9 @@ allocate(obs(lonpx,latpx),obs_err(lonpx,latpx),altitude(lonpx,latpx),mean_obs(lo
 
 !----
 !read HydroWeb data
+write(78,*) "========================================================="
 print*, "read observations"
+write(78,*) "read observations"
 call read_observation(yyyymmdd,lonpx,latpx,obs,obs_err,mean_obs,std_obs)
 
 ! inflation parameter
@@ -303,45 +353,48 @@ if(ios==0)then
     read(34,rec=1) parm_infl
 else
     write(*,*) "no parm_infl",fname
-    write(82,*) "no file :", fname
+    write(82,*) "no file parm_infl:", fname
+    write(78,*) "no file parm_infl at:", fname
 end if
 close(34)
 
 ! read mean sfelv forcast
 allocate(meanglobalx(lonpx,latpx,ens_num),stdglobalx(lonpx,latpx,ens_num))
 meanglobalx=0
-! do num=1,ens_num
-!     write(numch,'(i3.3)') num
-!     fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/meansfcelvC"//numch//".bin"
-!     !print *, fname
-!     open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
-!     if(ios==0)then
-!         read(34,rec=1) meanglobalx(:,:,num)
-!     else
-!         write(*,*) "no mean x"
-!         write(82,*) "no file :", fname
-!     end if
-!     close(34)
-! end do
+do num=1,ens_num
+    write(numch,'(i3.3)') num
+    fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/meansfcelvC"//numch//".bin"
+    !print *, fname
+    open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+    if(ios==0)then
+        read(34,rec=1) meanglobalx(:,:,num)
+    else
+        write(*,*) "no mean x", fname
+        write(82,*) "no mean x at:", fname
+        write(78,*) "no mean x at:", fname
+    end if
+    close(34)
+end do
 
 stdglobalx=0
-! do num=1,ens_num
-!     write(numch,'(i3.3)') num
-!     fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/stdsfcelvC"//numch//".bin"
-!     !print *, fname
-!     open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
-!     if(ios==0)then
-!         read(34,rec=1) stdglobalx(:,:,num)
-!     else
-!         write(*,*) "no mean x"
-!         write(82,*) "no file :", fname
-!     end if
-!     close(34)
-! end do
+do num=1,ens_num
+    write(numch,'(i3.3)') num
+    fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/stdsfcelvC"//numch//".bin"
+    !print *, fname
+    open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+    if(ios==0)then
+        read(34,rec=1) stdglobalx(:,:,num)
+    else
+        write(*,*) "no std x", fname
+        write(82,*) "no std x at:", fname
+        write(78,*) "no std x at:", fname
+    end if
+    close(34)
+end do
 
 ! read mean WSE true
 allocate(meanglobaltrue(lonpx,latpx))
-meanglobaltrue=0
+meanglobaltrue=0.0
 !fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/meansfcelvT000.bin"
 !fname=trim(adjustl(DAdir))//"/dat/mean_sfcelv_1958-2013.bin"
 !fname=trim(adjustl(DAdir))//"/dat/mean_sfcelv_E2O_1980-2014.bin"
@@ -349,21 +402,21 @@ meanglobaltrue=0
 !fname=trim(adjustl(DAdir))//"/dat/mean_sfcelv_VIC_BC_1980-2014.bin"
 !fname=trim(adjustl(DAdir))//"/dat/mean_sfcelv_VIC_BC_amz_06min_1980-2014.bin"
 fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/mean_sfcelv.bin"
-open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
-if(ios==0)then
-   read(34,rec=1) meanglobaltrue
-else
-   write(*,*) "no true"
-   write(82,*) "no file :", fname
-end if
-close(34)
+! ! open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+! ! if(ios==0)then
+! !    read(34,rec=1) meanglobaltrue
+! ! else
+! !    write(*,*) "no true"
+! !    write(82,*) "no file :", fname
+! ! end if
+! ! close(34)
 
 ! update meanglobalture
 !meanglobaltrue=(sum(meanglobalx(:,:,:),dim=3)/real(ens_num))
 
 ! read std WSE true
 allocate(stdglobaltrue(lonpx,latpx))
-stdglobaltrue=0
+stdglobaltrue=0.0
 !fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/meansfcelvT000.bin"
 !fname=trim(adjustl(DAdir))//"/dat/std_sfcelv_1958-2013.bin"
 !fname=trim(adjustl(DAdir))//"/dat/std_sfcelv_E2O_1980-2014.bin"
@@ -371,14 +424,14 @@ stdglobaltrue=0
 !fname=trim(adjustl(DAdir))//"/dat/std_sfcelv_VIC_BC_1980-2014.bin"
 !fname=trim(adjustl(DAdir))//"/dat/std_sfcelv_VIC_BC_amz_06min_1980-2014.bin"
 fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/std_sfcelv.bin"
-open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
-if(ios==0)then
-   read(34,rec=1) stdglobaltrue
-else
-   write(*,*) "no true"
-   write(82,*) "no file :", fname
-end if
-close(34)
+! ! open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+! ! if(ios==0)then
+! !    read(34,rec=1) stdglobaltrue
+! ! else
+! !    write(*,*) "no true"
+! !    write(82,*) "no file :", fname
+! ! end if
+! ! close(34)
 
 ! update stdglobalture
 !stdglobaltrue=(sum(stdglobalx(:,:,:),dim=3)/real(ens_num))
@@ -389,13 +442,15 @@ globalx=0
 do num=1,ens_num
     write(numch,'(i3.3)') num
     fname=trim(adjustl(expdir))//"/CaMa_out/"//yyyymmdd//"A"//numch//"/sfcelv"//yyyymmdd(1:4)//".bin"
+    ! fname=trim(adjustl(expdir))//"/CaMa_out/"//yyyymmdd//"C"//numch//"/sfcelv"//yyyymmdd(1:4)//".bin"
     !print *, fname
     open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
     if(ios==0)then
         read(34,rec=1) globalx(:,:,num)
     else
         write(*,*) "no x :", fname
-        write(82,*) "no file :", fname
+        write(82,*) "no x at:", fname
+        write(78,*) "no x at:", fname
     end if
     close(34)
 end do
@@ -437,7 +492,8 @@ if(ios==0)then
     read(34,rec=2) targetp
 else
     write(*,*) "no file :countp , target", fname
-    write(82,*) "no file :", fname
+    write(82,*) "no countnum at:", fname
+    write(78,*) "no countnum at:", fname
 end if
 close(34)
 
@@ -502,10 +558,12 @@ global_null = 0.0
 !!allocate(VSrefer(lonpx,latpx))
 write(82,*) "====================================="
 write(82,*) "Calculation Errors"
+write(78,*) "====================================="
+write(78,*) "Assimilation of each grid"
 ! parallel calculation
-
+! errflg=0
 !$omp parallel default(none)&
-!$omp& shared(lon_cent,assimW,assimE,assimN,assimS,ocean,rivwth,obs_mask,patch_size,ens_num,&
+!$omp& shared(lon_cent,assimW,assimE,assimN,assimS,ocean,rivwth,rivhgt,obs_mask,patch_size,ens_num,&
 !$omp& patch_nums,nextX,nextY,nextdst,errfix, &
 !$omp& swot_obs,globalx,globaltrue,global_xa,global_null) &
 !$omp& private(lat_cent,lat,lon,llon,llat,fname,fn,ios,weightage, &
@@ -535,18 +593,35 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         ! countnum and target pixel
         countnumber=countp(lon_cent,lat_cent)
         targetpixel=targetp(lon_cent,lat_cent)
-
-        ! open emperical local patch
+        
+        ! print*, "+++++++++++++++++"
+        ! print*, lon_cent, lat_cent, countnumber, targetpixel
+        if (targetpixel == -9999) cycle
+        ! allocate 
         allocate(lag(patch_nums),xlist(countnumber),ylist(countnumber),wgt(countnumber))
+        ! open emperical local patch
         write(llon,'(i4.4)') lon_cent
         write(llat,'(i4.4)') lat_cent
         fname=trim(adjustl(patchdir))//"/"//trim(patchname)//"/patch"//trim(llon)//trim(llat)//".txt"
         !write(*,*) fname
-        open(34,file=fname,status='old',access='sequential',form='formatted',action='read')!
-        do i=1, countnumber
-          read(34,*) xlist(i),ylist(i),wgt(i)
-          !write(*,*) xlist(i),ylist(i),wgt(i)
-        end do
+        open(34,file=fname,status='old',access='sequential',form='formatted',action='read',iostat=ios)!
+        if(ios==0)then
+            do i=1, countnumber
+                read(34,*) xlist(i),ylist(i),wgt(i)
+                !write(*,*) xlist(i),ylist(i),wgt(i)
+            end do
+        else
+            ! allocate(lag(1),xlist(1),ylist(1),wgt(1))
+            ! lag(1)=0.0
+            ! xlist(1)=lon_cent
+            ! ylist(1)=lat_cent
+            ! wgt(1)=1.0
+            ! countnumber=1
+            ! targetpixel=1
+            print*, "no local patch file", fname
+            write(82,*) "no local patch file at:", fname
+            write(78,*) "no local patch file at:", fname
+        end if
         !write(*,23) xlist,ylist,wgt
         close(34)
         !--
@@ -568,11 +643,13 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         ! read local satellite values
         allocate(local_sat(countnum))
         allocate(local_err(countnum))
+        allocate(local_lag(countnum))
+        allocate(local_wgt(countnum))
+        allocate(local_obs(countnum))
+
         allocate(xt(countnum))
         !print*, countnum,lon_cent,lat_cent
-        allocate(local_lag(countnum))
         !print*,shape(local_lag)
-        allocate(local_wgt(countnum))
         local_sat=-9999.0
         local_err=-9999.0
         !local_lag=-9999.0
@@ -591,8 +668,8 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
             j_m=ylist(i)
             if (obs(i_m,j_m)/=-9999.0) then
                 !print*, obs(i_m,j_m),altitude(i_m,j_m)
-                print*,"^^^^^^^^^^^^^^^^^"
-                print*,lon_cent,lat_cent,patch_start,patch_end,targetpixel,countnumber
+                ! print*,"^^^^^^^^^^^^^^^^^"
+                ! print*,lon_cent,lat_cent,patch_start,patch_end,targetpixel,countnumber
                 local_sat(j)=1.0
                 !!! observation converstions 
                 !  1 - Directly values 
@@ -619,8 +696,8 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
                 ! xt(j)=(obs(i_m,j_m)-mean_obs(i_m,j_m))/(std_obs(i_m,j_m)+1.0e-20)
                 write(79,*) "Observations"
                 write(79,*) i_m,j_m, conflag, xt(j) !    obs(i_m,j_m),mean_obs(i_m,j_m),std_obs(i_m,j_m) !,stdglobaltrue(i_m,j_m) , meanglobaltrue(i_m,j_m)
-                print*, "observation converstion"
-                print*,i_m,j_m, conflag, xt(j) !,obs(i_m,j_m),mean_obs(i_m,j_m),std_obs(i_m,j_m)!,stdglobaltrue(i_m,j_m) , meanglobaltrue(i_m,j_m)
+                ! print*, "observation converstion"
+                ! print*,i_m,j_m, conflag, xt(j) !,obs(i_m,j_m),mean_obs(i_m,j_m),std_obs(i_m,j_m)!,stdglobaltrue(i_m,j_m) , meanglobaltrue(i_m,j_m)
                 !max(obs_err(i_m,j_m),0.30)
             else
                 local_sat(j)=-9999.0
@@ -637,11 +714,10 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
             !end if
         end do
         !---
-        allocate(local_obs(countnum))
         local_obs=0
 
         ! satellite observation 
-        local_obs=(local_sat/=-9999.0)*(-1) ! .true.=1 of .false.=0
+        local_obs=(local_sat/=-9999.0)*(-1) ! .true.=1 or .false.=0
         write(72,*) lon_cent,lat_cent,lat,lon,local_obs
         write(79,*) "satellite observations",lon_cent,lat_cent,lat,lon,local_obs
 
@@ -663,9 +739,10 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
                 if (conflag == 1) then
                     xf(j,num)=globalx(i_m,j_m,num)
                 else if (conflag == 2) then
-                    xf(j,num)=globalx(i_m,j_m,num)-meanglobaltrue(i_m,j_m)
+                    xf(j,num)=globalx(i_m,j_m,num)-meanglobalx(i_m,j_m,num) !meanglobaltrue(i_m,j_m)
                 else if (conflag == 3) then
-                    xf(j,num)=(globalx(i_m,j_m,num)-meanglobaltrue(i_m,j_m))/(stdglobaltrue(i_m,j_m)+1.0e-20)
+                    ! xf(j,num)=(globalx(i_m,j_m,num)-meanglobaltrue(i_m,j_m))/(stdglobaltrue(i_m,j_m)+1.0e-20)
+                    xf(j,num)=(globalx(i_m,j_m,num)-meanglobalx(i_m,j_m,num))/(stdglobalx(i_m,j_m,num)+1.0e-20)
                 else if (conflag == 4) then
                     xf(j,num)=log10(globalx(i_m,j_m,num))
                 end if
@@ -675,7 +752,7 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
 
         ! deallocate variables of making observation and dimension related
         ! variables
-        deallocate(lag,local_sat,xlist,ylist,wgt)
+        deallocate(local_sat,lag,xlist,ylist,wgt)
 
         errflg=0
         ! calculate the number of observations
@@ -686,9 +763,9 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
             write(82,*) lat,lon,"error",errflg
             goto 9999
         end if
-        !------------------------------------------------------------
+        !------------------------------------------------------------------------------------------------
         ! ========= reach here only when there is at least one observation inside the local patch =======
-        !------------------------------------------------------------
+        !------------------------------------------------------------------------------------------------
         write(78,*) "=========================================================="
         !write(78,*) "******************",lat,lon,"*******************"
         write(78,*) "******************",lon_cent,lat_cent," *******************"
@@ -696,7 +773,7 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         !=========
         write(*,*) "******************",lon_cent,lat_cent,"*******************"
         write(78,*) "size",countnum
-        write(78,*) "local obs",local_obs
+        write(78,*) "local obs",sum((local_obs/=0)*(-1))
 
         ! inflation parameter
         if (rho_fixed==-1.0) then
@@ -809,7 +886,8 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         !write(78,*) "HETRHE:",HETRHE
         !write(78,*) "ET*E:",matmul(TRANSPOSE(Ef),Ef)
 
-        allocate(work(1000),iwork(1000),ifail(1000),isuppz(1000))
+        ! allocate(work(1000),iwork(1000),ifail(1000),isuppz(1000))
+        allocate(work(lwork),iwork(lwork),ifail(lwork),isuppz(lwork))
         work=0
         iwork=0
         ifail=0
@@ -836,9 +914,10 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         !call ssyevx("V","A","U",ens_num,VDVT,ens_num,-1e20,1e20,1,ens_num,-1.0,m,la_p,U_p,ens_num,work,1000,iwork,ifail,info)
         !call ssyevx("V","I","U",ens_num,VDVT,ens_num,-1e20,1e20,1,ens_num,-1.0,m,la_p,U_p,ens_num,work,1000,iwork,ifail,info)
         !call ssyevr("V","A","U",ens_num,VDVT,ens_num,-1e-20,1e20,1,ens_num,2.0*2.3e-38,m,la_p,U_p,ens_num,isuppz,work,1000,iwork,1000,info)
-        call ssyevr("V","A","U",ens_num,VDVT,ens_num,-1e20,1e20,1,ens_num,-1.0,m,la_p,U_p,ens_num,isuppz,work,1000,iwork,1000,info)
+        ! call ssyevr("V","A","U",ens_num,VDVT,ens_num,-1e20,1e20,1,ens_num,-1.0,m,la_p,U_p,ens_num,isuppz,work,1000,iwork,1000,info)
+        call ssyevr("V","A","U",ens_num,VDVT,ens_num,-1e20,1e20,1,ens_num,-1.0,m,la_p,U_p,ens_num,isuppz,work,lwork,iwork,lwork,info)
         !write(78,*) "m",m
-        !write(78,*) "ovs:",ovs
+        !write(78,*) "ovs:",ovss
         !write(78,*) "la_p",la_p
         !write(78,*) "U_p",U_p
         !write(78,*) "info",info
@@ -847,10 +926,13 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         if (m<ens_num)then
             errflg=2
             !write(78,*) "~~~ m<ens_num ~~~ m=",m
-            write(*,*) "~~~ m<ens_num ~~~ m=",m,info
-            write(*,*) real(ens_num-1.)*UNI/rho+HETRHE
+            ! write(*,*) "~~~ m<ens_num ~~~ m=",m,info
+            ! write(*,*) real(ens_num-1.)*UNI/rho+HETRHE
+            print*, "====== ERROR m<ens_num ======"," m= ", m , errflg
+            print*, "forcast:",sum(xf(target_pixel,:))/(ens_num+1e-20), xf(target_pixel,:)
             !xa=xf
             write(82,*) lat,lon,"error",errflg,"info",info ! bugfix file name
+            write(78,*) "error:",errflg, "ssyevr: m<ens_num", "info:",info
             goto 9999 
         end if
         allocate(U(m,m),la(m))
@@ -879,8 +961,10 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
             if(info2/=0) then
                 errflg=3
                 !xa=xf
-                write(*,*) "====== ERROR cannot unpack Dsqr======",errflg
+                print*, "====== ERROR cannot unpack Dsqr======",errflg
+                print*, "forcast:",sum(xf(target_pixel,:))/(ens_num+1e-20)
                 write(82,*) lat,lon,"error",errflg
+                write(78,*) "error:",errflg, "spotrf: cannot unpack Dsqr", "info:",info2
                 goto 9999
             end if
             !write(78,*) "Dsqr",Dsqr
@@ -905,6 +989,7 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
             W=0
             errflg=4
             write(82,*) lat,lon,"error",errflg,"info:",info
+            write(78,*) "error:",errflg, "ssyevr: m<ens_num", "info:",info
             goto 9999
         end if
 
@@ -927,8 +1012,8 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         ! check center pixel ====================================
         !write(*,*) "errfix:", errfix, obserrrand(lon_cent,lat_cent)
         ! write(*,*) "true   :",xt(target_pixel)
-        write(*,*) "forcast:",sum(xf(target_pixel,:))/(ens_num+1e-20)
-        write(*,*) "assimil:",sum(xa(target_pixel,:))/(ens_num+1e-20)
+        print*, "forcast:",sum(xf(target_pixel,:))/(ens_num+1e-20)
+        print*, "assimil:",sum(xa(target_pixel,:))/(ens_num+1e-20)
 
 
         ! write(78,*) "true   :",xt(target_pixel)
@@ -988,14 +1073,30 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
             if (conflag == 1) then
                 global_xa(lon_cent,lat_cent,num) = xa(target_pixel,num)
             else if (conflag == 2) then
+                ! global_xa(lon_cent,lat_cent,num) = xa(target_pixel,num)&
+                !                                 & + meanglobaltrue(lon_cent,lat_cent)
                 global_xa(lon_cent,lat_cent,num) = xa(target_pixel,num)&
-                                                & + meanglobaltrue(lon_cent,lat_cent)
+                                                 & + meanglobalx(lon_cent,lat_cent,num)
             else if (conflag == 3) then
-                global_xa(lon_cent,lat_cent,num) = xa(target_pixel,num)*stdglobaltrue(lon_cent,lat_cent) &
-                                                & + meanglobaltrue(lon_cent,lat_cent)
+                ! global_xa(lon_cent,lat_cent,num) = xa(target_pixel,num)*stdglobaltrue(lon_cent,lat_cent) &
+                !                                 & + meanglobaltrue(lon_cent,lat_cent)
+                global_xa(lon_cent,lat_cent,num) = xa(target_pixel,num)*stdglobalx(lon_cent,lat_cent,num)&
+                                                 & + meanglobalx(lon_cent,lat_cent,num)
             else if (conflag == 4) then
                 global_xa(lon_cent,lat_cent,num) = 10**xa(target_pixel,num)
             end if
+            ! ! !==added to fix large errors== 2022/04/10
+            ! ! !==stablize the data assimilation process==
+            ! ! if (global_xa(lon_cent,lat_cent,num) < (elevtn(lon_cent,lat_cent) - rivhgt(lon_cent,lat_cent)) ) then
+            ! !     print*, "water surface elevation is too small.....",global_xa(lon_cent,lat_cent,num),"<",(elevtn(lon_cent,lat_cent) - rivhgt(lon_cent,lat_cent))
+            ! !     write(78,*) "water surface elevation is too small: ",global_xa(lon_cent,lat_cent,num),"<",(elevtn(lon_cent,lat_cent) - rivhgt(lon_cent,lat_cent))
+            ! !     global_xa(lon_cent,lat_cent,num) = elevtn(lon_cent,lat_cent) - rivhgt(lon_cent,lat_cent) !globalx(lon_cent,lat_cent,num)
+            ! ! end if
+            ! ! if (global_xa(lon_cent,lat_cent,num) > (elevtn(lon_cent,lat_cent) + fldhgt(lon_cent,lat_cent,10)) ) then
+            ! !     print*, "water surface elevation is too large.....",global_xa(lon_cent,lat_cent,num),">",(elevtn(lon_cent,lat_cent) + fldhgt(lon_cent,lat_cent,10))
+            ! !     write(78,*) "water surface elevation is too large: ",global_xa(lon_cent,lat_cent,num),">",(elevtn(lon_cent,lat_cent) + fldhgt(lon_cent,lat_cent,10))
+            ! !     global_xa(lon_cent,lat_cent,num) = elevtn(lon_cent,lat_cent) + fldhgt(lon_cent,lat_cent,10) !globalx(lon_cent,lat_cent,num)
+            ! ! end if
         end do
         global_null(lon_cent,lat_cent) = 1.0
 !        if (sum(K_) > real(ens_num)) then 
@@ -1022,10 +1123,8 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
             deallocate(Ef,R,Rdiag,W,VDVT,la,U,Dinv,Dsqr,Pa,Pasqr,UNI,work,H,iwork,ifail,U_p,la_p,HETRHE,xf_m,isuppz)
         end if
         !print*,"L962"
-        deallocate(local_obs,xf,xt)
-        deallocate(local_lag)
-        !print*,"L965"
-        deallocate(local_wgt,local_err)
+        deallocate(local_lag,local_obs,local_wgt,local_err,xf,xt)
+
         !print*,"END L971"
     end do
 end do
@@ -1104,7 +1203,7 @@ close(73)
 close(74)
 close(82)
 
-deallocate(rivwth,rivlen,nextdst,lons,lats,elevtn,weightage,storage,parm_infl)
+deallocate(rivwth,rivhgt,fldhgt,rivlen,nextdst,lons,lats,elevtn,weightage,storage,parm_infl)
 deallocate(nextX,nextY,ocean,countp,targetp)
 deallocate(obs,obs_err,altitude,mean_obs,std_obs)
 deallocate(global_xa,globalx,ens_xa,global_null)!,obs_mask)
@@ -1133,7 +1232,7 @@ std_obs=-9999.0
     end if
 1000 continue
     read(11,*,end=1090) ix, iy, wse, mean, std, sat
-    print*, yyyymmdd, ix, iy, wse, trim(sat)
+    ! print*, yyyymmdd, ix, iy, wse, trim(sat)
     obs(ix,iy)=wse
     obs_err(ix,iy)=obs_error(sat)
     mean_obs(ix,iy)=mean
@@ -1386,11 +1485,11 @@ end subroutine ixy2iixy
 function str2int(str)
 implicit none
 ! for input
-character(len=*)            str
+character(len=*)            :: str
 ! for output
-integer                     str2int
+integer                     :: str2int
 !-
-integer                     stat
+integer                     :: stat
 !---
 read(str,*,iostat=stat)  str2int
 if (stat/=0) str2int=-9999
@@ -1415,12 +1514,13 @@ real                         :: obs_error
 !JASON2      |   0.28
 !JASON3      |   0.28
 !SENTINEL3A  |   0.30*
+!SWOT        |   0.10+
 !------------------------
 ! *1.Watson, C.; Legresy, B.; King, M.; Deane, A. Absolute altimeter bias results from Bass Strait, 
 ! Australia.In Proceedings of the Ocean Surface Topography Science Team Meeting 2018, Ponta Delgada, 
 ! Portugal,24–29 September 2018.
 ! *2.Bonnefond, P.; Exertier, P.; Laurain, O.; Guinle, T.; Féménias, P. Corsica:  
-! A 20-Yr multi-mission absolutealtimeter calibration site.  In Proceedings of the Ocean Surface 
+! A 20-Yr multi-mission absolute altimeter calibration site.  In Proceedings of the Ocean Surface 
 ! Topography Science Team Meeting 2018,Ponta Delgada, Portugal, 24–29 September 2018.
 ! *3.Garcia-Mondejar, A.; Zhao, Z.; Rhines, P. Sentinel-3 Range and Datation Calibration with Crete transponder.
 ! In Proceedings of the 25 Years of Progress in Radar Altimetry, Ponta Delgada, Portugal, 24–29 September 2018.
@@ -1433,6 +1533,8 @@ if (trim(sat) == "ENVISAT") obs_error=0.30
 if (trim(sat) == "JASON2") obs_error=0.28
 if (trim(sat) == "JASON3") obs_error=0.28
 if (trim(sat) == "SENTINEL3A") obs_error=0.30
+if (trim(sat) == "SENTINEL3B") obs_error=0.30
+if (trim(sat) == "SWOT") obs_error=0.10
 return
 end function obs_error
 !********************************

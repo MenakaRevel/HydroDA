@@ -103,7 +103,7 @@ def initial(): #used
 
     # observations folder
     # inside the assim_out folder
-    mkdir("assim_out/obs")
+    # mkdir("assim_out/obs") # no need as a softlink is made
 
     os.system("touch assim_out/__init__.py")
     mkdir("logout")
@@ -138,41 +138,41 @@ def make_initial_infl():
     yyyy='%04d' % (start_year)
     mm='%02d' % (start_month)
     dd='%02d' % (start_date)
-    parm_infl.tofile(pm.DA_dir()+"/out/"+pm.experiment()+"/inflation/parm_infl"+yyyy+mm+dd+".bin")
+    parm_infl.tofile("./inflation/parm_infl"+yyyy+mm+dd+".bin")
     return 0
 ###########################
 def make_anomaly_data(mode=pm.mode()):
     # make directory for mean sfcelv
-    mkdir(pm.DA_dir()+"/out/"+pm.experimet_name()+"/assim_out/mean_sfcelv/")
+    mkdir("./assim_out/mean_sfcelv/")
     # copy the anomaly files
     if mode == 1:
         # for mean
         iname=pm.DA_dir()+"/dat/mean_sfcelv_E2O_"+pm.mapname()+"_1980-2014.bin"
-        oname=pm.DA_dir()+"/out/"+pm.experimet_name()+"/assim_out/mean_sfcelv/mean_sfcelv.bin"
+        oname="./assim_out/mean_sfcelv/mean_sfcelv.bin"
         os.system("cp "+iname+" "+oname)
         # for std
         iname=pm.DA_dir()+"/dat/std_sfcelv_E2O_"+pm.mapname()+"_1980-2014.bin"
-        oname=pm.DA_dir()+"/out/"+pm.experimet_name()+"/assim_out/mean_sfcelv/std_sfcelv.bin"
+        oname="./assim_out/mean_sfcelv/std_sfcelv.bin"
         os.system("cp "+iname+" "+oname)
 
     if mode == 2:
         # for mean
         iname=pm.DA_dir()+"/dat/mean_sfcelv_E2O_"+pm.mapname()+"_1980-2014.bin"
-        oname=pm.DA_dir()+"/out/"+pm.experimet_name()+"/assim_out/mean_sfcelv/mean_sfcelv.bin"
+        oname="./assim_out/mean_sfcelv/mean_sfcelv.bin"
         os.system("cp "+iname+" "+oname)
         # for std
         iname=pm.DA_dir()+"/dat/std_sfcelv_E2O_"+pm.mapname()+"_1980-2014.bin"
-        oname=pm.DA_dir()+"/out/"+pm.experimet_name()+"/assim_out/mean_sfcelv/std_sfcelv.bin"
+        oname="./assim_out/mean_sfcelv/std_sfcelv.bin"
         os.system("cp "+iname+" "+oname)
     
     if mode == 3:
         # for mean
         iname=pm.DA_dir()+"/dat/mean_sfcelv_VIC_BC_"+pm.mapname()+"_1979-2013.bin"
-        oname=pm.DA_dir()+"/out/"+pm.experimet_name()+"/assim_out/mean_sfcelv/mean_sfcelv.bin"
+        oname="./assim_out/mean_sfcelv/mean_sfcelv.bin"
         os.system("cp "+iname+" "+oname)
         # for std
         iname=pm.DA_dir()+"/dat/std_sfcelv_VIC_BC_"+pm.mapname()+"_1979-2013.bin"
-        oname=pm.DA_dir()+"/out/"+pm.experimet_name()+"/assim_out/mean_sfcelv/std_sfcelv.bin"
+        oname="./assim_out/mean_sfcelv/std_sfcelv.bin"
         os.system("cp "+iname+" "+oname)
     return 0
 ###########################
@@ -180,28 +180,88 @@ def save_statistic():
     # copy mean and std of simulated WSE
     # for anomaly and normalized assimilations
     mkdir("./assim_out/mean_sfcelv/")
-    if pm.input()=="E2O":
-        os.system("cp -r "+pm.DA_dir()+"/dat/mean_sfcelv_"+pm.input()+"_"+pm.mapname()+"_2000-2014.bin ./assim_out/mean_sfcelv/mean_sfcelv.bin")
-        os.system("cp -r "+pm.DA_dir()+"/dat/std_sfcelv_"+pm.input()+"_"+pm.mapname()+"_2000-2014.bin ./assim_out/mean_sfcelv/std_sfcelv.bin")
-        print "cp -r "+pm.DA_dir()+"/dat/mean_sfcelv_"+pm.input()+"_"+pm.mapname()+"_2000-2014.bin ./assim_out/mean_sfcelv/mean_sfcelv.bin"
-    if pm.input()=="VIC_BC":
-        os.system("cp -r "+pm.DA_dir()+"/dat/mean_sfcelv_"+pm.input()+"_"+pm.mapname()+"_1979-2013.bin ./assim_out/mean_sfcelv/mean_sfcelv.bin")
-        os.system("cp -r "+pm.DA_dir()+"/dat/std_sfcelv_"+pm.input()+"_"+pm.mapname()+"_1979-2013.bin ./assim_out/mean_sfcelv/std_sfcelv.bin")
-        print "cp -r "+pm.DA_dir()+"/dat/mean_sfcelv_"+pm.input()+"_"+pm.mapname()+"_1979-2013.bin ./assim_out/mean_sfcelv/mean_sfcelv.bin"
+    # if pm.input()=="E2O":
+    #     iname = pm.DA_dir()+"/dat/mean_sfcelv_"+pm.input()+"_"+pm.mapname()+"_2000-2010"+ens_char+".bin
+    #     oname = "./assim_out/mean_sfcelv/meansfcelv"+ens+".bin"
+        
+    #     os.system("cp -r "+pm.DA_dir()+"/dat/mean_sfcelv_"+pm.input()+"_"+pm.mapname()+"_2000-2014.bin ./assim_out/mean_sfcelv/mean_sfcelv.bin")
+    #     os.system("cp -r "+pm.DA_dir()+"/dat/std_sfcelv_"+pm.input()+"_"+pm.mapname()+"_2000-2014.bin ./assim_out/mean_sfcelv/std_sfcelv.bin")
+    #     print ("cp -r "+pm.DA_dir()+"/dat/mean_sfcelv_"+pm.input()+"_"+pm.mapname()+"_2000-2014.bin ./assim_out/mean_sfcelv/mean_sfcelv.bin")
+    # if pm.input()=="VIC_BC":
+    #     os.system("cp -r "+pm.DA_dir()+"/dat/mean_sfcelv_"+pm.input()+"_"+pm.mapname()+"_1979-2013.bin ./assim_out/mean_sfcelv/mean_sfcelv.bin")
+    #     os.system("cp -r "+pm.DA_dir()+"/dat/std_sfcelv_"+pm.input()+"_"+pm.mapname()+"_1979-2013.bin ./assim_out/mean_sfcelv/std_sfcelv.bin")
+    #     print ("cp -r "+pm.DA_dir()+"/dat/mean_sfcelv_"+pm.input()+"_"+pm.mapname()+"_1979-2013.bin ./assim_out/mean_sfcelv/mean_sfcelv.bin")
+    
+    # #===========
+    # # mean
+    # inputlist=[]
+    # for ens in np.arange(1,pm.ens_mem(pm.mode())+1):
+    #     ens_char="%03d"%(ens)
+    #     if pm.input()=="E2O":
+    #         iname = pm.DA_dir()+"/dat/mean_"+pm.stat_name()+"_"+ens_char+".bin"
+    #         # iname = pm.DA_dir()+"/dat/mean_sfcelv_E2O_"+pm.mapname()+"_2000-2010_"+ens_char+".bin"
+    #         # iname = pm.DA_dir()+"/dat/mean_sfcelv_cal_E2O_"+pm.mapname()+"_2000-2010_"+ens_char+".bin"
+    #         oname = "./assim_out/mean_sfcelv/meansfcelvC"+ens_char+".bin"
+    #     if pm.input()=="VIC_BC":
+    #         iname = pm.DA_dir()+"/dat/mean_"+pm.stat_name()+"_"+ens_char+".bin"
+    #         # iname = pm.DA_dir()+"/dat/mean_sfcelv_VIC_BC_"+pm.mapname()+"_2000-2010_"+ens_char+".bin"
+    #         # iname = pm.DA_dir()+"/dat/mean_sfcelv_cal_VIC_BC_"+pm.mapname()+"_2000-2010_"+ens_char+".bin"
+    #         oname = "./assim_out/mean_sfcelv/meansfcelvC"+ens_char+".bin"
+    #     inputlist.append([iname,oname])
+    #===========
+    # mean
+    inputlist=[]
+    for ens in np.arange(1,pm.ens_mem(pm.mode())+1):
+        ens_char="%03d"%(ens)
+        iname = pm.DA_dir()+"/dat/mean_"+pm.stat_name()+"_"+ens_char+".bin"
+        oname = "./assim_out/mean_sfcelv/meansfcelvC"+ens_char+".bin"
+        inputlist.append([iname,oname])
+
+    # do parallel
+    p=Pool(pm.para_nums())
+    p.map(copy_stat,inputlist)
+    p.terminate()
+    
+    # #===========
+    # # std
+    # inputlist=[]
+    # for ens in np.arange(1,pm.ens_mem(pm.mode())+1):
+    #     ens_char="%03d"%(ens)
+    #     if pm.input()=="E2O":
+    #         iname = pm.DA_dir()+"/dat/std_"+pm.stat_name()+"_"+ens_char+".bin"
+    #         # iname = pm.DA_dir()+"/dat/std_sfcelv_E2O_"+pm.mapname()+"_2000-2010_"+ens_char+".bin"
+    #         # iname = pm.DA_dir()+"/dat/std_sfcelv_cal_E2O_"+pm.mapname()+"_2000-2010_"+ens_char+".bin"
+    #         oname = "./assim_out/mean_sfcelv/stdsfcelvC"+ens_char+".bin"
+    #     if pm.input()=="VIC_BC":
+    #         iname = pm.DA_dir()+"/dat/std_"+pm.stat_name()+"_"+ens_char+".bin"
+    #         # iname = pm.DA_dir()+"/dat/std_sfcelv_VIC_BC_"+pm.mapname()+"_2000-2010_"+ens_char+".bin"
+    #         # iname = pm.DA_dir()+"/dat/std_sfcelv_cal_VIC_BC_"+pm.mapname()+"_2000-2010_"+ens_char+".bin"
+    #         oname = "./assim_out/mean_sfcelv/stdsfcelvC"+ens_char+".bin"
+    #     inputlist.append([iname,oname])
+
+    #===========
+    # std
+    inputlist=[]
+    for ens in np.arange(1,pm.ens_mem(pm.mode())+1):
+        ens_char="%03d"%(ens)
+        iname = pm.DA_dir()+"/dat/std_"+pm.stat_name()+"_"+ens_char+".bin"
+        oname = "./assim_out/mean_sfcelv/stdsfcelvC"+ens_char+".bin"
+        inputlist.append([iname,oname])
+
+    # do parallel
+    p=Pool(pm.para_nums())#*cpu_nums())
+    p.map(copy_stat,inputlist)
+    p.terminate()
     return 0
 ###########################
-# # make necessary directories
-# print "initial"
-# initial()
-
-# # prepare runoff ensembles
-# print "prepare input"
-# prepare_input()
-
-# # initial inflation parameter rho for assimilation
-# print "make intial inflation"
-# make_initial_infl()
-
-# # preapre the mean and std for anomaly/normalized assimilation
-# print "save statistics"
-# save_statistic()
+def copy_stat(inputlist):
+    iname = inputlist[0]
+    oname = inputlist[1]
+    print ("cp "+iname+" "+oname)
+    os.system("cp "+iname+" "+oname)
+    return 0
+###########################
+if __name__ == "__main__":
+    initial()
+    make_initial_infl()
+    save_statistic()

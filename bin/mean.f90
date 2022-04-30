@@ -11,7 +11,7 @@ character(len=8)                :: yyyymmdd,nxtyyyymmdd
 real                            :: gsize,west, north, east, south ! map boundries
 integer                         :: latpx,lonpx,nflp    ! pixel size, calculated
 !==================================
-if(iargc().lt.5) then
+if ( iargc().lt.5 ) then
   write(*,*) 'Usage: mean'
   write(*,*) '      yearmin yearmax yearout CaMadir mapname'
   stop

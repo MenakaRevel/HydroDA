@@ -36,16 +36,16 @@ import os
 # experiment="VIC_BC_HydroWeb11"
 # experiment="test_wse"
 # experiment="DIR_WSE_E2O_HWEB_001"
-# experiment="DIR_WSE_E2O_HWEB_001"
+# experiment="DIR_WSE_E2O_HWEB_002"
 # experiment="DIR_WSE_E2O_HWEB_004"
 # experiment="ANO_WSE_E2O_HWEB_001"
 # experiment="ANO_WSE_E2O_HWEB_002"
 # experiment="ANO_WSE_E2O_HWEB_003"
 # experiment="ANO_WSE_E2O_HWEB_004"
-# experiment="NOM_WSE_E2O_HWEB_001"
-# experiment="NOM_WSE_E2O_HWEB_002"
+experiment="NOM_WSE_E2O_HWEB_001"
+# experiment="NOM_WSE_E2O_HWEB_002" 
 # experiment="NOM_WSE_E2O_HWEB_003"
-experiment="NOM_WSE_E2O_HWEB_004"
+# experiment="NOM_WSE_E2O_HWEB_004"
 # experiment="NOM_WSE_E2O_HWEB_005"
 # experiment="NOM_WSE_E2O_HWEB_006"
 # experiment="NOM_WSE_E2O_HWEB_007"
@@ -68,23 +68,22 @@ sys.path.append(assim_out)
 import params as pm
 import read_grdc as grdc
 import cal_stat as stat
-import my_colorbar as mbar
-#====================================================================
-def filter_nan(s,o):
-    """
-    this functions removed the data  from simulated and observed data
-    where ever the observed data contains nan
-    """
-    data = np.array([s.flatten(),o.flatten()])
-    data = np.transpose(data)
-    data = data[~np.isnan(data).any(1)]
+# #====================================================================
+# def filter_nan(s,o):
+#     """
+#     this functions removed the data  from simulated and observed data
+#     where ever the observed data contains nan
+#     """
+#     data = np.array([s.flatten(),o.flatten()])
+#     data = np.transpose(data)
+#     data = data[~np.isnan(data).any(1)]
 
-    return data[:,0],data[:,1]
+#     return data[:,0],data[:,1]
 #====================================================================
 def vec_par(LEVEL,ax=None):
     ax=ax or plt.gca()
-    txt="NSEAItmp_%02d.txt"%(LEVEL)
-    os.system("./bin/print_rivvec NSEAItmp1.txt 1 "+str(LEVEL)+" > "+txt)
+    txt="corrtmp_%02d.txt"%(LEVEL)
+    os.system("./bin/print_rivvec corrtmp1.txt 1 "+str(LEVEL)+" > "+txt)
     width=(float(LEVEL)**sup)*w
     #print LEVEL, width#, lon1,lat1,lon2-lon1,lat2-lat1#x1[0],y1[0],x1[1]-x1[0],y1[1]-y1[0]
     # open tmp2.txt
@@ -94,17 +93,17 @@ def vec_par(LEVEL,ax=None):
     #print LEVEL, width, lines, txt
     #---
     for line in lines:
-        line    = filter(None, re.split(" ",line))
+        line = filter(None, re.split(" ",line))
         lon1 = float(line[0])
         lat1 = float(line[1])
         lon2 = float(line[3])
         lat2 = float(line[4])
 
-        ix = int((lon1 - west)*(1/gsize))
-        iy = int((-lat1 + north)*(1/gsize))
+        # ix = int((lon1 + 180.)*(1/gsize))
+        # iy = int((-lat1 + 90.)*(1/gsize))
 
-        if rivermap[iy-1,ix-1] == 0:
-            continue
+        # if rivermap[iy,ix] == 0:
+        #     continue
 
         if lon1-lon2 > 180.0:
             print (lon1, lon2)
@@ -113,7 +112,7 @@ def vec_par(LEVEL,ax=None):
             print (lon1,lon2)
             lon2=-180.0
         #--------
-        colorVal="grey" #"w" 
+        colorVal="w" 
         #print (lon1,lon2,lat1,lat2,width)
         plot_ax(lon1,lon2,lat1,lat2,width,colorVal,ax)
 #====================================================================
@@ -154,8 +153,29 @@ def NS(s,o):
     s=np.compress(o>0.0,s) 
     return 1 - sum((s-o)**2)/(sum((o-np.mean(o))**2)+1e-20)
 #====================================================================
+def correlation(s,o):
+    """
+    correlation coefficient
+    input:
+        s: simulated
+        o: observed
+    output:
+        correlation: correlation coefficient
+    """
+    s,o = filter_nan(s,o)
+    o=ma.masked_where(o<=0.0,o).filled(0.0)
+    s=ma.masked_where(o<=0.0,s).filled(0.0)
+    o=np.compress(o>0.0,o)
+    s=np.compress(o>0.0,s)
+    if s.size == 0:
+        corr = 0.0 #np.NaN
+    else:
+        corr = np.corrcoef(o, s)[0,1]
+        
+    return corr
+#====================================================================
 mk_dir(assim_out+"/figures")
-mk_dir(assim_out+"/figures/NSEAI")
+mk_dir(assim_out+"/figures/corr")
 #----
 fname=pm.CaMa_dir()+"/map/"+pm.mapname()+"/params.txt"
 f=open(fname,"r")
@@ -195,8 +215,8 @@ rivnum=np.fromfile(rivnum,np.int32).reshape(ny,nx)
 rivermap=((nextxy[0]>0)*(rivnum==1))*1.0
 # rivermap=rivermap*(uparea>1e12)*1.0
 #----
-syear,smonth,sdate=pm.starttime()# 2004#1991  2004,1,1 # 2003,1,1 # 
-eyear,emonth,edate=pm.endtime()  # 2010,1,1 #2014,1,1 # 2004,1,1 #
+syear,smonth,sdate=pm.starttime()#2004#1991  2004,1,1 # 2003,1,1 # 
+eyear,emonth,edate=pm.endtime() # 2010,1,1 #2014,1,1 # 2004,1,1 #
 #month=1
 #date=1
 start_dt=datetime.date(syear,smonth,sdate)
@@ -215,7 +235,7 @@ pname=[]
 xlist=[]
 ylist=[]
 river=[]
-rivernames = grdc.grdc_river_name_v396()
+# rivernames = grdc.grdc_river_name_v396()
 rivernames  = ["AMAZON","NEGRO, RIO","PURUS, RIO","MADEIRA, RIO","JURUA, RIO"
               ,"TAPAJOS, RIO","XINGU, RIO","CURUA, RIO","JAPURA, RIO","BRANCO, RIO"
               ,"JAVARI, RIO","IRIRI, RIO","JURUENA, RIO","ACRE, RIO","BENI, RIO"
@@ -308,15 +328,14 @@ epix=(180+east)*4
 
 #cmap=make_colormap(colors_list)
 # cmap=mbar.colormap("H01")
-# cmap=cm.get_cmap("bwr_r")
-# cmap=cm.get_cmap("PRGn_r")
-# cmap=cm.get_cmap("seismic_r")
-# cmap=mbar.colormap("H01")
-cmap=mbar.diverging_colormap()
+# cmap=cm.get_cmap("bwr")
+# cmap=cm.get_cmap("Spectral_r")
+# cmap=cm.get_cmap("PiYG")
+cmap=cm.get_cmap("PRGn")
 # cmap.set_under("w",alpha=0)
 cmapL=cmap #cm.get_cmap("rainbow_r")
-vmin=-1.0
-vmax=1.0
+vmin=-0.50
+vmax=0.50
 norm=Normalize(vmin=vmin,vmax=vmax)
 #------
 # river width
@@ -330,21 +349,17 @@ resol=1
 fig=plt.figure()
 G = gridspec.GridSpec(1,1)
 ax=fig.add_subplot(G[0,0])
-m = Basemap(projection='cyl',llcrnrlat=south-2.0,urcrnrlat=north+2.0,llcrnrlon=west,urcrnrlon=east, lat_ts=0,resolution='c',ax=ax)
+m = Basemap(projection='cyl',llcrnrlat=south,urcrnrlat=north,llcrnrlon=west,urcrnrlon=east, lat_ts=0,resolution='c',ax=ax)
 #m.drawcoastlines( linewidth=0.1, color='k' )
-# m.fillcontinents(color=land,lake_color=water,zorder=99)
+m.fillcontinents(color=land,lake_color=water,zorder=99)
 #m.drawmapboundary(fill_color=water,zorder=100)
-# m.drawparallels(np.arange(south,north+0.1,5), labels = [1,0,0,0], fontsize=10,linewidth=0,zorder=102)
-# m.drawmeridians(np.arange(west,east+0.1,5), labels = [0,0,0,1], fontsize=10,linewidth=0,zorder=102)
-# Amazon basin boundry
-m.readshapefile('../dat/Amazon_basin/Amazon_boundry', 'Amazon_boundry', drawbounds = False)
-for info, shape in zip(m.Amazon_boundry, m.Amazon_boundry):
-# if info['nombre'] == 'Amazon_boundry':
-    x, y = zip(*shape) 
-    m.plot(x, y, marker=None,color='grey',linewidth=1.0)
+im=plt.scatter([],[],c=[],cmap=cmap,s=0.1,vmin=vmin,vmax=vmax,norm=norm,zorder=101)
+im.set_visible(False)
+m.drawparallels(np.arange(south,north+0.1,5), labels = [1,0,0,0], fontsize=10,linewidth=0,zorder=102)
+m.drawmeridians(np.arange(west,east+0.1,5), labels = [0,0,0,1], fontsize=10,linewidth=0,zorder=102)
 #--
 box="%f %f %f %f"%(west,east,north,south) 
-os.system("./bin/txt_vector "+box+" "+pm.CaMa_dir()+" "+pm.mapname()+" > NSEAItmp1.txt") 
+os.system("./bin/txt_vector "+box+" "+pm.CaMa_dir()+" "+pm.mapname()+" > corrtmp1.txt") 
 #map(vec_par,np.arange(1,10+1,1))
 map(vec_par,np.arange(2,10+1,1))
 # map(vec_par,np.arange(5,10+1,1))
@@ -353,16 +368,16 @@ for point in np.arange(pnum):
     org=grdc.grdc_dis(staid[point],syear,eyear-1)
     org=np.array(org)
     # if np.sum(ma.masked_where(org!=-99.9,org))==0.0:
-    # if np.sum((org!=-9999.0)*1.0) == 0.0:
-    if np.sum((org!=-9999.0)*1.0) < 365*1:
-        # print ("no obs", (org!=-9999.0)*1.0))
+    if np.sum((org!=-9999.0)*1.0) == 0.0:
+        print ("no obs: ",pname[point], np.sum((org!=-9999.0)*1.0))
         continue
-    NSEasm=NS(np.mean(asm[:,:,point],axis=1),org)
-    NSEopn=NS(np.mean(opn[:,:,point],axis=1),org)
-    if NSEopn==1.00:
+    CORasm=correlation(np.mean(asm[:,:,point],axis=1),org)
+    CORopn=correlation(np.mean(opn[:,:,point],axis=1),org)
+    if CORopn==1.00:
         # print (NSEopn, staid[point], pname[point])
         continue
-    NSEAI=(NSEasm-NSEopn)/((1.0-NSEopn)+1.0e-20) 
+    # DCOR=(CORasm-CORopn)/(CORopn+1.0e-20) 
+    DCOR=CORasm-CORopn
     #NSEAI=NSEasm
     ix=xlist[point]
     iy=ylist[point]
@@ -373,9 +388,9 @@ for point in np.arange(pnum):
     #lat=lat0-iy*gsize
     lon=lonlat[0,iy,ix]
     lat=lonlat[1,iy,ix]
-    c=cmapL(norm(NSEAI))
-    ax.scatter(lon, lat, s=25, marker="o", edgecolors="k", linewidth=0.5, facecolors=c,zorder=106)
-    # print (pname[point],lon,lat,NSEAI) #,NSEasm,NSEopn)
+    c=cmapL(norm(DCOR))
+    ax.scatter(lon,lat,s=15,marker="o",edgecolors="k", facecolors=c,zorder=106)
+    # print (river[point], pname[point],lon,lat,DCOR,CORasm,CORopn) #,NSEasm,NSEopn)
     # if NSEAI > 0.0:
     #     print lon,lat, "%3.2f %3.2f %3.2f"%(NSEAI, NSEasm, NSEopn)
     # if NSEAI >= 0.00:
@@ -383,19 +398,10 @@ for point in np.arange(pnum):
     # if NSEAI < 0.00:
     #     print staid[point], pname[point]
     #     ax.scatter(lon,lat,s=10,marker="d",edgecolors=c, facecolors="k",zorder=106)
-#========================
-# remove out lines
-ax.spines['top'].set_visible(False)
-ax.spines['right'].set_visible(False)
-ax.spines['bottom'].set_visible(False)
-ax.spines['left'].set_visible(False)
-#========================
-# make colorbar
-im=plt.scatter([],[],c=[],cmap=cmap,s=0.1,vmin=vmin,vmax=vmax,norm=norm,zorder=101)
-im.set_visible(False)
-cbar=m.colorbar(im,"right",size="2%",extend="min",ticks=np.arange(vmin,vmax+0.001,0.2))
-# cbar=m.colorbar(im,"bottom",size="2%",ticks=np.arange(vmin,vmax+0.001,0.2))
-cbar.set_label("NSEAI")
+#--
+cbar=m.colorbar(im,"right",size="2%",ticks=np.arange(vmin,vmax+0.001,0.1),extend="both")
+cbar.set_label("$\Delta$$correlation$") #$(r_{assim} - r_{open})$")
+# cbar.set_label("$r $ $correlation$") #$(r_{assim} - r_{open})$")
 #plt.title(stitle)
-plt.savefig(assim_out+"/figures/NSEAI/NSEAIscatter.jpg",dpi=500,bbox_inches="tight", pad_inches=0.05)
-os.system("rm -r NSEAItmp*.txt")
+plt.savefig(assim_out+"/figures/corr/corrscatter.png",dpi=500,bbox_inches="tight", pad_inches=0.05)
+os.system("rm -r corrtmp*.txt")

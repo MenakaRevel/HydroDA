@@ -40,6 +40,8 @@ runname=$6
 EXP_DIR=$7
 
 mapname=$8
+
+cal=$9
 #================================================
 echo $CAMADIR
 echo $EXP_DIR
@@ -62,8 +64,10 @@ fi
 
 #*** 0a. Set CaMa-Flood base directory
 BASE=$CAMADIR                         #   CaMa-Flood directory
-OUTBASE=$EXP_DIR					  #   base for output => CaMa_out
-INBASE=$EXP_DIR                       #   base for input => CaMa_in
+# OUTBASE=$EXP_DIR					            #   base for output => CaMa_out
+# INBASE=$EXP_DIR                       #   base for input => CaMa_in
+OUTBASE="${EXP_DIR}CaMa_out"					  #   base for output => CaMa_out
+INBASE="../../CaMa_in"                       #   base for input => CaMa_in
 
 echo $BASE
 
@@ -81,7 +85,7 @@ export OMP_NUM_THREADS=$cpunums        # OpenMP cpu num
 #============================
 #*** 1a. Experiment directory setting
 EXP=$ar_year$ar_month$ar_date$ar_ens        # experiment name (output directory name)
-RDIR=${OUTBASE}/CaMa_out/${EXP}             # directory to run CaMa-Flood
+RDIR=${OUTBASE}/${EXP}             # directory to run CaMa-Flood
 EXE="MAIN_cmf"                              # Execute file name
 PROG=${BASE}/src/${EXE}                     # location of Fortran main program
 NMLIST="./input_cmf.nam"                    # standard namelist
@@ -130,6 +134,10 @@ IFRQ_INP="24"                               # input forcing frequency: [1,2,3,..
 DROFUNIT="86400000"   # [mm/day->m/s]       # runoff unit conversion
 if [ $runname = "E2O" ];then
      DROFUNIT="86400000"   # [mm/day->m/s]  # runoff unit conversion
+elif [ $runname = "ECMWF000" ];then
+     DROFUNIT="86400000"   # [mm/day->m/s]  # runoff unit conversion
+elif [ $runname = "ECMWF050" ];then
+     DROFUNIT="86400000"   # [mm/day->m/s]  # runoff unit conversion
 elif [ $runname = "ERA20CM" ];then
      DROFUNIT="1000"   # [mm/day->m/s]      # runoff unit conversion
 elif [ $runname = "ELSE_KIM2009" ];then
@@ -152,8 +160,8 @@ if [ $acttype = "true" ];then
 	CROFDIR="${INBASE}/CaMa_in/$runname/Roff_TRUE"    #   runoff directory
 	CROFSUF="T000.one" 
 else
-	CROFDIR="${INBASE}/CaMa_in/$runname/Roff_CORR"    #   runoff directory
-	CROFSUF="C$ens_num.one" 
+	CROFDIR="${INBASE}/$runname/Roff"    #   runoff directory
+	CROFSUF="$ens_num.one" 
 fi
 
  
@@ -190,6 +198,12 @@ CINPMAT="${FMAP}/inpmat_test-1deg.bin"        # runoff input matrix for interpor
 if [ $runname = "E2O" ];then
     CDIMINFO="${FMAP}/diminfo-15min.txt" # dimention information file
     CINPMAT="${FMAP}/inpmat-15min.bin"   # runoff input matrix for interporlation
+elif [ $runname = "ECMWF000" ];then
+    CDIMINFO="${FMAP}/diminfo-15min.txt" # dimention information file
+    CINPMAT="${FMAP}/inpmat-15min.bin"   # runoff input matrix for interporlation
+elif [ $runname = "ECMWF050" ];then
+    CDIMINFO="${FMAP}/diminfo-15min.txt" # dimention information file
+    CINPMAT="${FMAP}/inpmat-15min.bin"   # runoff input matrix for interporlation
 elif [ $runname = "ERA20CM" ];then
 	  CDIMINFO="${FMAP}/diminfo-1deg.txt"  # dimention information file
     CINPMAT="${FMAP}/inpmat-1deg.bin"    # runoff input matrix for interporlation
@@ -215,6 +229,11 @@ CFLDHGT="${FMAP}/fldhgt.bin"                # floodplain elevation profile (heig
 ###CRIVWTH=${FMAP}/rivwth.bin"              # channel width [m] (empirical power-low)
 CRIVWTH="${FMAP}/rivwth_gwdlr.bin"          # channel width [m] (GWD-LR + filled with empirical)
 CRIVHGT="${FMAP}/rivhgt.bin"                # channel depth [m] (empirical power-low)
+if [ $cal = "yes" ];then
+  CRIVHGT="${FMAP}/rivhgt_Xudong.bin"         # channel depth [m] (Xudong et al 2021)
+elif [ $cal = "corrupt" ];then
+  CRIVHGT="${FMAP}/rivhgt_corrupt.bin"         # channel depth [m] (Corrupted rivhgt)
+fi
 CRIVMAN="${FMAP}/rivman.bin"                # manning coefficient river (The one in flood plain is a global parameter; set $PMANFLD below.)
 #if [ $acttype = "true" ];then
 #    CRIVMAN="${INBASE}/assim_out/rivman/rivmanTRUE.bin"

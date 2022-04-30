@@ -17,7 +17,7 @@ integer,allocatable             :: nextX(:,:),nextY(:,:)
 real,parameter                  :: g=9.80665,dt=86400.,man=0.03,man2=0.10,pdstmth=10000.
 character(len=8)                :: yyyymmdd,onedaybef,onedayaft
 real                            :: dhgtpre        !! private
-character(len=3)                :: num_name
+character(len=3)                :: num_name, cal
 character(len=10)               :: loop
 
 real,allocatable                :: fldfrac(:,:)
@@ -60,6 +60,9 @@ read(buf,*) num_name
 
 call getarg(9,buf)
 read(buf,"(A)") expdir
+
+call getarg(10,buf)
+read(buf,"(A)") cal
 
 !==
 fname=trim(camadir)//"/map/"//trim(mapname)//"/params.txt"
@@ -126,7 +129,14 @@ close(34)
 !    else
 !      fname=trim(adjustl(camadir))//"map/"//trim(mapname)//"/rivhgt.bin"
 !    end if
-fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivhgt.bin" 
+fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivhgt.bin"
+if (trim(cal)=="yes") then
+    fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivhgt_Xudong.bin"
+elseif (trim(cal)=="corrupt") then
+    fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivhgt_corrupt.bin"
+else
+    fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivhgt.bin"
+end if
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) rivhgt
@@ -189,7 +199,7 @@ close(34)
 
 ! read grid area
 !fname=trim(adjustl(camadir))//"map/"//trim(mapname)//"/grdare.bin"
-fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/ctmare.bin" ! after CaMa v3.9
+fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/ctmare.bin" ! after CaMa-Flood v3.9
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) grid_area

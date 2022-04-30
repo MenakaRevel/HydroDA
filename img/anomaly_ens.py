@@ -12,25 +12,40 @@ import os
 import calendar 
 from multiprocessing import Pool
 from multiprocessing import Process
+from multiprocessing import sharedctypes
 from numpy import ma
+import re
+import math
 
-os.system("ln -sf ../gosh/params.py params.py")
-#sys.path.append('../assim_out/')
-import params as pm
-import read_grdc as grdc
-import read_hydroweb as hweb
-import cal_stat as stat
+# os.system("ln -sf ../gosh/params.py params.py")
+# #sys.path.append('../assim_out/')
+# import params as pm
+
 #from matplotlib.font_manager import FontProperties
 #fp = FontProperties(fname="jap.ttc",size=15)
 
 #argvs = sys.argv
 
-experiment="E2O_HydroWeb5"
+# experiment="E2O_HydroWeb5"
+experiment="DIR_WSE_E2O_HWEB_001"
+# experiment="DIR_WSE_E2O_HWEB_003"
+# experiment="DIR_WSE_E2O_HWEB_004"
+# experiment="NOM_WSE_E2O_HWEB_009"
+# experiment="ANO_WSE_E2O_HWEB_002"
+# experiment="ANO_WSE_E2O_HWEB_003"
+# experiment="NOM_WSE_E2O_HWEB_001"
+# experiment="NOM_WSE_E2O_HWEB_002"
+# experiment="NOM_WSE_E2O_HWEB_003"
+# experiment="NOM_WSE_E2O_HWEB_004" 
+# experiment="NOM_WSE_E2O_HWEB_011"
+# experiment="NOM_WSE_E2O_HWEB_013"
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
-assim_out=pm.DA_dir()+"/out/"+experiment
-print assim_out
+# assim_out=pm.DA_dir()+"/out/"+experiment
+# print assim_out
 
+assim_out="../out/"+experiment
+print (assim_out)
 #assim_out="assim_out_E2O_womc"
 #assim_out="assim_out"
 #assim_out="assim_out_E2O_wmc"
@@ -44,10 +59,17 @@ print assim_out
 #assim_out="assim_out_biased_womc"
 #assim_out="assim_out_biased_wmc"
 
+sys.path.append(assim_out)
+import params as pm
+import read_grdc as grdc
+import read_hydroweb as hweb
+import cal_stat as stat
 
+conflag=pm.conflag()
+print conflag
 #os.system("mkdir ../assim_out/fig")
 #os.system("mkdir ../assim_out/fig/anomaly")
-#----
+#====================================================================
 def SWOT_day(yyyy,mm,dd):
   st_year,st_month,st_date=pm.starttime()
   start_time=datetime.date(st_year,st_month,st_date)
@@ -55,43 +77,105 @@ def SWOT_day(yyyy,mm,dd):
   days=this_time-start_time
   days=days.days
   return days%21+1
-#----
+#====================================================================
 def mk_dir(sdir):
   try:
     os.makedirs(sdir)
   except:
     pass
-#----
+#====================================================================
+def filter_nan(s,o):
+    """
+    this functions removed the data  from simulated and observed data
+    where ever the observed data contains nan
+    """
+    data = np.array([s.flatten(),o.flatten()])
+    data = np.transpose(data)
+    data = data[~np.isnan(data).any(1)]
+
+    return data[:,0],data[:,1]
+#====================================================================
+def RMSE(s,o):
+    """
+    Root Mean Squre Error
+    input:
+        s: simulated
+        o: observed
+    output:
+        RMSE: Root Mean Squre Error
+    """
+    o=ma.masked_where(o==-9999.0,o).filled(0.0)
+    s=ma.masked_where(o==-9999.0,s).filled(0.0)
+    o=np.compress(o>0.0,o)
+    s=np.compress(o>0.0,s)
+    s,o = filter_nan(s,o)
+    return np.sqrt(np.mean((s-o)**2))
+#==========================================================
 mk_dir(assim_out+"/figures")
 mk_dir(assim_out+"/figures/anomaly")
+#----
+fname=pm.CaMa_dir()+"/map/"+pm.mapname()+"/params.txt"
+f=open(fname,"r")
+lines=f.readlines()
+f.close()
+#-------
+nx     = int(filter(None, re.split(" ",lines[0]))[0])
+ny     = int(filter(None, re.split(" ",lines[1]))[0])
+gsize  = float(filter(None, re.split(" ",lines[3]))[0])
 #---
-year=2004
-month=1
-date=1
-start_dt=datetime.date(year,month,date)
+# year=2004
+# month=1
+# date=1
+# start_dt=datetime.date(year,month,date)
+# size=60
+
+syear,smonth,sdate=pm.starttime()#2004#1991 #2003,1,1 #
+eyear,emonth,edate=2012,1,1 #pm.endtime() #2005,1,1 #
+
+# start=0
+# #last=int(argvs[1])
+# last=365#int(argvs[1])
+# if calendar.isleap(year):
+#     last=366
+# else:
+#     last=365
+
+start_dt=datetime.date(syear,smonth,sdate)
+end_dt=datetime.date(eyear,emonth,edate)
 size=60
 
 start=0
-#last=int(argvs[1])
-last=365#int(argvs[1])
-if calendar.isleap(year):
-    last=366
-else:
-    last=365
+last=(end_dt-start_dt).days
+
+# N=int(last)
+# green2="greenyellow"
 
 N=int(last)
 green2="greenyellow"
 #--------------
-nextxy = pm.CaMa_dir()+"/map/glb_15min/nextxy.bin"
-rivwth = pm.CaMa_dir()+"/map/glb_15min/rivwth_gwdlr.bin"
-rivhgt = pm.CaMa_dir()+"/map/glb_15min/rivhgt.bin"
-rivlen = pm.CaMa_dir()+"/map/glb_15min/rivlen.bin"
-elevtn = pm.CaMa_dir()+"/map/glb_15min/elevtn.bin"
-nextxy = np.fromfile(nextxy,np.int32).reshape(2,720,1440)
-rivwth = np.fromfile(rivwth,np.float32).reshape(720,1440)
-rivhgt = np.fromfile(rivhgt,np.float32).reshape(720,1440)
-rivlen = np.fromfile(rivlen,np.float32).reshape(720,1440)
-elevtn = np.fromfile(elevtn,np.float32).reshape(720,1440)
+nextxy = pm.CaMa_dir()+"/map/"+pm.mapname()+"/nextxy.bin"
+rivwth = pm.CaMa_dir()+"/map/"+pm.mapname()+"/rivwth_gwdlr.bin"
+rivhgt = pm.CaMa_dir()+"/map/"+pm.mapname()+"/rivhgt.bin"
+rivlen = pm.CaMa_dir()+"/map/"+pm.mapname()+"/rivlen.bin"
+elevtn = pm.CaMa_dir()+"/map/"+pm.mapname()+"/elevtn.bin"
+nextxy = np.fromfile(nextxy,np.int32).reshape(2,ny,nx)
+rivwth = np.fromfile(rivwth,np.float32).reshape(ny,nx)
+rivhgt = np.fromfile(rivhgt,np.float32).reshape(ny,nx)
+rivlen = np.fromfile(rivlen,np.float32).reshape(ny,nx)
+elevtn = np.fromfile(elevtn,np.float32).reshape(ny,nx)
+
+#-------
+# mean & std from previous year
+mean_obss=np.zeros([pm.ens_mem(),ny,nx])
+std_obss=np.zeros([pm.ens_mem(),ny,nx])
+for num in np.arange(1,int(pm.ens_mem())+1):
+    numch='%03d'%num
+    fname=assim_out+"/assim_out/mean_sfcelv/meansfcelvC"+numch+".bin"
+    mean_corr=np.fromfile(fname,np.float32).reshape([ny,nx])
+    mean_obss[num-1,:,:]=mean_corr
+    fname=assim_out+"/assim_out/mean_sfcelv/stdsfcelvC"+numch+".bin"
+    std_corr=np.fromfile(fname,np.float32).reshape([ny,nx])
+    std_obss[num-1,:,:]=std_corr
 #----
 
 pname=[]
@@ -105,10 +189,10 @@ EGM96=[]
 rivernames  = ["AMAZONAS"]
 for rivername in rivernames:
   path = assim_out+"/figures/anomaly/%s"%(rivername)
-  print path
-  mk_dir(path)
-  station_loc,x_list,y_list,egm08,egm96 =hweb.get_hydroweb_loc(rivername)
-  print rivername, station_loc
+#   print path
+#   mk_dir(path)
+  station_loc,x_list,y_list,egm08,egm96 =hweb.get_hydroweb_loc(rivername,pm.mapname())
+#   print rivername, station_loc
   river.append([rivername]*len(station_loc))
   pname.append(station_loc)
   xlist.append(x_list)
@@ -193,141 +277,211 @@ xlist=([flatten for inner in xlist for flatten in inner])
 ylist=([flatten for inner in ylist for flatten in inner])
 EGM08=([flatten for inner in EGM08 for flatten in inner])
 EGM96=([flatten for inner in EGM96 for flatten in inner])
-
 pnum=len(pname)
 #print len(river),pnum,pname,river
 org=[]
 opn=[]
 asm=[]
-hgt=[]
-bathy=[]
-ele=[]
-m_sf=[]
-em_sf=[]
-swt={}
-for point in np.arange(pnum):
-    swt[point] = []
-
+# multiprocessing array
+# result       = np.ctypeslib.as_ctypes(np.zeros((size, size)))
+# shared_array = sharedctypes.RawArray(result._type_, result)
+opn=np.ctypeslib.as_ctypes(np.zeros([N,pm.ens_mem(),pnum],np.float32))
+shared_array_opn  = sharedctypes.RawArray(opn._type_, opn)
+asm=np.ctypeslib.as_ctypes(np.zeros([N,pm.ens_mem(),pnum],np.float32))
+shared_array_asm  = sharedctypes.RawArray(asm._type_, asm)
+# for parallel calcualtion
+inputlist=[]
 for day in np.arange(start,last):
     target_dt=start_dt+datetime.timedelta(days=day)
     yyyy='%04d' % (target_dt.year)
     mm='%02d' % (target_dt.month)
     dd='%02d' % (target_dt.day)
-    print yyyy,mm,dd
-
-#    fname="../sat/mesh_day%02d.bin"%(SWOT_day(yyyy,mm,dd))
-#    mesh_in=np.fromfile(fname,np.float32).reshape([640,1440])
-#    mesh=(mesh_in>=10)*(mesh_in<=60)
-#    meshP=mesh-1000*(mesh<0.1)
-#
-#    # make org
-#    fname=assim_out+"/xa_m/true/"+yyyy+mm+dd+"_xam.bin"
-#    #fname="../CaMa_out/"+yyyy+mm+dd+"T000/sfcelv"+yyyy+".bin"
-#    orgfile=np.fromfile(fname,np.float32).reshape([720,1440])
-#
-#    fname=pm.CaMa_dir()+"/map/glb_15min/rivhgt.bin"
-#    bathyfile=np.fromfile(fname,np.float32).reshape([720,1440])
-#
-#    fname=assim_out+"/mean_sfcelv/meansfcelvT000.bin"
-#    mean_true=np.fromfile(fname,np.float32).reshape([720,1440])
-#
-#    org_frag=[]
-#    bathy_frag=[]
-#    ele_frag=[]
-#    m_sf_frag=[]
-#    for point in np.arange(pnum):
-#        xpoint=xlist[point]
-#        ypoint=ylist[point]
-#        org_frag.append(orgfile[ypoint,xpoint]-mean_true[ypoint,xpoint])
-#        bathy_frag.append(elevtn[ypoint,xpoint] -bathyfile[ypoint,xpoint])
-#        ele_frag.append(elevtn[ypoint,xpoint])
-#        m_sf_frag.append(mean_true[ypoint,xpoint])
-#
-#        #---SWOT--
-#        if meshP[ypoint-40,xpoint] >= 1:
-#          if point not in swt.keys():
-#            swt[point] = [day]
-#          else:
-#            swt[point].append(day)
-#
-#    org.append(org_frag)
-#    bathy.append(bathy_frag)
-#    ele.append(ele_frag)
-#    m_sf.append(m_sf_frag)
-
-    # make asm and opn
-    opn_ens=[]
-    asm_ens=[]
-    hgt_ens=[]
-    em_sf_ens=[]
-    for num in np.arange(1,int(pm.ens_mem())+1):
+    for num in np.arange(1,pm.ens_mem()+1):
         numch='%03d'%num
+        inputlist.append([yyyy,mm,dd,numch])
+        #print yyyy,mm,dd,numch
 
-        fname=assim_out+"/assim_out/ens_xa/open/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
-        #fname="../CaMa_out/"+yyyy+mm+dd+"C"+numch+"/sfcelv"+yyyy+".bin"
-        #fname="../"+assim_out+"/ens_xa/open/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
-        opnfile=np.fromfile(fname,np.float32).reshape([720,1440])
+def read_data(inputlist):
+    yyyy = inputlist[0]
+    mm   = inputlist[1]
+    dd   = inputlist[2]
+    numch= inputlist[3]
+    #print (yyyy,mm,dd,numch)
+    #--
+    tmp_opn  = np.ctypeslib.as_array(shared_array_opn)
+    tmp_asm  = np.ctypeslib.as_array(shared_array_asm)
 
-        fname=assim_out+"/assim_out/ens_xa/assim/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
-        asmfile=np.fromfile(fname,np.float32).reshape([720,1440])
+    # year, mon, day
+    year=int(yyyy)
+    mon=int(mm)
+    day=int(dd)
+    num=int(numch)-1
+    #--
+    target_dt=datetime.date(year,mon,day)
+    dt=(target_dt-start_dt).days
+    # corrpted
+    fname=assim_out+"/assim_out/ens_xa/open/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
+    #fname=assim_out+"/assim_out/outflw/open/outflw"+yyyy+mm+dd+"_"+numch+".bin"
+    #fname=assim_out+"/assim_out/rivout/open/rivout"+yyyy+mm+dd+"_"+numch+".bin"
+    opnfile=np.fromfile(fname,np.float32).reshape([ny,nx])
+    # assimilated
+    fname=assim_out+"/assim_out/ens_xa/assim/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
+    #fname=assim_out+"/assim_out/outflw/assim/outflw"+yyyy+mm+dd+"_"+numch+".bin"
+    #fname=assim_out+"/assim_out/rivout/assim/rivout"+yyyy+mm+dd+"_"+numch+".bin"
+    asmfile=np.fromfile(fname,np.float32).reshape([ny,nx])
+    #print (yyyy,mm,dd,numch,dt)
+    #-------------
+    for point in np.arange(pnum):
+        ix1=xlist[point]
+        iy1=ylist[point]
+        #print (ix1,iy1)
+        tmp_opn[dt,num,point]=opnfile[iy1,ix1]
+        tmp_asm[dt,num,point]=asmfile[iy1,ix1]
+#--------
+#print (pname[0])
+p   = Pool(20)
+res = p.map(read_data, inputlist)
+#map(read_data, inputlist)
+opn = np.ctypeslib.as_array(shared_array_opn)
+asm = np.ctypeslib.as_array(shared_array_asm)
+p.terminate()
+#############
 
-#        fname="../assim_out/rivhgt/assim/rivhgt"+yyyy+mm+dd+"_"+numch+"A.bin"
-        #fname="../CaMa_out/"+yyyy+mm+dd+"A"+numch+"/sfcelv"+yyyy+".bin"
-        rhgtfile=np.fromfile(fname,np.float32).reshape([720,1440])
 
-        fname=assim_out+"/assim_out/mean_sfcelv/meansfcelvC"+numch+".bin"
-        mean_corr=np.fromfile(fname,np.float32).reshape([720,1440])
+# # pnum=len(pname)
+# # #print len(river),pnum,pname,river
+# # org=[]
+# # opn=[]
+# # asm=[]
+# # hgt=[]
+# # bathy=[]
+# # ele=[]
+# # m_sf=[]
+# # em_sf=[]
+# # swt={}
+# # for point in np.arange(pnum):
+# #     swt[point] = []
 
-        opn_frag=[]
-        asm_frag=[]
-        hgt_frag=[]
-        em_sf_frag=[]
-        for point in np.arange(pnum):
-            xpoint=xlist[point]
-            ypoint=ylist[point]
-            opn_frag.append(opnfile[ypoint,xpoint]-elevtn[ypoint,xpoint])
-            asm_frag.append(asmfile[ypoint,xpoint]-elevtn[ypoint,xpoint])
-            hgt_frag.append(rhgtfile[ypoint,xpoint])
-            #print asmfile[ypoint,xpoint],elevtn[ypoint,xpoint] - rhgtfile[ypoint,xpoint],rhgtfile[ypoint,xpoint]
-            em_sf_frag.append(mean_corr[ypoint,xpoint])
-        opn_ens.append(opn_frag)
-        asm_ens.append(asm_frag)
-        hgt_ens.append(hgt_frag)
-        em_sf_ens.append(em_sf_frag)
+# # for day in np.arange(start,last):
+# #     target_dt=start_dt+datetime.timedelta(days=day)
+# #     yyyy='%04d' % (target_dt.year)
+# #     mm='%02d' % (target_dt.month)
+# #     dd='%02d' % (target_dt.day)
+# #     print yyyy,mm,dd
 
-    opn.append(opn_ens)
-    asm.append(asm_ens)
-    hgt.append(hgt_ens)
-    em_sf.append(em_sf_ens)
-#-----
-org=np.array(org)
-bathy=np.array(bathy)
-ele=np.array(ele)
-opn=np.array(opn)
-asm=np.array(asm)
-hgt=np.array(hgt)
-m_sf=np.array(m_sf)
-em_sf=np.array(em_sf)
+# # #    fname="../sat/mesh_day%02d.bin"%(SWOT_day(yyyy,mm,dd))
+# # #    mesh_in=np.fromfile(fname,np.float32).reshape([640,1440])
+# # #    mesh=(mesh_in>=10)*(mesh_in<=60)
+# # #    meshP=mesh-1000*(mesh<0.1)
+# # #
+# # #    # make org
+# # #    fname=assim_out+"/xa_m/true/"+yyyy+mm+dd+"_xam.bin"
+# # #    #fname="../CaMa_out/"+yyyy+mm+dd+"T000/sfcelv"+yyyy+".bin"
+# # #    orgfile=np.fromfile(fname,np.float32).reshape([ny,nx])
+# # #
+# # #    fname=pm.CaMa_dir()+"/map/glb_15min/rivhgt.bin"
+# # #    bathyfile=np.fromfile(fname,np.float32).reshape([ny,nx])
+# # #
+# # #    fname=assim_out+"/mean_sfcelv/meansfcelvT000.bin"
+# # #    mean_true=np.fromfile(fname,np.float32).reshape([ny,nx])
+# # #
+# # #    org_frag=[]
+# # #    bathy_frag=[]
+# # #    ele_frag=[]
+# # #    m_sf_frag=[]
+# # #    for point in np.arange(pnum):
+# # #        xpoint=xlist[point]
+# # #        ypoint=ylist[point]
+# # #        org_frag.append(orgfile[ypoint,xpoint]-mean_true[ypoint,xpoint])
+# # #        bathy_frag.append(elevtn[ypoint,xpoint] -bathyfile[ypoint,xpoint])
+# # #        ele_frag.append(elevtn[ypoint,xpoint])
+# # #        m_sf_frag.append(mean_true[ypoint,xpoint])
+# # #
+# # #        #---SWOT--
+# # #        if meshP[ypoint-40,xpoint] >= 1:
+# # #          if point not in swt.keys():
+# # #            swt[point] = [day]
+# # #          else:
+# # #            swt[point].append(day)
+# # #
+# # #    org.append(org_frag)
+# # #    bathy.append(bathy_frag)
+# # #    ele.append(ele_frag)
+# # #    m_sf.append(m_sf_frag)
 
-#print np.shape(org),org.dtype
-#org.tofile("org.bin")
-#print np.shape(opn)
-#opn.tofile("opn.bin")
-#print np.shape(asm)
-#asm.tofile("asm.bin")
-#--
-def save_txt(data,name):
-  data=data.flatten()
-  f=open(name,"w")
-  for i in data:
-    line="%10.4f\n"%(i)
-    f.write(line)
-  f.close()
-  return 0
+# #     # make asm and opn
+# #     opn_ens=[]
+# #     asm_ens=[]
+# #     hgt_ens=[]
+# #     em_sf_ens=[]
+# #     for num in np.arange(1,int(pm.ens_mem())+1):
+# #         numch='%03d'%num
 
-#save_txt(org,"org.txt")
-#save_txt(opn,"opn.txt")
-#save_txt(asm,"asm.txt")
+# #         fname=assim_out+"/assim_out/ens_xa/open/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
+# #         #fname="../CaMa_out/"+yyyy+mm+dd+"C"+numch+"/sfcelv"+yyyy+".bin"
+# #         #fname="../"+assim_out+"/ens_xa/open/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
+# #         opnfile=np.fromfile(fname,np.float32).reshape([ny,nx])
+
+# #         fname=assim_out+"/assim_out/ens_xa/assim/"+yyyy+mm+dd+"_"+numch+"_xa.bin"
+# #         asmfile=np.fromfile(fname,np.float32).reshape([ny,nx])
+
+# # #        fname="../assim_out/rivhgt/assim/rivhgt"+yyyy+mm+dd+"_"+numch+"A.bin"
+# #         #fname="../CaMa_out/"+yyyy+mm+dd+"A"+numch+"/sfcelv"+yyyy+".bin"
+# #         rhgtfile=np.fromfile(fname,np.float32).reshape([ny,nx])
+
+# #         fname=assim_out+"/assim_out/mean_sfcelv/meansfcelvC"+numch+".bin"
+# #         mean_corr=np.fromfile(fname,np.float32).reshape([ny,nx])
+
+# #         opn_frag=[]
+# #         asm_frag=[]
+# #         hgt_frag=[]
+# #         em_sf_frag=[]
+# #         for point in np.arange(pnum):
+# #             xpoint=xlist[point]
+# #             ypoint=ylist[point]
+# #             opn_frag.append(opnfile[ypoint,xpoint]-elevtn[ypoint,xpoint])
+# #             asm_frag.append(asmfile[ypoint,xpoint]-elevtn[ypoint,xpoint])
+# #             hgt_frag.append(rhgtfile[ypoint,xpoint])
+# #             #print asmfile[ypoint,xpoint],elevtn[ypoint,xpoint] - rhgtfile[ypoint,xpoint],rhgtfile[ypoint,xpoint]
+# #             em_sf_frag.append(mean_corr[ypoint,xpoint])
+# #         opn_ens.append(opn_frag)
+# #         asm_ens.append(asm_frag)
+# #         hgt_ens.append(hgt_frag)
+# #         em_sf_ens.append(em_sf_frag)
+
+# #     opn.append(opn_ens)
+# #     asm.append(asm_ens)
+# #     hgt.append(hgt_ens)
+# #     em_sf.append(em_sf_ens)
+# # #-----
+# # org=np.array(org)
+# # bathy=np.array(bathy)
+# # ele=np.array(ele)
+# # opn=np.array(opn)
+# # asm=np.array(asm)
+# # hgt=np.array(hgt)
+# # m_sf=np.array(m_sf)
+# # em_sf=np.array(em_sf)
+
+# # #print np.shape(org),org.dtype
+# # #org.tofile("org.bin")
+# # #print np.shape(opn)
+# # #opn.tofile("opn.bin")
+# # #print np.shape(asm)
+# # #asm.tofile("asm.bin")
+# # #--
+# # def save_txt(data,name):
+# #   data=data.flatten()
+# #   f=open(name,"w")
+# #   for i in data:
+# #     line="%10.4f\n"%(i)
+# #     f.write(line)
+# #   f.close()
+# #   return 0
+
+# # #save_txt(org,"org.txt")
+# # #save_txt(opn,"opn.txt")
+# # #save_txt(asm,"asm.txt")
 
 print 'making figure'
 #for point in np.arange(pnum):
@@ -343,31 +497,84 @@ def make_fig(point):
 
     fig, ax1 = plt.subplots()
     #ax1.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7,zorder=101,marker = "o",markevery=swt[point])
-    time,org=hweb.HydroWeb_WSE(pname[point],year,year)
-    alti=hweb.altimetry(pname[point]) - EGM08[point] + EGM96[point]
-    data=np.array(org)-np.array(EGM08[point])+np.array(EGM96[point]) - alti
-    lines=[ax1.plot(time,data,label="obs",marker="o",color="black",linewidth=0.0,zorder=101)[0]]
+    time,org=hweb.HydroWeb_WSE(pname[point],syear,eyear)
+    # alti=hweb.altimetry(pname[point]) - EGM08[point] + EGM96[point]
+    data=np.array(org)-np.array(EGM08[point])+np.array(EGM96[point]) #- alti
+    #====================================
+    if conflag==1:
+        data0=data
+    elif conflag==2:
+        data0=data-np.mean(data) #(data-mean_obs[ylist[point],xlist[point]])+mean_sfcelv[ylist[point],xlist[point]]
+    elif conflag==3:
+        data0=(data-np.mean(data))/(np.std(data)+1e-20) #((data-mean_obs[ylist[point],xlist[point]])/(std_obs[ylist[point],xlist[point]]+1.0e-20))*std_sfcelv[ylist[point],xlist[point]]+mean_sfcelv[ylist[point],xlist[point]]
+    #====================================
+    lines=[ax1.plot(time,data0,label="obs",marker="o",color="#34495e",linewidth=0.0,zorder=101)[0]]
 #    ax1.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7,zorder=101)
 #    ax1.plot(np.arange(start,last),m_sf[:,point],label="mean sfcelv",color="black",linewidth=0.7,linestyle="--",zorder=107)
 #    plt.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7)
 
     for num in np.arange(0,int(pm.ens_mem())):
-        ax1.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.2,alpha=0.5,zorder=102)
-        ax1.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.3,alpha=0.5,zorder=103)
+        if conflag==1:
+            opn0=opn[:,num,point]
+            asm0=asm[:,num,point]
+        elif conflag==2:
+            opn0=opn[:,num,point]-mean_obss[num,ylist[point],xlist[point]]
+            asm0=asm[:,num,point]-mean_obss[num,ylist[point],xlist[point]]
+        elif conflag==3:
+            opn0=(opn[:,num,point]-mean_obss[num,ylist[point],xlist[point]])/(std_obss[num,ylist[point],xlist[point]]+1e-20)
+            asm0=(asm[:,num,point]-mean_obss[num,ylist[point],xlist[point]])/(std_obss[num,ylist[point],xlist[point]]+1e-20)
+        #------------------------
+        ax1.plot(np.arange(start,last),opn0,label="corrupted",color="#4dc7ec",linewidth=0.2,alpha=0.5,zorder=102)
+        ax1.plot(np.arange(start,last),asm0,label="assimilated",color="#ff8021",linewidth=0.3,alpha=0.5,zorder=103)
 #        ax1.plot(np.arange(start,last),em_sf[:,num,point],label="mean sfcelv",color="blue",linewidth=0.3,linestyle="--",alpha=0.5,zorder=103)
 #        plt.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.3,alpha=0.5)
 #        plt.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.3,alpha=0.5)
-    lines.append(ax1.plot(np.arange(start,last),np.mean(opn[:,:,point],axis=1),label="corrupted",color="blue",linewidth=0.8,alpha=0.8,zorder=102)[0])
-    lines.append(ax1.plot(np.arange(start,last),np.mean(asm[:,:,point],axis=1),label="assimilated",color="red",linewidth=0.8,alpha=0.8,zorder=103)[0])
+    if conflag==1:
+        opn1=np.mean(opn[:,:,point],axis=1)
+        asm1=np.mean(asm[:,:,point],axis=1)
+    elif conflag==2:
+        opn1=np.mean(opn[:,:,point],axis=1)-np.mean(mean_obss[:,ylist[point],xlist[point]],axis=0)
+        asm1=np.mean(asm[:,:,point],axis=1)-np.mean(mean_obss[:,ylist[point],xlist[point]],axis=0)
+    elif conflag==3:
+        opn1=(np.mean(opn[:,:,point],axis=1)-np.mean(mean_obss[:,ylist[point],xlist[point]],axis=0))/(np.mean(std_obss[:,ylist[point],xlist[point]],axis=0)+1e-20)
+        asm1=(np.mean(asm[:,:,point],axis=1)-np.mean(mean_obss[:,ylist[point],xlist[point]],axis=0))/(np.mean(std_obss[:,ylist[point],xlist[point]],axis=0)+1e-20)
+
+    lines.append(ax1.plot(np.arange(start,last),opn1,label="corrupted",color="#4dc7ec",linewidth=0.8,alpha=0.8,zorder=102)[0])
+    lines.append(ax1.plot(np.arange(start,last),asm1,label="assimilated",color="#ff8021",linewidth=0.8,alpha=0.8,zorder=103)[0])
 #    ax1.plot(np.arange(start,last),np.mean(em_sf[:,:,point],axis=1),label="mean sfelv",color="blue",linewidth=0.5,linestyle="--",alpha=0.5,zorder=103)
 #    plt.ylim(ymin=)
+    meanch="mean (long-term): %5.2f"%(np.mean(mean_obss[:,ylist[point],xlist[point]],axis=0))
+    stdch="std (long-term):%5.2f"%(np.mean(std_obss[:,ylist[point],xlist[point]],axis=0))
+    omch="mean (obs): %5.2f"%(np.mean(data))
+    osch="std (obs): %5.2f"%(np.std(data))
+    cmch="mean (cor): %5.2f"%(np.mean(opn[:,:,point]))
+    csch="std (cor): %5.2f"%(np.std(opn[:,:,point]))
+    ax1.text(0.02,0.9,meanch,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    ax1.text(0.02,0.8,stdch,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    ax1.text(0.02,0.7,omch,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    ax1.text(0.02,0.6,osch,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    ax1.text(0.02,0.5,cmch,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    ax1.text(0.02,0.4,csch,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+
     # Make the y-axis label, ticks and tick labels match the line color.
-    ax1.set_ylabel('WSE (m)', color='k')
+    ax1.set_ylabel('anomaly WSE (m)', color='k')
     #ax1.set_ylim(ymin=0,ymax=250.)
     ax1.set_xlim(xmin=0,xmax=last+1)
     ax1.tick_params('y', colors='k')
-    xxlist=np.linspace(15,N-15,int(N/30))
-    xxlab=[calendar.month_name[i][:3] for i in range(1,13)]
+    # xxlist=np.linspace(15,N-15,int(N/30))
+    # xxlab=[calendar.month_name[i][:3] for i in range(1,13)]
+    # ax1.set_xticks(xxlist)
+    # ax1.set_xticklabels(xxlab,fontsize=10)
+
+    if eyear-syear > 5:
+        dtt=5
+        dt=int(math.ceil(((eyear-syear)+1)/5.0))
+    else:
+        dtt=1
+        dt=(eyear-syear)+1
+    xxlist=np.linspace(0,N,dt,endpoint=True)
+    #xxlab=[calendar.month_name[i][:3] for i in range(1,13)]
+    xxlab=np.arange(syear,eyear+1,dtt)
     ax1.set_xticks(xxlist)
     ax1.set_xticklabels(xxlab,fontsize=10)
 
@@ -393,13 +600,15 @@ def make_fig(point):
 #    ax2.tick_params('y', colors='green')
 #    ax2.set_ylim(ymin=0.,ymax=1.)
     plt.legend(lines,labels,ncol=1,loc='upper right') #, bbox_to_anchor=(1.0, 1.0),transform=ax1.transAxes)
-    #fig.legend(lines,labels,ncol=1)
-    print 'save',river[point]
-    plt.savefig(assim_out+"/figures/anomaly/"+river[point]+"/"+pname[point]+".png",dpi=300)
+#    fig.legend(lines,labels,ncol=1,loc='lower left', bbox_to_anchor=(1.0, 1.0))
+    print ('save',river[point],re.split("_",pname[point])[2]+"_"+re.split("_",pname[point])[3]) #,ylist[point],xlist[point],mean_obs[ylist[point],xlist[point]],std_obs[ylist[point],xlist[point]]
+    # print (asm[:,num,point])
+    #plt.savefig(assim_out+"/figures/sfcelv/"+river[point]+"_"+re.split("_",pname[point])[2]+"_"+re.split("_",pname[point])[3]+".png",dpi=300)
+    plt.savefig(assim_out+"/figures/anomaly/"+pname[point][2::]+".png",dpi=300)
     return 0
 #
 para_flag=1
-#para_flag=0
+# para_flag=0
 #--
 if para_flag==1:
     p=Pool(20)

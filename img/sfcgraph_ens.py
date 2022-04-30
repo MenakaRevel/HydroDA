@@ -17,12 +17,9 @@ from numpy import ma
 import re
 import math
 
-os.system("ln -sf ../gosh/params.py params.py")
+# os.system("ln -sf ../gosh/params.py params.py")
 #sys.path.append('../assim_out/')
-import params as pm
-import read_grdc as grdc
-import read_hydroweb as hweb
-import cal_stat as stat
+
 #from matplotlib.font_manager import FontProperties
 #fp = FontProperties(fname="jap.ttc",size=15)
 
@@ -30,12 +27,37 @@ import cal_stat as stat
 
 #experiment="E2O_HydroWeb22"
 # experiment="VIC_BC_HydroWeb11"
-experiment="test_wse"
+# experiment="test_wse"
+# experiment="DIR_WSE_E2O_HWEB_001"
+# experiment="DIR_WSE_E2O_HWEB_002"
+# experiment="DIR_WSE_E2O_HWEB_003"
+# experiment="DIR_WSE_E2O_HWEB_004"
+# experiment="DIR_WSE_ECMWF_HWEB_011"
+# experiment="DIR_WSE_ECMWF_HWEB_012"
+experiment="DIR_WSE_ECMWF_HWEB_013"
+# experiment="ANO_WSE_E2O_HWEB_001"
+# experiment="ANO_WSE_E2O_HWEB_003"
+# experiment="ANO_WSE_E2O_HWEB_004"
+# experiment="ANO_WSE_E2O_HWEB_006"
+# experiment="NOM_WSE_E2O_HWEB_001"
+# experiment="NOM_WSE_E2O_HWEB_002"
+# experiment="NOM_WSE_E2O_HWEB_004"
+# experiment="NOM_WSE_E2O_HWEB_007"
+# experiment="NOM_WSE_E2O_HWEB_008"
+# experiment="NOM_WSE_E2O_HWEB_009"
+# experiment="NOM_WSE_E2O_HWEB_010"
+# experiment="NOM_WSE_E2O_HWEB_011"
+# experiment="NOM_WSE_E2O_HWEB_013"
+# experiment="test_virtual"
+# conflag=1
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
-assim_out=pm.DA_dir()+"/out/"+experiment
-print assim_out
+# assim_out=pm.DA_dir()+"/out/"+experiment
+# print (assim_out)
 
+# assim_out="../out/"+experiment
+assim_out="/cluster/data7/menaka/HydroDA/out/"+experiment
+print (assim_out)
 #assim_out="assim_out_E2O_womc"
 #assim_out="assim_out"
 #assim_out="assim_out_E2O_wmc"
@@ -49,7 +71,13 @@ print assim_out
 #assim_out="assim_out_biased_womc"
 #assim_out="assim_out_biased_wmc"
 
+sys.path.append(assim_out)
+import params as pm
+import read_grdc as grdc
+import read_hydroweb as hweb
+import cal_stat as stat
 
+conflag=pm.conflag()
 #os.system("mkdir ../assim_out/img")
 #os.system("mkdir ../assim_out/img/sfcelv")
 #----
@@ -66,6 +94,34 @@ def mk_dir(sdir):
     os.makedirs(sdir)
   except:
     pass
+#====================================================================
+def filter_nan(s,o):
+    """
+    this functions removed the data  from simulated and observed data
+    where ever the observed data contains nan
+    """
+    data = np.array([s.flatten(),o.flatten()])
+    data = np.transpose(data)
+    data = data[~np.isnan(data).any(1)]
+
+    return data[:,0],data[:,1]
+#====================================================================
+def RMSE(s,o):
+    """
+    Root Mean Squre Error
+    input:
+        s: simulated
+        o: observed
+    output:
+        RMSE: Root Mean Squre Error
+    """
+    o=ma.masked_where(o==-9999.0,o).filled(0.0)
+    s=ma.masked_where(o==-9999.0,s).filled(0.0)
+    o=np.compress(o>0.0,o)
+    s=np.compress(o>0.0,s)
+    s,o = filter_nan(s,o)
+    return np.sqrt(np.mean((s-o)**2))
+#==========================================================
 #----
 mk_dir(assim_out+"/figures")
 mk_dir(assim_out+"/figures/sfcelv")
@@ -92,8 +148,9 @@ gsize  = float(filter(None, re.split(" ",lines[3]))[0])
 ###    last=366
 ###else:
 ###    last=365
-syear,smonth,sdate=2002,1,1 #pm.starttime()#2004#1991
-eyear,emonth,edate=pm.endtime() #2005,1,1 #
+syear,smonth,sdate=pm.starttime()#2004#1991 #2003,1,1 #
+eyear,emonth,edate=pm.endtime() #2005,1,1 #2004,1,1 #2010,1,1 #
+# print pm.endtime()
 #month=1
 #date=1
 start_dt=datetime.date(syear,smonth,sdate)
@@ -118,27 +175,28 @@ rivlen = np.fromfile(rivlen,np.float32).reshape(ny,nx)
 elevtn = np.fromfile(elevtn,np.float32).reshape(ny,nx)
 #----
 # mean
+# mean_sfcelv = np.zeros([ny,nx,pm.ens_mem()],np.float32)
 #mean_sfcelv = pm.DA_dir()+"/dat/mean_sfcelv_1958-2013.bin"
 #mean_sfcelv = pm.DA_dir()+"/dat/mean_sfcelv_E2O_amz_06min_1980-2014.bin"
 #mean_sfcelv = pm.DA_dir()+"/dat/mean_sfcelv_VIC_BC_1980-2014.bin"
 #mean_sfcelv = pm.DA_dir()+"/dat/mean_sfcelv_"+pm.input()+"_"+pm.mapname()+"_1980-2014.bin"
 #mean_sfcelv = pm.DA_dir()+"/dat/mean_sfcelv_"+pm.input()+"_"+pm.mapname()+"_1979-2013.bin"
-mean_sfcelv = assim_out+"/assim_out/mean_sfcelv/mean_sfcelv.bin"
-mean_sfcelv = np.fromfile(mean_sfcelv,np.float32).reshape(ny,nx)
+mean_sfcelv = 0.0 #assim_out+"/assim_out/mean_sfcelv/mean_sfcelv.bin"
+# mean_sfcelv = np.fromfile(mean_sfcelv,np.float32).reshape(ny,nx)
 # std
 #std_sfcelv = pm.DA_dir()+"/dat/std_sfcelv_1958-2013.bin"
 #std_sfcelv = pm.DA_dir()+"/dat/std_sfcelv_E2O_amz_06min_1980-2014.bin"
 #std_sfcelv = pm.DA_dir()+"/dat/std_sfcelv_VIC_BC_1980-2014.bin"
 #std_sfcelv = pm.DA_dir()+"/dat/std_sfcelv_"+pm.input()+"_"+pm.mapname()+"_1980-2014.bin"
 #std_sfcelv = pm.DA_dir()+"/dat/std_sfcelv_"+pm.input()+"_"+pm.mapname()+"_1979-2013.bin"
-std_sfcelv = assim_out+"/assim_out/mean_sfcelv/std_sfcelv.bin"
-std_sfcelv = np.fromfile(std_sfcelv,np.float32).reshape(ny,nx)
+std_sfcelv = 0.0 #assim_out+"/assim_out/mean_sfcelv/std_sfcelv.bin"
+# std_sfcelv = np.fromfile(std_sfcelv,np.float32).reshape(ny,nx)
 #- mean obs HydroWeb
-mean_obs = pm.HydroWeb_dir()+"/bin/HydroWeb_mean.bin"
-mean_obs = np.fromfile(mean_obs,np.float32).reshape(ny,nx)
+mean_obs = 0.0 #pm.HydroWeb_dir()+"/bin/HydroWeb_mean.bin"
+# mean_obs = np.fromfile(mean_obs,np.float32).reshape(ny,nx)
 # std obs HydroWeb
-std_obs = pm.HydroWeb_dir()+"/bin/HydroWeb_std.bin"
-std_obs = np.fromfile(std_obs,np.float32).reshape(ny,nx)
+std_obs = 0.0 #pm.HydroWeb_dir()+"/bin/HydroWeb_std.bin"
+# std_obs = np.fromfile(std_obs,np.float32).reshape(ny,nx)
 #-------
 # # mean & std from previous year
 # mean_obss=np.zeros([pm.ens_mem(),ny,nx])
@@ -153,6 +211,19 @@ std_obs = np.fromfile(std_obs,np.float32).reshape(ny,nx)
 #     std_obss[num-1]=std_corr
 # mean_sfcelv=np.mean(mean_obss,axis=0)
 # std_sfcelv=np.std(std_obss,axis=0)
+
+#-------
+# mean & std from previous year
+mean_obss=np.zeros([pm.ens_mem(),ny,nx])
+std_obss=np.zeros([pm.ens_mem(),ny,nx])
+for num in np.arange(1,int(pm.ens_mem())+1):
+    numch='%03d'%num
+    fname=assim_out+"/assim_out/mean_sfcelv/meansfcelvC"+numch+".bin"
+    mean_corr=np.fromfile(fname,np.float32).reshape([ny,nx])
+    mean_obss[num-1,:,:]=mean_corr
+    fname=assim_out+"/assim_out/mean_sfcelv/stdsfcelvC"+numch+".bin"
+    std_corr=np.fromfile(fname,np.float32).reshape([ny,nx])
+    std_obss[num-1,:,:]=std_corr
 ###------
 pname=[]
 xlist=[]
@@ -164,7 +235,7 @@ EGM96=[]
 #rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZONAS","MEKONG","IRRAWADDY","VOLGA", "NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
 rivernames  = ["AMAZONAS"]
 for rivername in rivernames:
-  path = assim_out+"/figures/sfcelv/%s"%(rivername)
+#   path = assim_out+"/figures/sfcelv/%s"%(rivername)
   #print path
   #mk_dir(path)
   #station_loc,x_list,y_list = grdc.get_grdc_loc(rivername,"b")
@@ -476,20 +547,26 @@ def make_fig(point):
     #data=(data-np.mean(data))+mean_sfcelv[ylist[point],xlist[point]]
     #---------
     #data=data-mean_obs[ylist[point],xlist[point]]+mean_sfcelv[ylist[point],xlist[point]]
-    data=((data-mean_obs[ylist[point],xlist[point]])/(std_obs[ylist[point],xlist[point]]+1.0e-20))*std_sfcelv[ylist[point],xlist[point]]+mean_sfcelv[ylist[point],xlist[point]]
-    lines=[ax1.plot(time,data,label="obs",marker="o",color="black",linewidth=0.0,zorder=101)[0]]
+    data0=data
+    # if conflag==1:
+    #     data0=data
+    # elif conflag==2:
+    #     data0=(data-mean_obs[ylist[point],xlist[point]])+mean_sfcelv[ylist[point],xlist[point]]
+    # elif conflag==3:
+    #     data0=((data-mean_obs[ylist[point],xlist[point]])/(std_obs[ylist[point],xlist[point]]+1.0e-20))*std_sfcelv[ylist[point],xlist[point]]+mean_sfcelv[ylist[point],xlist[point]]
+    lines=[ax1.plot(time,data0,label="obs",marker="o",color="#34495e",linewidth=0.0,zorder=101)[0]]
 #    ax1.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7,zorder=101)
 #    ax1.plot(np.arange(start,last),m_sf[:,point],label="mean sfcelv",color="black",linewidth=0.7,linestyle="--",zorder=107)
 #    plt.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7)
 
     for num in np.arange(0,int(pm.ens_mem())):
-        ax1.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.2,alpha=0.5,zorder=102)
-        ax1.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.1,alpha=0.5,zorder=103)
+        ax1.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="#4dc7ec",linewidth=0.1,alpha=0.3,zorder=102)
+        ax1.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="#ff8021",linewidth=0.5,alpha=0.3,zorder=103)
 #        ax1.plot(np.arange(start,last),em_sf[:,num,point],label="mean sfcelv",color="blue",linewidth=0.3,linestyle="--",alpha=0.5,zorder=103)
 #        plt.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.3,alpha=0.5)
 #        plt.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.3,alpha=0.5)
-    lines.append(ax1.plot(np.arange(start,last),np.mean(opn[:,:,point],axis=1),label="corrupted",color="blue",linewidth=0.8,alpha=0.8,zorder=102)[0])
-    lines.append(ax1.plot(np.arange(start,last),np.mean(asm[:,:,point],axis=1),label="assimilated",color="red",linewidth=0.8,alpha=0.8,zorder=103)[0])
+    lines.append(ax1.plot(np.arange(start,last),np.mean(ma.masked_less(opn[:,:,point],0.0),axis=1),label="corrupted",color="#4dc7ec",linewidth=0.8,alpha=0.8,zorder=102)[0])
+    lines.append(ax1.plot(np.arange(start,last),np.mean(ma.masked_less(asm[:,:,point],0.0),axis=1),label="assimilated",color="#ff8021",linewidth=0.8,alpha=0.8,zorder=103)[0])
 #    ax1.plot(np.arange(start,last),np.mean(em_sf[:,:,point],axis=1),label="mean sfelv",color="blue",linewidth=0.5,linestyle="--",alpha=0.5,zorder=103)
 #    plt.ylim(ymin=)
     # Make the y-axis label, ticks and tick labels match the line color.
@@ -497,20 +574,34 @@ def make_fig(point):
     #ax1.set_ylim(ymin=0,ymax=250.)
     ax1.set_xlim(xmin=0,xmax=last+1)
     ax1.tick_params('y', colors='k')
+
+    meanch="mean (long-term): %5.2f"%(np.mean(mean_obss[:,ylist[point],xlist[point]],axis=0))
+    stdch="std (long-term):%5.2f"%(np.mean(std_obss[:,ylist[point],xlist[point]],axis=0))
+    omch="mean (obs): %5.2f"%(np.mean(data))
+    osch="std (obs): %5.2f"%(np.std(data))
+    cmch="mean (cor): %5.2f"%(np.mean(opn[:,:,point]))
+    csch="std (cor): %5.2f"%(np.std(opn[:,:,point]))
+    ax1.text(0.02,0.9,meanch,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    ax1.text(0.02,0.8,stdch,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    ax1.text(0.02,0.7,omch,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    ax1.text(0.02,0.6,osch,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    ax1.text(0.02,0.5,cmch,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    ax1.text(0.02,0.4,csch,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+
     # xxlist=np.linspace(15,N-15,int(N/30))
     # xxlab=[calendar.month_name[i][:3] for i in range(1,13)]
     #ax1.set_xticks(xxlist)
     #ax1.set_xticklabels(xxlab,fontsize=10)
     #--for bug fixing
-    corr_mean=np.mean(np.mean(opn[:,:,point],axis=1),axis=0)
-    obs_mean=mean_obs[ylist[point],xlist[point]]
-    sfc_mean=mean_sfcelv[ylist[point],xlist[point]]
-    outtext="courrpted mean: %6.2f"%(corr_mean)
-    ax1.text(0.02,0.9,outtext,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
-    outtext="used(norm) mean: %6.2f"%(sfc_mean)
-    ax1.text(0.02,0.8,outtext,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
-    outtext="observation mean: %6.2f"%(obs_mean)
-    ax1.text(0.02,0.7,outtext,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    # corr_mean=np.mean(np.mean(opn[:,:,point],axis=1),axis=0)
+    # obs_mean=mean_obs[ylist[point],xlist[point]]
+    # sfc_mean=mean_sfcelv[ylist[point],xlist[point]]
+    # outtext="courrpted mean: %6.2f"%(corr_mean)
+    # ax1.text(0.02,0.9,outtext,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    # outtext="used(norm) mean: %6.2f"%(sfc_mean)
+    # ax1.text(0.02,0.8,outtext,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    # outtext="observation mean: %6.2f"%(obs_mean)
+    # ax1.text(0.02,0.7,outtext,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
     # xlable in years
     if eyear-syear > 5:
         dtt=5
@@ -547,16 +638,17 @@ def make_fig(point):
 #    ax2.set_ylim(ymin=0.,ymax=1.)
     plt.legend(lines,labels,ncol=1,loc='upper right') #, bbox_to_anchor=(1.0, 1.0),transform=ax1.transAxes)
 #    fig.legend(lines,labels,ncol=1,loc='lower left', bbox_to_anchor=(1.0, 1.0))
-    print 'save',river[point],re.split("_",pname[point])[2]+"_"+re.split("_",pname[point])[3],ylist[point],xlist[point],mean_obs[ylist[point],xlist[point]],std_obs[ylist[point],xlist[point]]
+    print ('save',river[point],re.split("_",pname[point])[2]+"_"+re.split("_",pname[point])[3]) #,ylist[point],xlist[point],mean_obs[ylist[point],xlist[point]],std_obs[ylist[point],xlist[point]]
+    # print (asm[:,num,point])
     #plt.savefig(assim_out+"/figures/sfcelv/"+river[point]+"_"+re.split("_",pname[point])[2]+"_"+re.split("_",pname[point])[3]+".png",dpi=300)
     plt.savefig(assim_out+"/figures/sfcelv/"+pname[point][2::]+".png",dpi=300)
     return 0
 #
 para_flag=1
-#para_flag=0
+# para_flag=0
 #--
 if para_flag==1:
-    p=Pool(20)
+    p=Pool(6)
     p.map(make_fig,np.arange(pnum))
     p.terminate()
 else:

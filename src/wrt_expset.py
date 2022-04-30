@@ -53,6 +53,27 @@ def inflation_para(rho):
     else:
         return "Inflation Parameter %3.2f"%(rho)
 ###########################
+def calibration(cal):
+    if cal=="yes":
+        return "calibrated (Xudong et al,. 2021)"
+    else:
+        return "not calibrated (Yamazaki et al,. 2011)"
+###########################
+def stat_name(conflag,cal):
+    if conflag == 1:
+        meanname="None"
+        stdname="None"
+    if conflag == 2:
+        meanname=pm.stat_name(cal)
+        stdname="None"
+    if conflag == 3:
+        meanname=pm.stat_name(cal)
+        stdname=pm.stat_name(cal)
+    if conflag == 4:
+        meanname="None"
+        stdname="None"
+    return [meanname, stdname]
+###########################
 def write_text():
     with open("./experimetal_settings.log", "w") as f:
         f.write("# Experimental Settings\n")
@@ -67,6 +88,8 @@ def write_text():
         # Time domain for analysis
         f.write("# Start Date: %04d-%02d-%02d\n"%(pm.starttime()))
         f.write("# End Date: %04d-%02d-%02d\n"%(pm.endtime()))
+        # Calibration
+        f.write("# Model Calibration: "+calibration(pm.calibrate())+"\n")
         # Assimilation Settings
         f.write("# Assimilation Mode: "+assimlation_mode(pm.conflag())+"\n")
         f.write("# Assimilation Domain: \n")
@@ -78,6 +101,9 @@ def write_text():
         f.write("# \tPatch Size : "+patch_character(pm.patch_size())+"\n")
         f.write("# \tPatch Id : "+pm.patch_name()+" "+pm.patch_id()+"\n")
         f.write("# \tInflation Method : "+inflation_para(pm.rho())+"\n")
+        f.write("# Assimilation Statistics: \n")
+        f.write("# \tMean : "+stat_name(pm.conflag(),pm.calibrate())[0]+"\n")
+        f.write("# \tStandrad Deviation : "+stat_name(pm.conflag(),pm.calibrate())[1]+"\n")
     return 0
 ###########################
 if __name__=="__main__":

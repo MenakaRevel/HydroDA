@@ -25,8 +25,6 @@ import cartopy.feature as cfeature
 import os
 
 #sys.path.append('../assim_out/')
-os.system("ln -sf ../gosh/params.py params.py")
-import params as pm
 import read_grdc as grdc
 import cal_stat as stat
 #import plot_colors as pc
@@ -37,11 +35,32 @@ import cal_stat as stat
 
 #experiment="E2O_HydroWeb22"
 # experiment="VIC_BC_HydroWeb11"
-experiment="test_wse"
+# experiment="test_wse"
+# experiment="DIR_WSE_E2O_HWEB_001"
+# experiment="DIR_WSE_E2O_HWEB_002"
+# experiment="ANO_WSE_E2O_HWEB_001"
+# experiment="ANO_WSE_E2O_HWEB_002"
+# experiment="ANO_WSE_E2O_HWEB_003"
+# experiment="NOM_WSE_E2O_HWEB_001"
+# experiment="NOM_WSE_E2O_HWEB_002"
+# experiment="NOM_WSE_E2O_HWEB_003"
+# experiment="NOM_WSE_E2O_HWEB_004"
+# experiment="NOM_WSE_E2O_HWEB_005"
+# experiment="NOM_WSE_E2O_HWEB_006"
+# experiment="NOM_WSE_E2O_HWEB_007"
+# experiment="NOM_WSE_E2O_HWEB_008"
+# experiment="NOM_WSE_E2O_HWEB_009"
+experiment="NOM_WSE_E2O_HWEB_010"
+
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
-assim_out=pm.DA_dir()+"/out/"+experiment
+# assim_out=pm.DA_dir()+"/out/"+experiment
+assim_out="../out/"+experiment
 print (assim_out)
+
+# os.system("ln -sf "+assim_out+"/params.py params.py")
+sys.path.append(assim_out)
+import params as pm
 #----
 def filter_nan(s,o):
     """
@@ -86,8 +105,8 @@ def KGE(s,o):
 #----
 def vec_par(LEVEL,ax=None):
     ax=ax or plt.gca()
-    txt="tmp_%02d.txt"%(LEVEL)
-    os.system("./bin/print_rivvec tmp1.txt 1 "+str(LEVEL)+" > "+txt)
+    txt="KGEtmp_%02d.txt"%(LEVEL)
+    os.system("./bin/print_rivvec KGEtmp1.txt 1 "+str(LEVEL)+" > "+txt)
     width=(float(LEVEL)**sup)*w
     #print LEVEL, width#, lon1,lat1,lon2-lon1,lat2-lat1#x1[0],y1[0],x1[1]-x1[0],y1[1]-y1[0]
     # open tmp2.txt
@@ -185,6 +204,7 @@ uparea = np.fromfile(uparea,np.float32).reshape(ny,nx)
 rivnum="../dat/rivnum_"+pm.mapname()+".bin"
 rivnum=np.fromfile(rivnum,np.int32).reshape(ny,nx)
 rivermap=((nextxy[0]>0)*(rivnum==1))*1.0
+rivermap=rivermap*(uparea>1e11)*1.0
 #----
 syear,smonth,sdate=2003,1,1 #spm.starttime()#2004#1991  2004,1,1 #
 eyear,emonth,edate=pm.endtime() #2005,1,1 #
@@ -276,7 +296,7 @@ def read_data(inputlist):
             tmp_opn[dt,num,point]=opnfile[iy1,ix1]+opnfile[iy2,ix2]
             tmp_asm[dt,num,point]=asmfile[iy1,ix1]+asmfile[iy2,ix2]
 #--------
-p   = Pool(20)
+p   = Pool(10)
 res = p.map(read_data, inputlist)
 opn = np.ctypeslib.as_array(shared_array_opn)
 asm = np.ctypeslib.as_array(shared_array_asm)
@@ -322,7 +342,7 @@ m.drawparallels(np.arange(south,north+0.1,5), labels = [1,0,0,0], fontsize=10,li
 m.drawmeridians(np.arange(west,east+0.1,5), labels = [0,0,0,1], fontsize=10,linewidth=0,zorder=102)
 #--
 box="%f %f %f %f"%(west,east,north,south) 
-os.system("./bin/txt_vector "+box+" "+pm.CaMa_dir()+" "+pm.mapname()+" > tmp1.txt") 
+os.system("./bin/txt_vector "+box+" "+pm.CaMa_dir()+" "+pm.mapname()+" > KGEtmp1.txt") 
 #map(vec_par,np.arange(1,10+1,1))
 map(vec_par,np.arange(2,10+1,1))
 #--
@@ -361,4 +381,4 @@ for point in np.arange(pnum):
 cbar=m.colorbar(im,"right",size="2%",ticks=np.arange(vmin,vmax+0.001,0.2))
 #plt.title(stitle)
 plt.savefig(assim_out+"/figures/KGE/KGEscatter.png",dpi=300,bbox_inches="tight", pad_inches=0.05)
-os.system("rm -r tmp*.txt")
+os.system("rm -r KGEtmp*.txt")

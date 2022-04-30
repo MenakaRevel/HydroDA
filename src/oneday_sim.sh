@@ -45,6 +45,10 @@ EXP_DIR=$9
 
 mapname=${10}
 
+cal=${11}
+
+DA_dir=${12}
+
 echo "looptype" $looptype
 #=================================================
 #cd ${CAMADIR}/gosh
@@ -69,8 +73,8 @@ fi
 
 #*** 0a. Set CaMa-Flood base directory
 BASE=$CAMADIR                         #   CaMa-Flood directory
-OUTBASE=$EXP_DIR    				  #   base for output => CaMa_out
-INBASE=$EXP_DIR                       #   base for input => CaMa_in
+OUTBASE="$EXP_DIR/CaMa_out"    		   #   base for output => CaMa_out
+INBASE="../../CaMa_in"                #   base for input => CaMa_in
 
 echo $BASE
 
@@ -88,7 +92,7 @@ export OMP_NUM_THREADS=$cpunums       # OpenMP cpu num
 #============================
 #*** 1a. Experiment directory setting
 EXP=$ar_year$ar_month$ar_date$ar_ens        # experiment name (output directory name)
-RDIR=${OUTBASE}/CaMa_out/${EXP}                  # directory to run CaMa-Flood
+RDIR=${OUTBASE}/${EXP}                      # directory to run CaMa-Flood
 EXE="MAIN_cmf"                              # Execute file name
 PROG=${BASE}/src/${EXE}                     # location of Fortran main program
 NMLIST="./input_cmf.nam"                    # standard namelist
@@ -123,11 +127,11 @@ NSP=0                                        # spinup repeat time
 LRESTART=".TRUE." # see (3) set each year   # TRUE. to use restart initial condition
 #CRESTSTO="" # see (3) set each year         # input restart FIle
 if [ $looptype = "true" ];then
-	CRESTSTO=$INBASE"/CaMa_in/restart/true/restart"$ar_year$ar_month$ar_date"T000.bin" #restart file name
+	CRESTSTO=$INBASE"/restart/true/restart"$ar_year$ar_month$ar_date"T000.bin" #restart file name
 elif [ $looptype = "open" ];then
-	CRESTSTO=$INBASE"/CaMa_in/restart/open/restart"$ar_year$ar_month$ar_date"C"$ens_num".bin" #restart file name
+	CRESTSTO=$INBASE"/restart/open/restart"$ar_year$ar_month$ar_date"C"$ens_num".bin" #restart file name
 else
-	CRESTSTO=$INBASE"/CaMa_in/restart/assim/restart"$ar_year$ar_month$ar_date"A"$ens_num".bin" #restart file name
+	CRESTSTO=$INBASE"/restart/assim/restart"$ar_year$ar_month$ar_date"A"$ens_num".bin" #restart file name
 fi
 echo $CRESTSTO
 LSTOONLY=".TRUE."                          # .TRUE. for storage only restart (for assimilation)
@@ -146,6 +150,10 @@ IFRQ_RST="0"                                # output restat frequency.
 IFRQ_INP="24"                               # input forcing frequency: [1,2,3,...,24] hour
 DROFUNIT="86400000"   # [mm/day->m/s]       # runoff unit conversion
 if [ $runname = "E2O" ];then
+     DROFUNIT="86400000"   # [mm/day->m/s]  # runoff unit conversion
+elif [ $runname = "ECMWF000" ];then
+     DROFUNIT="86400000"   # [mm/day->m/s]  # runoff unit conversion
+elif [ $runname = "ECMWF050" ];then
      DROFUNIT="86400000"   # [mm/day->m/s]  # runoff unit conversion
 elif [ $runname = "ERA20CM" ];then
      DROFUNIT="1000"   # [mm/day->m/s]      # runoff unit conversion
@@ -169,8 +177,8 @@ if [ $looptype = "true" ];then
 	CROFDIR="${INBASE}/CaMa_in/$runname/Roff_TRUE"    #   runoff directory
 	CROFSUF="T000.one" 
 else
-	CROFDIR="${INBASE}/CaMa_in/$runname/Roff_CORR"    #   runoff directory
-	CROFSUF="C${ens_num}.one" 
+	CROFDIR="${INBASE}/$runname/Roff"    #   runoff directory
+	CROFSUF="${ens_num}.one" 
 fi
 
 ###** sub-surface runoff scheme (not available with plain binary runoff)
@@ -204,17 +212,23 @@ CINPMAT="${FMAP}/inpmat_test-1deg.bin"        # runoff input matrix for interpor
 #CDIMINFO="${FMAP}/diminfo_test-15min.txt" # dimention information file
 #CINPMAT=${FMAP}/inpmat_test-15min.bin     # runoff input matrix for interporlation
 if [ $runname = "E2O" ] ; then
+     CDIMINFO="${FMAP}/diminfo-15min.txt" # dimention information file
+     CINPMAT="${FMAP}/inpmat-15min.bin"     # runoff input matrix for interporlation
+elif [ $runname = "ECMWF000" ];then
     CDIMINFO="${FMAP}/diminfo-15min.txt" # dimention information file
-    CINPMAT="${FMAP}/inpmat-15min.bin"     # runoff input matrix for interporlation
+    CINPMAT="${FMAP}/inpmat-15min.bin"   # runoff input matrix for interporlation
+elif [ $runname = "ECMWF050" ] ; then
+     CDIMINFO="${FMAP}/diminfo-15min.txt" # dimention information file
+     CINPMAT="${FMAP}/inpmat-15min.bin"     # runoff input matrix for interporlation
 elif [ $runname = "ERA20CM" ] ; then
-	  CDIMINFO="${FMAP}/diminfo-1deg.txt"  # dimention information file
-    CINPMAT="${FMAP}/inpmat-1deg.bin"      # runoff input matrix for interporlation
+     CDIMINFO="${FMAP}/diminfo-1deg.txt"  # dimention information file
+     CINPMAT="${FMAP}/inpmat-1deg.bin"      # runoff input matrix for interporlation
 elif [ $runname = "ELSE_KIM2009" ] ; then
-	  CDIMINFO="${FMAP}/diminfo-1deg.txt"  # dimention information file
-    CINPMAT="${FMAP}/inpmat-1deg.bin"      # runoff input matrix for interporlation
+     CDIMINFO="${FMAP}/diminfo-1deg.txt"  # dimention information file
+     CINPMAT="${FMAP}/inpmat-1deg.bin"      # runoff input matrix for interporlation
 elif [ $runname = "VIC_BC" ] ; then
-	  CDIMINFO="${FMAP}/diminfo-15min.txt"  # dimention information file
-    CINPMAT="${FMAP}/inpmat-15min.bin"      # runoff input matrix for interporlation
+     CDIMINFO="${FMAP}/diminfo-15min.txt"  # dimention information file
+     CINPMAT="${FMAP}/inpmat-15min.bin"      # runoff input matrix for interporlation
 fi
 
 #----- for plain binary map input
@@ -231,6 +245,11 @@ CFLDHGT="${FMAP}/fldhgt.bin"                # floodplain elevation profile (heig
 ###CRIVWTH=${FMAP}/rivwth.bin"              # channel width [m] (empirical power-low)
 CRIVWTH="${FMAP}/rivwth_gwdlr.bin"          # channel width [m] (GWD-LR + filled with empirical)
 CRIVHGT="${FMAP}/rivhgt.bin"                # channel depth [m] (empirical power-low)
+if [ $cal = "yes" ];then
+  CRIVHGT="${FMAP}/rivhgt_Xudong.bin"         # channel depth [m] (Xudong et al 2021)
+elif [ $cal = "corrupt" ];then
+  CRIVHGT="${FMAP}/rivhgt_corrupt.bin"         # channel depth [m] (Corrupted rivhgt)
+fi
 CRIVMAN="${FMAP}/rivman.bin"                # manning coefficient river (The one in flood plain is a global parameter; set $PMANFLD below.)
 #if [ $looptype = "true" ] ; then
 #    CRIVMAN="${INBASE}/assim_out/rivman/rivmanTRUE.bin"
@@ -285,7 +304,7 @@ COUTDIR="./"                                # output directory
 #CVARSOUT="outflw,storge,fldfrc,maxdph,flddph" # list output variable (comma separated)
 #CVARSOUT="rivout,rivsto,rivdph,rivvel,fldout,fldsto,flddph,fldfrc,fldare,sfcelv,outflw,storge,pthflw,pthout,maxsto,maxflw,maxdph" # list output variable (comma separated)
 #CVARSOUT="rivout,rivsto,rivdph,fldout,flddph,fldfrc,fldare,sfcelv,outflw,storge,maxsto,maxflw,maxdph" # list output variable (comma separated)
-CVARSOUT="rivout,rivsto,fldout,flddph,fldfrc,sfcelv,outflw,storge,maxsto,maxflw,maxdph" # list output variable (comma separated)
+CVARSOUT="rivout,rivsto,fldout,flddph,fldfrc,fldare,sfcelv,outflw,storge,maxsto,maxflw,maxdph" # list output variable (comma separated)
 COUTTAG=""  # see (3) set each year         #   output tag $(COUTDIR)/$(VARNAME)$(OUTTAG).bin
 
 ##### Model Parameters ################
@@ -343,9 +362,9 @@ SMON=$in_month
 SDAY=$in_date
 SHOUR=0
 
-EYEAR=`python ${orgDIR}/../../src/calc_end_date.py $in_year $in_month $in_date "year"`
-EMON=`python ${orgDIR}/../../src/calc_end_date.py $in_year $in_month $in_date "month"`
-EDAY=`python ${orgDIR}/../../src/calc_end_date.py $in_year $in_month $in_date "date"`
+EYEAR=`python ${DA_dir}/src/calc_end_date.py $in_year $in_month $in_date "year"`
+EMON=`python ${DA_dir}/src/calc_end_date.py $in_year $in_month $in_date "month"`
+EDAY=`python ${DA_dir}/src/calc_end_date.py $in_year $in_month $in_date "date"`
 EHOUR=0
 
 ln -sf $PROG $EXE

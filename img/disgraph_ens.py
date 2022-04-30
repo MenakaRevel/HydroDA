@@ -19,10 +19,9 @@ import math
 
 #sys.path.append('../assim_out/')
 # Link the params.py in the experiment dir
-os.system("ln -sf ../gosh/params.py params.py")
-import params as pm
-import read_grdc as grdc
-import cal_stat as stat
+# os.system("ln -sf ../gosh/params_real.py params.py")
+# import params as pm
+
 #import plot_colors as pc
 #from matplotlib.font_manager import FontProperties
 #fp = FontProperties(fname="jap.ttc",size=15)
@@ -33,11 +32,39 @@ import cal_stat as stat
 # experiment="E2O_HydroWeb23"
 # experiment="VIC_BC_HydroWeb11"
 # experiment="test_wse"
-experiment="DIR_WSE_E2O_HWEB_001"
+# experiment="test_virtual"
+# experiment="DIR_WSE_E2O_HWEB_001"
+# experiment="DIR_WSE_E2O_HWEB_002"
+# experiment="DIR_WSE_E2O_HWEB_003"
+# experiment="DIR_WSE_E2O_HWEB_004"
+# experiment="DIR_WSE_ECMWF_HWEB_011"
+# experiment="DIR_WSE_ECMWF_HWEB_012"
+experiment="DIR_WSE_ECMWF_HWEB_013"
+# experiment="ANO_WSE_E2O_HWEB_001"
+# experiment="ANO_WSE_E2O_HWEB_002"
+# experiment="ANO_WSE_E2O_HWEB_003"
+# experiment="ANO_WSE_E2O_HWEB_004"
+# experiment="ANO_WSE_E2O_HWEB_006"
+# experiment="NOM_WSE_E2O_HWEB_001"
+# experiment="NOM_WSE_E2O_HWEB_002"
+# experiment="NOM_WSE_E2O_HWEB_003"
+# experiment="NOM_WSE_E2O_HWEB_004"
+# experiment="NOM_WSE_E2O_HWEB_005"
+# experiment="NOM_WSE_E2O_HWEB_006"
+# experiment="NOM_WSE_E2O_HWEB_007"
+# experiment="NOM_WSE_E2O_HWEB_008"
+# experiment="NOM_WSE_E2O_HWEB_009"
+# experiment="NOM_WSE_E2O_HWEB_010"
+# experiment="NOM_WSE_E2O_HWEB_011"
+# experiment="NOM_WSE_E2O_HWEB_012"
+# experiment="NOM_WSE_E2O_HWEB_013"
+
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
-assim_out=pm.DA_dir()+"/out/"+experiment
-print assim_out
+# assim_out=pm.DA_dir()+"/out/"+experiment
+# assim_out="../out/"+experiment
+assim_out="/cluster/data7/menaka/HydroDA/out/"+experiment
+print (assim_out)
 #assim_out="assim_out_E2O_wmc"
 #assim_out="assim_out_E2O_womc_0"
 #assim_out="assim_out_ECMWF_womc_baised_0"
@@ -57,8 +84,25 @@ print assim_out
 #os.system("mkdir ../assim_out/img")
 #os.system("mkdir ../assim_out/img/disgraph")
 
+# os.system("ln -sf "+assim_out+"/params.py params.py")
+sys.path.append(assim_out)
+import params as pm
+import read_grdc as grdc
+import cal_stat as stat
+#========================================
+#====  functions for making figures  ====
+#========================================
+def filter_nan(s,o):
+    """
+    this functions removed the data  from simulated and observed data
+    where ever the observed data contains nan
+    """
+    data = np.array([s.flatten(),o.flatten()])
+    data = np.transpose(data)
+    data = data[~np.isnan(data).any(1)]
 
-#----
+    return data[:,0],data[:,1]
+#========================================
 def SWOT_day(yyyy,mm,dd):
   st_year,st_month,st_date=pm.starttime()
   start_time=datetime.date(st_year,st_month,st_date)
@@ -66,13 +110,13 @@ def SWOT_day(yyyy,mm,dd):
   days=this_time-start_time
   days=days.days
   return days%21+1
-#----
+#========================================
 def mk_dir(sdir):
   try:
     os.makedirs(sdir)
   except:
     pass
-#----
+#========================================
 def NS(s,o):
     """
     Nash Sutcliffe efficiency coefficient
@@ -82,13 +126,68 @@ def NS(s,o):
     output:
         ns: Nash Sutcliffe efficient coefficient
     """
-    #s,o = filter_nan(s,o)
+    s,o = filter_nan(s,o)
     o=ma.masked_where(o<=0.0,o).filled(0.0)
     s=ma.masked_where(o<=0.0,s).filled(0.0)
     o=np.compress(o>0.0,o)
     s=np.compress(o>0.0,s) 
     return 1 - sum((s-o)**2)/(sum((o-np.mean(o))**2)+1e-20)
-#----
+#========================================
+def KGE(s,o):
+    """
+	Kling Gupta Efficiency (Kling et al., 2012, http://dx.doi.org/10.1016/j.jhydrol.2012.01.011)
+	input:
+        s: simulated
+        o: observed
+    output:
+        KGE: Kling Gupta Efficiency
+    """
+    o=ma.masked_where(o<=0.0,o).filled(0.0)
+    s=ma.masked_where(o<=0.0,s).filled(0.0)
+    o=np.compress(o>0.0,o)
+    s=np.compress(o>0.0,s)
+    s,o = filter_nan(s,o)
+    B = np.mean(s) / np.mean(o)
+    y = (np.std(s) / np.mean(s)) / (np.std(o) / np.mean(o))
+    r = np.corrcoef(o, s)[0,1]
+    return 1 - np.sqrt((r - 1) ** 2 + (B - 1) ** 2 + (y - 1) ** 2)
+#========================================
+def correlation(s,o):
+    """
+    correlation coefficient
+    input:
+        s: simulated
+        o: observed
+    output:
+        correlation: correlation coefficient
+    """
+    s,o = filter_nan(s,o)
+    o=ma.masked_where(o<=0.0,o).filled(0.0)
+    s=ma.masked_where(o<=0.0,s).filled(0.0)
+    o=np.compress(o>0.0,o)
+    s=np.compress(o>0.0,s)
+    if s.size == 0:
+        corr = 0.0 #np.NaN
+    else:
+        corr = np.corrcoef(o, s)[0,1]
+        
+    return corr
+#========================================
+def RMSE(s,o):
+    """
+    Root Mean Squre Error
+    input:
+        s: simulated
+        o: observed
+    output:
+        RMSE: Root Mean Squre Error
+    """
+    o=ma.masked_where(o<=0.0,o).filled(0.0)
+    s=ma.masked_where(o<=0.0,s).filled(0.0)
+    s,o = filter_nan(s,o)
+    # return np.sqrt(np.mean((s-o)**2))
+    return np.sqrt(np.ma.mean(np.ma.masked_where(o<=0.0,(s-o)**2)))
+#====================================================================
 mk_dir(assim_out+"/figures")
 mk_dir(assim_out+"/figures/disgraph")
 #----
@@ -101,8 +200,8 @@ nx     = int(filter(None, re.split(" ",lines[0]))[0])
 ny     = int(filter(None, re.split(" ",lines[1]))[0])
 gsize  = float(filter(None, re.split(" ",lines[3]))[0])
 #----
-syear,smonth,sdate=2003,1,1 #pm.starttime()#2004#1991
-eyear,emonth,edate=pm.endtime() #2005,1,1 #
+syear,smonth,sdate=pm.starttime()#2004#1991 #2003,1,1 # 2009,1,1 #
+eyear,emonth,edate=pm.endtime() #2005,1,1 #2004,1,1 # 2004,1,1 # 2010,1,1 # 2012,1,1 # 2011,1,1 #
 #month=1
 #date=1
 start_dt=datetime.date(syear,smonth,sdate)
@@ -130,11 +229,11 @@ ylist=[]
 river=[]
 #--
 #rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZON","MEKONG","IRRAWADDY","VOLGA", "NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
-#rivernames  = ["AMAZON"]
+# rivernames  = ["AMAZON"]
 rivernames = grdc.grdc_river_name_v396()
 for rivername in rivernames:
   grdc_id,station_loc,x_list,y_list = grdc.get_grdc_loc_v396(rivername)
-  print rivername, grdc_id,station_loc
+# #   print rivername, grdc_id,station_loc
   river.append([rivername]*len(station_loc))
   staid.append(grdc_id)
   pname.append(station_loc)
@@ -182,7 +281,7 @@ def read_data(inputlist):
     mm   = inputlist[1]
     dd   = inputlist[2]
     numch= inputlist[3]
-    print (yyyy,mm,dd,numch)
+    # print (yyyy,mm,dd,numch)
     #--
     tmp_opn  = np.ctypeslib.as_array(shared_array_opn)
     tmp_asm  = np.ctypeslib.as_array(shared_array_asm)
@@ -220,6 +319,9 @@ opn = np.ctypeslib.as_array(shared_array_opn)
 asm = np.ctypeslib.as_array(shared_array_asm)
 p.terminate()
 
+# res = map(read_data, inputlist)
+# opn = np.ctypeslib.as_array(shared_array_opn)
+# asm = np.ctypeslib.as_array(shared_array_asm)
 # for day in np.arange(start,last):
 #     target_dt=start_dt+datetime.timedelta(days=day)
 #     yyyy='%04d' % (target_dt.year)
@@ -339,17 +441,17 @@ def make_fig(point):
     fig, ax1 = plt.subplots()
     org=grdc.grdc_dis(staid[point],syear,eyear-1)
     org=np.array(org)
-    lines=[ax1.plot(np.arange(start,last),ma.masked_less(org,0.0),label="GRDC",color="black",linewidth=1.5,zorder=101)[0]] #,marker = "o",markevery=swt[point])
+    lines=[ax1.plot(np.arange(start,last),ma.masked_less(org,0.0),label="GRDC",color="#34495e",linewidth=3.0,zorder=101)[0]] #,marker = "o",markevery=swt[point])
 #    ax1.plot(np.arange(start,last),hgt[:,point],label="true",color="gray",linewidth=0.7,linestyle="--",zorder=101)
 #    plt.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7)
-    # for num in np.arange(0,pm.ens_mem()):
-    #     ax1.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.1,alpha=0.1,zorder=102)
-    #     ax1.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.1,alpha=0.1,zorder=103)
+    for num in np.arange(0,pm.ens_mem()):
+        ax1.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.1,alpha=0.1,zorder=102)
+        ax1.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.1,alpha=0.1,zorder=103)
 #        plt.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.3,alpha=0.5)
 #        plt.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.3,alpha=0.5)
     # draw mean of ensembles
-    lines.append(ax1.plot(np.arange(start,last),np.mean(opn[:,:,point],axis=1),label="corrupted",color="blue",linewidth=1.0,alpha=1,zorder=104)[0])
-    lines.append(ax1.plot(np.arange(start,last),np.mean(asm[:,:,point],axis=1),label="assimilated",color="red",linewidth=1.0,alpha=1,zorder=106)[0])
+    lines.append(ax1.plot(np.arange(start,last),np.mean(ma.masked_less(opn[:,:,point],0.0),axis=1),label="corrupted",color="#4dc7ec",linewidth=1.0,alpha=1,zorder=104)[0])
+    lines.append(ax1.plot(np.arange(start,last),np.mean(ma.masked_less(asm[:,:,point],0.0),axis=1),label="assimilated",color="#ff8021",linewidth=1.0,alpha=1,zorder=106)[0])
     #    plt.ylim(ymin=)
     # Make the y-axis label, ticks and tick labels match the line color.
     ax1.set_ylabel('discharge (m$^3$/s)', color='k')
@@ -362,7 +464,10 @@ def make_fig(point):
     #xxlist=np.linspace(0,N,(eyear-syear)+1)
     #xlab=np.arange(syear,eyear+1,1)
     #xxlab=[calendar.month_name[i][:3] for i in range(1,13)]
-    if eyear-syear > 5:
+    if eyear-syear > 8:
+        dtt=2
+        dt=int(math.ceil(((eyear-syear)+1)/5.0))
+    elif eyear-syear > 10:
         dtt=5
         dt=int(math.ceil(((eyear-syear)+1)/5.0))
     else:
@@ -376,14 +481,38 @@ def make_fig(point):
     # Nash-Sutcllf calcuation
     NS1=NS(np.mean(asm[:,:,point],axis=1),org)
     NS2=NS(np.mean(opn[:,:,point],axis=1),org)
+    KGE1=KGE(np.mean(asm[:,:,point],axis=1),org)
+    KGE2=KGE(np.mean(opn[:,:,point],axis=1),org)
+    COR1=correlation(np.mean(asm[:,:,point],axis=1),org)
+    COR2=correlation(np.mean(opn[:,:,point],axis=1),org)
+    RSE1=RMSE(np.mean(asm[:,:,point],axis=1),org)
+    RSE2=RMSE(np.mean(opn[:,:,point],axis=1),org)
     #1-((np.sum((org[:ed,point]-org_Q)**2))/(np.sum((org_Q-np.mean(org_Q))**2)))
     #print point,NS1,NS2
     Nash1="NS (assim):%4.2f"%(NS1)
     Nash2="NS (open):%4.2f"%(NS2)
+    kgeh1="KGE(assim):%4.2f"%(KGE1)
+    kgeh2="KGE(open):%4.2f"%(KGE2)
+    corr1="$r$(assim):%4.2f"%(COR1)
+    corr2="$r$(open):%4.2f"%(COR2)
+    rmse1="RMSE: %4.2f"%(RSE1)
+    rmse2="RMSE: %4.2f"%(RSE2)
+    # #
+    # ax1.text(0.02,0.95,Nash1,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    # ax1.text(0.02,0.85,Nash2,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    # ax1.text(0.42,0.95,kgeh1,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    # ax1.text(0.42,0.85,kgeh2,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    # ax1.text(0.02,0.75,corr1,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    # ax1.text(0.02,0.55,corr2,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
     #
-    ax1.text(0.02,0.95,Nash1,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
-    ax1.text(0.02,0.85,Nash2,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
-
+    ax1.text(0.02,0.95,Nash1,ha="left",va="center",transform=ax1.transAxes,fontsize=8)
+    ax1.text(0.02,0.90,Nash2,ha="left",va="center",transform=ax1.transAxes,fontsize=8)
+    ax1.text(0.02,0.80,kgeh1,ha="left",va="center",transform=ax1.transAxes,fontsize=8)
+    ax1.text(0.02,0.75,kgeh2,ha="left",va="center",transform=ax1.transAxes,fontsize=8)
+    ax1.text(0.42,0.95,corr1,ha="left",va="center",transform=ax1.transAxes,fontsize=8)
+    ax1.text(0.42,0.90,corr2,ha="left",va="center",transform=ax1.transAxes,fontsize=8)
+    ax1.text(0.42,0.80,rmse1,ha="left",va="center",transform=ax1.transAxes,fontsize=8)
+    ax1.text(0.42,0.75,rmse2,ha="left",va="center",transform=ax1.transAxes,fontsize=8)
 
 #    # twin axis
 #    ax2 = ax1.twinx()
@@ -453,7 +582,7 @@ def make_fig(point):
 
 
 #    ax2.plot(np.arange(start,last),aiv,color="green",zorder=104,marker = "o",alpha=0.3, markevery=swt[point])
-    #ax2.plot(np.arange(start,last),ma.masked_less_equal(aivn,1.0e-20),color="green",zorder=104,marker = "o", alpha=0.5,linewidth=0.5,markevery=swt[point])
+#    ax2.plot(np.arange(start,last),ma.masked_less_equal(aivn,1.0e-20),color="green",zorder=104,marker = "o", alpha=0.5,linewidth=0.5,markevery=swt[point])
 #    ax2.plot(np.arange(start,last),ma.masked_where(error<=0.1,aivn),color=green,marker = "o",markeredgecolor =green, alpha=1,linewidth=0.5,markevery=swt[point],markersize=3,zorder=100)#,label="AI")
 #    ax2.plot(np.arange(start,last),ma.masked_where(error>0.1,aivn),color=green2,marker = "o",markeredgecolor =green2, alpha=1,linewidth=0.5,markevery=swt[point],markersize=3,zorder=100)#,label="AI")
 #    ax2.set_ylabel('AI', color='green')
@@ -464,7 +593,7 @@ def make_fig(point):
     plt.legend(lines,labels,ncol=1,loc='upper right') #, bbox_to_anchor=(1.0, 1.0),transform=ax1.transAxes)
     station_loc_list=pname[point].split("/")
     station_name="-".join(station_loc_list) 
-    print 'save',river[point] , station_name
+    print ('save',river[point] , station_name)
     plt.savefig(assim_out+"/figures/disgraph/"+river[point]+"-"+station_name+".png",dpi=500)
     return 0
 
@@ -488,8 +617,8 @@ def make_fig(point):
 
 
 
-#para_flag=1
-para_flag=0
+para_flag=1
+# para_flag=0
 #--
 if para_flag==1:
     p=Pool(20)

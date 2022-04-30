@@ -279,7 +279,7 @@ def grdc_river_name_v396():
   
   rivername =  []
   
-  for line in lines:
+  for line in lines[1::]:
     line    = filter(None, re.split(";",line))
     grdc_id = line[0]
     river   = line[1].strip()
@@ -332,9 +332,10 @@ def grdc_dis(grdc_id,syear,eyear,smon=1,emon=12,sday=1,eday=31):
   #iid="%d"%(grdc_id)
   iid=grdc_id
   # read grdc q
-  grdc ="/cluster/data6/menaka/GRDC_2019/"+iid+"_Q_Day.Cmd.txt"
+  # grdc ="/cluster/data6/menaka/GRDC_2019/"+iid+"_Q_Day.Cmd.txt"
+  grdc ="/cluster/data7/menaka/GRDC_2021/"+iid+"_Q_Day.Cmd.txt" # updated GRDC 2021
   if not os.path.exists(grdc):
-      return np.ones([last],np.float32)*-99.0
+      return np.ones([last],np.float32)*-9999.0
   else:
       f = open(grdc,"r")
       lines = f.readlines()
@@ -343,15 +344,15 @@ def grdc_dis(grdc_id,syear,eyear,smon=1,emon=12,sday=1,eday=31):
       for line in lines[37::]:
         line     = filter(None, re.split(";",line))
         yyyymmdd = filter(None, re.split("-",line[0]))
-        #print yyyymmdd
         yyyy     = int(yyyymmdd[0])
         mm       = int(yyyymmdd[1])
         dd       = int(yyyymmdd[2])
         #---
-        #print start_dt.year,start_dt.month,start_dt.day
         if start_dt <= datetime.date(yyyy,mm,dd) and last_dt  >= datetime.date(yyyy,mm,dd):
-          dis[yyyy,mm,dd]=float(line[2])
-          #print float(line[2])
+          if float(line[2].strip()) == -99.9:
+            dis[yyyy,mm,dd]=-9999.0
+          else:
+            dis[yyyy,mm,dd]=float(line[2].strip())
         elif last_dt  < datetime.date(yyyy,mm,dd):
           break
       #---
@@ -363,6 +364,6 @@ def grdc_dis(grdc_id,syear,eyear,smon=1,emon=12,sday=1,eday=31):
         if (target_dt.year,target_dt.month,target_dt.day) in dis.keys():
           Q.append(dis[target_dt.year,target_dt.month,target_dt.day])
         else:
-          Q.append(-99.0)
+          Q.append(-9999.0)
       return np.array(Q)
 #--
