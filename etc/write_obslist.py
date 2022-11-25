@@ -43,14 +43,15 @@ def slope(ix,iy,nextxy,uparea,elevtn,nxtdst,rivseq):
         slp2=0.0
     return slp1,slp2
 #===================
-syear=2009
+syear=2002
 eyear=2014
 #===================
 # CaMa_dir="/cluster/data6/menaka/CaMa-Flood_v396a_20200514"
-CaMa_dir="/cluster/data6/menaka/CaMa-Flood_v4"
-#map="glb_15min"
+# CaMa_dir="/cluster/data6/menaka/CaMa-Flood_v4"
+CaMa_dir="/cluster/data7/menaka/CaMa-Flood_v407"
+map="glb_15min"
 # map="glb_06min"
-map="amz_06min"
+# map="amz_06min"
 fname=CaMa_dir+"/map/"+map+"/params.txt"
 f=open(fname,"r")
 lines=f.readlines()
@@ -94,20 +95,22 @@ dy=5
 # f.close()
 # write
 #---------------------
-rivername0="AMAZONAS" #"CONGO" #
+# rivername0="AMAZONAS" #"CONGO" #
+rivername0="ALL" #"CONGO" #
 stream0=["AMAZONAS","SOLIMOES"] # "CONGO" #
 #---------------------
 # fname="HydroWeb_alloc_"+map+".txt"
 # fname="/cluster/data6/menaka/Altimetry/out/altimetry_"+map+"_20210826.txt"
 # fname="/cluster/data6/menaka/Altimetry/out/altimetry_"+map+"_20210826.txt"
-fname="/cluster/data6/menaka/Altimetry/out/altimetry_"+map+"_20210920.txt"
+# fname="/cluster/data6/menaka/AltiMaP/out/altimetry_"+map+"_20210920.txt"
+fname="/cluster/data6/menaka/AltiMaP/out/altimetry_"+map+"_20220725.txt"
 with open(fname,"r") as f:
 	lines=f.readlines()
 #===============================================
 # unreal observations
 # fname="/cluster/data6/menaka/Altimetry/out/unreal_obs_20210824.txt"
 # fname="/cluster/data6/menaka/Altimetry/out/unreal_obs_20210826.txt"
-fname="/cluster/data6/menaka/Altimetry/out/unreal_obs_20210909.txt"
+fname="/cluster/data6/menaka/AltiMaP/out/unreal_obs_20220802.txt"
 with open(fname,"r") as f_unreal:
 	unreal=f_unreal.readlines()
 #----
@@ -118,7 +121,8 @@ for item in unreal:
     unreal_stations.append(station)
 #===============================================
 # higher RMSE locations
-fname="/cluster/data6/menaka/Altimetry/out/rmse_VIC_BC_glb_06min_20211122.txt"
+# fname="/cluster/data6/menaka/AltiMaP/out/rmse_VIC_BC_glb_06min_20211122.txt"
+fname="/cluster/data6/menaka/AltiMaP/out/rmse_VIC_BC_glb_15min_20221020.txt"
 with open(fname,"r") as f_rmse:
 	rmse=f_rmse.readlines()
 #----
@@ -134,8 +138,9 @@ for item in rmse[1::]:
 # writef="/cluster/data6/menaka/HydroDA/dat/HydroWeb_alloc_"+map+"_amz.txt"
 # writef="/cluster/data6/menaka/HydroDA/dat/HydroWeb_alloc_"+map+"_QC.txt"
 # writef="/cluster/data6/menaka/HydroDA/dat/HydroWeb_alloc_"+map+"_QC1.txt"
-writef="/cluster/data6/menaka/HydroDA/dat/HydroWeb_alloc_"+map+"_QC0.txt"
+# writef="/cluster/data6/menaka/HydroDA/dat/HydroWeb_alloc_"+map+"_QC0.txt"
 # writef="/cluster/data6/menaka/HydroDA/dat/HydroWeb_alloc_"+map+"_QCrmse.txt"
+writef="/cluster/data6/menaka/HydroDA/dat/HydroWeb_alloc_"+map+".txt"
 with open(writef, "w") as wf:
     header = "%13s%62s%8s%8s%8s%8s%12s%12s%12s%12s%17s\n"%("ID","station","lon","lat","ix","iy","elevation","ele_diff","EGM08","EGM96","satellite")
     wf.write(header)
@@ -162,8 +167,9 @@ with open(writef, "w") as wf:
         kx      = int(line[13])
         ky      = int(line[14])
         #======================
-        if riv != rivername0:
-            continue
+        if rivername0 != "ALL":
+            if riv != rivername0:
+                continue
         # if stream not in stream0:
         #     continue
         # print (num, ele_dif)

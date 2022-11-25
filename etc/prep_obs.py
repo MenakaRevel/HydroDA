@@ -292,6 +292,10 @@ def prepare_obs(dir0="./"):
 	"""
 	Prepare observations as textfile
 	"""
+	# making dir
+	mk_dir(dir0)
+
+	#=========================
 	syear,smon,sday=starttime()
 	eyear,emon,eday=endtime()
 	start_dt=datetime.date(syear,smon,sday)
@@ -316,17 +320,19 @@ def prepare_obs(dir0="./"):
 	return 0
 ####################################
 def starttime():
-    return 2009,1,1
+    return 2002,1,1
 ####################################
 def endtime():
-    return 2015,1,1
+    return 2021,1,1
 ####################################
 def obs_list():
-    return "../dat/HydroWeb_alloc_amz_06min_QC0_simulation.txt"
+    # return "../dat/HydroWeb_alloc_amz_06min_QC0_simulation.txt"
+	return "../dat/HydroWeb_alloc_glb_15min.txt"
 ####################################
 def obs_name():
     return "HydroWeb"
 ####################################
 if __name__ == "__main__":
 	print ("prepare observations")
-	prepare_obs("/cluster/data7/menaka/HydroDA/obs/HydroWeb")
+	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/HydroWeb")
+	prepare_obs("/cluster/data7/menaka/HydroDA/obs/HydroWeb_glb_15min")

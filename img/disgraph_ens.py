@@ -37,9 +37,6 @@ import math
 # experiment="DIR_WSE_E2O_HWEB_002"
 # experiment="DIR_WSE_E2O_HWEB_003"
 # experiment="DIR_WSE_E2O_HWEB_004"
-# experiment="DIR_WSE_ECMWF_HWEB_011"
-# experiment="DIR_WSE_ECMWF_HWEB_012"
-experiment="DIR_WSE_ECMWF_HWEB_013"
 # experiment="ANO_WSE_E2O_HWEB_001"
 # experiment="ANO_WSE_E2O_HWEB_002"
 # experiment="ANO_WSE_E2O_HWEB_003"
@@ -58,6 +55,25 @@ experiment="DIR_WSE_ECMWF_HWEB_013"
 # experiment="NOM_WSE_E2O_HWEB_011"
 # experiment="NOM_WSE_E2O_HWEB_012"
 # experiment="NOM_WSE_E2O_HWEB_013"
+
+
+
+# experiment="DIR_WSE_ECMWF_HWEB_011"
+# experiment="DIR_WSE_ECMWF_HWEB_012"
+# experiment="DIR_WSE_ECMWF_HWEB_013"
+# experiment="DIR_WSE_ECMWF_HWEB_014"
+
+# experiment="ANO_WSE_ECMWF_HWEB_011"
+# experiment="ANO_WSE_ECMWF_HWEB_012"
+# experiment="ANO_WSE_ECMWF_HWEB_013"
+# experiment="ANO_WSE_ECMWF_HWEB_014"
+
+# experiment="NOM_WSE_ECMWF_HWEB_011"
+# experiment="NOM_WSE_ECMWF_HWEB_012"
+# experiment="NOM_WSE_ECMWF_HWEB_013"
+# experiment="NOM_WSE_ECMWF_HWEB_014"
+
+experiment="NOM_WSE_E2O_HWEB_101"
 
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
@@ -200,8 +216,8 @@ nx     = int(filter(None, re.split(" ",lines[0]))[0])
 ny     = int(filter(None, re.split(" ",lines[1]))[0])
 gsize  = float(filter(None, re.split(" ",lines[3]))[0])
 #----
-syear,smonth,sdate=pm.starttime()#2004#1991 #2003,1,1 # 2009,1,1 #
-eyear,emonth,edate=pm.endtime() #2005,1,1 #2004,1,1 # 2004,1,1 # 2010,1,1 # 2012,1,1 # 2011,1,1 #
+syear,smonth,sdate=pm.starttime()#2003,1,1 #pm.starttime()#2004#1991 # 2009,1,1 #
+eyear,emonth,edate=2011,1,1 #pm.endtime() #2004,1,1 #2005,1,1 # 2004,1,1 # 2010,1,1 # 2012,1,1 # 2011,1,1 #
 #month=1
 #date=1
 start_dt=datetime.date(syear,smonth,sdate)
@@ -216,9 +232,10 @@ last=(end_dt-start_dt).days
 #else:
 #    last=365
 
+ncpus=10
 #last=89
 N=int(last)
-
+print ("days: ",N)
 green2="greenyellow"
 green ="green"
 #colors = pc.color_assimd()
@@ -228,9 +245,9 @@ xlist=[]
 ylist=[]
 river=[]
 #--
-#rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZON","MEKONG","IRRAWADDY","VOLGA", "NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
+rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZON","MEKONG","IRRAWADDY","VOLGA", "NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
 # rivernames  = ["AMAZON"]
-rivernames = grdc.grdc_river_name_v396()
+# rivernames = grdc.grdc_river_name_v396()
 for rivername in rivernames:
   grdc_id,station_loc,x_list,y_list = grdc.get_grdc_loc_v396(rivername)
 # #   print rivername, grdc_id,station_loc
@@ -313,7 +330,7 @@ def read_data(inputlist):
             tmp_opn[dt,num,point]=opnfile[iy1,ix1]+opnfile[iy2,ix2]
             tmp_asm[dt,num,point]=asmfile[iy1,ix1]+asmfile[iy2,ix2]
 #--------
-p   = Pool(20)
+p   = Pool(ncpus)
 res = p.map(read_data, inputlist)
 opn = np.ctypeslib.as_array(shared_array_opn)
 asm = np.ctypeslib.as_array(shared_array_asm)
@@ -621,7 +638,7 @@ para_flag=1
 # para_flag=0
 #--
 if para_flag==1:
-    p=Pool(20)
+    p=Pool(ncpus)
     p.map(make_fig,np.arange(pnum))
     p.terminate()
 else:

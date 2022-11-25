@@ -34,7 +34,8 @@ import math
 # experiment="DIR_WSE_E2O_HWEB_004"
 # experiment="DIR_WSE_ECMWF_HWEB_011"
 # experiment="DIR_WSE_ECMWF_HWEB_012"
-experiment="DIR_WSE_ECMWF_HWEB_013"
+# experiment="DIR_WSE_ECMWF_HWEB_013"
+# experiment="DIR_WSE_ECMWF_HWEB_014"
 # experiment="ANO_WSE_E2O_HWEB_001"
 # experiment="ANO_WSE_E2O_HWEB_003"
 # experiment="ANO_WSE_E2O_HWEB_004"
@@ -48,6 +49,7 @@ experiment="DIR_WSE_ECMWF_HWEB_013"
 # experiment="NOM_WSE_E2O_HWEB_010"
 # experiment="NOM_WSE_E2O_HWEB_011"
 # experiment="NOM_WSE_E2O_HWEB_013"
+experiment="NOM_WSE_ECMWF_HWEB_013"
 # experiment="test_virtual"
 # conflag=1
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
@@ -159,6 +161,8 @@ size=60
 
 start=0
 last=(end_dt-start_dt).days
+
+ncpus=10
 
 N=int(last)
 green2="greenyellow"
@@ -387,7 +391,7 @@ def read_data(inputlist):
         tmp_asm[dt,num,point]=asmfile[iy1,ix1]
 #--------
 #print (pname[0])
-p   = Pool(20)
+p   = Pool(ncpus)
 res = p.map(read_data, inputlist)
 #map(read_data, inputlist)
 opn = np.ctypeslib.as_array(shared_array_opn)
@@ -648,7 +652,7 @@ para_flag=1
 # para_flag=0
 #--
 if para_flag==1:
-    p=Pool(6)
+    p=Pool(ncpus)
     p.map(make_fig,np.arange(pnum))
     p.terminate()
 else:

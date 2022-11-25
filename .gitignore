@@ -36,6 +36,7 @@ calc_stat
 #PBS oe files
 HydroDA*.o*
 HydroDA.o*
+*/sfcelv_mean.o*
 
 #figures
 *.png

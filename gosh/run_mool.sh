@@ -42,7 +42,7 @@ which python
 
 # get number of cpus
 #export NCPUS=`cat ${PBS_NODEFILE} | wc -l`
-NCPUS=40
+NCPUS=48
 
 # OMP Settings
 export OMP_NUM_THREADS=$NCPUS
@@ -71,15 +71,16 @@ cd $HydroDAout
 # experiment name [XXX_YYY_ZZZ_WWW]
 # 1. Assimilation method [direct(DIR), anomaly(ANO), normalized(NOM)]
 # 2. Observation variable [WSE/DIS]
-# 3. Runoff Data [E2O/VICBC]
+# 3. Runoff Data [e.g., E2O, VICBC, ECMWF]
 # 4. Observation data [HydroWeb(HWEB)] 
-# 5. Number for identifying the experiment [e.g., 001]
+# 5. Number for identifying the experiment [e.g., 001]: 0XX - regional, 1XX - global
 
-EXP="DIR_WSE_ECMWF_HWEB_014"
-# EXP="ANO_WSE_E2O_HWEB_006"
-# EXP="NOM_WSE_E2O_HWEB_007"
+# EXP="DIR_WSE_ECMWF_HWEB_014"
+# EXP="ANO_WSE_ECMWF_HWEB_012"
+# EXP="NOM_WSE_ECMWF_HWEB_012"
 # EXP="test_virtual"
 # EXP="test_wse"
+EXP="NOM_WSE_E2O_HWEB_101" # for glb_15min
 
 # mkdir -p $HydroDA"/out/"$EXP
 mkdir -p $HydroDAout"/out/"$EXP

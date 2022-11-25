@@ -56,6 +56,8 @@ def inflation_para(rho):
 def calibration(cal):
     if cal=="yes":
         return "calibrated (Xudong et al,. 2021)"
+    elif cal=="corrupt":
+        return "corrupted"
     else:
         return "not calibrated (Yamazaki et al,. 2011)"
 ###########################
@@ -84,7 +86,7 @@ def write_text():
         f.write("# Experiment Name: "+pm.experiment()+"\n")
         f.write("# Experiment Mode: "+"%d"%(pm.mode())+"\n")
         # Runoff data
-        f.write("# Runoff Data: "+pm.input(pm.mode())+"\n")
+        f.write("# Runoff Data: "+pm.input(pm.mode())+", "+pm.runoff_dir()+"\n")
         # Time domain for analysis
         f.write("# Start Date: %04d-%02d-%02d\n"%(pm.starttime()))
         f.write("# End Date: %04d-%02d-%02d\n"%(pm.endtime()))
