@@ -23,7 +23,7 @@
 ################################################################################################
 
 ### SET "mool PBS" @ IIS U-Tokyo
-#PBS -q E40
+#PBS -q F40S
 #PBS -l select=1:ncpus=40:mem=100gb
 #PBS -j oe
 #PBS -m ea
@@ -42,7 +42,7 @@ which python
 
 # get number of cpus
 #export NCPUS=`cat ${PBS_NODEFILE} | wc -l`
-NCPUS=48
+NCPUS=40
 
 # OMP Settings
 export OMP_NUM_THREADS=$NCPUS
@@ -80,8 +80,8 @@ cd $HydroDAout
 # EXP="NOM_WSE_ECMWF_HWEB_012"
 # EXP="test_virtual"
 # EXP="test_wse"
-EXP="NOM_WSE_E2O_HWEB_101" # for glb_15min
-EXP="DIR_WSE_E2O_SWOT_001" # for SWOTH08
+# EXP="NOM_WSE_E2O_HWEB_101" # for glb_15min
+EXP="DIR_WSE_E2O_SWOT_002" # for SWOTH08
 
 # mkdir -p $HydroDA"/out/"$EXP
 mkdir -p $HydroDAout"/out/"$EXP
@@ -99,11 +99,8 @@ echo $EXP > "./exp.txt"
 echo $NCPUS > $"./ncpus.txt"
 
 # copy params.py
-# cp -r $HydroDA/gosh/params.py     $HydroDA/out/$EXP/params.py
-# cp -r $HydroDA/gosh/params_virt.py     $HydroDA/out/$EXP/params.py
-# cp -r $HydroDA/gosh/params_real.py     $HydroDA/out/$EXP/params.py
-# cp -r $HydroDA/gosh/params_real.py     ./params.py
-cp -r $HydroDA/gosh/params_virt.py     ./params.py
+# cp -r $HydroDA/gosh/params_real.py     ./params.py # for real experiment
+cp -r $HydroDA/gosh/params_virt.py     ./params.py # for virtual experiment
 
 # copy running related files
 # cp -r $HydroDA/src/run.py           $HydroDA/out/$EXP/run.py

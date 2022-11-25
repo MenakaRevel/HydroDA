@@ -106,7 +106,8 @@ def patch_name():
     # return "amz_06min_S14FD_60"
     # return "amz_06min_S14FD_40"
     # return "amz_06min_S14FD_20"
-    return "glb_15min_S14FD_60"
+    # return "glb_15min_S14FD_60"
+    return "glb_15min_S14FD_60_dam"
 
 def patch_id():
     # return "0.80"
@@ -157,10 +158,10 @@ def timestep():
     return 86400 # outer timestep in seconds
 
 def starttime():
-    return (2001,1,1) # start date: [year,month,date]
+    return (2009,1,1) # start date: [year,month,date]
 
 def endtime():
-    return (2015,1,1) # end date: [year,month,date]
+    return (2010,1,1) # end date: [year,month,date]
                       # *note: this date is not included
 
 # **************************************************************
@@ -174,7 +175,7 @@ def spinup_mode():
     ### if initial restart file is ready, spinup simulation is no need
 
 def spinup_end_year():
-    return 2000
+    return 2008
 
 def spinup_end_month():
     return 12

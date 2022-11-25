@@ -57,7 +57,7 @@ def calibration(cal):
     if cal=="yes":
         return "calibrated (Xudong et al,. 2021)"
     elif cal=="corrupt":
-        return "corrupted"
+        return "corrupted (Revel et al,. 2022)"
     else:
         return "not calibrated (Yamazaki et al,. 2011)"
 ###########################
