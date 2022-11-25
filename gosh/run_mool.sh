@@ -81,6 +81,7 @@ cd $HydroDAout
 # EXP="test_virtual"
 # EXP="test_wse"
 EXP="NOM_WSE_E2O_HWEB_101" # for glb_15min
+EXP="DIR_WSE_E2O_SWOT_001" # for SWOTH08
 
 # mkdir -p $HydroDA"/out/"$EXP
 mkdir -p $HydroDAout"/out/"$EXP
@@ -101,7 +102,8 @@ echo $NCPUS > $"./ncpus.txt"
 # cp -r $HydroDA/gosh/params.py     $HydroDA/out/$EXP/params.py
 # cp -r $HydroDA/gosh/params_virt.py     $HydroDA/out/$EXP/params.py
 # cp -r $HydroDA/gosh/params_real.py     $HydroDA/out/$EXP/params.py
-cp -r $HydroDA/gosh/params_real.py     ./params.py
+# cp -r $HydroDA/gosh/params_real.py     ./params.py
+cp -r $HydroDA/gosh/params_virt.py     ./params.py
 
 # copy running related files
 # cp -r $HydroDA/src/run.py           $HydroDA/out/$EXP/run.py

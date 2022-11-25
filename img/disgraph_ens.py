@@ -17,6 +17,10 @@ from numpy import ma
 import re
 import math
 
+# import CaMa-Flood variable reading using fortran
+sys.path.append('../etc/')
+from read_CMF import read_discharge, read_discharge_multi
+
 #sys.path.append('../assim_out/')
 # Link the params.py in the experiment dir
 # os.system("ln -sf ../gosh/params_real.py params.py")
@@ -41,7 +45,10 @@ import math
 # experiment="ANO_WSE_E2O_HWEB_002"
 # experiment="ANO_WSE_E2O_HWEB_003"
 # experiment="ANO_WSE_E2O_HWEB_004"
+<<<<<<< HEAD
 # experiment="ANO_WSE_E2O_HWEB_006"
+=======
+>>>>>>> dev_virtual
 # experiment="NOM_WSE_E2O_HWEB_001"
 # experiment="NOM_WSE_E2O_HWEB_002"
 # experiment="NOM_WSE_E2O_HWEB_003"
@@ -56,6 +63,7 @@ import math
 # experiment="NOM_WSE_E2O_HWEB_012"
 # experiment="NOM_WSE_E2O_HWEB_013"
 
+<<<<<<< HEAD
 
 
 # experiment="DIR_WSE_ECMWF_HWEB_011"
@@ -74,6 +82,9 @@ import math
 # experiment="NOM_WSE_ECMWF_HWEB_014"
 
 experiment="NOM_WSE_E2O_HWEB_101"
+=======
+experiment="DIR_WSE_E2O_SWOT_001"
+>>>>>>> dev_virtual
 
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
@@ -204,13 +215,58 @@ def RMSE(s,o):
     # return np.sqrt(np.mean((s-o)**2))
     return np.sqrt(np.ma.mean(np.ma.masked_where(o<=0.0,(s-o)**2)))
 #====================================================================
+def read_dis(ix1, iy1, ix2, iy2, syear, eyear, indir):
+    """
+    Read CaMa-Flood discharge
+    """
+    dis = np.zeros( nbdays, 'f')
+    # dis_max = np.zeros( nbyears, 'f')
+    for year in range(syear, eyear):
+        s_days = int( (datetime.date(year , 1,1) - datetime.date(syear, 1, 1)). days)
+        e_days = int( (datetime.date(year+1, 1, 1) - datetime.date(syear, 1, 1)). days)
+        
+        f = indir + '/outflw'+str(year)+'.bin'
+
+        #outflw = np.fromfile(f, 'float32').reshape(-1,len(lat_global), len(lon_global))
+        #if ix2 < 0 and iy2 < 0:
+        #    tmp = outflw[:,iy1, ix1]
+        #else:
+        #    tmp = outflw[:,iy1, ix1] + outflw[:,iy2, ix2]
+
+        #print tmp
+
+        tmp = read_discharge( ix1+1, iy1+1, ix2+1, iy2+1, e_days-s_days, f, nx, ny)
+
+        #print year, e_days - s_days, s_days, e_days, outflw.shape
+        dis[s_days:e_days] = tmp
+
+    return dis
+#====================================================================
+def read_dis_multi(ix1, iy1, ix2, iy2, syear, eyear, indir):
+    #print ix1,iy1
+    dis = np.zeros( (len(ix1), nbdays), 'f')
+    dis_max = np.zeros( (len(ix1), nbyears), 'f')
+    for year in range(syear, eyear+1):
+        print year
+        s_days = int( (datetime.date(year , 1,1) - datetime.date(syear, 1, 1)). days)
+        e_days = int( (datetime.date(year+1, 1, 1) - datetime.date(syear, 1, 1)). days)
+        
+        f = indir + '/outflw'+str(year)+'.bin'
+
+        tmp = read_discharge_multi( ix1, iy1, ix2, iy2, e_days-s_days, f, nx, ny)
+
+        #print year, e_days - s_days, s_days, e_days, outflw.shape
+        dis[:,s_days:e_days] = tmp
+        dis_max[:,year-syear] = np.nanmax(tmp, axis=1)
+
+    return dis , dis_max
+#====================================================================
 mk_dir(assim_out+"/figures")
 mk_dir(assim_out+"/figures/disgraph")
 #----
 fname=pm.CaMa_dir()+"/map/"+pm.mapname()+"/params.txt"
-f=open(fname,"r")
-lines=f.readlines()
-f.close()
+with open(fname,"r") as f:
+    lines=f.readlines()
 #-------
 nx     = int(filter(None, re.split(" ",lines[0]))[0])
 ny     = int(filter(None, re.split(" ",lines[1]))[0])
@@ -226,6 +282,7 @@ size=60
 
 start=0
 last=(end_dt-start_dt).days
+nbdays=int(last)
 #last=365#int(argvs[1])
 #if calendar.isleap(year):
 #    last=366
@@ -247,6 +304,10 @@ river=[]
 #--
 rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZON","MEKONG","IRRAWADDY","VOLGA", "NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
 # rivernames  = ["AMAZON"]
+# rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZON","IRRAWADDY","VOLGA","NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
+# rivernames  = ["AMAZON", "MISSISSIPPI","MEKONG", "VOLGA"]
+#rivernames  = ["AMAZON"]
+# rivernames  = ["COLORADO"]
 # rivernames = grdc.grdc_river_name_v396()
 for rivername in rivernames:
   grdc_id,station_loc,x_list,y_list = grdc.get_grdc_loc_v396(rivername)
@@ -260,10 +321,10 @@ for rivername in rivernames:
 river=([flatten for inner in river for flatten in inner])
 staid=([flatten for inner in staid for flatten in inner])
 pname=([flatten for inner in pname for flatten in inner])
-print len(pname), len(xlist)
 xlist=([flatten for inner in xlist for flatten in inner])
 ylist=([flatten for inner in ylist for flatten in inner])
 
+print len(pname), len(xlist)
 
 pnum=len(pname)
 
@@ -291,14 +352,14 @@ for day in np.arange(start,last):
     for num in np.arange(1,pm.ens_mem()+1):
         numch='%03d'%num
         inputlist.append([yyyy,mm,dd,numch])
-        #print (yyyy,mm,dd,numch)
+        # print (yyyy,mm,dd,numch)
 
 def read_data(inputlist):
     yyyy = inputlist[0]
     mm   = inputlist[1]
     dd   = inputlist[2]
     numch= inputlist[3]
-    # print (yyyy,mm,dd,numch)
+    print (yyyy,mm,dd,numch)
     #--
     tmp_opn  = np.ctypeslib.as_array(shared_array_opn)
     tmp_asm  = np.ctypeslib.as_array(shared_array_asm)
@@ -441,7 +502,13 @@ p.terminate()
 def make_fig(point):
     plt.close()
     #labels=["GRDC","corrupted","assimilated"]
-    labels=["GRDC","simulated","assimilated"]
+    obstype=pm.obs_name()
+    if obstype=="SWOT":
+        exptype="virtual"
+        labels=["true","simulated","assimilated"]
+    else:
+        exptype="real"
+        labels=["GRDC","simulated","assimilated"]
     #
     #print org[:,point]
     #for i in np.arange(start,last):
@@ -456,14 +523,23 @@ def make_fig(point):
 #
 #    plt.ylim(ymin=0)
     fig, ax1 = plt.subplots()
-    org=grdc.grdc_dis(staid[point],syear,eyear-1)
-    org=np.array(org)
+    if exptype=="virtual":
+        # org=read_dis()
+        ix1,iy1,ix2,iy2=grdc.get_grdc_station_v396(pname[point])
+        indir = "/work/a04/julien/CaMa-Flood_v4/out/coupled-model2"
+        # indir = pm.obs_dir()
+        org=read_dis(ix1, iy1, ix2, iy2, syear, eyear, indir)
+        # org=grdc.grdc_dis(staid[point],syear,eyear-1)
+        org=np.array(org)
+    else:
+        org=grdc.grdc_dis(staid[point],syear,eyear-1)
+        org=np.array(org)
     lines=[ax1.plot(np.arange(start,last),ma.masked_less(org,0.0),label="GRDC",color="#34495e",linewidth=3.0,zorder=101)[0]] #,marker = "o",markevery=swt[point])
 #    ax1.plot(np.arange(start,last),hgt[:,point],label="true",color="gray",linewidth=0.7,linestyle="--",zorder=101)
 #    plt.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7)
-    for num in np.arange(0,pm.ens_mem()):
-        ax1.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.1,alpha=0.1,zorder=102)
-        ax1.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.1,alpha=0.1,zorder=103)
+    # for num in np.arange(0,pm.ens_mem()):
+    #     ax1.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.1,alpha=0.1,zorder=102)
+    #     ax1.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.1,alpha=0.1,zorder=103)
 #        plt.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.3,alpha=0.5)
 #        plt.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.3,alpha=0.5)
     # draw mean of ensembles

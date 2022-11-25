@@ -6,7 +6,7 @@ import sys
 import os
 from multiprocessing import Pool
 
-from gosh.params_real import ens_mem
+# from gosh.params_real import ens_mem
 
 # copy mean and std to HydroDA
 #=============================
@@ -18,32 +18,33 @@ def copy(inputlist):
     runname="E2O" #pm.runname(pm.mode())
     # mean
     # oname="/cluster/data6/menaka/HydroDA/dat/mean_sfcelv_"+runname+"_"+mapname+"_"+tagout+"_"+ens_char+".bin"
-    oname="/cluster/data6/menaka/HydroDA/dat/mean_sfcelv_49_"+runname+"_"+mapname+"_"+tagout+"_"+ens_char+".bin"
-    # oname="/cluster/data6/menaka/HydroDA/dat/mean_cal_sfcelv_49_"+runname+"_"+mapname+"_"+tagout+"_"+ens_char+".bin"
+    # oname="/cluster/data6/menaka/HydroDA/dat/mean_sfcelv_49_"+runname+"_"+mapname+"_"+tagout+"_"+ens_char+".bin"
+    oname="/cluster/data6/menaka/HydroDA/dat/mean_cal_sfcelv_49_"+runname+"_"+mapname+"_"+tagout+"_"+ens_char+".bin"
     # oname="/cluster/data6/menaka/HydroDA/dat/mean_sfcelv_cal_"+runname+"_"+mapname+"_"+tagout+"_"+ens_char+".bin"
     iname="/cluster/data6/menaka/ensemble_simulations/CaMa_out/"+input_name+"/sfcelv_mean"+tagout+".bin"
 
-    # print ("cp "+iname+" "+oname)
+    print ("cp "+iname+" "+oname)
     os.system("cp "+iname+" "+oname)
 
     # std
     # oname="/cluster/data6/menaka/HydroDA/dat/std_sfcelv_"+runname+"_"+mapname+"_"+tagout+"_"+ens_char+".bin"
-    oname="/cluster/data6/menaka/HydroDA/dat/std_sfcelv_49_"+runname+"_"+mapname+"_"+tagout+"_"+ens_char+".bin"
-    # oname="/cluster/data6/menaka/HydroDA/dat/std_cal_sfcelv_49_"+runname+"_"+mapname+"_"+tagout+"_"+ens_char+".bin"
+    # oname="/cluster/data6/menaka/HydroDA/dat/std_sfcelv_49_"+runname+"_"+mapname+"_"+tagout+"_"+ens_char+".bin"
+    oname="/cluster/data6/menaka/HydroDA/dat/std_cal_sfcelv_49_"+runname+"_"+mapname+"_"+tagout+"_"+ens_char+".bin"
     # oname="/cluster/data6/menaka/HydroDA/dat/std_sfcelv_cal_"+runname+"_"+mapname+"_"+tagout+"_"+ens_char+".bin"
     iname="/cluster/data6/menaka/ensemble_simulations/CaMa_out/"+input_name+"/sfcelv_std"+tagout+".bin"
 
-    # print ("cp "+iname+" "+oname)
+    print ("cp "+iname+" "+oname)
     os.system("cp "+iname+" "+oname)
 
-    print (ens_char, oname)
+    # print (ens_char, oname)
     return
 #=============================
 inputlist=[]
-syear="%04d"%(2009) #2000)
-eyear="%04d"%(2009) #2014) #2010)
+syear="%04d"%(2000) #2000)
+eyear="%04d"%(2014) #2014) #2010)
 tag=syear+"-"+eyear
-expname="AMZ49" #pm.expname()
+# expname="AMZ049" #pm.expname()
+expname="AMZCAL049"
 runname="E2O" #pm.runname(pm.mode())
 mapname="amz_06min" #pm.mapname()
 ens_mem=49

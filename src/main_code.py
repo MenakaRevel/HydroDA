@@ -41,6 +41,7 @@ import params as pm
 ############
 def main_act():
 
+    print (pm.experiment())
     print (pm.version())
     print (pm.runname(pm.mode()))
 

@@ -4,7 +4,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import datetime
-from matplotlib.colors import LogNorm,Normalize,ListedColormap
+from matplotlib.colors import LogNorm,Normalize,ListedColormap,BoundaryNorm
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from mpl_toolkits.basemap import Basemap
 import matplotlib.cm as cm
@@ -32,7 +32,7 @@ import os
 
 #argvs = sys.argv
 
-#experiment="E2O_HydroWeb22"
+# experiment="E2O_HydroWeb22"
 # experiment="VIC_BC_HydroWeb11"
 # experiment="test_wse"
 # experiment="DIR_WSE_E2O_HWEB_001"
@@ -42,10 +42,10 @@ import os
 # experiment="ANO_WSE_E2O_HWEB_002"
 # experiment="ANO_WSE_E2O_HWEB_003"
 # experiment="ANO_WSE_E2O_HWEB_004"
-experiment="NOM_WSE_E2O_HWEB_001"
+# experiment="NOM_WSE_E2O_HWEB_001"
 # experiment="NOM_WSE_E2O_HWEB_002" 
 # experiment="NOM_WSE_E2O_HWEB_003"
-# experiment="NOM_WSE_E2O_HWEB_004"
+experiment="NOM_WSE_E2O_HWEB_004"
 # experiment="NOM_WSE_E2O_HWEB_005"
 # experiment="NOM_WSE_E2O_HWEB_006"
 # experiment="NOM_WSE_E2O_HWEB_007"
@@ -99,11 +99,11 @@ def vec_par(LEVEL,ax=None):
         lon2 = float(line[3])
         lat2 = float(line[4])
 
-        # ix = int((lon1 + 180.)*(1/gsize))
-        # iy = int((-lat1 + 90.)*(1/gsize))
+        ix = int((lon1 - west0)*(1/gsize))
+        iy = int((-lat1 + north0)*(1/gsize))
 
-        # if rivermap[iy,ix] == 0:
-        #     continue
+        if rivermap[iy-1,ix-1] == 0:
+            continue
 
         if lon1-lon2 > 180.0:
             print (lon1, lon2)
@@ -112,7 +112,7 @@ def vec_par(LEVEL,ax=None):
             print (lon1,lon2)
             lon2=-180.0
         #--------
-        colorVal="w" 
+        colorVal="grey" 
         #print (lon1,lon2,lat1,lat2,width)
         plot_ax(lon1,lon2,lat1,lat2,width,colorVal,ax)
 #====================================================================
@@ -187,10 +187,10 @@ ny     = int(filter(None, re.split(" ",lines[1]))[0])
 gsize  = float(filter(None, re.split(" ",lines[3]))[0])
 lon0   = float(filter(None, re.split(" ",lines[4]))[0])
 lat0   = float(filter(None, re.split(" ",lines[7]))[0])
-west   = float(filter(None, re.split(" ",lines[4]))[0])
-east   = float(filter(None, re.split(" ",lines[5]))[0])
-south  = float(filter(None, re.split(" ",lines[6]))[0])
-north  = float(filter(None, re.split(" ",lines[7]))[0])
+west0  = float(filter(None, re.split(" ",lines[4]))[0])
+east0  = float(filter(None, re.split(" ",lines[5]))[0])
+south0 = float(filter(None, re.split(" ",lines[6]))[0])
+north0 = float(filter(None, re.split(" ",lines[7]))[0])
 #----
 nextxy = pm.CaMa_dir()+"/map/"+pm.mapname()+"/nextxy.bin"
 rivwth = pm.CaMa_dir()+"/map/"+pm.mapname()+"/rivwth_gwdlr.bin"
@@ -235,13 +235,13 @@ pname=[]
 xlist=[]
 ylist=[]
 river=[]
-# rivernames = grdc.grdc_river_name_v396()
-rivernames  = ["AMAZON","NEGRO, RIO","PURUS, RIO","MADEIRA, RIO","JURUA, RIO"
-              ,"TAPAJOS, RIO","XINGU, RIO","CURUA, RIO","JAPURA, RIO","BRANCO, RIO"
-              ,"JAVARI, RIO","IRIRI, RIO","JURUENA, RIO","ACRE, RIO","BENI, RIO"
-              ,"MAMORE, RIO","GUAPORE, RIO","ARINOS, RIO","TROMBETAS, RIO"]
+rivernames = grdc.grdc_river_name_v396(fname="/cluster/data6/menaka/HydroDA/dat/grdc_"+pm.mapname()+".txt")
+# rivernames  = ["AMAZON","NEGRO, RIO","PURUS, RIO","MADEIRA, RIO","JURUA, RIO"
+#               ,"TAPAJOS, RIO","XINGU, RIO","CURUA, RIO","JAPURA, RIO","BRANCO, RIO"
+#               ,"JAVARI, RIO","IRIRI, RIO","JURUENA, RIO","ACRE, RIO","BENI, RIO"
+#               ,"MAMORE, RIO","GUAPORE, RIO","ARINOS, RIO","TROMBETAS, RIO"]
 for rivername in rivernames:
-    grdc_id,station_loc,x_list,y_list = grdc.get_grdc_loc_v396(rivername)
+    grdc_id,station_loc,x_list,y_list = grdc.get_grdc_loc_v396(rivername,fname="/cluster/data6/menaka/HydroDA/dat/grdc_"+pm.mapname()+".txt")
     #print (rivername, grdc_id,station_loc)
     river.append([rivername]*len(station_loc))
     staid.append(grdc_id)
@@ -318,6 +318,11 @@ p.terminate()
 land="#C0C0C0"
 water="#FFFFFF"
 
+west=west0
+east=east0
+south=south0-2
+north=north0+2
+
 londiff=(east-west)*4
 latdiff=(north-south)*4
 
@@ -331,12 +336,14 @@ epix=(180+east)*4
 # cmap=cm.get_cmap("bwr")
 # cmap=cm.get_cmap("Spectral_r")
 # cmap=cm.get_cmap("PiYG")
-cmap=cm.get_cmap("PRGn")
+# cmap=cm.get_cmap("PRGn")
 # cmap.set_under("w",alpha=0)
+cmap=mbar.colormap("H07")
 cmapL=cmap #cm.get_cmap("rainbow_r")
-vmin=-0.50
-vmax=0.50
-norm=Normalize(vmin=vmin,vmax=vmax)
+vmin=-0.40
+vmax=0.40
+# norm=Normalize(vmin=vmin,vmax=vmax)
+norm=BoundaryNorm(np.arange(vmin,vmax+0.1,0.1),cmapL.N)
 #------
 # river width
 sup=2
@@ -351,25 +358,33 @@ G = gridspec.GridSpec(1,1)
 ax=fig.add_subplot(G[0,0])
 m = Basemap(projection='cyl',llcrnrlat=south,urcrnrlat=north,llcrnrlon=west,urcrnrlon=east, lat_ts=0,resolution='c',ax=ax)
 #m.drawcoastlines( linewidth=0.1, color='k' )
-m.fillcontinents(color=land,lake_color=water,zorder=99)
+# m.fillcontinents(color=land,lake_color=water,zorder=99)
 #m.drawmapboundary(fill_color=water,zorder=100)
 im=plt.scatter([],[],c=[],cmap=cmap,s=0.1,vmin=vmin,vmax=vmax,norm=norm,zorder=101)
 im.set_visible(False)
-m.drawparallels(np.arange(south,north+0.1,5), labels = [1,0,0,0], fontsize=10,linewidth=0,zorder=102)
-m.drawmeridians(np.arange(west,east+0.1,5), labels = [0,0,0,1], fontsize=10,linewidth=0,zorder=102)
+# m.drawparallels(np.arange(south,north+0.1,5), labels = [1,0,0,0], fontsize=10,linewidth=0,zorder=102)
+# m.drawmeridians(np.arange(west,east+0.1,5), labels = [0,0,0,1], fontsize=10,linewidth=0,zorder=102)
 #--
+m.readshapefile('../dat/Amazon_basin/Amazon_boundry', 'Amazon_boundry', drawbounds = False)
+for info, shape in zip(m.Amazon_boundry, m.Amazon_boundry):
+    # if info['nombre'] == 'Amazon_boundry':
+    x, y = zip(*shape) 
+    m.plot(x, y, marker=None,color='grey',linewidth=1.0)
+#---
 box="%f %f %f %f"%(west,east,north,south) 
 os.system("./bin/txt_vector "+box+" "+pm.CaMa_dir()+" "+pm.mapname()+" > corrtmp1.txt") 
 #map(vec_par,np.arange(1,10+1,1))
 map(vec_par,np.arange(2,10+1,1))
 # map(vec_par,np.arange(5,10+1,1))
 #--
+over1=0
+allst=0
 for point in np.arange(pnum):
     org=grdc.grdc_dis(staid[point],syear,eyear-1)
     org=np.array(org)
     # if np.sum(ma.masked_where(org!=-99.9,org))==0.0:
     if np.sum((org!=-9999.0)*1.0) == 0.0:
-        print ("no obs: ",pname[point], np.sum((org!=-9999.0)*1.0))
+        # print ("no obs: ",pname[point], np.sum((org!=-9999.0)*1.0))
         continue
     CORasm=correlation(np.mean(asm[:,:,point],axis=1),org)
     CORopn=correlation(np.mean(opn[:,:,point],axis=1),org)
@@ -383,14 +398,20 @@ for point in np.arange(pnum):
     iy=ylist[point]
     if rivermap[iy,ix] !=1.0:
         continue
+    if uparea[iy,ix] <1.0e10:
+        continue
     #--------------
+    if DCOR > 0.0:
+        over1=over1+1
+    allst=allst+1
     #lon=lon0+ix*gsize
     #lat=lat0-iy*gsize
     lon=lonlat[0,iy,ix]
     lat=lonlat[1,iy,ix]
     c=cmapL(norm(DCOR))
-    ax.scatter(lon,lat,s=15,marker="o",edgecolors="k", facecolors=c,zorder=106)
+    ax.scatter(lon,lat,s=15,marker="o",edgecolors="k",linewidth=0.5, facecolors=c,zorder=106)
     # print (river[point], pname[point],lon,lat,DCOR,CORasm,CORopn) #,NSEasm,NSEopn)
+    print (river[point], pname[point],DCOR)
     # if NSEAI > 0.0:
     #     print lon,lat, "%3.2f %3.2f %3.2f"%(NSEAI, NSEasm, NSEopn)
     # if NSEAI >= 0.00:
@@ -398,10 +419,16 @@ for point in np.arange(pnum):
     # if NSEAI < 0.00:
     #     print staid[point], pname[point]
     #     ax.scatter(lon,lat,s=10,marker="d",edgecolors=c, facecolors="k",zorder=106)
+#===
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.spines['bottom'].set_visible(False)
+ax.spines['left'].set_visible(False)
 #--
 cbar=m.colorbar(im,"right",size="2%",ticks=np.arange(vmin,vmax+0.001,0.1),extend="both")
-cbar.set_label("$\Delta$$correlation$") #$(r_{assim} - r_{open})$")
+cbar.set_label("$\Delta$ $r$") #$(r_{assim} - r_{open})$")
 # cbar.set_label("$r $ $correlation$") #$(r_{assim} - r_{open})$")
 #plt.title(stitle)
 plt.savefig(assim_out+"/figures/corr/corrscatter.png",dpi=500,bbox_inches="tight", pad_inches=0.05)
 os.system("rm -r corrtmp*.txt")
+print (experiment, over1, allst)

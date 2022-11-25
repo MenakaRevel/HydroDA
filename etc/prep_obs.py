@@ -25,10 +25,10 @@ import calendar
 import math
 import sys
 
-#external python codes
-dir_param="../gosh"
-sys.path.append(dir_param)
-import params as pm
+# #external python codes
+# dir_param="../gosh"
+# sys.path.append(dir_param)
+# import params as pm
 ###########################
 def mk_dir(sdir):
     try:
@@ -58,7 +58,8 @@ def get_HydroWeb():
 	# fname=pm.DA_dir()+"/dat/HydroWeb_alloc_"+pm.mapname()+".txt"
 	# fname=pm.DA_dir()+"/dat/HydroWeb_alloc_"+pm.mapname()+"_new.txt"
 	# fname=pm.DA_dir()+"/dat/HydroWeb_alloc_"+pm.mapname()+"_amz.txt"
-	fname=obs_list()
+	# fname=obs_list()
+	fname=HydroWeb_list()
 	#=========================
 	with open(fname,"r") as f:
 		lines=f.readlines()
@@ -162,7 +163,7 @@ def swot_data(yyyy,mm,dd):
 	# pre-simulated data
 	# river width thershold
 	rivwdth_thr=50.0 #m
-	nx,ny,gsize = pm.map_dimension()
+	nx,ny,gsize = map_dimension()
 	ny_swot = min(ny,640)
 	day=SWOT_day(yyyy,mm,dd)
 	SWOTDD="%02d"%(day)
@@ -172,9 +173,10 @@ def swot_data(yyyy,mm,dd):
 	meshP=mesh-1000*(mesh<0.1)
 	SWOTmesh=np.zeros([ny,nx],np.float32)
 	SWOTmesh[40:680,:]=meshP
-	fname=pm.CaMa_dir()+"/map/"+pm.mapname()+"/rivwth_gwdlr.bin"
+	fname=CaMa_dir()+"/map/"+mapname()+"/rivwth_gwdlr.bin"
 	rivwth=np.fromfile(fname,np.float32).reshape(ny,nx)
-	obs=(SWOTmesh>=1.0)*(rivwth>=rivwdth_thr)*1.0
+	damloc=dam_loc()
+	obs=(SWOTmesh>=1.0)*(rivwth>=rivwdth_thr)*(damloc>0.0)*1.0
 	lname =[]
 	xlist =[]
 	ylist =[]
@@ -185,7 +187,7 @@ def swot_data(yyyy,mm,dd):
 	# leledif, lEGM08, lEGM96, satellite
 	#===================================
 	# odir="/cluster/data6/menaka/ensemble_org/CaMa_out/E2O003"
-	odir=pm.obs_dir()
+	odir=obs_dir()
 	fname=odir+"/sfcelv"+yyyy+".bin"
 	year=int(yyyy)
 	mon=int(mm)
@@ -203,7 +205,7 @@ def swot_data(yyyy,mm,dd):
 	for ix in np.arange(nx):
 		for iy in np.arange(ny):
 			if obs[iy,ix] == 1.0:
-				wse=orgfile[it,iy,ix] + err_rand(ix,iy)
+				wse=orgfile[it,iy,ix] + err_rand(obs_err,ix,iy)
 				# print (ix,iy,wse[0])
 				l_wse.append(wse[0])
 				xlist.append(ix+1)
@@ -214,7 +216,7 @@ def swot_data(yyyy,mm,dd):
 	return xlist, ylist, l_wse, m_wse, s_wse, l_sat
 ####################################
 def SWOT_day(yyyy,mm,dd):
-	st_year,st_month,st_date=pm.starttime()
+	st_year,st_month,st_date=starttime()
 	start_time=datetime.date(st_year,st_month,st_date)
 	this_time=datetime.date(int(yyyy),int(mm),int(dd))
 	days=this_time-start_time
@@ -225,40 +227,59 @@ def SWOT_observation_error():
 	"""observation error of WSE depending on the L*W of each pixel
 	used sigma*(1/l)*(1/w) l=k*L, w=q*W  Rodrigaz et al 2017:
 	According to CaMa k=0.25, q=0.85"""
-	fname=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out/obs/obs_err.bin"
-	if os.path.isfile(fname):
-		return 0
-	else:
-		nx,ny,gsize = pm.map_dimension()
-		k=1.00 # assume nearest part to the unit catchment
-		q=1.00 # used 1.0 -> river width variability is 30%
-		ovs_err = 0.10
-		rivlen=np.fromfile(pm.CaMa_dir()+"/map/glb_15min/rivlen.bin",np.float32).reshape(ny,nx)
-		rivwth=np.fromfile(pm.CaMa_dir()+"/map/glb_15min/rivwth_gwdlr.bin",np.float32).reshape(ny,nx)
-		nextx=(np.fromfile(pm.CaMa_dir()+"/map/glb_15min/nextxy.bin",np.int32).reshape(2,ny,nx)[0]!=-9999)*1.0
-		rivlen=1.0 #rivlen*1.0e-3 #used as one kilometer
-		rivwth=rivwth*1.0e-3
-		area=(k*rivlen)*(q*rivwth)
-		obs_err=ovs_err*(1/(k*rivlen+1.0e-20))*(1/(q*rivwth+1.0e-20))*nextx
-		#obs_err=pm.ovs_err()*(1/(area+1.0e-20))*nextx
-		# if water area < 1.0 km2 -> 0.25
-		obs_err=obs_err*(area>=1.0)*1.0+0.25*(1/(k*rivlen+1.0e-20))*(1/(q*rivwth+1.0e-20))*nextx*(area<1.0)*1.0
-		obs_err=ma.masked_where(area<0.625,obs_err).filled(0.25) # 25cm for < 1km^2 water area
-		obs_err=obs_err*nextx
-		obs_err=obs_err.astype(np.float32)
-		# obs_err0=obs_err[iy,ix]
-		fname=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out/obs/obs_err.bin"
-		obs_err.tofile(fname)
-		return 0
-#########################
-def err_rand(ix,iy):
-	"""make random values to add to true values"""
-	nx,ny,gsize = pm.map_dimension()
-	fname=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out/obs/obs_err.bin"
-	obs_err=np.fromfile(fname,np.float32).reshape(ny,nx)
+	# fname=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out/obs/obs_err.bin"
+	# if os.path.isfile(fname):
+	# 	obs_err=np.fromfile(fname,np.float32).reshape(ny,nx)
+	# 	return 0
+	# else:
+	nx,ny,gsize = map_dimension()
+	k=1.00 # assume nearest part to the unit catchment
+	q=1.00 # used 1.0 -> river width variability is 30%
+	ovs_err = 0.10
+	rivlen=np.fromfile(CaMa_dir()+"/map/"+mapname()+"/rivlen.bin",np.float32).reshape(ny,nx)
+	rivwth=np.fromfile(CaMa_dir()+"/map/"+mapname()+"/rivwth_gwdlr.bin",np.float32).reshape(ny,nx)
+	nextx=(np.fromfile(CaMa_dir()+"/map/"+mapname()+"/nextxy.bin",np.int32).reshape(2,ny,nx)[0]!=-9999)*1.0
+	rivlen=1.0 #rivlen*1.0e-3 #used as one kilometer
+	rivwth=rivwth*1.0e-3
+	area=(k*rivlen)*(q*rivwth)
+	obs_err=ovs_err*(1/(k*rivlen+1.0e-20))*(1/(q*rivwth+1.0e-20))*nextx
+	#obs_err=pm.ovs_err()*(1/(area+1.0e-20))*nextx
+	# if water area < 1.0 km2 -> 0.25
+	obs_err=obs_err*(area>=1.0)*1.0+0.25*(1/(k*rivlen+1.0e-20))*(1/(q*rivwth+1.0e-20))*nextx*(area<1.0)*1.0
+	obs_err=ma.masked_where(area<0.625,obs_err).filled(0.25) # 25cm for < 1km^2 water area
 	obs_err=obs_err*((obs_err<=0.25)*1.0) + 0.25*((obs_err>0.25)*1.0)
+	obs_err=obs_err*nextx
+	obs_err=obs_err.astype(np.float32)
+	# obs_err0=obs_err[iy,ix]
+	# fname=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out/obs/obs_err.bin"
+	# obs_err.tofile(fname)
+	return obs_err
+#########################
+def err_rand(obs_err,ix,iy):
+	"""make random values to add to true values"""
+	# nx,ny,gsize = pm.map_dimension()
+	# fname=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out/obs/obs_err.bin"
+	# obs_err=np.fromfile(fname,np.float32).reshape(ny,nx)
+	# obs_err=obs_err*((obs_err<=0.25)*1.0) + 0.25*((obs_err>0.25)*1.0)
 	rand = np.random.normal(0.0,obs_err[iy,ix],1)
 	return rand
+#########################
+def dam_loc():
+	"Prepare dam location"
+	nx,ny,gsize = map_dimension()
+	damloc=np.ones([ny,nx],np.float32)
+	#-----
+	with open(dam_list(),"r") as f:
+		lines=f.readlines()
+	#
+	for line in lines[1::]:
+		line    = re.split(" ",line)
+		line    = list(filter(None, line))
+		#---------------------------------
+		ix      = int(line[4]) - 1
+		iy      = int(line[5]) - 1
+		damloc[iy,ix]=-9999.0
+	return damloc
 #########################
 def write_txt(inputlist):
     yyyy=inputlist[0]
@@ -294,14 +315,13 @@ def prepare_obs(dir0="./"):
 	"""
 	# making dir
 	mk_dir(dir0)
-
 	#=========================
 	syear,smon,sday=starttime()
 	eyear,emon,eday=endtime()
 	start_dt=datetime.date(syear,smon,sday)
 	end_dt=datetime.date(eyear,emon,eday)
 	start=0
-	last=(end_dt-start_dt).days
+	last=(end_dt-start_dt).days + 1
 	# print (start,last)
 	#-------
 	inputlist=[]
@@ -313,11 +333,13 @@ def prepare_obs(dir0="./"):
 		# print (yyyy,mm,dd) #,obs_dir
 		inputlist.append([yyyy,mm,dd,dir0])
 	# write text files parallel
-	p=Pool(6)
+	p=Pool(10)
 	p.map(write_txt,inputlist)
 	p.terminate()
 	# map(write_txt,inputlist)
 	return 0
+####################################
+############# parameters ###########
 ####################################
 def starttime():
     return 2002,1,1
@@ -327,12 +349,55 @@ def endtime():
 ####################################
 def obs_list():
     # return "../dat/HydroWeb_alloc_amz_06min_QC0_simulation.txt"
+	# return "../dat/HydroWeb_alloc_amz_06min_2002-2020.txt"
 	return "../dat/HydroWeb_alloc_glb_15min.txt"
 ####################################
+def HydroWeb_list():
+    # return "../dat/HydroWeb_alloc_amz_06min_QC0_simulation.txt"
+	return "../dat/HydroWeb_alloc_amz_06min_2002-2020.txt"
+####################################
 def obs_name():
-    return "HydroWeb"
+    # return "HydroWeb"
+	return "SWOT"
+####################################
+def obs_dir():
+    # return "/cluster/data7/menaka/HydroDA/obs/HydroWeb"
+    # return "/cluster/data6/menaka/HydroWeb"
+    # return "/cluster/data6/menaka/ensemble_org/CaMa_out/E2O003"
+	return "/work/a04/julien/CaMa-Flood_v4/out/coupled-model2"
+####################################
+def dam_list():
+	return "../dat/dam_glb_15min.txt"
+####################################
+def CaMa_dir():
+	return "/cluster/data6/menaka/CaMa-Flood_v4"
+    # directory of CaMa-Flood
+    # indicate the directory of ./map or ./src and other folders
+####################################
+def mapname():
+    # return "amz_06min"
+    return "glb_15min"
+    # related CaMa-Flood map directory
+    # [e.g. : glb_15min, glb_06min, Mkg_06min, etc.]
+    # Check 
+####################################
+def map_dimension():
+    fname=CaMa_dir()+"/map/"+mapname()+"/params.txt"
+    with open(fname,"r") as f:
+        lines=f.readlines()
+    #-------
+    nx     = int(filter(None, re.split(" ",lines[0]))[0])
+    ny     = int(filter(None, re.split(" ",lines[1]))[0])
+    gsize  = float(filter(None, re.split(" ",lines[3]))[0])
+    return nx,ny,gsize
+####################################
+def out_dir():
+	# return "/cluster/data7/menaka/HydroDA/obs/HydroWeb"
+	# return "/cluster/data7/menaka/HydroDA/obs/HydroWebAll"
+	return "/cluster/data7/menaka/HydroDA/obs/SWOTH08"
 ####################################
 if __name__ == "__main__":
 	print ("prepare observations")
 	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/HydroWeb")
-	prepare_obs("/cluster/data7/menaka/HydroDA/obs/HydroWeb_glb_15min")
+	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/HydroWeb_glb_15min")
+	prepare_obs("/cluster/data7/menaka/HydroDA/obs/SWOTH08") # for SWOTH08

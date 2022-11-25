@@ -346,7 +346,7 @@ def prepare_obs_old():
 ####################################
 def prepare_obs():
 	"""
-	Link observation files
+	link observation files
 	"""
 	if os.path.islink("./assim_out/obs"):
 		os.system("rm -rf ./assim_out/obs")

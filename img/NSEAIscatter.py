@@ -47,7 +47,7 @@ import os
 # experiment="NOM_WSE_E2O_HWEB_003"
 experiment="NOM_WSE_E2O_HWEB_004"
 # experiment="NOM_WSE_E2O_HWEB_005"
-# experiment="NOM_WSE_E2O_HWEB_006"
+experiment="NOM_WSE_E2O_HWEB_006"
 # experiment="NOM_WSE_E2O_HWEB_007"
 # experiment="NOM_WSE_E2O_HWEB_008"
 # experiment="NOM_WSE_E2O_HWEB_009"
@@ -232,9 +232,9 @@ for rivername in rivernames:
 river=([flatten for inner in river for flatten in inner])
 staid=([flatten for inner in staid for flatten in inner])
 pname=([flatten for inner in pname for flatten in inner])
-print (len(pname), len(xlist))
 xlist=([flatten for inner in xlist for flatten in inner])
 ylist=([flatten for inner in ylist for flatten in inner])
+print (len(pname), len(xlist))
 #########################################################
 pnum=len(pname)
 opn=np.ctypeslib.as_ctypes(np.zeros([N,pm.ens_mem(),pnum],np.float32))
@@ -346,7 +346,7 @@ for info, shape in zip(m.Amazon_boundry, m.Amazon_boundry):
 box="%f %f %f %f"%(west,east,north,south) 
 os.system("./bin/txt_vector "+box+" "+pm.CaMa_dir()+" "+pm.mapname()+" > NSEAItmp1.txt") 
 #map(vec_par,np.arange(1,10+1,1))
-map(vec_par,np.arange(2,10+1,1))
+# map(vec_par,np.arange(2,10+1,1))
 # map(vec_par,np.arange(5,10+1,1))
 #--
 for point in np.arange(pnum):

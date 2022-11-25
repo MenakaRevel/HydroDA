@@ -24,7 +24,7 @@ def mode():
     # 1: Earth2Obs, 2: ERA20CM, 3: VIC_BC, 4: baised (ECMWF/ELSE_KIM2009/E2O/ERA20CM), 5: ERA5
 
 def conflag():
-    return 3
+    return 2
     # converstion flag for observation converstions 
     #  1 - Directly values 
     #  2 - Anomalies
