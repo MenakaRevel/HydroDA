@@ -158,10 +158,10 @@ def timestep():
     return 86400 # outer timestep in seconds
 
 def starttime():
-    return (2009,1,1) # start date: [year,month,date]
+    return (2001,1,1) # start date: [year,month,date]
 
 def endtime():
-    return (2010,1,1) # end date: [year,month,date]
+    return (2015,1,1) # end date: [year,month,date]
                       # *note: this date is not included
 
 # **************************************************************
@@ -175,7 +175,7 @@ def spinup_mode():
     ### if initial restart file is ready, spinup simulation is no need
 
 def spinup_end_year():
-    return 2008
+    return 2000
 
 def spinup_end_month():
     return 12
@@ -397,7 +397,7 @@ def slack_notification():
 # **************************************************************
 # 8. parallel run settings
 def para_nums():
-    return 10
+    return 20
     # setting number of parallels to run CaMa-Flood Model
     # defualt is 6, but may change depending on your system
 

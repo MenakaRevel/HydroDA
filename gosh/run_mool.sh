@@ -23,7 +23,7 @@
 ################################################################################################
 
 ### SET "mool PBS" @ IIS U-Tokyo
-#PBS -q F40S
+#PBS -q F40
 #PBS -l select=1:ncpus=40:mem=100gb
 #PBS -j oe
 #PBS -m ea
@@ -49,7 +49,8 @@ export OMP_NUM_THREADS=$NCPUS
 
 # go to working dirctory
 HydroDA="/cluster/data6/menaka/HydroDA"
-HydroDAout="/cluster/data7/menaka/HydroDA"
+# HydroDAout="/cluster/data7/menaka/HydroDA"
+HydroDAout="/work/a06/menaka/HydroDA"
 
 #----------
 # cd $HydroDA
