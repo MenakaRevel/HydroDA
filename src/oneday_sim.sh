@@ -107,7 +107,7 @@ LADPSTP=".TRUE."                            # .TRUE. for adaptive time step
 LFPLAIN=".TRUE."                            # .TRUE. to activate floodplain storage
 LKINE=".FALSE."                             # .TRUE. to use kinematic wave equation
 LFLDOUT=".TRUE."                            # .TRUE. to activate floodplain discharge
-LPTHOUT=".FALSE."                           # .TRUE. to activate bifurcation flow, mainly for delta simulation
+LPTHOUT=".TRUE."                            # .TRUE. to activate bifurcation flow, mainly for delta simulation
 LDAMOUT=".FALSE."                           # .TRUE. to activate reservoir operation (under development)
 
 

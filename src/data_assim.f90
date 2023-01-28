@@ -14,6 +14,9 @@ program data_assim
 ! created by Ikeshima & Menaka
 ! Menaka@IIS 2021
 !*************************************************************************************
+use letkf
+use common
+!*************************************************************************************
 implicit none
 character(len=128)              :: fname,buf,camadir,expdir,DAdir,patchdir,hydrowebdir,mapname,patchname,cal
 character(len=8)                :: yyyymmdd,nxtyyyymmdd
@@ -182,7 +185,7 @@ open(36,file=fname,status='replace')
 errrand=-1
 write(36,*) errrand
 close(36)
-
+! Initiate logfiles
 fname=trim(adjustl(expdir))//"/logout/assimLog_"//yyyymmdd//".log"
 open(78,file=fname,status='replace')
 write(78,*) "File I/O Errors"

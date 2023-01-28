@@ -1,17 +1,31 @@
 #=========
 include ../gosh/Mkinclude
 #=========
-TARGETS=\
-data_assim\
-make_restart
+#*** module
+OBJECTS=\
+letkf.o\
+common.o
+
+#=========
+TARGET=\
+data_assim
 
 # Suffix
-.SUFFIXES : .f90
-.f90:
-	$(FC) ${FFLAGS} ${INC} ${LIB} $^ -o $@
+.SUFFIXES: .o .f90
+
+%.o: %.f90
+	$(FC) ${FFLAGS} ${INC} ${LIB} -c $<
+
+$(TARGET): $(OBJECTS) $(TARGET).o
+	$(FC) $(FFLAGS) $@.o $(OBJECTS) -o $@ $(LIB)
+
+# Dependecies
+letkf.o  : letkf.f90 common.o
+common.o : common.f90
 
 # commands
-all: $(TARGETS)
+all: $(TARGET)
 # clean
+.PHONY: clean
 clean:
-	rm -rf  $(TARGETS)
+	rm -rf *.o *~ *.mod $(TARGET)
