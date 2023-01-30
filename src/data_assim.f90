@@ -566,7 +566,8 @@ write(78,*) "Assimilation of each grid"
 ! parallel calculation
 ! errflg=0
 !$omp parallel default(none)&
-!$omp& shared(lon_cent,assimW,assimE,assimN,assimS,ocean,rivwth,rivhgt,obs_mask,patch_size,ens_num,&
+!$omp& shared(lon_cent,assimW,assimE,assimN,assimS, &
+!$omp& ocean,rivwth,rivhgt,obs_mask,patch_size,ens_num, &
 !$omp& patch_nums,nextX,nextY,nextdst,errfix, &
 !$omp& swot_obs,globalx,globaltrue,global_xa,global_null) &
 !$omp& private(lat_cent,lat,lon,llon,llat,fname,fn,ios,weightage, &
@@ -608,12 +609,16 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         fname=trim(adjustl(patchdir))//"/"//trim(patchname)//"/patch"//trim(llon)//trim(llat)//".txt"
         !write(*,*) fname
         open(34,file=fname,status='old',access='sequential',form='formatted',action='read',iostat=ios)!
-        if(ios==0)then
-            do i=1, countnumber
-                read(34,*) xlist(i),ylist(i),wgt(i)
-                !write(*,*) xlist(i),ylist(i),wgt(i)
-            end do
-        else
+        if(ios/=0)then
+            print*, "no local patch file", fname
+            write(82,*) "no local patch file at:", fname
+            write(78,*) "no local patch file at:", fname
+            goto 1090
+        end if
+        1000 continue
+            read(34,*,end=1090) xlist,ylist,wgt
+            goto 1000
+        1090 continue
             ! allocate(lag(1),xlist(1),ylist(1),wgt(1))
             ! lag(1)=0.0
             ! xlist(1)=lon_cent
@@ -621,10 +626,6 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
             ! wgt(1)=1.0
             ! countnumber=1
             ! targetpixel=1
-            print*, "no local patch file", fname
-            write(82,*) "no local patch file at:", fname
-            write(78,*) "no local patch file at:", fname
-        end if
         !write(*,23) xlist,ylist,wgt
         close(34)
         !--
@@ -1231,17 +1232,17 @@ std_obs=-9999.0
     open(11, file=fname, form='formatted',iostat=ios)
     if (ios /= 0) then 
         print*, "no observations: ", fname, ios
-        goto 1090
+        goto 2090
     end if
-1000 continue
-    read(11,*,end=1090) ix, iy, wse, mean, std, sat
+2000 continue
+    read(11,*,end=2090) ix, iy, wse, mean, std, sat
     ! print*, yyyymmdd, ix, iy, wse, trim(sat)
     obs(ix,iy)=wse
     obs_err(ix,iy)=obs_error(sat)
     mean_obs(ix,iy)=mean
     std_obs(ix,iy)=std
-    goto 1000
-1090 continue
+    goto 2000
+2090 continue
 return
 end subroutine read_observation
 !*****************************************************************
