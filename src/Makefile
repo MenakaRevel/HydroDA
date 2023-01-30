@@ -3,7 +3,10 @@ include ../gosh/Mkinclude
 #=========
 #*** module
 OBJECTS=\
-letkf.o\
+mod_varxf.o\
+mod_patch.o\
+mod_obser.o\
+mod_letkf.o\
 common.o
 
 #=========
@@ -20,8 +23,11 @@ $(TARGET): $(OBJECTS) $(TARGET).o
 	$(FC) $(FFLAGS) $@.o $(OBJECTS) -o $@ $(LIB)
 
 # Dependecies
-letkf.o  : letkf.f90 common.o
-common.o : common.f90
+mod_varxf.o  : mod_varxf.f90 common.o
+mod_patch.o  : mod_patch.f90 common.o
+mod_obser.o  : mod_obser.f90 common.o
+mod_letkf.o  : mod_letkf.f90 common.o
+common.o     : common.f90
 
 # commands
 all: $(TARGET)

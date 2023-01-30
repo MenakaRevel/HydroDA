@@ -15,6 +15,9 @@ program data_assim
 ! Menaka@IIS 2021
 !*************************************************************************************
 use letkf
+use obser
+use patch
+use varxf
 use common
 !*************************************************************************************
 implicit none
@@ -606,40 +609,48 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         ! open emperical local patch
         write(llon,'(i4.4)') lon_cent
         write(llat,'(i4.4)') lat_cent
+        !============================
+        ! read emperical local patch 
+        !============================
         fname=trim(adjustl(patchdir))//"/"//trim(patchname)//"/patch"//trim(llon)//trim(llat)//".txt"
+        call read_elp(fname,num,xlist,ylist,wgt)
         !write(*,*) fname
-        open(34,file=fname,status='old',access='sequential',form='formatted',action='read',iostat=ios)!
-        if(ios/=0)then
-            print*, "no local patch file", fname
-            write(82,*) "no local patch file at:", fname
-            write(78,*) "no local patch file at:", fname
-            goto 1090
-        end if
-        1000 continue
-            read(34,*,end=1090) xlist,ylist,wgt
-            goto 1000
-        1090 continue
-            ! allocate(lag(1),xlist(1),ylist(1),wgt(1))
-            ! lag(1)=0.0
-            ! xlist(1)=lon_cent
-            ! ylist(1)=lat_cent
-            ! wgt(1)=1.0
-            ! countnumber=1
-            ! targetpixel=1
-        !write(*,23) xlist,ylist,wgt
-        close(34)
+        ! ! open(34,file=fname,status='old',access='sequential',form='formatted',action='read',iostat=ios)!
+        ! ! if(ios/=0)then
+        ! !     print*, "no local patch file", fname
+        ! !     write(82,*) "no local patch file at:", fname
+        ! !     write(78,*) "no local patch file at:", fname
+        ! !     goto 1090
+        ! ! end if
+        ! ! 1000 continue
+        ! !     read(34,*,end=1090) xlist,ylist,wgt
+        ! !     goto 1000
+        ! ! 1090 continue
+        ! !     ! allocate(lag(1),xlist(1),ylist(1),wgt(1))
+        ! !     ! lag(1)=0.0
+        ! !     ! xlist(1)=lon_cent
+        ! !     ! ylist(1)=lat_cent
+        ! !     ! wgt(1)=1.0
+        ! !     ! countnumber=1
+        ! !     ! targetpixel=1
+        ! ! !write(*,23) xlist,ylist,wgt
+        ! ! close(34)
         !--
-        if (patch_size == 0) then ! for zero local patch ***Only target pixel is used
-            patch_start=targetpixel
-            patch_end=targetpixel
-            target_pixel=1
-            countnum=1
-        else
-            patch_start=1
-            patch_end=countnumber
-            target_pixel=targetpixel
-            countnum=countnumber
-        end if
+        !============================
+        ! assign local patch 
+        !============================
+        call assign_local_patch(countnumber,targetpixel,patch_size,patch_start,patch_end,target_pixel,countnum)
+        ! ! if (patch_size == 0) then ! for zero local patch ***Only target pixel is used
+        ! !     patch_start=targetpixel
+        ! !     patch_end=targetpixel
+        ! !     target_pixel=1
+        ! !     countnum=1
+        ! ! else
+        ! !     patch_start=1
+        ! !     patch_end=countnumber
+        ! !     target_pixel=targetpixel
+        ! !     countnum=countnumber
+        ! ! end if
         !============================
         write(79,*)"patch dimesion",patch_start,patch_end,target_pixel,countnum
         !write(*,*)"patch dimesion",patch_start,patch_end,target_pixel,countnum
@@ -663,60 +674,62 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         xt=-9999.0
         !print*,"L514: read observation"
         !print*, patch_start,patch_end
-        ! read observations
         !print*,"^^^^^^^^^^^^^^^^^"
         !print*, lon_cent,lat_cent
-        j=1
-        do i=patch_start,patch_end
-            i_m=xlist(i)
-            j_m=ylist(i)
-            if (obs(i_m,j_m)/=-9999.0) then
-                !print*, obs(i_m,j_m),altitude(i_m,j_m)
-                ! print*,"^^^^^^^^^^^^^^^^^"
-                ! print*,lon_cent,lat_cent,patch_start,patch_end,targetpixel,countnumber
-                local_sat(j)=1.0
-                !!! observation converstions 
-                !  1 - Directly values 
-                !  2 - Anomalies
-                !  3 - Normalized values
-                !  4 - Log converted values
-                if (conflag == 1) then
-                    xt(j)=obs(i_m,j_m)
-                    local_err(j)=obs_err(i_m,j_m)
-                else if (conflag == 2) then
-                    xt(j)=obs(i_m,j_m)-mean_obs(i_m,j_m)
-                    local_err(j)=obs_err(i_m,j_m)
-                else if (conflag == 3) then
-                    xt(j)=(obs(i_m,j_m)-mean_obs(i_m,j_m))/(std_obs(i_m,j_m)+1.0e-20)
-                    local_err(j)=obs_err(i_m,j_m)/(std_obs(i_m,j_m)+1.0e-20)
-                else if (conflag == 4) then
-                    xt(j)=log10(obs(i_m,j_m))
-                    local_err(j)=sqrt(log10(obs_err(i_m,j_m)**2+1))
-                end if
-                ! local_err(j)=obs_err(i_m,j_m)
-                !xt(i)=obs(i_m,j_m) - altitude(i_m,j_m) + elevtn(i_m,j_m)
-                !xt(j)=obs(i_m,j_m) - mean_obs(i_m,j_m) !+ meanglobaltrue(i_m,j_m)
-                !xt(j)=((obs(i_m,j_m) - mean_obs(i_m,j_m))/std_obs(i_m,j_m))*stdglobaltrue(i_m,j_m) + meanglobaltrue(i_m,j_m)
-                ! xt(j)=(obs(i_m,j_m)-mean_obs(i_m,j_m))/(std_obs(i_m,j_m)+1.0e-20)
-                write(79,*) "Observations"
-                write(79,*) i_m,j_m, conflag, xt(j) !    obs(i_m,j_m),mean_obs(i_m,j_m),std_obs(i_m,j_m) !,stdglobaltrue(i_m,j_m) , meanglobaltrue(i_m,j_m)
-                ! print*, "observation converstion"
-                ! print*,i_m,j_m, conflag, xt(j) !,obs(i_m,j_m),mean_obs(i_m,j_m),std_obs(i_m,j_m)!,stdglobaltrue(i_m,j_m) , meanglobaltrue(i_m,j_m)
-                !max(obs_err(i_m,j_m),0.30)
-            else
-                local_sat(j)=-9999.0
-                xt(j)=-9999.0
-                local_err(j)=-9999.0
-            end if
-            j=j+1
-            !! get the VS for (i_m,j_m)
-            !call get_virtualstation(i_m,j_m,yyyymmdd,10.0,hydrowebdir,mapname,station,wse,std,flag)
-            !if (flag==1) then
-            !    local_sat(i)=1
-            !    xt(i)=wse
-            !    local_err(i)=std
-            !end if
-        end do
+        !====================================================
+        ! read local observations
+        !====================================================
+        ! ! j=1
+        ! ! do i=patch_start,patch_end
+        ! !     i_m=xlist(i)
+        ! !     j_m=ylist(i)
+        ! !     if (obs(i_m,j_m)/=-9999.0) then
+        ! !         !print*, obs(i_m,j_m),altitude(i_m,j_m)
+        ! !         ! print*,"^^^^^^^^^^^^^^^^^"
+        ! !         ! print*,lon_cent,lat_cent,patch_start,patch_end,targetpixel,countnumber
+        ! !         local_sat(j)=1.0
+        ! !         !!! observation converstions 
+        ! !         !  1 - Directly values 
+        ! !         !  2 - Anomalies
+        ! !         !  3 - Normalized values
+        ! !         !  4 - Log converted values
+        ! !         if (conflag == 1) then
+        ! !             xt(j)=obs(i_m,j_m)
+        ! !             local_err(j)=obs_err(i_m,j_m)
+        ! !         else if (conflag == 2) then
+        ! !             xt(j)=obs(i_m,j_m)-mean_obs(i_m,j_m)
+        ! !             local_err(j)=obs_err(i_m,j_m)
+        ! !         else if (conflag == 3) then
+        ! !             xt(j)=(obs(i_m,j_m)-mean_obs(i_m,j_m))/(std_obs(i_m,j_m)+1.0e-20)
+        ! !             local_err(j)=obs_err(i_m,j_m)/(std_obs(i_m,j_m)+1.0e-20)
+        ! !         else if (conflag == 4) then
+        ! !             xt(j)=log10(obs(i_m,j_m))
+        ! !             local_err(j)=sqrt(log10(obs_err(i_m,j_m)**2+1))
+        ! !         end if
+        ! !         ! local_err(j)=obs_err(i_m,j_m)
+        ! !         !xt(i)=obs(i_m,j_m) - altitude(i_m,j_m) + elevtn(i_m,j_m)
+        ! !         !xt(j)=obs(i_m,j_m) - mean_obs(i_m,j_m) !+ meanglobaltrue(i_m,j_m)
+        ! !         !xt(j)=((obs(i_m,j_m) - mean_obs(i_m,j_m))/std_obs(i_m,j_m))*stdglobaltrue(i_m,j_m) + meanglobaltrue(i_m,j_m)
+        ! !         ! xt(j)=(obs(i_m,j_m)-mean_obs(i_m,j_m))/(std_obs(i_m,j_m)+1.0e-20)
+        ! !         write(79,*) "Observations"
+        ! !         write(79,*) i_m,j_m, conflag, xt(j) !    obs(i_m,j_m),mean_obs(i_m,j_m),std_obs(i_m,j_m) !,stdglobaltrue(i_m,j_m) , meanglobaltrue(i_m,j_m)
+        ! !         ! print*, "observation converstion"
+        ! !         ! print*,i_m,j_m, conflag, xt(j) !,obs(i_m,j_m),mean_obs(i_m,j_m),std_obs(i_m,j_m)!,stdglobaltrue(i_m,j_m) , meanglobaltrue(i_m,j_m)
+        ! !         !max(obs_err(i_m,j_m),0.30)
+        ! !     else
+        ! !         local_sat(j)=-9999.0
+        ! !         xt(j)=-9999.0
+        ! !         local_err(j)=-9999.0
+        ! !     end if
+        ! !     j=j+1
+        ! !     !! get the VS for (i_m,j_m)
+        ! !     !call get_virtualstation(i_m,j_m,yyyymmdd,10.0,hydrowebdir,mapname,station,wse,std,flag)
+        ! !     !if (flag==1) then
+        ! !     !    local_sat(i)=1
+        ! !     !    xt(i)=wse
+        ! !     !    local_err(i)=std
+        ! !     !end if
+        ! ! end do
         !---
         local_obs=0
 
@@ -727,32 +740,36 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
 
         ! make xf =====================================
         !write(*,*) "make xf"
+        !====================================================
+        ! read local prognostic variable
+        !====================================================
         allocate(xf(countnum,ens_num))!localx(countnum,countnum,ens_num),
-        xf=0
-        !print*,"L538: read model forcasts"
-        j=1
-        do i=patch_start,patch_end
-            i_m=xlist(i)
-            j_m=ylist(i)
-            !xf(j,:)=globalx(i_m,j_m,:)!-meanglobaltrue(i_m,j_m)
-            do num=1, ens_num
-                !xf(j,num)=globalx(i_m,j_m,num)-meanglobalx(i_m,j_m,num)
-                !xf(j,num)=(globalx(i_m,j_m,num)-meanglobalx(i_m,j_m,num))/(stdglobalx(i_m,j_m,num)+1.0e-20)
-                ! xf(j,num)=(globalx(i_m,j_m,num)-meanglobaltrue(i_m,j_m))/stdglobaltrue(i_m,j_m) !meanglobalx(i_m,j_m,num)
-            !    !print*, "L611",globalx(i_m,j_m,num)-meanglobaltrue(i_m,j_m)
-                if (conflag == 1) then
-                    xf(j,num)=globalx(i_m,j_m,num)
-                else if (conflag == 2) then
-                    xf(j,num)=globalx(i_m,j_m,num)-meanglobalx(i_m,j_m,num) !meanglobaltrue(i_m,j_m)
-                else if (conflag == 3) then
-                    ! xf(j,num)=(globalx(i_m,j_m,num)-meanglobaltrue(i_m,j_m))/(stdglobaltrue(i_m,j_m)+1.0e-20)
-                    xf(j,num)=(globalx(i_m,j_m,num)-meanglobalx(i_m,j_m,num))/(stdglobalx(i_m,j_m,num)+1.0e-20)
-                else if (conflag == 4) then
-                    xf(j,num)=log10(globalx(i_m,j_m,num))
-                end if
-            end do
-        j=j+1
-        end do
+        call local_xf(xlist,ylist,countnum,patch_start,patch_end,lonpx,latpx,ens_num,xf)
+        ! ! xf=0
+        ! ! !print*,"L538: read model forcasts"
+        ! ! j=1
+        ! ! do i=patch_start,patch_end
+        ! !     i_m=xlist(i)
+        ! !     j_m=ylist(i)
+        ! !     !xf(j,:)=globalx(i_m,j_m,:)!-meanglobaltrue(i_m,j_m)
+        ! !     do num=1, ens_num
+        ! !         !xf(j,num)=globalx(i_m,j_m,num)-meanglobalx(i_m,j_m,num)
+        ! !         !xf(j,num)=(globalx(i_m,j_m,num)-meanglobalx(i_m,j_m,num))/(stdglobalx(i_m,j_m,num)+1.0e-20)
+        ! !         ! xf(j,num)=(globalx(i_m,j_m,num)-meanglobaltrue(i_m,j_m))/stdglobaltrue(i_m,j_m) !meanglobalx(i_m,j_m,num)
+        ! !     !    !print*, "L611",globalx(i_m,j_m,num)-meanglobaltrue(i_m,j_m)
+        ! !         if (conflag == 1) then
+        ! !             xf(j,num)=globalx(i_m,j_m,num)
+        ! !         else if (conflag == 2) then
+        ! !             xf(j,num)=globalx(i_m,j_m,num)-meanglobalx(i_m,j_m,num) !meanglobaltrue(i_m,j_m)
+        ! !         else if (conflag == 3) then
+        ! !             ! xf(j,num)=(globalx(i_m,j_m,num)-meanglobaltrue(i_m,j_m))/(stdglobaltrue(i_m,j_m)+1.0e-20)
+        ! !             xf(j,num)=(globalx(i_m,j_m,num)-meanglobalx(i_m,j_m,num))/(stdglobalx(i_m,j_m,num)+1.0e-20)
+        ! !         else if (conflag == 4) then
+        ! !             xf(j,num)=log10(globalx(i_m,j_m,num))
+        ! !         end if
+        ! !     end do
+        ! ! j=j+1
+        ! ! end do
 
         ! deallocate variables of making observation and dimension related
         ! variables
@@ -820,14 +837,14 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         !allocate(xf_m(countnum))
         Ef=0
         xf_m=0
-
-        do i=1,countnum
-            xf_m(i)=sum(xf(i,:))/(1e-20+real(ens_num))
-        end do
-
-        do k=1,ens_num
-            Ef(:,k)=(xf(:,k)-xf_m(:))
-        end do
+        call get_ensemble_mean(xf,countnum,ens_num,xf_m)
+        ! ! do i=1,countnum
+        ! !     xf_m(i)=sum(xf(i,:))/(1e-20+real(ens_num))
+        ! ! end do
+        call get_ensemble_diff(xf,xf_m,countnum,ens_num,Ef)
+        ! ! do k=1,ens_num
+        ! !     Ef(:,k)=(xf(:,k)-xf_m(:))
+        ! ! end do
 
         write(78,*) "shape H:",shape(H)
         !write(78,*) "H:",H
@@ -1214,37 +1231,37 @@ deallocate(global_xa,globalx,ens_xa,global_null)!,obs_mask)
 deallocate(meanglobalx,stdglobalx,meanglobaltrue,stdglobaltrue)
 end program data_assim
 !*****************************************************************
-subroutine read_observation(yyyymmdd,nx,ny,obs,obs_err,mean_obs,std_obs)
-implicit none
-!---
-integer                             :: ix,iy,nx,ny,ios
-character(len=128)                  :: fname,sat
-character(len=8)                    :: yyyymmdd
-real,dimension(nx,ny)               :: obs,obs_err,mean_obs,std_obs
-real                                :: wse,mean,std,obs_error
-!--
-obs=-9999.0
-obs_err=-9999.0
-mean_obs=-9999.0
-std_obs=-9999.0
-    fname="./assim_out/obs/"//trim(yyyymmdd)//".txt"
-    print*, fname
-    open(11, file=fname, form='formatted',iostat=ios)
-    if (ios /= 0) then 
-        print*, "no observations: ", fname, ios
-        goto 2090
-    end if
-2000 continue
-    read(11,*,end=2090) ix, iy, wse, mean, std, sat
-    ! print*, yyyymmdd, ix, iy, wse, trim(sat)
-    obs(ix,iy)=wse
-    obs_err(ix,iy)=obs_error(sat)
-    mean_obs(ix,iy)=mean
-    std_obs(ix,iy)=std
-    goto 2000
-2090 continue
-return
-end subroutine read_observation
+! subroutine read_observation(yyyymmdd,nx,ny,obs,obs_err,mean_obs,std_obs)
+! implicit none
+! !---
+! integer                             :: ix,iy,nx,ny,ios
+! character(len=128)                  :: fname,sat
+! character(len=8)                    :: yyyymmdd
+! real,dimension(nx,ny)               :: obs,obs_err,mean_obs,std_obs
+! real                                :: wse,mean,std,obs_error
+! !--
+! obs=-9999.0
+! obs_err=-9999.0
+! mean_obs=-9999.0
+! std_obs=-9999.0
+!     fname="./assim_out/obs/"//trim(yyyymmdd)//".txt"
+!     print*, fname
+!     open(11, file=fname, form='formatted',iostat=ios)
+!     if (ios /= 0) then 
+!         print*, "no observations: ", fname, ios
+!         goto 2090
+!     end if
+! 2000 continue
+!     read(11,*,end=2090) ix, iy, wse, mean, std, sat
+!     ! print*, yyyymmdd, ix, iy, wse, trim(sat)
+!     obs(ix,iy)=wse
+!     obs_err(ix,iy)=obs_error(sat)
+!     mean_obs(ix,iy)=mean
+!     std_obs(ix,iy)=std
+!     goto 2000
+! 2090 continue
+! return
+! end subroutine read_observation
 !*****************************************************************
 subroutine lag_distance(i,j,x,y,nx,ny,nextX,nextY,nextdst,lag_dist)
 implicit none 
@@ -1326,39 +1343,39 @@ end if
 return
 !---
 end subroutine lag_distance
-!**************************************************
-subroutine read_wgt(fname,nx,ny,weightage)
-!$ use omp_lib    
-implicit none
-character*128                      :: fname 
-integer                            :: fn,nx,ny,ios
-real,dimension(nx,ny)              :: weightage
-fn=34
-!$ fn= fn + omp_get_thread_num()
-!!$ write(*,*) fn
-open(fn,file=fname,form="unformatted",access="direct",recl=4*ny*nx,status="old",iostat=ios)
-if(ios==0)then
-    read(fn,rec=1) weightage
-else
-    write(*,*) "no weightage", fname
-end if
-close(fn)
-!--
-return
-!---
-end subroutine read_wgt
-!**************************************************
-function Gauss_wt(lag)
-implicit none
-real                                :: lag,Gauss_wt
-real,parameter                      :: sigma=1000.0 !1000 km 
-!---
-Gauss_wt=exp(-(lag**2.0/(2.0*sigma**2.0)))  
-!---
-return
-!---
-end function Gauss_wt
-!***************************************************   
+! !**************************************************
+! subroutine read_wgt(fname,nx,ny,weightage)
+! !$ use omp_lib    
+! implicit none
+! character*128                      :: fname 
+! integer                            :: fn,nx,ny,ios
+! real,dimension(nx,ny)              :: weightage
+! fn=34
+! !$ fn= fn + omp_get_thread_num()
+! !!$ write(*,*) fn
+! open(fn,file=fname,form="unformatted",access="direct",recl=4*ny*nx,status="old",iostat=ios)
+! if(ios==0)then
+!     read(fn,rec=1) weightage
+! else
+!     write(*,*) "no weightage", fname
+! end if
+! close(fn)
+! !--
+! return
+! !---
+! end subroutine read_wgt
+! !**************************************************
+! function Gauss_wt(lag)
+! implicit none
+! real                                :: lag,Gauss_wt
+! real,parameter                      :: sigma=1000.0 !1000 km 
+! !---
+! Gauss_wt=exp(-(lag**2.0/(2.0*sigma**2.0)))  
+! !---
+! return
+! !---
+! end function Gauss_wt
+! !***************************************************   
 function roundx(ix, nx)
 implicit none
 !-- for input -----------

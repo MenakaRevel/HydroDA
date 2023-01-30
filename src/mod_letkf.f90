@@ -24,7 +24,7 @@ implicit none
 public
 
 contains
-
+!************************************************************************************
 subroutine letkf_core(ne,nobs,HEf,Rdiag,Rwgt,Yo,HXb,parm_infl,min_infl,infl_flg,T,errflg)
 !=======================================================================
 !  Main Subroutine of LETKF Core
@@ -209,5 +209,6 @@ return
 deallocate(work,iwork,ifail,isuppz)
 
 end subroutine letkf_core
+!************************************************************************************
 
 end module letkf
