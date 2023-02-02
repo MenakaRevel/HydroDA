@@ -613,7 +613,7 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         ! read emperical local patch 
         !============================
         fname=trim(adjustl(patchdir))//"/"//trim(patchname)//"/patch"//trim(llon)//trim(llat)//".txt"
-        call read_elp(fname,num,xlist,ylist,wgt)
+        call read_elp(fname,countnumber,xlist,ylist,wgt)
         !write(*,*) fname
         ! ! open(34,file=fname,status='old',access='sequential',form='formatted',action='read',iostat=ios)!
         ! ! if(ios/=0)then
@@ -679,6 +679,7 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         !====================================================
         ! read local observations
         !====================================================
+        call read_local_obs(xlist,ylist,conflag,obs,obs_err,mean_obs,std_obs,countnum,patch_start,patch_end,lonpx,latpx,local_sat,xt,local_err)
         ! ! j=1
         ! ! do i=patch_start,patch_end
         ! !     i_m=xlist(i)
@@ -744,7 +745,8 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         ! read local prognostic variable
         !====================================================
         allocate(xf(countnum,ens_num))!localx(countnum,countnum,ens_num),
-        call local_xf(xlist,ylist,countnum,patch_start,patch_end,lonpx,latpx,ens_num,xf)
+        xf=0
+        call local_xf(globalx,xlist,ylist,countnum,patch_start,patch_end,lonpx,latpx,ens_num,xf)
         ! ! xf=0
         ! ! !print*,"L538: read model forcasts"
         ! ! j=1

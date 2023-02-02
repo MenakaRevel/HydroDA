@@ -62,3 +62,6 @@ HydroDA.o*
 
 # VS code 
 */.vscode
+
+# unnessary f90
+src/data_assim_old.f90

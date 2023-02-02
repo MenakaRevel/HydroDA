@@ -24,10 +24,10 @@ implicit none
 !--in
 integer,intent(in)                             :: countnum,patch_start,patch_end,nx,ny,ne !,conflag
 integer,intent(in)                             :: xlist(countnum),ylist(countnum)
-real(r_size),intent(in)                        :: globalx(nx,ny,ne)!,meanglobalx(nx,ny,ne),stdglobalx(nx,ny,ne)
+real,intent(in)                                :: globalx(nx,ny,ne)!,meanglobalx(nx,ny,ne),stdglobalx(nx,ny,ne)
 !--out
 !integer,intent(out)                            :: local_sat(countnum)
-real(r_size),intent(out)                       :: xf(countnum,ne) !,local_err(countnum)
+real,intent(out)                               :: xf(countnum,ne) !,local_err(countnum)
 !--
 integer                                        :: i,j,i_m,j_m,num
 xf=0
@@ -54,33 +54,33 @@ end do
 return
 end subroutine local_xf
 !************************************************************************************
-subroutine get_ensemble_mean(x,countnum,ne,xm)
+subroutine get_ensemble_mean(x,countnum,ne,Xm)
 !=======================================================================
 ! get ensemble mean of x
 !=======================================================================
 !--in
 integer,intent(in)                             :: ne,countnum
-real(r_size),intent(in)                        :: x(countnum,ne)
+real,intent(in)                                :: X(countnum,ne)
 !--out
-real(r_size),intent(out)                       :: xm(countnum)
+real,intent(out)                               :: Xm(countnum)
 !--
 integer                                        :: i
 !---
 do i=1,countnum
-    xm(i)=sum(x(i,:))/(1e-20+real(ne))
+    Xm(i)=sum(X(i,:))/(1e-20+real(ne))
 end do
 return
 end subroutine get_ensemble_mean
 !************************************************************************************
-subroutine get_ensemble_diff(x,xm,countnum,ne,E)
+subroutine get_ensemble_diff(X,Xm,countnum,ne,E)
 !=======================================================================
 ! get ensemble mean differnce of x
 !=======================================================================
 !--in
 integer,intent(in)                             :: ne,countnum
-real(r_size),intent(in)                        :: x(countnum,ne),xm(countnum)
+real,intent(in)                                :: X(countnum,ne),Xm(countnum)
 !--out
-real(r_size),intent(out)                       :: E(countnum,ne)
+real,intent(out)                               :: E(countnum,ne)
 !--
 integer                                        :: i
 !---
@@ -90,7 +90,44 @@ end do
 return
 end subroutine get_ensemble_diff
 !************************************************************************************
-! subroutine get_Hxfm()
-! end subroutine get_Hxfm
+subroutine get_HX(globalvar,local_obs,xlist,ylist,Hobs,nx,ny,nvar,nobs,ne,countnum,HX)
+!=======================================================================
+! get HX - simulations in obervational space with ensembles
+! input  
+!   globalvar - global simulated variable: globalvar[nx,ny,numvar,ne]
+!   local_obs - array of available observation: local_obs[nvar*countnum]; 1=observation available
+!   xlist     - list of x corrdinates
+!   ylist     - list of y corrdinates
+!   Hobs      - convert observation to only observation space: Hobs[nobs,countnum]
+!   nx        - x dimension of global map
+!   ny        - y dimension of global map
+!   nvar      - number of variables
+!   nobs      - total numer of observations: sum(wse,dis,wsa)
+!   ne        - number of ensembles
+!   countnum  - number pixel in the local patch
+! output
+!   HX        - simulations in obervational space: HX[nobs,ne]
+!=======================================================================
+!--in
+integer,intent(in)                             :: nx,ny,numvar,nobs,ne
+real,intent(in)                                :: xlist(countnum),ylist(countnum),local_obs(nvar*countnum)
+real,intent(in)                                :: globalvar(nx,ny,nvar,ne),Hobs(nobs,countnum)
+!--out
+real,intent(out)                               :: HX(nobs,ne)
+!--
+integer                                        :: i,i_m,j_m,var
+! real                                           :: Xt
+HX=0
+j=1
+do var=1, numvar
+    do i=1, countnum
+        i_m=xlist(i)
+        j_m=ylist(i)
+        if (local_obs(j) == 1.0) then
+            HX(j,:)=globalvar(i_m,j_m,var,:)
+        end if
+    end do
+end do
+end subroutine get_HX
 !************************************************************************************
 end module varxf
