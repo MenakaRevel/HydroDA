@@ -19,6 +19,9 @@ data_assim
 data_assim_dis
 calc_stat
 *.so
+*.mod
+*.o
+*/data_assim_old.f90
 
 #img/bin
 *print_flddpth*

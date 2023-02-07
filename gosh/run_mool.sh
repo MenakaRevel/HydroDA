@@ -82,7 +82,7 @@ cd $HydroDAout
 # EXP="test_virtual"
 # EXP="test_wse"
 # EXP="NOM_WSE_E2O_HWEB_101" # for glb_15min
-EXP="DIR_WSE_E2O_SWOT_002" # for SWOTH08
+EXP="DIR_WSE_E2O_SWOT_003" # for SWOTH08
 
 # mkdir -p $HydroDA"/out/"$EXP
 mkdir -p $HydroDAout"/out/"$EXP

@@ -219,15 +219,16 @@ def max_lat():
                # *note: SWOT ovservation is not available beyond 80 degs. this should be less or equal to 80
                ## modified 2018-06-05
 
-def distopen(num):
-    if num == 1:
-        return 1.0
+def distopen(): #num=1):
+    return 1.0
+    # if num == 1:
+    #     return 1.0
 
-    if num == 2:
-        return 1.0
+    # if num == 2:
+    #     return 1.0
 
-    if num == 3:
-        return 1.0
+    # if num == 3:
+    #     return 1.0
     #return 0.75 # not needed for ERA20CM
     # corrupted runoff's percentage
     # 0.75 for original Data Assimilation simulation (25% reduced)
@@ -235,15 +236,16 @@ def distopen(num):
     # 1.00 for simulation using 1 year before runoff
     # *note: also editing and and re-compile of control_inp at CaMa-Flood is nessessary
 
-def diststd(num):
-    if num == 1:
-        return 0.1
+def diststd(): #num=1):
+    return 0.25
+    # if num == 1:
+    #     return 0.1
 
-    if num == 2:
-        return 0.25
+    # if num == 2:
+    #     return 0.25
 
-    if num == 3:
-        return 0.25
+    # if num == 3:
+    #     return 0.25
 
     #return 1.0 # not needed for ERA20CM
     # noise to make runoff input to scatter ensembles
