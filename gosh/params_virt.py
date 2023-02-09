@@ -18,10 +18,10 @@ def version():
 # **************************************************************
 # 1. experment type related definitions
 def mode():
-    return 1
+    return 5
     # parameter to change assimilation mode
     # runoff ensembles will change accordingly.
-    # 1: Earth2Obs, 2: ERA20CM, 3: VIC_BC, 4: -25% baised (ELSE_KIM2009/E2O/ERA20CM)
+    # 1: Earth2Obs, 2: ERA20CM, 3: VIC_BC, 4: -25% baised (ELSE_KIM2009/E2O/ERA20CM) 5:isimip3a
 
 def conflag():
     return 1
@@ -148,7 +148,10 @@ def ens_mem(mode=mode()):
     if mode == 3:
         return 20
 
-    if mode == 3:
+    if mode == 4:
+        return 20
+
+    if mode == 5:
         return 20
     # number of ensemble members
 
@@ -161,7 +164,7 @@ def starttime():
     return (2001,1,1) # start date: [year,month,date]
 
 def endtime():
-    return (2015,1,1) # end date: [year,month,date]
+    return (2011,1,1) # end date: [year,month,date]
                       # *note: this date is not included
 
 # **************************************************************
@@ -186,7 +189,8 @@ def spinup_end_date():
 # **************************************************************
 # 5. Runoff forcing 
 def runoff_dir():
-    return "/cluster/data6/menaka/ensemble_simulations/CaMa_in/E2O"
+    # return "/cluster/data6/menaka/ensemble_simulations/CaMa_in/E2O"
+    return "/work/a06/menaka/ensemble_simulations/CaMa_in/isimip3a"
 
 def runname(num=mode()):
     if num == 1:
@@ -203,6 +207,10 @@ def runname(num=mode()):
         return "E2O"
         #return "ERA20CM"
 
+    if num == 5: 
+        return "isimip3a"
+
+
 def input(num=mode()):
     if num==1:
         return "E2O"
@@ -212,6 +220,9 @@ def input(num=mode()):
 
     if num==3:
         return "VIC_BC"
+
+    if num==5:
+        return "isimip3a"
     # define the runoff data type.
     
 def max_lat():
@@ -219,16 +230,16 @@ def max_lat():
                # *note: SWOT ovservation is not available beyond 80 degs. this should be less or equal to 80
                ## modified 2018-06-05
 
-def distopen(): #num=1):
-    return 1.0
-    # if num == 1:
-    #     return 1.0
+def distopen(num=1):
+    # return 1.0
+    if num == 1:
+        return 1.0
 
-    # if num == 2:
-    #     return 1.0
+    if num == 2:
+        return 1.0
 
-    # if num == 3:
-    #     return 1.0
+    if num == 3:
+        return 1.0
     #return 0.75 # not needed for ERA20CM
     # corrupted runoff's percentage
     # 0.75 for original Data Assimilation simulation (25% reduced)
@@ -236,16 +247,16 @@ def distopen(): #num=1):
     # 1.00 for simulation using 1 year before runoff
     # *note: also editing and and re-compile of control_inp at CaMa-Flood is nessessary
 
-def diststd(): #num=1):
-    return 0.25
-    # if num == 1:
-    #     return 0.1
+def diststd(num=1):
+    # return 0.25
+    if num == 1:
+        return 0.1
 
-    # if num == 2:
-    #     return 0.25
+    if num == 2:
+        return 0.25
 
-    # if num == 3:
-    #     return 0.25
+    if num == 3:
+        return 0.25
 
     #return 1.0 # not needed for ERA20CM
     # noise to make runoff input to scatter ensembles
@@ -404,9 +415,8 @@ def para_nums():
     # defualt is 6, but may change depending on your system
 
 def cpu_nums():
-    f=open("./ncpus.txt","r")
-    line=f.readline()
+    with open("./ncpus.txt","r") as f:
+        line=f.readline()
     ncpus =int(line.split("\n")[0])
-    f.close()
     return ncpus/para_nums()
     # number of cpus used

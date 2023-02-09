@@ -203,7 +203,7 @@ def cal_monthly_mean(runname0,syear,eyear,indir,outdir,months=24):
         roff_mean=roff_mean.astype(np.float32)
         roff_mean=roff_mean+threshold
         roff_mean.tofile(outdir+"/"+runname0+"/mean_month/mean_"+ychar+mchar+".bin")
-        print (outdir+"/"+runname0+"/mean_month/mean_"+ychar+mchar+".bin")
+        # print (outdir+"/"+runname0+"/mean_month/mean_"+ychar+mchar+".bin")
     return 0
 ###########################
 def prepare_input():
@@ -731,7 +731,7 @@ def prep_runoff_ensemble(distopen,diststd,ne,runname,rundir,outdir,syear=2001,ey
         nx,ny,prefix,sufix=get_runoff_metadata(runname)
         # make directories
         mkdir(outdir+"/"+runname)
-        mkdir(outdir+"/"+runname+"/Roff_CORR")
+        mkdir(outdir+"/"+runname+"/Roff")
         # get random values
 
         # # copy for TRUE simulation
@@ -795,13 +795,13 @@ def prep_runoff_ensemble(distopen,diststd,ne,runname,rundir,outdir,syear=2001,ey
             # roff_total=np.fromfile(outdir+"/"+runname+"/total_month/total_"+yyyy+mm+".bin",np.float32).reshape(ny,nx)
             #===========================
             for ens in np.arange(1,ne+1):
-                ens_char="C%03d"%(ens)
+                ens_char="%03d"%(ens)
                 #print pm.distopen(),std[ens-1]
                 # ofile=ifile*distopen + roff_mean*std[ens-1]
                 #ofile=ifile*(distopen + std[ens-1])
                 #ofile=ifile*distopen + roff_total*std[ens-1]
                 #ofile=ifile*distopen + roff_total*std[ens-1]*0.75
-                ofile=outdir+"/"+runname+"/Roff_CORR/Roff__"+yyyy+mm+dd+ens_char+".one"
+                ofile=outdir+"/"+runname+"/Roff/Roff__"+yyyy+mm+dd+ens_char+".one"
                 # ofile.astype(np.float32)
                 # ofile.tofile(outdir+"/"+runname+"/Roff_CORR/Roff__"+yyyy+mm+dd+ens_char+".one")
                 inputlist.append([yyyy,mm,dd,ens_char,str(distopen),str(std[ens-1]),ifile,roff_mean,str(nx),str(ny),ofile])
@@ -992,5 +992,5 @@ if __name__ == "__main__":
     # print (corr_norm(1.00,20))
     sys.path.append("../gosh/")
     import params_virt as pm
-    prep_runoff_ensemble(val_distopen(),val_diststd(),20,runoff_name(),runoff_dir(),out_dir(),2002,2010,"simple")
+    prep_runoff_ensemble(val_distopen(),val_diststd(),20,runoff_name(),runoff_dir(),out_dir(),2000,2010,"simple")
     

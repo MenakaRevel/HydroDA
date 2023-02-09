@@ -185,6 +185,7 @@ def spinup_mode():
     # 1: do spin up only at corrupted simulation
     # 2: do spin up only at true simulation
     # 3: no spinup simulation at all
+    # 4: copy restart file from previous data
     ### if initial restart file is ready, spinup simulation is no need
 
 def spinup_end_year():

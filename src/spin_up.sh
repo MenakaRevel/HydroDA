@@ -100,7 +100,7 @@ LADPSTP=".TRUE."                            # .TRUE. for adaptive time step
 LFPLAIN=".TRUE."                            # .TRUE. to activate floodplain storage
 LKINE=".FALSE."                             # .TRUE. to use kinematic wave equation
 LFLDOUT=".TRUE."                            # .TRUE. to activate floodplain discharge
-LPTHOUT=".FALSE."                           # .TRUE. to activate bifurcation flow, mainly for delta simulation
+LPTHOUT=".TRUE."                            # .TRUE. to activate bifurcation flow, mainly for delta simulation
 LDAMOUT=".FALSE."                           # .TRUE. to activate reservoir operation (under development)
 
 
@@ -144,6 +144,8 @@ elif [ $runname = "ELSE_KIM2009" ];then
      DROFUNIT="86400000"   # [mm/day->m/s]  # runoff unit conversion
 elif [ $runname = "VIC_BC" ];then
      DROFUNIT="86400000"   # [mm/day->m/s]  # runoff unit conversion
+elif [ $runname = "isimip3a" ];then
+     DROFUNIT="1000"   # [mm/day->m/s]      # runoff unit conversion
 fi
 
 #----- for plain binary runoff forcing
@@ -213,6 +215,9 @@ elif [ $runname = "ELSE_KIM2009" ];then
 elif [ $runname = "VIC_BC" ] ; then
 	  CDIMINFO="${FMAP}/diminfo-15min.txt"  # dimention information file
     CINPMAT="${FMAP}/inpmat-15min.bin"      # runoff input matrix for interporlation
+elif [ $runname = "isimip3a" ] ; then
+     CDIMINFO="${FMAP}/diminfo-30min.txt"  # dimention information file
+     CINPMAT="${FMAP}/inpmat-30min.bin"      # runoff input matrix for interporlation
 fi
 echo $CDIMINFO  $CINPMAT
 #----- for plain binary map input
