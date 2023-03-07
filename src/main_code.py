@@ -500,7 +500,7 @@ def compile_func(): #used
     os.system("ifort "+pm.DA_dir()+"/src/make_restart.f90 -o "+pm.DA_dir()+"/src/make_restart -O2 -assume byterecl -heap-arrays -nogen-interfaces -free -g -traceback  -lpthread -parallel")
     #os.system("ifort src/calc_stoerr.f90 -o src/calc_stoerr -O2 -assume byterecl")
 #    os.system("ifort src/make_rivout.f90 -o src/make_rivout -O2 -assume byterecl") 
-    print "compile data assimilation codes..."
+    print ("compile data assimilation codes...")
 #    os.system("source src/compileMKL.sh "+pm.MKLdir())
 #    os.system("ifort  src/make_corrupt_rivhgt.f90 -o src/make_corrupt_rivhgt -O3 -assume byterecl -heap-arrays -nogen-interfaces -free -mkl -mcmodel=large -shared-intel")
 #    os.system("ifort  src/data_assim_localpatch.f90 -o src/data_assim -O3 -assume byterecl -heap-arrays -nogen-interfaces -free -mkl=parallel -check bounds -g -fp-stack-check -g -traceback -lpthread -parallel") #-openmp")
@@ -596,9 +596,9 @@ def make_restart(inputlist):
     #       floodplain outflow, river depth, flood plain storage
 
     # built in hold
-    print "finish assimilating"
-    print "built in hold"
-    print "press enter"
+    print ("finish assimilating")
+    print ("built in hold")
+    print ("press enter")
 
     # get the date of one day before
     bef_y=calc_odb(yyyy,mm,dd,"year")
@@ -620,7 +620,7 @@ def make_restart(inputlist):
     exp_dir="./" #pm.DA_dir()+"/out/"+pm.experiment()
     os.system(pm.DA_dir()+"/src/make_restart "+yyyy+mm+dd+" "+yyyy_b+mm_b+dd_b+" "+yyyy_n+mm_n+dd_n+" "+loop+" "+pm.CaMa_dir()+" "+pm.mapname()+" "+str(pm.ens_mem())+" "+numch+" "+exp_dir+" "+pm.calibrate())
 
-    print "finish restarting",numch
+    print ("finish restarting",numch)
 ###########################
 def make_rivout(inputlist):
     # new version

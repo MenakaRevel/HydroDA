@@ -22,6 +22,7 @@ import random
 import re
 import calendar
 import math
+import scipy.signal
 
 # #external python codes
 # sys.path.append("../gosh")
@@ -716,7 +717,7 @@ def prep_runoff_ensemble(distopen,diststd,ne,runname,rundir,outdir,syear=2001,ey
     Several methods propsed
     1. simple - random normal distribution spatial constant
     2. spatial - spatially correlated random field
-    3. lognorm - spatially correlated random fields by log normal distribution
+    3. lognorm - spatially correlated random fields by log normal distribution as proposed by Nijssen and Lettenmaier (2004)
     """
     #=================================
     if method=="simple":
@@ -812,6 +813,51 @@ def prep_runoff_ensemble(distopen,diststd,ne,runname,rundir,outdir,syear=2001,ey
         p.map(make_runoff,inputlist)
         p.terminate()
         # map(make_runoff,inputlist)
+    #=================================
+    if method=="lognormal":
+        # get runoff metadata
+        nx,ny,prefix,sufix=get_runoff_metadata(runname)
+        # make directories
+        mkdir(outdir+"/"+runname)
+        mkdir(outdir+"/"+runname+"/Roff")
+        #====================
+        # get runoff metadata
+        nx,ny,prefix,suffix=get_runoff_metadata(runname)
+        #====================
+        alpha=1-(1/(val_tau_t()+1e-20))
+        beta=val_beta()
+        E=val_E()
+        #===========================
+        for ens in np.arange(1,ne+1):
+            ens_char="%03d"%(ens)
+            for day in np.arange(start,last):
+                target_dt=start_dt+datetime.timedelta(days=day)
+                yyyy='%04d' % (target_dt.year)
+                mm='%02d' % (target_dt.month)
+                dd='%02d' % (target_dt.day)
+                # get spatially correlated normal distributiion
+                w=spatially_correlated_random(nx,ny)
+                s=alpha*s+math.sqrt(1-alpha**2)*w
+                Rcoff=((1+beta)/math.sqrt(E**2+1))*math.exp(math.sqrt(E**2+1))*s
+                ifile=rundir+"/"+prefix+yyyy+mm+dd+suffix
+                ifile=np.fromfile(rundir+"/"+prefix+yyyy+mm+dd+suffix,np.float32).reshape(ny,nx)
+                ofile=outdir+"/"+runname+"/Roff/Roff__"+yyyy+mm+dd+ens_char+".one"
+                Rc=Rcoff*ifile
+                Rc.astype(np.float32)
+                Rc.tofile(ofile)
+    return 
+######################################
+def spatially_correlated_random(nx,ny):
+    correlation_scale = val_tau_s()
+    x = np.arange(-correlation_scale, correlation_scale)
+    y = np.arange(-correlation_scale, correlation_scale)
+    X, Y = np.meshgrid(x, y)
+    dist = np.sqrt(X*X + Y*Y)
+    filter_kernel = np.exp(-dist**2/(2*correlation_scale))
+    noise = np.abs(np.random.normal(0.0, 1.0, size=(ny,nx))) #.reshape(ny,nx)
+    noise = scipy.signal.fftconvolve(noise, filter_kernel, mode='same')
+    noise = noise*(1/(np.max(noise)+1e-20))
+    return noise
 ######################################
 def make_runoff(inputlist):
     """
@@ -977,6 +1023,18 @@ def val_distopen():
 ######################################
 def val_diststd():
     return 0.25
+######################################
+def val_tau_t():
+    return 15 # decorrelation time
+######################################
+def val_tau_s():
+    return 50 # spatial decorrelation length
+######################################
+def val_beta():
+    return 0.0
+######################################
+def val_E():
+    return 0.30
 ######################################
 def runoff_name():
     return "isimip3a"
