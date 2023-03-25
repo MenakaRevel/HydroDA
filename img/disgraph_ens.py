@@ -45,10 +45,6 @@ from read_CMF import read_discharge, read_discharge_multi
 # experiment="ANO_WSE_E2O_HWEB_002"
 # experiment="ANO_WSE_E2O_HWEB_003"
 # experiment="ANO_WSE_E2O_HWEB_004"
-<<<<<<< HEAD
-# experiment="ANO_WSE_E2O_HWEB_006"
-=======
->>>>>>> dev_virtual
 # experiment="NOM_WSE_E2O_HWEB_001"
 # experiment="NOM_WSE_E2O_HWEB_002"
 # experiment="NOM_WSE_E2O_HWEB_003"
@@ -82,9 +78,9 @@ from read_CMF import read_discharge, read_discharge_multi
 # experiment="NOM_WSE_ECMWF_HWEB_014"
 
 experiment="NOM_WSE_E2O_HWEB_101"
-=======
-experiment="DIR_WSE_E2O_SWOT_001"
->>>>>>> dev_virtual
+#=======
+# experiment="DIR_WSE_E2O_SWOT_001"
+# >>>>>>> dev_virtual
 
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"

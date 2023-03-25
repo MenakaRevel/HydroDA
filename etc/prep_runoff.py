@@ -828,6 +828,7 @@ def prep_runoff_ensemble(distopen,diststd,ne,runname,rundir,
         # map(make_runoff,inputlist)
     #=================================
     if method=="lognormal":
+        # spatially distibuted lognormal
         # get runoff metadata
         nx,ny,prefix,sufix=get_runoff_metadata(runname)
         # make directories
@@ -842,13 +843,14 @@ def prep_runoff_ensemble(distopen,diststd,ne,runname,rundir,
         # E=val_E()
         #===========================
         s=spatially_correlated_random(nx,ny)
+        rand=np.sort(np.abs(np.random.normal(0,1,[ne])))
         inputlist=[]
         for ens in np.arange(1,ne+1):
             ens_char="%03d"%(ens)
             yyyy1="%04d"%(syear)
             yyyy2="%04d"%(eyear)
-            print (yyyy1,yyyy2,ens_char,runname,str(alpha),str(beta),str(E),rundir,outdir)
-            inputlist.append([yyyy1,yyyy2,ens_char,runname,str(alpha),str(beta),str(E),rundir,outdir])
+            # print (yyyy1,yyyy2,ens_char,runname,str(alpha),str(beta),str(E),rundir,outdir)
+            inputlist.append([yyyy1,yyyy2,ens_char,runname,str(alpha),str(beta),str(E),str(rand[ens-1]),rundir,outdir])
         #==================================
         # do parallel
         para=20 #pm.para_nums()
@@ -871,6 +873,34 @@ def prep_runoff_ensemble(distopen,diststd,ne,runname,rundir,
             #     Rc=Rcoff*ifile
             #     Rc.astype(np.float32)
             #     Rc.tofile(ofile)
+    #=================================
+    if method=="normal":
+        # spatially distibuted lognormal
+        # get runoff metadata
+        nx,ny,prefix,sufix=get_runoff_metadata(runname)
+        # make directories
+        mkdir(outdir+"/"+runname)
+        mkdir(outdir+"/"+runname+"/Roff")
+        #====================
+        # get runoff metadata
+        nx,ny,prefix,suffix=get_runoff_metadata(runname)
+        #====================
+        #===========================
+        s=spatially_correlated_random(nx,ny)
+        rand=np.sort(np.abs(np.random.normal(0,1,[ne])))
+        inputlist=[]
+        for ens in np.arange(1,ne+1):
+            ens_char="%03d"%(ens)
+            yyyy1="%04d"%(syear)
+            yyyy2="%04d"%(eyear)
+            # print (yyyy1,yyyy2,ens_char,runname,str(alpha),str(beta),str(E),rundir,outdir)
+            inputlist.append([yyyy1,yyyy2,ens_char,runname,str(alpha),str(beta),str(E),str(rand[ens-1]),rundir,outdir])
+        #==================================
+        # do parallel
+        para=20 #pm.para_nums()
+        p=Pool(para)
+        p.map(make_runoff_normal,inputlist)
+        p.terminate()
     return 0
 ######################################
 def spatially_correlated_random(nx,ny):
@@ -882,7 +912,7 @@ def spatially_correlated_random(nx,ny):
     filter_kernel = np.exp(-dist**2/(2*correlation_scale))
     noise = np.random.normal(0.0, 1.0, size=(ny,nx)) #.reshape(ny,nx)
     noise = scipy.signal.fftconvolve(noise, filter_kernel, mode='same')
-    noise = noise*(1/(np.max(noise)+1e-20))
+    noise = noise*(1/(np.std(noise)+1e-20))
     return noise
 ######################################
 def make_runoff(inputlist):
@@ -917,12 +947,14 @@ def make_runoff_temporal(inputlist):
     alpha=float(inputlist[4])
     beta=float(inputlist[5])
     E=float(inputlist[6])
-    rundir=inputlist[7]
-    outdir=inputlist[8]
+    rand=float(inputlist[7])
+    rundir=inputlist[8]
+    outdir=inputlist[9]
     # get runoff metadata
     nx,ny,prefix,suffix=get_runoff_metadata(runname)
     # create necessary varibales
-    s=spatially_correlated_random(nx,ny)
+    # get spatially correlated normal distributiion
+    s=spatially_correlated_random(nx,ny)#*rand
     start_dt=datetime.date(syear,1,1)
     end_dt=datetime.date(eyear,12,31)
     start=0
@@ -933,12 +965,15 @@ def make_runoff_temporal(inputlist):
         mm='%02d' % (target_dt.month)
         dd='%02d' % (target_dt.day)
         # get spatially correlated normal distributiion
-        w=spatially_correlated_random(nx,ny)
+        # w=spatially_correlated_random(nx,ny)
+        # stochastic term with mean 0 and variance 1 following a Gaussian distribution
+        w=np.random.normal(0,1)
         # print ("w ", np.max(w),np.min(w))
         s=alpha*s+np.sqrt(1-alpha**2)*w
         #===
         Rcoff = ((1.0 + beta) / np.sqrt(E**2 + 1.0)) * np.exp(np.sqrt(np.log(E**2 + 1)) * s)
-        Rcoff.astype(np.float32, casting='unsafe', copy=True)
+        Rcoff = np.float32(Rcoff)
+        # Rcoff.astype(np.float32, casting='unsafe', copy=True)
         # Rcoff=np.zeros([ny,nx],np.float32)
         # for ix in np.arange(nx):
         #     for iy in np.arange(ny):
@@ -946,11 +981,65 @@ def make_runoff_temporal(inputlist):
         # ifile=rundir+"/"+prefix+yyyy+mm+dd+suffix
         ifile=np.fromfile(rundir+"/"+prefix+yyyy+mm+dd+suffix,np.float32).reshape(ny,nx)
         ifile=np.nan_to_num(ifile)
-        ifile.astype(np.float32, casting='unsafe', copy=True)
-        Rc=np.zeros([ny,nx],np.float32)
+        ifile=np.float32(ifile)
+        # ifile.astype(np.float32, casting='unsafe', copy=True)
+        # Rc=np.zeros([ny,nx],np.float32)
         Rc=Rcoff*ifile
         # Rc=Rc*(Rc>1e-2)*1.0
-        Rc.astype(np.float32, casting='unsafe', copy=True)
+        # Rc.astype(np.float32, casting='unsafe', copy=True)
+        Rc=np.float32(Rc)
+        # print (yyyy,mm,dd,ens_char,np.max(Rc),np.min(Rc)) #np.max(Rcoff),np.min(Rcoff),np.max(ifile),np.min(ifile),
+        ofile=outdir+"/"+runname+"/Roff/Roff__"+yyyy+mm+dd+ens_char+".one"
+        Rc.tofile(ofile)
+    return 0
+######################################
+def make_runoff_normal(inputlist):
+    syear=int(inputlist[0])
+    eyear=int(inputlist[1])
+    ens_char=inputlist[2]
+    runname=inputlist[3]
+    alpha=float(inputlist[4])
+    beta=float(inputlist[5])
+    E=float(inputlist[6])
+    rand=float(inputlist[7])
+    rundir=inputlist[8]
+    outdir=inputlist[9]
+    # get runoff metadata
+    nx,ny,prefix,suffix=get_runoff_metadata(runname)
+    # create necessary varibales
+    s=spatially_correlated_random(nx,ny)#*rand
+    start_dt=datetime.date(syear,1,1)
+    end_dt=datetime.date(eyear,12,31)
+    start=0
+    last=(end_dt-start_dt).days + 1
+    for day in np.arange(start,last):
+        target_dt=start_dt+datetime.timedelta(days=day)
+        yyyy='%04d' % (target_dt.year)
+        mm='%02d' % (target_dt.month)
+        dd='%02d' % (target_dt.day)
+        # get spatially correlated normal distributiion
+        # w=spatially_correlated_random(nx,ny)
+        # stochastic term with mean 0 and variance 1 following a Gaussian distribution
+        w=np.random.normal(0,1)
+        # print ("w ", np.max(w),np.min(w))
+        s=alpha*s+np.sqrt(1-alpha**2)*w
+        #===
+        Rcoff = s #((1.0 + beta) / np.sqrt(E**2 + 1.0)) * np.exp(np.sqrt(np.log(E**2 + 1)) * s)
+        Rcoff = np.float32(Rcoff)
+        # Rcoff.astype(np.float32, casting='unsafe', copy=True)
+        # Rcoff=np.zeros([ny,nx],np.float32)
+        # for ix in np.arange(nx):
+        #     for iy in np.arange(ny):
+        #         Rcoff[iy,ix]=((1.0+beta)/math.sqrt(E**2+1.0))*math.exp(math.sqrt(E**2+1)*s[iy,ix])
+        # ifile=rundir+"/"+prefix+yyyy+mm+dd+suffix
+        ifile=np.fromfile(rundir+"/"+prefix+yyyy+mm+dd+suffix,np.float32).reshape(ny,nx)
+        ifile=np.nan_to_num(ifile)
+        ifile=np.float32(ifile)
+        # ifile.astype(np.float32, casting='unsafe', copy=True)
+        # Rc=np.zeros([ny,nx],np.float32)
+        Rc=Rcoff*ifile
+        # Rc=Rc*(Rc>1e-2)*1.0
+        # Rc.astype(np.float32, casting='unsafe', copy=True)
         Rc=np.float32(Rc)
         # print (yyyy,mm,dd,ens_char,np.max(Rc),np.min(Rc)) #np.max(Rcoff),np.min(Rcoff),np.max(ifile),np.min(ifile),
         ofile=outdir+"/"+runname+"/Roff/Roff__"+yyyy+mm+dd+ens_char+".one"
@@ -1106,7 +1195,7 @@ def val_tau_t():
     return 150 # decorrelation time
 ######################################
 def val_tau_s():
-    return 50 # spatial decorrelation length
+    return 100 # spatial decorrelation length
 ######################################
 def val_alpha():
     return 1.0 - (1.0/(val_tau_t()+1e-20))
