@@ -708,7 +708,7 @@ def prepare_input():
 ######################################
 def prep_runoff_ensemble(distopen,diststd,ne,runname,rundir,
                         outdir,syear=2001,eyear=2010,method="simple",
-                        beta=0.0,E=0.3,alpha=0.993):
+                        beta=0.0,E=0.3,alpha=0.993,tau_s=50.0):
     """
     runname = name of the runoff [e.g., VIC BC, E2O]
     rundir  = runoff directory
@@ -850,7 +850,7 @@ def prep_runoff_ensemble(distopen,diststd,ne,runname,rundir,
             yyyy1="%04d"%(syear)
             yyyy2="%04d"%(eyear)
             # print (yyyy1,yyyy2,ens_char,runname,str(alpha),str(beta),str(E),rundir,outdir)
-            inputlist.append([yyyy1,yyyy2,ens_char,runname,str(alpha),str(beta),str(E),str(rand[ens-1]),rundir,outdir])
+            inputlist.append([yyyy1,yyyy2,ens_char,runname,str(alpha),str(beta),str(E),str(tau_s),rundir,outdir])
         #==================================
         # do parallel
         para=20 #pm.para_nums()
@@ -894,7 +894,7 @@ def prep_runoff_ensemble(distopen,diststd,ne,runname,rundir,
             yyyy1="%04d"%(syear)
             yyyy2="%04d"%(eyear)
             # print (yyyy1,yyyy2,ens_char,runname,str(alpha),str(beta),str(E),rundir,outdir)
-            inputlist.append([yyyy1,yyyy2,ens_char,runname,str(alpha),str(beta),str(E),str(rand[ens-1]),rundir,outdir])
+            inputlist.append([yyyy1,yyyy2,ens_char,runname,str(alpha),str(beta),str(E),str(tau_s),rundir,outdir])
         #==================================
         # do parallel
         para=20 #pm.para_nums()
@@ -903,8 +903,13 @@ def prep_runoff_ensemble(distopen,diststd,ne,runname,rundir,
         p.terminate()
     return 0
 ######################################
-def spatially_correlated_random(nx,ny):
-    correlation_scale = val_tau_s()
+def spatially_correlated_random(nx,ny,tau=50.0):
+    """
+    Spatially correlated random variable 
+    sptial demensions are [nx,ny]
+    tau_s = decorrelation length
+    """
+    correlation_scale = tau
     x = np.arange(-correlation_scale, correlation_scale)
     y = np.arange(-correlation_scale, correlation_scale)
     X, Y = np.meshgrid(x, y)
@@ -912,7 +917,7 @@ def spatially_correlated_random(nx,ny):
     filter_kernel = np.exp(-dist**2/(2*correlation_scale))
     noise = np.random.normal(0.0, 1.0, size=(ny,nx)) #.reshape(ny,nx)
     noise = scipy.signal.fftconvolve(noise, filter_kernel, mode='same')
-    noise = noise*(1/(np.std(noise)+1e-20))
+    # noise = noise*(1/(np.std(noise)+1e-20))
     return noise
 ######################################
 def make_runoff(inputlist):
@@ -940,6 +945,14 @@ def make_runoff(inputlist):
     return 0
 ######################################
 def make_runoff_temporal(inputlist):
+    """
+    make spatially and temporally correlated runoff: lognormal distribution
+    Refferce:
+    Nijssen, B., & Lettenmaier, D. P. (2004). Effect of precipitation 
+    sampling error on simulated hydrological fluxes and states: Anticipating 
+    the Global Precipitation Measurement satellites. Journal of Geophysical 
+    Research: Atmospheres, 109(2), 1–15. https://doi.org/10.1029/2003jd003497
+    """
     syear=int(inputlist[0])
     eyear=int(inputlist[1])
     ens_char=inputlist[2]
@@ -947,14 +960,16 @@ def make_runoff_temporal(inputlist):
     alpha=float(inputlist[4])
     beta=float(inputlist[5])
     E=float(inputlist[6])
-    rand=float(inputlist[7])
+    tau_s=float(inputlist[7])
     rundir=inputlist[8]
     outdir=inputlist[9]
     # get runoff metadata
     nx,ny,prefix,suffix=get_runoff_metadata(runname)
     # create necessary varibales
     # get spatially correlated normal distributiion
-    s=spatially_correlated_random(nx,ny)#*rand
+    s=spatially_correlated_random(nx,ny,tau_s)#*rand
+    s=s*(1/(np.std(s)+1e-20))
+    # date
     start_dt=datetime.date(syear,1,1)
     end_dt=datetime.date(eyear,12,31)
     start=0
@@ -994,6 +1009,9 @@ def make_runoff_temporal(inputlist):
     return 0
 ######################################
 def make_runoff_normal(inputlist):
+    """
+    make spatially and temporally correlated runoff: normal distribution
+    """
     syear=int(inputlist[0])
     eyear=int(inputlist[1])
     ens_char=inputlist[2]
@@ -1008,6 +1026,8 @@ def make_runoff_normal(inputlist):
     nx,ny,prefix,suffix=get_runoff_metadata(runname)
     # create necessary varibales
     s=spatially_correlated_random(nx,ny)#*rand
+    s=s*(1/(np.std(s)+1e-20))
+    # date 
     start_dt=datetime.date(syear,1,1)
     end_dt=datetime.date(eyear,12,31)
     start=0

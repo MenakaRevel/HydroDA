@@ -350,24 +350,27 @@ def endtime():
 def obs_list():
     # return "../dat/HydroWeb_alloc_amz_06min_QC0_simulation.txt"
 	# return "../dat/HydroWeb_alloc_amz_06min_2002-2020.txt"
-	return "../dat/HydroWeb_alloc_glb_15min.txt"
+	# return "../dat/HydroWeb_alloc_glb_15min.txt"
+	return "../dat/HydroWeb_alloc_conus_06min_org.txt"
 ####################################
 def HydroWeb_list():
     # return "../dat/HydroWeb_alloc_amz_06min_QC0_simulation.txt"
-	return "../dat/HydroWeb_alloc_amz_06min_2002-2020.txt"
+	# return "../dat/HydroWeb_alloc_amz_06min_2002-2020.txt"
+	return "../dat/HydroWeb_alloc_conus_06min_org.txt"
 ####################################
 def obs_name():
-    # return "HydroWeb"
-	return "SWOT"
+    return "HydroWeb"
+	# return "SWOT"
 ####################################
 def obs_dir():
     # return "/cluster/data7/menaka/HydroDA/obs/HydroWeb"
-    # return "/cluster/data6/menaka/HydroWeb"
+    return "/cluster/data6/menaka/HydroWeb"
     # return "/cluster/data6/menaka/ensemble_org/CaMa_out/E2O003"
-	return "/work/a04/julien/CaMa-Flood_v4/out/coupled-model2"
+	# return "/work/a04/julien/CaMa-Flood_v4/out/coupled-model2"
 ####################################
 def dam_list():
-	return "../dat/dam_glb_15min.txt"
+	# return "../dat/dam_glb_15min.txt"
+	return "../dat/dam_conus_06min.txt"
 ####################################
 def CaMa_dir():
 	return "/cluster/data6/menaka/CaMa-Flood_v4"
@@ -376,7 +379,8 @@ def CaMa_dir():
 ####################################
 def mapname():
     # return "amz_06min"
-    return "glb_15min"
+    # return "glb_15min"
+	return "conus_06min"
     # related CaMa-Flood map directory
     # [e.g. : glb_15min, glb_06min, Mkg_06min, etc.]
     # Check 
@@ -392,12 +396,13 @@ def map_dimension():
     return nx,ny,gsize
 ####################################
 def out_dir():
-	# return "/cluster/data7/menaka/HydroDA/obs/HydroWeb"
+	return "/cluster/data7/menaka/HydroDA/obs/HydroWeb"
 	# return "/cluster/data7/menaka/HydroDA/obs/HydroWebAll"
-	return "/cluster/data7/menaka/HydroDA/obs/SWOTH08"
+	# return "/cluster/data7/menaka/HydroDA/obs/SWOTH08"
 ####################################
 if __name__ == "__main__":
 	print ("prepare observations")
 	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/HydroWeb")
 	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/HydroWeb_glb_15min")
-	prepare_obs("/cluster/data7/menaka/HydroDA/obs/SWOTH08") # for SWOTH08
+	prepare_obs("/cluster/data7/menaka/HydroDA/obs/HydroWeb_conus_06min")
+	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/SWOTH08") # for SWOTH08

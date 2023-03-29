@@ -49,8 +49,8 @@ export OMP_NUM_THREADS=$NCPUS
 
 # go to working dirctory
 HydroDA="/cluster/data6/menaka/HydroDA"
-# HydroDAout="/cluster/data7/menaka/HydroDA"
-HydroDAout="/work/a06/menaka/HydroDA"
+HydroDAout="/cluster/data7/menaka/HydroDA"
+# HydroDAout="/work/a06/menaka/HydroDA"
 
 #----------
 # cd $HydroDA
@@ -82,7 +82,8 @@ cd $HydroDAout
 # EXP="test_virtual"
 # EXP="test_wse"
 # EXP="NOM_WSE_E2O_HWEB_101" # for glb_15min
-EXP="DIR_WSE_E2O_SWOT_003" # for SWOTH08
+# EXP="DIR_WSE_E2O_SWOT_003" # for SWOTH08
+EXP="NOM_WSE_E2O_HWEB_201" # for conus 
 
 # mkdir -p $HydroDA"/out/"$EXP
 mkdir -p $HydroDAout"/out/"$EXP
@@ -100,8 +101,8 @@ echo $EXP > "./exp.txt"
 echo $NCPUS > $"./ncpus.txt"
 
 # copy params.py
-# cp -r $HydroDA/gosh/params_real.py     ./params.py # for real experiment
-cp -r $HydroDA/gosh/params_virt.py     ./params.py # for virtual experiment
+cp -r $HydroDA/gosh/params_real.py     ./params.py # for real experiment
+# cp -r $HydroDA/gosh/params_virt.py     ./params.py # for virtual experiment
 
 # copy running related files
 # cp -r $HydroDA/src/run.py           $HydroDA/out/$EXP/run.py

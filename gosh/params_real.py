@@ -25,7 +25,7 @@ def mode():
 
 def conflag():
     return 2
-    # converstion flag for observation converstions 
+    # flag for observation conversations 
     #  1 - Directly values 
     #  2 - Anomalies
     #  3 - Normalized values
@@ -33,7 +33,8 @@ def conflag():
 
 def mapname():
     # return "amz_06min"
-    return "glb_15min"
+    # return "glb_15min"
+    return "conus_06min"
     # related CaMa-Flood map directory
     # [e.g., : glb_15min, glb_06min, Mkg_06min, etc.]
     # Check 
@@ -92,10 +93,11 @@ def patch_size():
 def DA_dir():
     return "/cluster/data6/menaka/HydroDA"
     # directory of HydroDA
-    # where src, dat, sat, out exsits
+    # where src, dat, sat, out exists
 
 def patch_dir():
-    return "/cluster/data6/menaka/Empirical_LocalPatch/local_patch"
+    return "/cluster/data6/menaka/Empirical_LocalPatch/local_patch/conus_06min_VIC_BC_60_dam" # correlation-based dam
+    # return "/cluster/data6/menaka/Empirical_LocalPatch/local_patch"
     # return "/cluster/data6/menaka/Empirical_LocalPatch/local_patchMS"
     # return "/cluster/data6/menaka/covariance/local_patch"
     # return "/cluster/data6/menaka/covariance/local_patchMS"
@@ -109,7 +111,8 @@ def patch_name():
     # return "amz_06min_S14FD_60"
     # return "amz_06min_S14FD_40"
     # return "amz_06min_S14FD_20"
-    return "glb_15min_S14FD_60"
+    # return "glb_15min_S14FD_60"
+    return "conus_06min_VIC_BC_60_dam"
 
 def patch_id():
     # return "0.95MS"
@@ -119,9 +122,10 @@ def patch_id():
     # return "0.60MS"
     # return "0.90"
     # return "0.80"
-    return "0.60"
+    # return "0.60"
     # return "0.40"
     # return "0.20"
+    return "0.60-dam"
 
 def thersold():
     # return 0.95
@@ -171,7 +175,7 @@ def timestep():
     return 86400 # outer timestep in seconds
 
 def starttime():
-    return (2003,1,1) # start date: [year,month,date]
+    return (2014,1,1) # start date: [year,month,date]
 
 def endtime():
     return (2015,1,1) # end date: [year,month,date]
@@ -189,7 +193,7 @@ def spinup_mode():
     ### if initial restart file is ready, spinup simulation is no need
 
 def spinup_end_year():
-    return 2002
+    return 2013
 
 def spinup_end_month():
     return 12
@@ -368,13 +372,14 @@ def HydroWeb_dir():
     return "/cluster/data6/menaka/HydroWeb"
 
 def obs_dir():
-    return "/cluster/data7/menaka/HydroDA/obs/HydroWeb_glb_15min"
+    return "/cluster/data7/menaka/HydroDA/obs/HydroWeb_conus_06min"
+    # return "/cluster/data7/menaka/HydroDA/obs/HydroWeb_glb_15min"
     # return "/cluster/data7/menaka/HydroDA/obs/HydroWeb"
     # return "/cluster/data6/menaka/HydroWeb"
     # return "/cluster/data6/menaka/ensemble_org/CaMa_out/E2O003"
 
 def obs_list():
-    return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+".txt"
+    return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_org.txt"
     # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_amz.txt"
     # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_QC.txt"
     # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_QC1.txt"
@@ -383,11 +388,11 @@ def obs_list():
     # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_QC0_simulation.txt"
 
 def stat_name(cal=calibrate()):
-    # return "sfcelv_49_ECMWF_amz_06min_2000-2014" # original statistic
+    return "sfcelv_49_ECMWF_amz_06min_2000-2014" # original statistic
     # return "sfcelv_bias_ECMWF_amz_06min_2000-2014" # biased runoff statistic
     # return "sfcelv_corrupt_ECMWF_amz_06min_2000-2014" #  courrpted bathymetry statistic
     # return "sfcelv_bias_corrupt_ECMWF_amz_06min_2000-2014" # biased courrpted bathymetry statistic
-    return "sfcelv_49_E2O_glb_15min_2002-2014"
+    # return "sfcelv_49_E2O_glb_15min_2002-2014"
 
     # if cal=="yes":
     #     # return "cal_sfcelv_49_E2O_amz_06min_2009-2014" # for long-term statistic simulation calibrated
@@ -474,7 +479,7 @@ def slack_notification():
 def para_nums():
     return 40
     # setting number of parallels to run CaMa-Flood Model
-    # defualt is 6, but may change depending on your system
+    # default is 6, but may change depending on your system
 
 def cpu_nums():
     with open("./ncpus.txt","r") as f:
