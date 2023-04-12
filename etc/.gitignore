@@ -1,0 +1,9 @@
+mean
+
+*.pyc
+
+*.so
+
+*.o*
+
+*.cpython-*
