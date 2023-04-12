@@ -18,13 +18,13 @@ def version():
 # **************************************************************
 # 1. experment type related definitions
 def mode():
-    return 1
+    return 5
     # parameter to change assimilation mode
     # runoff ensembles will change accordingly.
-    # 1: Earth2Obs, 2: ERA20CM, 3: VIC_BC, 4: baised (ECMWF/ELSE_KIM2009/E2O/ERA20CM), 5: ERA5
+    # 1: Earth2Obs, 2: ERA20CM, 3: VIC_BC, 4: biased (ECMWF/ELSE_KIM2009/E2O/ERA20CM), 5: ERA5
 
 def conflag():
-    return 2
+    return 1
     # flag for observation conversations 
     #  1 - Directly values 
     #  2 - Anomalies
@@ -50,8 +50,8 @@ def map_dimension():
     return nx,ny,gsize
 
 def experiment():
-    f=open("./exp.txt","r")
-    line=f.readline()
+    with open("./exp.txt","r") as f:
+        line=f.readline()
     exp =line.split("\n")[0]
     f.close()
     return exp
@@ -59,27 +59,31 @@ def experiment():
 # **************************************************************
 # 2. Data assimilation related definitions
 def assimS():
+    return 20
     # return -20
-    return -90
+    # return -90
     # data Assimilation's Region (South Edge at latitude)
     # *note: should be larger or equal to -80
 
 def assimN():
+    return 55
     # return 5
-    return 90
+    # return 90
     # data Assimilation's Region (North Edge at latitude)
     # *note: should be smaller or equal to 80
 
 def assimW():
+    return -130
     # return -80
-    return -180
+    # return -180
     #return -68.25 # use this for disabling west side of the Amazon basin's observation
     # data Assimilation's Region (West Edge at latitude)
     # *note: should be larger or equal to -170
 
 def assimE():
+    return -60
     # return -45
-    return 180
+    # return 180
     # data Assimilation's Region (East Edge at latitude)
     # *note: should be smaller or equal to 170
 
@@ -96,7 +100,7 @@ def DA_dir():
     # where src, dat, sat, out exists
 
 def patch_dir():
-    return "/cluster/data6/menaka/Empirical_LocalPatch/local_patch/conus_06min_VIC_BC_60_dam" # correlation-based dam
+    return "/cluster/data6/menaka/Empirical_LocalPatch/local_patch" 
     # return "/cluster/data6/menaka/Empirical_LocalPatch/local_patch"
     # return "/cluster/data6/menaka/Empirical_LocalPatch/local_patchMS"
     # return "/cluster/data6/menaka/covariance/local_patch"
@@ -112,7 +116,7 @@ def patch_name():
     # return "amz_06min_S14FD_40"
     # return "amz_06min_S14FD_20"
     # return "glb_15min_S14FD_60"
-    return "conus_06min_VIC_BC_60_dam"
+    return "conus_06min_VIC_BC_60_dam" # correlation-based dam
 
 def patch_id():
     # return "0.95MS"
@@ -154,7 +158,7 @@ def sigma_b():
     # background variance of inflation for adaptive inflation Myoshi et al (2011)
 
 def ens_mem(mode=mode()):
-    return 49
+    return 20
     # if mode == 1:
     #     # return 21
     #     return 49
@@ -175,25 +179,25 @@ def timestep():
     return 86400 # outer timestep in seconds
 
 def starttime():
-    return (2014,1,1) # start date: [year,month,date]
+    return (2018,1,1) # start date: [year,month,date]
 
 def endtime():
-    return (2015,1,1) # end date: [year,month,date]
+    return (2019,1,1) # end date: [year,month,date]
                       # *note: this date is not included
 
 # **************************************************************
 # 4. Spinup options
 def spinup_mode():
-    return 0
-    # 0: do spinup simulation for both (corrupted and true) simulation
+    return 3
+    # 0: do spin up simulation for both (corrupted and true) simulation
     # 1: do spin up only at corrupted simulation
     # 2: do spin up only at true simulation
-    # 3: no spinup simulation at all
+    # 3: no spin up simulation at all
     # 4: copy restart file from previous data
-    ### if initial restart file is ready, spinup simulation is no need
+    ### if initial restart file is ready, spin up simulation is no need
 
 def spinup_end_year():
-    return 2013
+    return 2017
 
 def spinup_end_month():
     return 12
@@ -204,7 +208,8 @@ def spinup_end_date():
 # **************************************************************
 # 5. Runoff forcing 
 def runoff_dir():
-    return "/cluster/data6/menaka/ensemble_simulations/CaMa_in/E2O"
+    # return "/cluster/data6/menaka/ensemble_simulations/CaMa_in/E2O"
+    return "/work/a06/menaka/ensemble_simulations/CaMa_in/ERA5"
     # return "/cluster/data7/menaka/ensemble_simulations/CaMa_in/ECMWF000" # original runoff
     # return "/cluster/data7/menaka/ensemble_simulations/CaMa_in/ECMWF050" # biased runoff
 
@@ -365,21 +370,26 @@ def output_er():
 # **************************************************************
 # 7. observations settings
 def obs_name():
-    return "HydroWeb"
+    # return "HydroWeb"
     # return "SWOT"
+    return "CGLS"
 
 def HydroWeb_dir():
     return "/cluster/data6/menaka/HydroWeb"
 
 def obs_dir():
-    return "/cluster/data7/menaka/HydroDA/obs/HydroWeb_conus_06min"
+    # return "/cluster/data7/menaka/HydroDA/obs/HydroWeb_conus_06min_DIR"
+    return "/cluster/data7/menaka/HydroDA/obs/CGLS_conus_06min_DIR"
+    # return "/cluster/data7/menaka/HydroDA/obs/HydroWeb_conus_06min"
     # return "/cluster/data7/menaka/HydroDA/obs/HydroWeb_glb_15min"
     # return "/cluster/data7/menaka/HydroDA/obs/HydroWeb"
     # return "/cluster/data6/menaka/HydroWeb"
     # return "/cluster/data6/menaka/ensemble_org/CaMa_out/E2O003"
 
 def obs_list():
-    return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_org.txt"
+    # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_DIR.txt"
+    return DA_dir()+"/dat/CGLS_alloc_"+mapname()+"_DIR.txt"
+    # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_org.txt"
     # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_amz.txt"
     # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_QC.txt"
     # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_QC1.txt"

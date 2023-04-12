@@ -10,6 +10,9 @@ program data_assim
 ! 2. Revel, M., Ikeshima, D., Yamazaki, D., & Kanae, S. (2019). A Physically Based Empirical 
 ! Localization Method for Assimilating Synthetic SWOT Observations of a Continental-Scale River: 
 ! A Case Study in the Congo Basin,Water, 11(4), 829. https://doi.org/10.3390/w11040829
+! Revel, M., Zhou, X., Yamazaki, D., & Kanae, S. (2023). Assimilation of transformed water 
+! surface elevation to improve river discharge estimation in a continental-scale river. 
+! Hydrology and Earth System Sciences, 27(3), 647–671. https://doi.org/10.5194/hess-27-647-2023
 ! ====================================================================================
 ! created by Ikeshima & Menaka
 ! Menaka@IIS 2021
@@ -771,7 +774,7 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         write(78,*) "******************",lon_cent,lat_cent," *******************"
         write(78,*) "=========================================================="
         !=========
-        write(*,*) "******************",lon_cent,lat_cent,"*******************"
+        print*, "******************",lon_cent,lat_cent,"*******************"
         write(78,*) "size",countnum
         write(78,*) "local obs",sum((local_obs/=0)*(-1))
 
@@ -782,7 +785,7 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
             rho=rho_fixed
         endif
         if (rho<rho_min) rho=rho_min
-        write(*,*)rho
+        ! write(*,*)rho
 
         ! number observations
         ovs=sum(local_obs)
@@ -977,7 +980,7 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
 
             Wvec = matmul(matmul(matmul(Pa,TRANSPOSE(matmul(H,Ef))),R),yo-matmul(H,xf_m))
             !write(78,*) "yo-Hxt",yo-matmul(H,xf_m)
-            write(*,*) "yo-Hxt",yo,matmul(H,xf_m),yo-matmul(H,xf_m)
+            ! print*, "yo-Hxt",yo,matmul(H,xf_m),yo-matmul(H,xf_m)
             do i = 1,ens_num
                 W(:,i) = Wvec + sqrt(ens_num-1.)*Pasqr(:,i)
             end do
@@ -985,7 +988,7 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
             deallocate(Wvec)
         else
             !write(78,*) "NG INFO"
-            write(*,*) "NG INFO"
+            print*, "NG INFO"
             W=0
             errflg=4
             write(82,*) lat,lon,"error",errflg,"info:",info
@@ -1012,8 +1015,8 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         ! check center pixel ====================================
         !write(*,*) "errfix:", errfix, obserrrand(lon_cent,lat_cent)
         ! write(*,*) "true   :",xt(target_pixel)
-        print*, "forcast:",sum(xf(target_pixel,:))/(ens_num+1e-20)
-        print*, "assimil:",sum(xa(target_pixel,:))/(ens_num+1e-20)
+        ! print*, "forcast:",sum(xf(target_pixel,:))/(ens_num+1e-20)
+        ! print*, "assimil:",sum(xa(target_pixel,:))/(ens_num+1e-20)
 
 
         ! write(78,*) "true   :",xt(target_pixel)
@@ -1059,7 +1062,7 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         write(73,*) "+++++++++++++++++++++++++++++++++++"
         write(73,*) gain, parm(4),parm(1),parm(2),parm(3)
         rho=rho+ gain* parm(4)
-        write(*,*)"rho",rho,rho_min
+        ! write(*,*)"rho",rho,rho_min
         if (rho<rho_min) rho=rho_min
         write(73,*) lon_cent,lat_cent,"rho",rho,"rho_min",rho_min
         !---

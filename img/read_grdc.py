@@ -10,7 +10,7 @@ import sys
 #os.system("ln -sf ../params.py params.py")
 #shutil.copy("../gosh/params.py","params.py")
 sys.path.append("../gosh")
-import params as pm
+import params_real as pm
 #--
 def get_grdc_loc(name,info = "a"):
   #--ask the river name and a or b

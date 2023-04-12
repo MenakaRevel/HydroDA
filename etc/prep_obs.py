@@ -24,6 +24,7 @@ import re
 import calendar
 import math
 import sys
+import json
 
 # #external python codes
 # dir_param="../gosh"
@@ -45,6 +46,8 @@ def slink(src,dst):
       os.symlink(src,dst)
     else:
       raise
+#########################
+# HydroWeb
 #########################
 def get_HydroWeb():
 	#=============
@@ -158,6 +161,8 @@ def HydroWeb_data(yyyy,mm,dd):
 		l_sat.append(sat)
 	return xlist, ylist, l_wse, m_wse, s_wse, l_sat
 ####################################
+# SWOT
+#########################
 def swot_data(yyyy,mm,dd):
 	# prepare sythetic observations using
 	# pre-simulated data
@@ -255,6 +260,117 @@ def SWOT_observation_error():
 	# obs_err.tofile(fname)
 	return obs_err
 #########################
+# CGLS
+#########################
+def get_CGLS():
+	#=============
+	lname=[]
+	xlist=[]
+	ylist=[]
+	leledf=[]
+	lEGM08=[]
+	lEGM96=[]
+	satellite=[]
+	# fname=pm.DA_dir()+"/dat/HydroWeb_alloc_"+pm.mapname()+".txt"
+	# fname=pm.DA_dir()+"/dat/HydroWeb_alloc_"+pm.mapname()+"_new.txt"
+	# fname=pm.DA_dir()+"/dat/HydroWeb_alloc_"+pm.mapname()+"_amz.txt"
+	fname=obs_list()
+	# fname=HydroWeb_list()
+	#=========================
+	with open(fname,"r") as f:
+		lines=f.readlines()
+	for line in lines[1::]:
+		line    = re.split(" ",line)
+		line    = list(filter(None, line))
+		#print line
+		num     = line[0]
+		station = line[1]
+		riv     = re.split("_",station)[1]
+		lon     = float(line[2])
+		lat     = float(line[3])
+		ix      = int(line[4])
+		iy      = int(line[5])
+		eledif  = float(line[7])
+		EGM08   = float(line[8])
+		EGM96   = float(line[9])
+		sat     = line[10].split()[0]
+		# print (riv,station,sat)
+		#------
+		lname.append(station)
+		xlist.append(ix)
+		ylist.append(iy)
+		leledf.append(eledif)
+		lEGM08.append(EGM08)
+		lEGM96.append(EGM96)
+		satellite.append(sat)
+	return lname, xlist, ylist, leledf, lEGM08, lEGM96, satellite
+#########################
+def read_CGLS(yyyy,mm,dd,name,EGM08,EGM96,eledf=0.0):
+	target_dt=datetime.date(int(yyyy),int(mm),int(dd))
+	CGLS_dir="/work/a06/menaka/CGLS"
+	#print name
+	lwse=[]
+	wseo=-9999.0
+	#--read HydroWeb data
+	iname=CGLS_dir+"/data/river/"+name+".json"
+	with open(iname) as f:
+		alldata    = json.load(f)
+		cgls_data  = alldata["data"]
+    #----------------------------
+	for line in range(len(cgls_data)):
+		date    = cgls_data[line]["datetime"]
+		date    = re.split(" ",date)[0]
+		date    = re.split("/",date)
+		year    = int(date[0])
+		mon     = int(date[1])
+		day     = int(date[2])
+		wse     = cgls_data[line]["water_surface_height_above_reference_datum"] + EGM08 - EGM96 + eledf
+		lwse.append(wse)
+		now     = datetime.date(year,mon,day)
+		if now == target_dt:
+			wseo=wse
+	if wseo==-9999.0:
+		mean_wse=-9999.0
+		std_wse=-9999.0
+	else:
+		mean_wse=np.mean(np.array(lwse))
+		std_wse=np.std(np.array(lwse))	
+	return wseo, mean_wse, std_wse
+#########################	
+def CGLS_data(yyyy,mm,dd):
+	lname =[]
+	xlist =[]
+	ylist =[]
+	l_wse =[]
+	m_wse =[]
+	s_wse =[]
+	l_sat =[]
+	lstan, xcods, ycods, leledif, lEGM08, lEGM96, satellite = get_HydroWeb()
+	pnum=len(lstan)
+	# print (pnum)
+	for point in np.arange(pnum):
+		# # == read relevant observation data ==
+		# if pm.obs_name() == "HydroWeb":
+		# 	# == for HydroWeb data ==
+		wseo, mean_wse, std_wse = read_CGLS(yyyy,mm,dd,lstan[point],lEGM08[point],lEGM96[point])#,leledif[point])
+		# else:
+		# 	wseo, mean_wse, std_wse = read_HydroWeb(yyyy,mm,dd,lname[point],lEGM08[point],lEGM96[point],leledif[point])
+		# print (point, wseo)
+		if wseo == -9999.0:
+			continue
+		# print (point, wseo)
+		iix=xcods[point]
+		iiy=ycods[point]
+		sat=satellite[point]
+		#====================
+		xlist.append(iix)
+		ylist.append(iiy)
+		l_wse.append(wseo)
+		m_wse.append(mean_wse)
+		s_wse.append(std_wse)
+		l_sat.append(sat)
+	return xlist, ylist, l_wse, m_wse, s_wse, l_sat
+#########################
 def err_rand(obs_err,ix,iy):
 	"""make random values to add to true values"""
 	# nx,ny,gsize = pm.map_dimension()
@@ -282,32 +398,34 @@ def dam_loc():
 	return damloc
 #########################
 def write_txt(inputlist):
-    yyyy=inputlist[0]
-    mm=inputlist[1]
-    dd=inputlist[2]
-    dir0=inputlist[3]
-    print ("write text file: ",yyyy,mm,dd)
-    target_dt=datetime.date(int(yyyy),int(mm),int(dd))
-    txtfile=dir0+"/"+yyyy+mm+dd+".txt"
-    if obs_name() == "HydroWeb":
-        xlist, ylist, l_wse, m_wse, s_wse, l_sat = HydroWeb_data(yyyy,mm,dd)
-    if obs_name() == "SWOT":
-        xlist, ylist, l_wse, m_wse, s_wse, l_sat = swot_data(yyyy,mm,dd) 
-    #--------------
-    pnum=len(xlist)
-    # print ('xlist:',pnum, "l_wse:",len(l_wse))
-    with open(txtfile,"w") as txtf:
-        for point in np.arange(pnum):
-            iix=xlist[point]
-            iiy=ylist[point]
-            wseo=l_wse[point]
-            mean_wse=m_wse[point]
-            std_wse=s_wse[point]
-            sat=l_sat[point]
-            line="%04d	%04d	%10.4f	%10.4f	%10.4f	%s\n"%(iix,iiy,wseo,mean_wse,std_wse,sat)
-            txtf.write(line)
-            print (line)
-    return 0
+	yyyy=inputlist[0]
+	mm=inputlist[1]
+	dd=inputlist[2]
+	dir0=inputlist[3]
+	print ("write text file: ",yyyy,mm,dd)
+	target_dt=datetime.date(int(yyyy),int(mm),int(dd))
+	txtfile=dir0+"/"+yyyy+mm+dd+".txt"
+	if obs_name() == "HydroWeb":
+		xlist, ylist, l_wse, m_wse, s_wse, l_sat = HydroWeb_data(yyyy,mm,dd)
+	if obs_name() == "SWOT":
+		xlist, ylist, l_wse, m_wse, s_wse, l_sat = swot_data(yyyy,mm,dd) 
+	if obs_name() == "CGLS":
+		xlist, ylist, l_wse, m_wse, s_wse, l_sat = CGLS_data(yyyy,mm,dd)
+	#--------------
+	pnum=len(xlist)
+	# print ('xlist:',pnum, "l_wse:",len(l_wse))
+	with open(txtfile,"w") as txtf:
+		for point in np.arange(pnum):
+			iix=xlist[point]
+			iiy=ylist[point]
+			wseo=l_wse[point]
+			mean_wse=m_wse[point]
+			std_wse=s_wse[point]
+			sat=l_sat[point]
+			line="%04d	%04d	%10.4f	%10.4f	%10.4f	%s\n"%(iix,iiy,wseo,mean_wse,std_wse,sat)
+			txtf.write(line)
+			print (line)
+	return 0
 #########################
 def prepare_obs(dir0="./"):
 	"""
@@ -333,7 +451,7 @@ def prepare_obs(dir0="./"):
 		# print (yyyy,mm,dd) #,obs_dir
 		inputlist.append([yyyy,mm,dd,dir0])
 	# write text files parallel
-	p=Pool(10)
+	p=Pool(20)
 	p.map(write_txt,inputlist)
 	p.terminate()
 	# map(write_txt,inputlist)
@@ -342,7 +460,7 @@ def prepare_obs(dir0="./"):
 ############# parameters ###########
 ####################################
 def starttime():
-    return 2002,1,1
+    return 2015,1,1
 ####################################
 def endtime():
     return 2021,1,1
@@ -351,20 +469,28 @@ def obs_list():
     # return "../dat/HydroWeb_alloc_amz_06min_QC0_simulation.txt"
 	# return "../dat/HydroWeb_alloc_amz_06min_2002-2020.txt"
 	# return "../dat/HydroWeb_alloc_glb_15min.txt"
-	return "../dat/HydroWeb_alloc_conus_06min_org.txt"
+	# return "../dat/HydroWeb_alloc_conus_06min_org.txt"
+	# return "../dat/HydroWeb_alloc_conus_06min_DIR.txt"
+	# return "../dat/CGLS_alloc_conus_06min_DIR.txt"
+	return "../dat/CGLS_alloc_conus_06min_org.txt"
 ####################################
 def HydroWeb_list():
     # return "../dat/HydroWeb_alloc_amz_06min_QC0_simulation.txt"
 	# return "../dat/HydroWeb_alloc_amz_06min_2002-2020.txt"
-	return "../dat/HydroWeb_alloc_conus_06min_org.txt"
+	# return "../dat/HydroWeb_alloc_conus_06min_org.txt"
+	# return "../dat/HydroWeb_alloc_conus_06min_DIR.txt"
+	# return "../dat/CGLS_alloc_conus_06min_DIR.txt"
+	return "../dat/CGLS_alloc_conus_06min_org.txt"
 ####################################
 def obs_name():
-    return "HydroWeb"
+    # return "HydroWeb"
 	# return "SWOT"
+	return "CGLS"
 ####################################
 def obs_dir():
     # return "/cluster/data7/menaka/HydroDA/obs/HydroWeb"
-    return "/cluster/data6/menaka/HydroWeb"
+    # return "/cluster/data6/menaka/HydroWeb"
+	return "/work/a06/menaka/CGLS"
     # return "/cluster/data6/menaka/ensemble_org/CaMa_out/E2O003"
 	# return "/work/a04/julien/CaMa-Flood_v4/out/coupled-model2"
 ####################################
@@ -404,5 +530,8 @@ if __name__ == "__main__":
 	print ("prepare observations")
 	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/HydroWeb")
 	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/HydroWeb_glb_15min")
-	prepare_obs("/cluster/data7/menaka/HydroDA/obs/HydroWeb_conus_06min")
+	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/HydroWeb_conus_06min")
+	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/HydroWeb_conus_06min_DIR")
 	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/SWOTH08") # for SWOTH08
+	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/CGLS_conus_06min_DIR") # CGLS for CONUS for DIR
+	prepare_obs("/cluster/data7/menaka/HydroDA/obs/CGLS_conus_06min") # CGLS for CONUS

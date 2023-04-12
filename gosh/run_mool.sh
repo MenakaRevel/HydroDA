@@ -23,7 +23,7 @@
 ################################################################################################
 
 ### SET "mool PBS" @ IIS U-Tokyo
-#PBS -q F40S
+#PBS -q F40
 #PBS -l select=1:ncpus=40:mem=100gb
 #PBS -j oe
 #PBS -m ea
@@ -83,7 +83,9 @@ cd $HydroDAout
 # EXP="test_wse"
 # EXP="NOM_WSE_E2O_HWEB_101" # for glb_15min
 # EXP="DIR_WSE_E2O_SWOT_003" # for SWOTH08
-EXP="NOM_WSE_E2O_HWEB_201" # for conus 
+# EXP="NOM_WSE_E2O_HWEB_201" # for conus 
+# EXP="DIR_WSE_E2O_HWEB_201" # for conus
+EXP="DIR_WSE_ERA5_CGLS_001" # for ERA5 conus CGLS
 
 # mkdir -p $HydroDA"/out/"$EXP
 mkdir -p $HydroDAout"/out/"$EXP

@@ -59,7 +59,7 @@ from read_CMF import read_discharge, read_discharge_multi
 # experiment="NOM_WSE_E2O_HWEB_012"
 # experiment="NOM_WSE_E2O_HWEB_013"
 
-<<<<<<< HEAD
+# <<<<<<< HEAD
 
 
 # experiment="DIR_WSE_ECMWF_HWEB_011"
@@ -77,7 +77,10 @@ from read_CMF import read_discharge, read_discharge_multi
 # experiment="NOM_WSE_ECMWF_HWEB_013"
 # experiment="NOM_WSE_ECMWF_HWEB_014"
 
-experiment="NOM_WSE_E2O_HWEB_101"
+# experiment="NOM_WSE_E2O_HWEB_101"
+# experiment="NOM_WSE_E2O_HWEB_201"
+# experiment="DIR_WSE_E2O_HWEB_201"
+experiment="DIR_WSE_ERA5_CGLS_001"
 #=======
 # experiment="DIR_WSE_E2O_SWOT_001"
 # >>>>>>> dev_virtual
@@ -269,7 +272,7 @@ ny     = int(filter(None, re.split(" ",lines[1]))[0])
 gsize  = float(filter(None, re.split(" ",lines[3]))[0])
 #----
 syear,smonth,sdate=pm.starttime()#2003,1,1 #pm.starttime()#2004#1991 # 2009,1,1 #
-eyear,emonth,edate=2011,1,1 #pm.endtime() #2004,1,1 #2005,1,1 # 2004,1,1 # 2010,1,1 # 2012,1,1 # 2011,1,1 #
+eyear,emonth,edate=pm.endtime() #2004,1,1 #2005,1,1 # 2004,1,1 # 2010,1,1 # 2012,1,1 # 2011,1,1 #
 #month=1
 #date=1
 start_dt=datetime.date(syear,smonth,sdate)
@@ -298,16 +301,18 @@ xlist=[]
 ylist=[]
 river=[]
 #--
-rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZON","MEKONG","IRRAWADDY","VOLGA", "NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
+# rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZON","MEKONG","IRRAWADDY","VOLGA", "NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
 # rivernames  = ["AMAZON"]
 # rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZON","IRRAWADDY","VOLGA","NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
 # rivernames  = ["AMAZON", "MISSISSIPPI","MEKONG", "VOLGA"]
 #rivernames  = ["AMAZON"]
 # rivernames  = ["COLORADO"]
+# rivernames  = ["CHURCHILL"]
+rivernames = ["SAINT LAWRENCE","OHIO","CONNECTICUT","MISSOURI","MISSISSIPPI","COLORADO","CHURCHILL"]
 # rivernames = grdc.grdc_river_name_v396()
 for rivername in rivernames:
   grdc_id,station_loc,x_list,y_list = grdc.get_grdc_loc_v396(rivername)
-# #   print rivername, grdc_id,station_loc
+  print (rivername, grdc_id,station_loc)
   river.append([rivername]*len(station_loc))
   staid.append(grdc_id)
   pname.append(station_loc)
@@ -320,7 +325,7 @@ pname=([flatten for inner in pname for flatten in inner])
 xlist=([flatten for inner in xlist for flatten in inner])
 ylist=([flatten for inner in ylist for flatten in inner])
 
-print len(pname), len(xlist)
+print (len(pname), len(xlist))
 
 pnum=len(pname)
 
@@ -370,12 +375,13 @@ def read_data(inputlist):
     dt=(target_dt-start_dt).days
     # corrpted
     fname=assim_out+"/assim_out/outflw/open/outflw"+yyyy+mm+dd+"_"+numch+".bin"
-    #print (fname)
+    print ("---- reading file ->", fname)
     #fname=assim_out+"/assim_out/rivout/open/rivout"+yyyy+mm+dd+"_"+numch+".bin"
     opnfile=np.fromfile(fname,np.float32).reshape([ny,nx])
     # assimilated
     fname=assim_out+"/assim_out/outflw/assim/outflw"+yyyy+mm+dd+"_"+numch+".bin"
     #fname=assim_out+"/assim_out/rivout/assim/rivout"+yyyy+mm+dd+"_"+numch+".bin"
+    print ("---- reading file ->", fname)
     asmfile=np.fromfile(fname,np.float32).reshape([ny,nx])
     #-------------
     for point in np.arange(pnum):
@@ -396,6 +402,7 @@ p.terminate()
 # res = map(read_data, inputlist)
 # opn = np.ctypeslib.as_array(shared_array_opn)
 # asm = np.ctypeslib.as_array(shared_array_asm)
+
 # for day in np.arange(start,last):
 #     target_dt=start_dt+datetime.timedelta(days=day)
 #     yyyy='%04d' % (target_dt.year)
@@ -528,14 +535,14 @@ def make_fig(point):
         # org=grdc.grdc_dis(staid[point],syear,eyear-1)
         org=np.array(org)
     else:
-        org=grdc.grdc_dis(staid[point],syear,eyear-1)
+        org=grdc.grdc_dis(staid[point],syear,eyear-1) #,smon=1,emon=1,sday=1,eday=31)
         org=np.array(org)
     lines=[ax1.plot(np.arange(start,last),ma.masked_less(org,0.0),label="GRDC",color="#34495e",linewidth=3.0,zorder=101)[0]] #,marker = "o",markevery=swt[point])
 #    ax1.plot(np.arange(start,last),hgt[:,point],label="true",color="gray",linewidth=0.7,linestyle="--",zorder=101)
 #    plt.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7)
-    # for num in np.arange(0,pm.ens_mem()):
-    #     ax1.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.1,alpha=0.1,zorder=102)
-    #     ax1.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.1,alpha=0.1,zorder=103)
+    for num in np.arange(0,pm.ens_mem()):
+        ax1.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.1,alpha=0.1,zorder=102)
+        ax1.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.1,alpha=0.1,zorder=103)
 #        plt.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.3,alpha=0.5)
 #        plt.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.3,alpha=0.5)
     # draw mean of ensembles
@@ -681,8 +688,9 @@ def make_fig(point):
 #    print swt[point]
     plt.legend(lines,labels,ncol=1,loc='upper right') #, bbox_to_anchor=(1.0, 1.0),transform=ax1.transAxes)
     station_loc_list=pname[point].split("/")
+    station_loc_list="".join(station_loc_list.split())
     station_name="-".join(station_loc_list) 
-    print ('save',river[point] , station_name)
+    print ('--- saving figure',river[point]+"-"+station_name+".png")
     plt.savefig(assim_out+"/figures/disgraph/"+river[point]+"-"+station_name+".png",dpi=500)
     return 0
 

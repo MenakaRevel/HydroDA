@@ -49,12 +49,12 @@ cal=${11}
 
 DA_dir=${12}
 
-echo "looptype" $looptype
+# echo "looptype" $looptype
 #=================================================
 #cd ${CAMADIR}/gosh
 #ens_num=$(printf '%03d' $(($runens*$manens)))
-pwd
-echo ${CAMADIR}
+# pwd
+# echo ${CAMADIR}
 echo $EXP_DIR
 # years,months,dates in arranged digit
 ar_year=$in_year
@@ -76,7 +76,7 @@ BASE=$CAMADIR                         #   CaMa-Flood directory
 OUTBASE="$EXP_DIR/CaMa_out"    		   #   base for output => CaMa_out
 INBASE="../../CaMa_in"                #   base for input => CaMa_in
 
-echo $BASE
+# echo $BASE
 
 #*** 0b. Set dynamic library if needed
 export IFORTLIB="/opt/intel/lib:/opt/intel/mkl/lib"
@@ -133,7 +133,7 @@ elif [ $looptype = "open" ];then
 else
 	CRESTSTO=$INBASE"/restart/assim/restart"$ar_year$ar_month$ar_date"A"$ens_num".bin" #restart file name
 fi
-echo $CRESTSTO
+# echo $CRESTSTO
 LSTOONLY=".TRUE."                          # .TRUE. for storage only restart (for assimilation)
 
 
@@ -148,7 +148,7 @@ IFRQ_RST="0"                                # output restat frequency.
 #============================
 #*** 1e. forcing setting
 IFRQ_INP="24"                               # input forcing frequency: [1,2,3,...,24] hour
-DROFUNIT="86400000"   # [mm/day->m/s]       # runoff unit conversion
+DROFUNIT="86400000"        # [mm/day->m/s]  # runoff unit conversion
 if [ $runname = "E2O" ];then
      DROFUNIT="86400000"   # [mm/day->m/s]  # runoff unit conversion
 elif [ $runname = "ECMWF000" ];then
@@ -156,13 +156,15 @@ elif [ $runname = "ECMWF000" ];then
 elif [ $runname = "ECMWF050" ];then
      DROFUNIT="86400000"   # [mm/day->m/s]  # runoff unit conversion
 elif [ $runname = "ERA20CM" ];then
-     DROFUNIT="1000"   # [mm/day->m/s]      # runoff unit conversion
+     DROFUNIT="1000"       # [mm/day->m/s]  # runoff unit conversion
 elif [ $runname = "ELSE_KIM2009" ];then
      DROFUNIT="86400000"   # [mm/day->m/s]  # runoff unit conversion
 elif [ $runname = "VIC_BC" ];then
      DROFUNIT="86400000"   # [mm/day->m/s]  # runoff unit conversion
 elif [ $runname = "isimip3a" ];then
-     DROFUNIT="1000"   # [mm/day->m/s]      # runoff unit conversion
+     DROFUNIT="1000"       # [mm/day->m/s]  # runoff unit conversion
+elif [ $runname = "ERA5" ];then
+     DROFUNIT="86400"      # [m/day->m/s]   # runoff unit conversion
 fi
 
 #----- for plain binary runoff forcing
@@ -234,6 +236,9 @@ elif [ $runname = "VIC_BC" ] ; then
 elif [ $runname = "isimip3a" ] ; then
      CDIMINFO="${FMAP}/diminfo-30min.txt"  # dimention information file
      CINPMAT="${FMAP}/inpmat-30min.bin"      # runoff input matrix for interporlation
+elif [ ${runname} = "ERA5" ] ; then
+     CDIMINFO="${FMAP}/diminfo-06min.txt"  # dimention information file
+     CINPMAT="${FMAP}/inpmat-06min.bin"      # runoff input matrix for interporlation
 fi
 
 #----- for plain binary map input
@@ -263,7 +268,7 @@ CRIVMAN="${FMAP}/rivman.bin"                # manning coefficient river (The one
 #    CRIVMAN="${INBASE}/assim_out/rivman/rivmanCORR.bin"
 #    #CRIVMAN="${FMAP}/rivmanCORR.bin"
 #fi
-echo $CRIVMAN
+# echo $CRIVMAN
 
 #** bifurcation channel info
 CPTHOUT="${FMAP}/bifprm.txt"                #   bifurcation channel list

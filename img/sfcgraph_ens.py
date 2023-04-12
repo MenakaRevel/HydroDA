@@ -49,7 +49,8 @@ import math
 # experiment="NOM_WSE_E2O_HWEB_010"
 # experiment="NOM_WSE_E2O_HWEB_011"
 # experiment="NOM_WSE_E2O_HWEB_013"
-experiment="NOM_WSE_ECMWF_HWEB_013"
+# experiment="NOM_WSE_ECMWF_HWEB_013"
+experiment="DIR_WSE_E2O_HWEB_201"
 # experiment="test_virtual"
 # conflag=1
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
@@ -217,17 +218,17 @@ std_obs = 0.0 #pm.HydroWeb_dir()+"/bin/HydroWeb_std.bin"
 # std_sfcelv=np.std(std_obss,axis=0)
 
 #-------
-# mean & std from previous year
-mean_obss=np.zeros([pm.ens_mem(),ny,nx])
-std_obss=np.zeros([pm.ens_mem(),ny,nx])
-for num in np.arange(1,int(pm.ens_mem())+1):
-    numch='%03d'%num
-    fname=assim_out+"/assim_out/mean_sfcelv/meansfcelvC"+numch+".bin"
-    mean_corr=np.fromfile(fname,np.float32).reshape([ny,nx])
-    mean_obss[num-1,:,:]=mean_corr
-    fname=assim_out+"/assim_out/mean_sfcelv/stdsfcelvC"+numch+".bin"
-    std_corr=np.fromfile(fname,np.float32).reshape([ny,nx])
-    std_obss[num-1,:,:]=std_corr
+# # mean & std from previous year
+# mean_obss=np.zeros([pm.ens_mem(),ny,nx])
+# std_obss=np.zeros([pm.ens_mem(),ny,nx])
+# for num in np.arange(1,int(pm.ens_mem())+1):
+#     numch='%03d'%num
+#     fname=assim_out+"/assim_out/mean_sfcelv/meansfcelvC"+numch+".bin"
+#     mean_corr=np.fromfile(fname,np.float32).reshape([ny,nx])
+#     mean_obss[num-1,:,:]=mean_corr
+#     fname=assim_out+"/assim_out/mean_sfcelv/stdsfcelvC"+numch+".bin"
+#     std_corr=np.fromfile(fname,np.float32).reshape([ny,nx])
+#     std_obss[num-1,:,:]=std_corr
 ###------
 pname=[]
 xlist=[]
@@ -237,13 +238,13 @@ EGM08=[]
 EGM96=[]
 #--
 #rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZONAS","MEKONG","IRRAWADDY","VOLGA", "NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
-rivernames  = ["AMAZONAS"]
+rivernames  = ["MISSISSIPPI"] #"AMAZONAS"]
 for rivername in rivernames:
 #   path = assim_out+"/figures/sfcelv/%s"%(rivername)
   #print path
   #mk_dir(path)
   #station_loc,x_list,y_list = grdc.get_grdc_loc(rivername,"b")
-  station_loc,x_list,y_list,egm08,egm96 =hweb.get_hydroweb_loc(rivername,pm.mapname())
+  station_loc,x_list,y_list,egm08,egm96 =hweb.get_hydroweb_loc(rivername,pm.mapname(),fname=pm.obs_list())
   #print rivername, station_loc
   river.append([rivername]*len(station_loc))
   pname.append(station_loc)

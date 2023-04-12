@@ -91,7 +91,7 @@ def main_act():
 ## single loop program
 ################
 def one_day_loop(yyyy,mm,dd,day):
-    print "================================ start loop of "+yyyy+" "+mm+" "+dd+" ========================================"
+    print ("================================ start loop of "+yyyy+" "+mm+" "+dd+" ========================================")
     #
 #    # True Simulation ####################################################################
 #    if pm.run_flag() == 0 or pm.run_flag() == 2:
@@ -239,7 +239,7 @@ def spinup_loop(inputlist):
     exp_dir="./" #pm.DA_dir()+"/out/"+pm.experiment()
     mapname=pm.mapname()
     cal=pm.calibrate()
-    print  "%s for %03d"%(loop,int(ens_num))
+    print  ("%s for %03d"%(loop,int(ens_num)))
     os.system("source "+pm.DA_dir()+"/src/spin_up.sh "+str(yyyy)+" "+str(loop)+" "+ens_num+" "
     +dir2+" "+str(cpunums)+" "+str(run_name)+" "+str(exp_dir)+" "+str(mapname)+" "+str(cal))
     return 0
@@ -358,22 +358,23 @@ def make_initial_restart(): # updated the name
     #spinup_true="%04d%2d%02dT000"%(pm.spinup_end_year(),pm.spinup_end_month(),pm.spinup_end_date()) 
     #os.system("cp ./CaMa_out/"+spinup_true+"/restart"+yyyy+mm+dd+".bin ./CaMa_in/restart/true/restart"+yyyy+mm+dd+"T000.bin")
     #copy_stoonly(exp_dir+"/CaMa_out/"+spinup_true+"/restart"+yyyy+mm+dd+".bin",exp_dir+"/CaMa_in/restart/true/restart"+yyyy+mm+dd+"T000.bin")
-
+    if pm.spinup_mode()==4:
+        return 0
     #print "cp "+exp_dir+"/CaMa_out/"+spinup_true+"/restart"+yyyy+mm+dd+".bin  "+exp_dir+"/CaMa_in/restart/true/restart"+yyyy+mm+dd+"T000.bin"
     inputlist=[] # parallel 
     for num in np.arange(1,pm.ens_mem()+1):
         numch='%03d'%num
         spinup_open="%04d%2d%02dC%03d"%(pm.spinup_end_year(),pm.spinup_end_month(),pm.spinup_end_date(),num)
-        if pm.spinup_mode()==4: # copy from intermediate/previous day
-            infile_opn =exp_dir+"CaMa_in/restart/open/restart"+yyyy+mm+dd+".bin"
-            infile_asm =exp_dir+"CaMa_in/restart/assim/restart"+yyyy+mm+dd+".bin"
-            outfile_opn=exp_dir+"CaMa_in/restart/open/restart"+yyyy+mm+dd+"C"+numch+".bin"
-            outfile_asm=exp_dir+"CaMa_in/restart/assim/restart"+yyyy+mm+dd+"A"+numch+".bin"
-        else:
-            infile_opn =exp_dir+"CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin"
-            infile_asm =exp_dir+"CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin"
-            outfile_opn=exp_dir+"CaMa_in/restart/open/restart"+yyyy+mm+dd+"C"+numch+".bin"
-            outfile_asm=exp_dir+"CaMa_in/restart/assim/restart"+yyyy+mm+dd+"A"+numch+".bin"
+        # if pm.spinup_mode()==4: # copy from intermediate/previous day
+        #     infile_opn =exp_dir+"CaMa_in/restart/open/restart"+yyyy+mm+dd+"C"+numch+".bin"
+        #     infile_asm =exp_dir+"CaMa_in/restart/assim/restart"+yyyy+mm+dd+"A"+numch+".bin"
+        #     outfile_opn=exp_dir+"CaMa_in/restart/open/restart"+yyyy+mm+dd+"C"+numch+".bin"
+        #     outfile_asm=exp_dir+"CaMa_in/restart/assim/restart"+yyyy+mm+dd+"A"+numch+".bin"
+        # else:
+        infile_opn =exp_dir+"CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin"
+        infile_asm =exp_dir+"CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin"
+        outfile_opn=exp_dir+"CaMa_in/restart/open/restart"+yyyy+mm+dd+"C"+numch+".bin"
+        outfile_asm=exp_dir+"CaMa_in/restart/assim/restart"+yyyy+mm+dd+"A"+numch+".bin"
         inputlist.append([infile_opn,infile_asm,outfile_opn,outfile_asm])
         #os.system("cp ./CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin ./CaMa_in/restart/open/restart"+yyyy+mm+dd+"C"+numch+".bin")
         #os.system("cp ./CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin ./CaMa_in/restart/assim/restart"+yyyy+mm+dd+"A"+numch+".bin")
@@ -381,6 +382,7 @@ def make_initial_restart(): # updated the name
         # copy_stoonly(exp_dir+"CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin",exp_dir+"CaMa_in/restart/assim/restart"+yyyy+mm+dd+"A"+numch+".bin")
         copy_stoonly(infile_opn,outfile_opn)
         copy_stoonly(infile_asm,outfile_asm)
+    return 0
 ###########################
 def make_initial_restart_one(): # updated the name
     # copy restartyyyymmddC001 as restart for all simulations 

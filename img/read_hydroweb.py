@@ -22,9 +22,9 @@ def hydroweb_river_name(mapname="glb_15min"):
         river.append(riv)
     return river
 ################################
-def get_hydroweb(mapname="glb_15min"):
+def get_hydroweb(mapname="glb_15min",fname="/cluster/data6/menaka/HydroWeb/HydroWeb_alloc_glb_15min.txt"):
     # directory
-    fname="/cluster/data6/menaka/HydroWeb/HydroWeb_alloc_"+mapname+".txt"
+    # fname="/cluster/data6/menaka/HydroWeb/HydroWeb_alloc_"+mapname+".txt"
     #--
     river=[]
     pname=[]
@@ -50,12 +50,12 @@ def get_hydroweb(mapname="glb_15min"):
         egm_d.append(EGM96-EGM08)
     return river,pname,xlist,ylist,egm_d
 ##################################
-def get_hydroweb_loc(rivername,mapname="glb_15min"):
+def get_hydroweb_loc(rivername,mapname="glb_15min",fname="../dat/HydroWeb_alloc_glb_15min_QCrmse.txt"):
     # directory
     # fname="/cluster/data6/menaka/HydroWeb/HydroWeb_alloc_"+mapname+".txt"
     # fname="../dat/HydroWeb_alloc_"+mapname+"_QC.txt"
     # fname="../dat/HydroWeb_alloc_"+mapname+"_QC1.txt"
-    fname="../dat/HydroWeb_alloc_"+mapname+"_QCrmse.txt"
+    # fname="../dat/HydroWeb_alloc_"+mapname+"_QCrmse.txt"
     #--
     #river=[]
     pname=[]

@@ -458,7 +458,7 @@ def prepare_input():
             # roff_total=np.fromfile(pm.DA_dir()+"/out/"+pm.experiment()+"/CaMa_in/"+runname+"/total_month/total_"+yyyy+mm+".bin",np.float32).reshape(ny,nx)
             for ens in np.arange(1,pm.ens_mem()+1):
                 ens_char="%03d"%(ens)
-                print pm.distopen(),std[ens-1]
+                print (pm.distopen(),std[ens-1])
                 ofile=ifile*distopen + roff_mean*std[ens-1]#*10.0
                 #ofile=ifile*(distopen + std[ens-1])
                 #ofile=ifile*distopen + roff_total*std[ens-1]
@@ -886,8 +886,8 @@ def prep_runoff_ensemble(distopen,diststd,ne,runname,rundir,
         nx,ny,prefix,suffix=get_runoff_metadata(runname)
         #====================
         #===========================
-        s=spatially_correlated_random(nx,ny)
-        rand=np.sort(np.abs(np.random.normal(0,1,[ne])))
+        # s=spatially_correlated_random_init(nx,ny)
+        # rand=np.sort(np.abs(np.random.normal(0,1,[ne])))
         inputlist=[]
         for ens in np.arange(1,ne+1):
             ens_char="%03d"%(ens)
@@ -917,7 +917,33 @@ def spatially_correlated_random(nx,ny,tau=50.0):
     filter_kernel = np.exp(-dist**2/(2*correlation_scale))
     noise = np.random.normal(0.0, 1.0, size=(ny,nx)) #.reshape(ny,nx)
     noise = scipy.signal.fftconvolve(noise, filter_kernel, mode='same')
-    # noise = noise*(1/(np.std(noise)+1e-20))
+    noise = np.real(noise)*(1.0/(np.std(np.real(noise))+1e-20))
+    # noise = np.fft.fft2(noise)
+    # filter_kernel = np.fft.fft2(filter_kernel)
+    # noise = np.fft.ifft2(noise*filter_kernel)
+    # noise = np.real(noise)*(1.0/(np.std(np.real(noise))+1e-20))
+    return noise
+######################################
+def spatially_correlated_random_init(num,nx,ny,tau=50.0):
+    """
+    Spatially correlated random variable 
+    sptial demensions are [nx,ny]
+    tau_s = decorrelation length
+    """
+    np.random.seed(num)
+    correlation_scale = tau
+    x = np.arange(-correlation_scale, correlation_scale)
+    y = np.arange(-correlation_scale, correlation_scale)
+    X, Y = np.meshgrid(x, y)
+    dist = np.sqrt(X*X + Y*Y)
+    filter_kernel = np.exp(-dist**2/(2*correlation_scale))
+    noise = np.random.normal(0.0, 1.0, size=(ny,nx)) #.reshape(ny,nx)
+    noise = scipy.signal.fftconvolve(noise, filter_kernel, mode='same')
+    noise = np.real(noise)*(1.0/(np.std(np.real(noise))+1e-20))
+    # noise = np.fft.fft2(noise)
+    # filter_kernel = np.fft.fft2(filter_kernel)
+    # noise = np.fft.ifft2(noise*filter_kernel)
+    # noise = np.real(noise)*(1/(np.std(np.real(noise))+1e-20))
     return noise
 ######################################
 def make_runoff(inputlist):
@@ -967,8 +993,9 @@ def make_runoff_temporal(inputlist):
     nx,ny,prefix,suffix=get_runoff_metadata(runname)
     # create necessary varibales
     # get spatially correlated normal distributiion
-    s=spatially_correlated_random(nx,ny,tau_s)#*rand
-    s=s*(1/(np.std(s)+1e-20))
+    num=int(ens_char)
+    s=spatially_correlated_random_init(num,nx,ny,tau_s)#*rand
+    # s=s*(1/(np.std(s)+1e-20))
     # date
     start_dt=datetime.date(syear,1,1)
     end_dt=datetime.date(eyear,12,31)
@@ -1002,6 +1029,7 @@ def make_runoff_temporal(inputlist):
         Rc=Rcoff*ifile
         # Rc=Rc*(Rc>1e-2)*1.0
         # Rc.astype(np.float32, casting='unsafe', copy=True)
+        Rc=np.abs(Rc) #(Rc>0.0)*1.0 #remove negative values
         Rc=np.float32(Rc)
         # print (yyyy,mm,dd,ens_char,np.max(Rc),np.min(Rc)) #np.max(Rcoff),np.min(Rcoff),np.max(ifile),np.min(ifile),
         ofile=outdir+"/"+runname+"/Roff/Roff__"+yyyy+mm+dd+ens_char+".one"
@@ -1025,8 +1053,9 @@ def make_runoff_normal(inputlist):
     # get runoff metadata
     nx,ny,prefix,suffix=get_runoff_metadata(runname)
     # create necessary varibales
-    s=spatially_correlated_random(nx,ny)#*rand
-    s=s*(1/(np.std(s)+1e-20))
+    num=int(ens_char)
+    s=spatially_correlated_random_init(num,nx,ny)#*rand
+    # s=s*(1/(np.std(s)+1e-20))
     # date 
     start_dt=datetime.date(syear,1,1)
     end_dt=datetime.date(eyear,12,31)
@@ -1038,13 +1067,13 @@ def make_runoff_normal(inputlist):
         mm='%02d' % (target_dt.month)
         dd='%02d' % (target_dt.day)
         # get spatially correlated normal distributiion
-        # w=spatially_correlated_random(nx,ny)
+        w=spatially_correlated_random(nx,ny)
         # stochastic term with mean 0 and variance 1 following a Gaussian distribution
-        w=np.random.normal(0,1)
+        # w=np.random.normal(0,1)
         # print ("w ", np.max(w),np.min(w))
         s=alpha*s+np.sqrt(1-alpha**2)*w
         #===
-        Rcoff = s #((1.0 + beta) / np.sqrt(E**2 + 1.0)) * np.exp(np.sqrt(np.log(E**2 + 1)) * s)
+        Rcoff = (1.0 + s) #((1.0 + beta) / np.sqrt(E**2 + 1.0)) * np.exp(np.sqrt(np.log(E**2 + 1)) * s)
         Rcoff = np.float32(Rcoff)
         # Rcoff.astype(np.float32, casting='unsafe', copy=True)
         # Rcoff=np.zeros([ny,nx],np.float32)
@@ -1060,6 +1089,7 @@ def make_runoff_normal(inputlist):
         Rc=Rcoff*ifile
         # Rc=Rc*(Rc>1e-2)*1.0
         # Rc.astype(np.float32, casting='unsafe', copy=True)
+        Rc=np.abs(Rc) #(Rc>0.0)*1.0 #remove negative values
         Rc=np.float32(Rc)
         # print (yyyy,mm,dd,ens_char,np.max(Rc),np.min(Rc)) #np.max(Rcoff),np.min(Rcoff),np.max(ifile),np.min(ifile),
         ofile=outdir+"/"+runname+"/Roff/Roff__"+yyyy+mm+dd+ens_char+".one"
@@ -1085,7 +1115,7 @@ def corr_norm(sigma,n_samples,dcl=500):
     # decorrelation length
     dcl=500 #km
     sigma=0.01
-    # CaMa-FLood lat lon
+    # CaMa-Flood lat lon
     lonlat=pm.CaMa_dir()+"/map/"+pm.mapname()+"/lonlat.bin"
     lonlat=np.fromfile(lonlat,np.float32).reshape(2,250,350)
     fname="outsub_amz_06min.txt"
@@ -1215,7 +1245,7 @@ def val_tau_t():
     return 150 # decorrelation time
 ######################################
 def val_tau_s():
-    return 100 # spatial decorrelation length
+    return 50 # spatial decorrelation length
 ######################################
 def val_alpha():
     return 1.0 - (1.0/(val_tau_t()+1e-20))
@@ -1247,4 +1277,6 @@ if __name__ == "__main__":
     prep_runoff_ensemble(val_distopen(),val_diststd(),20,runoff_name(),runoff_dir(),out_dir(),2000,2010,"simple",beta=val_beta(),E=val_E(),aplha=val_alpha())
     # lognormal
     prep_runoff_ensemble(val_distopen(),val_diststd(),20,runoff_name(),runoff_dir(),out_dir(),2000,2010,"lognormal",beta=val_beta(),E=val_E(),aplha=val_alpha())
+    # normal
+    prep_runoff_ensemble(val_distopen(),val_diststd(),20,runoff_name(),runoff_dir(),out_dir(),2000,2010,"normal",beta=val_beta(),E=val_E(),aplha=val_alpha())
     
