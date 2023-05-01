@@ -16,16 +16,16 @@ def version():
     # CaMa-Flood v396a used
 
 # **************************************************************
-# 1. experment type related definitions
+# 1. experiment type related definitions
 def mode():
     return 5
     # parameter to change assimilation mode
     # runoff ensembles will change accordingly.
-    # 1: Earth2Obs, 2: ERA20CM, 3: VIC_BC, 4: -25% baised (ELSE_KIM2009/E2O/ERA20CM) 5:isimip3a
+    # 1: Earth2Obs, 2: ERA20CM, 3: VIC_BC, 4: -25% biased (ELSE_KIM2009/E2O/ERA20CM) 5:isimip3a
 
 def conflag():
     return 1
-    # converstion flag for observation converstions 
+    # conversation flag for observation conversations 
     #  1 - Directly values 
     #  2 - Anomalies
     #  3 - Normalized values
@@ -34,15 +34,14 @@ def conflag():
 def mapname():
     # return "amz_06min"
     return "glb_15min"
-    # realted CaMa-Flood map directory
+    # related CaMa-Flood map directory
     # [e.g. : glb_15min, glb_06min, Mkg_06min, etc.]
     # Check 
 
 def map_dimension():
     fname=CaMa_dir()+"/map/"+mapname()+"/params.txt"
-    f=open(fname,"r")
-    lines=f.readlines()
-    f.close()
+    with open(fname,"r") as f:
+        lines=f.readlines()
     #-------
     nx     = int(filter(None, re.split(" ",lines[0]))[0])
     ny     = int(filter(None, re.split(" ",lines[1]))[0])
@@ -50,10 +49,9 @@ def map_dimension():
     return nx,ny,gsize
 
 def experiment():
-    f=open("./exp.txt","r")
-    line=f.readline()
+    with open("./exp.txt","r") as f:
+        line=f.readline()
     exp =line.split("\n")[0]
-    f.close()
     return exp
 
 # **************************************************************
@@ -93,7 +91,7 @@ def patch_size():
 def DA_dir():
     return "/cluster/data6/menaka/HydroDA"
     # directory of HydroDA
-    # where src, dat, sat, out exsits
+    # where src, dat, sat, out exits
 
 def patch_dir():
     return "/cluster/data6/menaka/Empirical_LocalPatch/local_patch"
@@ -111,16 +109,17 @@ def patch_name():
 
 def patch_id():
     # return "0.80"
-    return "0.60"
+    # return "0.60"
     # return "0.40"
     # return "0.20"
+    return "0.60-dam"
 
 def thersold():
     # return 0.80
     return 0.60
     # return 0.40
     # return 0.20
-    # thersold to define the local patch
+    # threshold to define the local patch
 
 def initial_infl():
     return 1.08
@@ -139,20 +138,21 @@ def sigma_b():
     # bacground variance of inflation for adaptive inflation Myoshi et al (2011)
 
 def ens_mem(mode=mode()):
-    if mode == 1:
-        return 49
+    return 20
+    # if mode == 1:
+    #     return 49
     
-    if mode == 2:
-        return 20
+    # if mode == 2:
+    #     return 20
 
-    if mode == 3:
-        return 20
+    # if mode == 3:
+    #     return 20
 
-    if mode == 4:
-        return 20
+    # if mode == 4:
+    #     return 20
 
-    if mode == 5:
-        return 20
+    # if mode == 5:
+    #     return 20
     # number of ensemble members
 
 # **************************************************************
@@ -193,36 +193,38 @@ def runoff_dir():
     return "/work/a06/menaka/ensemble_simulations/CaMa_in/isimip3a"
 
 def runname(num=mode()):
-    if num == 1:
-        return "E2O"
+    return "isimip3a"
+    # if num == 1:
+    #     return "E2O"
 
-    if num == 2:
-        return "ERA20CM"
+    # if num == 2:
+    #     return "ERA20CM"
 
-    if num == 3:
-        return "VIC_BC"
+    # if num == 3:
+    #     return "VIC_BC"
 
-    if num == 4: #biased runoff experiment
-        #return "ELSE_KIM2009"
-        return "E2O"
-        #return "ERA20CM"
+    # if num == 4: #biased runoff experiment
+    #     #return "ELSE_KIM2009"
+    #     return "E2O"
+    #     #return "ERA20CM"
 
-    if num == 5: 
-        return "isimip3a"
+    # if num == 5: 
+    #     return "isimip3a"
 
 
 def input(num=mode()):
-    if num==1:
-        return "E2O"
+    return "isimip3a"
+    # if num==1:
+    #     return "E2O"
 
-    if num==2:
-        return "ERA20CM"
+    # if num==2:
+    #     return "ERA20CM"
 
-    if num==3:
-        return "VIC_BC"
+    # if num==3:
+    #     return "VIC_BC"
 
-    if num==5:
-        return "isimip3a"
+    # if num==5:
+    #     return "isimip3a"
     # define the runoff data type.
     
 def max_lat():
@@ -312,6 +314,16 @@ def calibrate():
     # return "yes"
     return "no"
 
+def corrupt():
+    return 0
+    # define the experiment with or without corrupted parameters
+    # 0 : no parameter corrupted
+    # 1 : with corrupted rivhgt
+    # 2 : with corrupted rivwth
+    # 3 : with corrupted rivman
+    # 4 : with corrupted fldhgt
+    # 5 : with corrupted rivhgt, rivwth, rivman, and fldhgt
+
 def MKLdir():
     return "/opt/intel/compilers_and_libraries_2016.3.170/mac/mkl"
     # directory of Intel MKL files
@@ -345,14 +357,15 @@ def obs_list():
     return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_amz.txt"
 
 def stat_name(cal=calibrate()):
-    if cal=="yes":
-        return "cal_sfcelv_49_E2O_amz_06min_2000-2014" # for lon-term statistic simulation calibrated
-        # return "cal_sfcelv_49_E2O_amz_06min_2009-2014" # for lon-term statistic simulation calibrated
+    return "sfcelv_49_E2O_amz_06min_2000-2014"
+    # if cal=="yes":
+    #     return "cal_sfcelv_49_E2O_amz_06min_2000-2014" # for lon-term statistic simulation calibrated
+    #     # return "cal_sfcelv_49_E2O_amz_06min_2009-2014" # for lon-term statistic simulation calibrated
 
-    if cal=="no":
-        return "sfcelv_49_E2O_amz_06min_2000-2014" # for long-term statistic simulation
+    # if cal=="no":
+    #     return "sfcelv_49_E2O_amz_06min_2000-2014" # for long-term statistic simulation
 
-    # return "sfcelv_E2O_amz_06min_2009-2009"
+    # # return "sfcelv_E2O_amz_06min_2009-2009"
 
 def make_log():
     return 1
@@ -412,7 +425,7 @@ def slack_notification():
 def para_nums():
     return 20
     # setting number of parallels to run CaMa-Flood Model
-    # defualt is 6, but may change depending on your system
+    # default is 6, but may change depending on your system
 
 def cpu_nums():
     with open("./ncpus.txt","r") as f:

@@ -10,7 +10,7 @@ program data_assim
 ! 2. Revel, M., Ikeshima, D., Yamazaki, D., & Kanae, S. (2019). A Physically Based Empirical 
 ! Localization Method for Assimilating Synthetic SWOT Observations of a Continental-Scale River: 
 ! A Case Study in the Congo Basin,Water, 11(4), 829. https://doi.org/10.3390/w11040829
-! Revel, M., Zhou, X., Yamazaki, D., & Kanae, S. (2023). Assimilation of transformed water 
+! 3. Revel, M., Zhou, X., Yamazaki, D., & Kanae, S. (2023). Assimilation of transformed water 
 ! surface elevation to improve river discharge estimation in a continental-scale river. 
 ! Hydrology and Earth System Sciences, 27(3), 647–671. https://doi.org/10.5194/hess-27-647-2023
 ! ====================================================================================

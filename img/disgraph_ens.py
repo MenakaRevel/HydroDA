@@ -20,97 +20,19 @@ import math
 # import CaMa-Flood variable reading using fortran
 sys.path.append('../etc/')
 from read_CMF import read_discharge, read_discharge_multi
-
-#sys.path.append('../assim_out/')
-# Link the params.py in the experiment dir
-# os.system("ln -sf ../gosh/params_real.py params.py")
-# import params as pm
-
-#import plot_colors as pc
-#from matplotlib.font_manager import FontProperties
-#fp = FontProperties(fname="jap.ttc",size=15)
-
-# os.system("rm -rf params.py")
-#argvs = sys.argv
-
-# experiment="E2O_HydroWeb23"
-# experiment="VIC_BC_HydroWeb11"
-# experiment="test_wse"
-# experiment="test_virtual"
-# experiment="DIR_WSE_E2O_HWEB_001"
-# experiment="DIR_WSE_E2O_HWEB_002"
-# experiment="DIR_WSE_E2O_HWEB_003"
-# experiment="DIR_WSE_E2O_HWEB_004"
-# experiment="ANO_WSE_E2O_HWEB_001"
-# experiment="ANO_WSE_E2O_HWEB_002"
-# experiment="ANO_WSE_E2O_HWEB_003"
-# experiment="ANO_WSE_E2O_HWEB_004"
-# experiment="NOM_WSE_E2O_HWEB_001"
-# experiment="NOM_WSE_E2O_HWEB_002"
-# experiment="NOM_WSE_E2O_HWEB_003"
-# experiment="NOM_WSE_E2O_HWEB_004"
-# experiment="NOM_WSE_E2O_HWEB_005"
-# experiment="NOM_WSE_E2O_HWEB_006"
-# experiment="NOM_WSE_E2O_HWEB_007"
-# experiment="NOM_WSE_E2O_HWEB_008"
-# experiment="NOM_WSE_E2O_HWEB_009"
-# experiment="NOM_WSE_E2O_HWEB_010"
-# experiment="NOM_WSE_E2O_HWEB_011"
-# experiment="NOM_WSE_E2O_HWEB_012"
-# experiment="NOM_WSE_E2O_HWEB_013"
-
-# <<<<<<< HEAD
-
-
-# experiment="DIR_WSE_ECMWF_HWEB_011"
-# experiment="DIR_WSE_ECMWF_HWEB_012"
-# experiment="DIR_WSE_ECMWF_HWEB_013"
-# experiment="DIR_WSE_ECMWF_HWEB_014"
-
-# experiment="ANO_WSE_ECMWF_HWEB_011"
-# experiment="ANO_WSE_ECMWF_HWEB_012"
-# experiment="ANO_WSE_ECMWF_HWEB_013"
-# experiment="ANO_WSE_ECMWF_HWEB_014"
-
-# experiment="NOM_WSE_ECMWF_HWEB_011"
-# experiment="NOM_WSE_ECMWF_HWEB_012"
-# experiment="NOM_WSE_ECMWF_HWEB_013"
-# experiment="NOM_WSE_ECMWF_HWEB_014"
-
-# experiment="NOM_WSE_E2O_HWEB_101"
-# experiment="NOM_WSE_E2O_HWEB_201"
-# experiment="DIR_WSE_E2O_HWEB_201"
-experiment="DIR_WSE_ERA5_CGLS_001"
-#=======
-# experiment="DIR_WSE_E2O_SWOT_001"
-# >>>>>>> dev_virtual
-
+#===============================================================================
+# Experiment name
+#===============================================================================
+experiment="NOM_WSE_ERA5_CGLS_003"
+#===============================================================================
+sys.path.append('../etc/')
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 # assim_out=pm.DA_dir()+"/out/"+experiment
 # assim_out="../out/"+experiment
 assim_out="/cluster/data7/menaka/HydroDA/out/"+experiment
 print (assim_out)
-#assim_out="assim_out_E2O_wmc"
-#assim_out="assim_out_E2O_womc_0"
-#assim_out="assim_out_ECMWF_womc_baised_0"
-#assim_out="assim_out_ECMWF_womc_baised"
-#assim_out="assim_out_ECMWF_womc_baised_if"
-#assim_out="assim_out_ECMWF_womc_baised_0.90"
-#assim_out="assim_out_ECMWF_womc_baised_0.80"
-#assim_out="assim_out_ECMWF_womc_baised_0.75"
-#assim_out="assim_out_ECMWF_womc_baised_0.20"
-#assim_out="assim_out_ECMWF_womc_baised_0.50"
-#assim_out="assim_out_ECMWF_womc_baised_if_fixed1.08"
-#assim_out="assim_out_ECMWF_womc_baised_if_fixed1.10"
-#assim_out="assim_out_ECMWF_womc_baised_if_adaptive"
-#assim_out="assim_out"
-#assim_out="assim_out_biased_womc"
-#assim_out="assim_out_biased_wmc"
-#os.system("mkdir ../assim_out/img")
-#os.system("mkdir ../assim_out/img/disgraph")
 
-# os.system("ln -sf "+assim_out+"/params.py params.py")
 sys.path.append(assim_out)
 import params as pm
 import read_grdc as grdc
@@ -246,7 +168,7 @@ def read_dis_multi(ix1, iy1, ix2, iy2, syear, eyear, indir):
     dis = np.zeros( (len(ix1), nbdays), 'f')
     dis_max = np.zeros( (len(ix1), nbyears), 'f')
     for year in range(syear, eyear+1):
-        print year
+        print (year)
         s_days = int( (datetime.date(year , 1,1) - datetime.date(syear, 1, 1)). days)
         e_days = int( (datetime.date(year+1, 1, 1) - datetime.date(syear, 1, 1)). days)
         
@@ -271,8 +193,8 @@ nx     = int(filter(None, re.split(" ",lines[0]))[0])
 ny     = int(filter(None, re.split(" ",lines[1]))[0])
 gsize  = float(filter(None, re.split(" ",lines[3]))[0])
 #----
-syear,smonth,sdate=pm.starttime()#2003,1,1 #pm.starttime()#2004#1991 # 2009,1,1 #
-eyear,emonth,edate=pm.endtime() #2004,1,1 #2005,1,1 # 2004,1,1 # 2010,1,1 # 2012,1,1 # 2011,1,1 #
+syear,smonth,sdate=pm.starttime()
+eyear,emonth,edate=pm.endtime()
 #month=1
 #date=1
 start_dt=datetime.date(syear,smonth,sdate)
@@ -560,9 +482,9 @@ def make_fig(point):
     #xxlist=np.linspace(0,N,(eyear-syear)+1)
     #xlab=np.arange(syear,eyear+1,1)
     #xxlab=[calendar.month_name[i][:3] for i in range(1,13)]
-    if eyear-syear > 8:
+    if eyear-syear > 5:
         dtt=2
-        dt=int(math.ceil(((eyear-syear)+1)/5.0))
+        dt=int(math.ceil(((eyear-syear)+1)/2.0))
     elif eyear-syear > 10:
         dtt=5
         dt=int(math.ceil(((eyear-syear)+1)/5.0))
@@ -688,8 +610,9 @@ def make_fig(point):
 #    print swt[point]
     plt.legend(lines,labels,ncol=1,loc='upper right') #, bbox_to_anchor=(1.0, 1.0),transform=ax1.transAxes)
     station_loc_list=pname[point].split("/")
-    station_loc_list="".join(station_loc_list.split())
-    station_name="-".join(station_loc_list) 
+    print (station_loc_list)
+    station_name="".join(station_loc_list[0].split())
+    # station_name="-".join(station_loc_list) 
     print ('--- saving figure',river[point]+"-"+station_name+".png")
     plt.savefig(assim_out+"/figures/disgraph/"+river[point]+"-"+station_name+".png",dpi=500)
     return 0

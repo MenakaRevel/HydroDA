@@ -16,7 +16,7 @@ def version():
     # CaMa-Flood v396a used
 
 # **************************************************************
-# 1. experment type related definitions
+# 1. experiment type related definitions
 def mode():
     return 5
     # parameter to change assimilation mode
@@ -24,7 +24,7 @@ def mode():
     # 1: Earth2Obs, 2: ERA20CM, 3: VIC_BC, 4: biased (ECMWF/ELSE_KIM2009/E2O/ERA20CM), 5: ERA5
 
 def conflag():
-    return 1
+    return 3
     # flag for observation conversations 
     #  1 - Directly values 
     #  2 - Anomalies
@@ -90,7 +90,7 @@ def assimE():
 def patch_size():
     # return 0
     return 100
-    # the size of the local patch of LETKF(Local ** EnKF)
+    # the size of the local patch of LETKF (Local ** EnKF)
     # 0: only 1 pixel (the pixel itself) belongs to its local patch
     # 100: empirical local patch
 
@@ -116,7 +116,9 @@ def patch_name():
     # return "amz_06min_S14FD_40"
     # return "amz_06min_S14FD_20"
     # return "glb_15min_S14FD_60"
-    return "conus_06min_VIC_BC_60_dam" # correlation-based dam
+    # return "conus_06min_VIC_BC_60_dam" # empirical local patch dam
+    return "conus_06min_ERA5_60" # empirical local patch no dam
+    # return "conus_06min_ERA5_60_dam" # empirical local patch dam
 
 def patch_id():
     # return "0.95MS"
@@ -126,10 +128,10 @@ def patch_id():
     # return "0.60MS"
     # return "0.90"
     # return "0.80"
-    # return "0.60"
+    return "0.60"
     # return "0.40"
     # return "0.20"
-    return "0.60-dam"
+    # return "0.60-dam"
 
 def thersold():
     # return 0.95
@@ -139,7 +141,7 @@ def thersold():
     return 0.60
     # return 0.40
     # return 0.20
-    # thersold to define the local patch
+    # threshold to define the local patch
 
 def initial_infl():
     return 1.08
@@ -174,22 +176,22 @@ def ens_mem(mode=mode()):
     # number of ensemble members
 
 # **************************************************************
-# 3. Experiment timimngs 
+# 3. Experiment timings 
 def timestep():
-    return 86400 # outer timestep in seconds
+    return 86400 # outer time step in seconds
 
 def starttime():
-    return (2018,1,1) # start date: [year,month,date]
+    return (2016,1,1) # start date: [year,month,date]
 
 def endtime():
-    return (2019,1,1) # end date: [year,month,date]
+    return (2021,1,1) # end date: [year,month,date]
                       # *note: this date is not included
 
 # **************************************************************
 # 4. Spinup options
 def spinup_mode():
     return 3
-    # 0: do spin up simulation for both (corrupted and true) simulation
+    # 0: do spin up simulation for both (corrupted/open and true) simulation
     # 1: do spin up only at corrupted simulation
     # 2: do spin up only at true simulation
     # 3: no spin up simulation at all
@@ -197,7 +199,7 @@ def spinup_mode():
     ### if initial restart file is ready, spin up simulation is no need
 
 def spinup_end_year():
-    return 2017
+    return 2015
 
 def spinup_end_month():
     return 12
@@ -214,51 +216,53 @@ def runoff_dir():
     # return "/cluster/data7/menaka/ensemble_simulations/CaMa_in/ECMWF050" # biased runoff
 
 def runname(num=mode()):
-    if num == 1:
-        return "E2O"
+    return "ERA5"
+    # if num == 1:
+    #     return "E2O"
 
-    if num == 2:
-        return "ERA20CM"
+    # if num == 2:
+    #     return "ERA20CM"
 
-    if num == 3:
-        return "VIC_BC"
+    # if num == 3:
+    #     return "VIC_BC"
 
-    if num == 4: #biased runoff experiment
-        # return "ECMWF000"
-        return "ECMWF050"
-        # return "ELSE_KIM2009"
-        # return "E2O"
-        # return "ERA20CM"
+    # if num == 4: #biased runoff experiment
+    #     # return "ECMWF000"
+    #     return "ECMWF050"
+    #     # return "ELSE_KIM2009"
+    #     # return "E2O"
+    #     # return "ERA20CM"
 
-    if num == 5:
-        return "ERA5"
+    # if num == 5:
+    #     return "ERA5"
 
 def input(num=mode()):
-    if num==1:
-        return "E2O"
+    return "ERA5"
+    # if num==1:
+    #     return "E2O"
 
-    if num==2:
-        return "ERA20CM"
+    # if num==2:
+    #     return "ERA20CM"
 
-    if num==3:
-        return "VIC_BC"
+    # if num==3:
+    #     return "VIC_BC"
 
-    if num==4: #biased runoff experiment
-        # return "ELSE_KIM2009" 
-        # return "ECMWF000"
-        return "ECMWF050" #biased runoff experiment -50%
-        # return "ECMWF150" #biased runoff experiment +50%
+    # if num==4: #biased runoff experiment
+    #     # return "ELSE_KIM2009" 
+    #     # return "ECMWF000"
+    #     return "ECMWF050" #biased runoff experiment -50%
+    #     # return "ECMWF150" #biased runoff experiment +50%
 
-    if num==5:
-        return "ERA5"
-    # define the runoff data type.
+    # if num==5:
+    #     return "ERA5"
+    # # define the runoff data type.
     
-def max_lat():
+def max_lat(): # not needed for current HydroDA
     return 80. # maximum latitude of assimilation
-               # *note: SWOT ovservation is not available beyond 80 degs. this should be less or equal to 80
+               # *note: SWOT observation is not available beyond 80 deg. this should be less or equal to 80
                ## modified 2018-06-05
 
-def distopen(num):
+def distopen(num): # not needed for current HydroDA
     if num == 1:
         return 1.0
 
@@ -280,7 +284,7 @@ def distopen(num):
     # 1.00 for simulation using 1 year before runoff
     # *note: also editing and and re-compile of control_inp at CaMa-Flood is nessessary
 
-def diststd(num):
+def diststd(num): # not needed for current HydroDA
     if num == 1:
         return 0.1
 
@@ -317,13 +321,13 @@ def err_expansion():
 # #     # 7 : with manning error: Manning's n depend on
 
 def run_flag():
-    return 0
+    return 3
     # 0 run all simulations
     # 1 run only corrupted and assimilated simulations
     # 2 run only true and assimilated simulations
     # 3 run only assimilated simulation
 
-def true_run(num):
+def true_run(num): # not needed for this version of HydroDA
     if num == 1:
         return 3 # ecmwf as true
 
@@ -349,11 +353,21 @@ def CaMa_dir():
     # directory of CaMa-Flood
     # indicate the directory of ./map or ./src and other folders
 
-def calibrate():
+def calibrate(): # rivhgt calibration
     # return "yes"
     return "no"
     # return "corrupt"
 
+def corrupt():
+    return 0
+    # define the experiment with or without corrupted parameters
+    # 0 : no parameter corrupted
+    # 1 : with corrupted rivhgt
+    # 2 : with corrupted rivwth
+    # 3 : with corrupted rivman
+    # 4 : with corrupted fldhgt
+    # 5 : with corrupted rivhgt, rivwth, rivman, and fldhgt
+    
 def MKLdir():
     return "/opt/intel/compilers_and_libraries_2016.3.170/mac/mkl"
     # directory of Intel MKL files
@@ -377,9 +391,10 @@ def obs_name():
 def HydroWeb_dir():
     return "/cluster/data6/menaka/HydroWeb"
 
-def obs_dir():
+def obs_dir(): # needed for this version of HydroDA
     # return "/cluster/data7/menaka/HydroDA/obs/HydroWeb_conus_06min_DIR"
     return "/cluster/data7/menaka/HydroDA/obs/CGLS_conus_06min_DIR"
+    # return "/cluster/data7/menaka/HydroDA/obs/CGLS_conus_06min"
     # return "/cluster/data7/menaka/HydroDA/obs/HydroWeb_conus_06min"
     # return "/cluster/data7/menaka/HydroDA/obs/HydroWeb_glb_15min"
     # return "/cluster/data7/menaka/HydroDA/obs/HydroWeb"
@@ -389,6 +404,7 @@ def obs_dir():
 def obs_list():
     # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_DIR.txt"
     return DA_dir()+"/dat/CGLS_alloc_"+mapname()+"_DIR.txt"
+    # return DA_dir()+"/dat/CGLS_alloc_"+mapname()+"_org.txt"
     # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_org.txt"
     # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_amz.txt"
     # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_QC.txt"
@@ -398,12 +414,16 @@ def obs_list():
     # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_QC0_simulation.txt"
 
 def stat_name(cal=calibrate()):
-    return "sfcelv_49_ECMWF_amz_06min_2000-2014" # original statistic
+    return "sfcelv_20_ERA5_conus_06min_2000-2020" # for conus_06min
+    # return "sfcelv_49_ECMWF_amz_06min_2000-2014" # original statistic
     # return "sfcelv_bias_ECMWF_amz_06min_2000-2014" # biased runoff statistic
-    # return "sfcelv_corrupt_ECMWF_amz_06min_2000-2014" #  courrpted bathymetry statistic
-    # return "sfcelv_bias_corrupt_ECMWF_amz_06min_2000-2014" # biased courrpted bathymetry statistic
+    # return "sfcelv_corrupt_ECMWF_amz_06min_2000-2014" #  corrupted bathymetry statistic
+    # return "sfcelv_bias_corrupt_ECMWF_amz_06min_2000-2014" # biased corrupted bathymetry statistic
     # return "sfcelv_49_E2O_glb_15min_2002-2014"
+    #=============================================
+    # {var}_{ensemble}_{forcing}_{resolution}_{time period}
 
+    
     # if cal=="yes":
     #     # return "cal_sfcelv_49_E2O_amz_06min_2009-2014" # for long-term statistic simulation calibrated
     #     # return "cal_sfcelv_49_E2O_amz_06min_2000-2014" # for long-term statistic simulation calibrated
@@ -427,7 +447,7 @@ def stat_name(cal=calibrate()):
     # return "cal_sfcelv_49_E2O_amz_06min_2009-2014"
     # return "sfcelv_49_E2O_amz_06min_2009-2010"
     # return "sfcelv_E2O_amz_06min_2009-2010"
-    # eturn "sfcelv_E2O_amz_06min_2009-2009"
+    # return "sfcelv_E2O_amz_06min_2009-2009"
     # return "sfcelv_E2O_amz_06min_2000-2010"
     # return "sfcelv_cal_E2O_amz_06min_2000-2010"
 
@@ -487,7 +507,7 @@ def slack_notification():
 # **************************************************************
 # 8. parallel run settings
 def para_nums():
-    return 40
+    return 20
     # setting number of parallels to run CaMa-Flood Model
     # default is 6, but may change depending on your system
 

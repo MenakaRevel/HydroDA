@@ -272,10 +272,11 @@ def one_day_sim(inputlist):
     exp_dir="./" #pm.DA_dir()+"/out/"+pm.experiment()
     mapname=pm.mapname()
     cal=pm.calibrate()
+    corrupt=pm.corrupt()
     DA_dir=pm.DA_dir()
     os.system("source "+pm.DA_dir()+"/src/oneday_sim.sh "+yyyy+" "+mm+" "+dd+" "+ens_num+" "+dir2
     +" "+looptype+" "+str(cpunums)+" "+str(run_name)+" "+str(exp_dir)+" "+str(mapname)+" "+str(cal)
-    +" "+DA_dir)
+    +" "+str(corrupt)+" "+DA_dir)
 
     return 0
 ########################### # modified to run paralle @Menaka 
@@ -492,7 +493,7 @@ def initial(): #used
 
     return 0
 ###########################
-def compile_func(): #used
+def compile_func(): # old used
     # program for compiling
     # activate ifort
     #os.system("source /opt/intel/parallel_studio_xe_2017/psxevars.sh intel64")
@@ -534,8 +535,10 @@ def store_out(yyyy,mm,dd):
 #    # storing fldarea
 #    shutil.copy("./CaMa_out/"+yyyy+mm+dd+"T"+numch+"/fldare"+yyyy+".bin","assim_out/fldarea/"+looptype+"/fldarea"+yyyy+mm+dd+".bin")
 
-
-    for CA in ["C","A"]:
+    listCA = ["C","A"]
+    if pm.run_flag() == 3:
+        listCA = ["A"]
+    for CA in listCA: # update on 2023/04/24
         if CA == "C":
             looptype = "open"
         if CA == "A":

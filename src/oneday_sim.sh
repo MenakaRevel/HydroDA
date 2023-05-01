@@ -47,7 +47,9 @@ mapname=${10}
 
 cal=${11}
 
-DA_dir=${12}
+corrupt=${12}
+
+DA_dir=${13}
 
 # echo "looptype" $looptype
 #=================================================
@@ -250,17 +252,28 @@ CELEVTN="${FMAP}/elevtn.bin"                # channel top elevation [m]
 CNXTDST="${FMAP}/nxtdst.bin"                # downstream distance   [m]
 CRIVLEN="${FMAP}/rivlen.bin"                # channel length        [m]
 CFLDHGT="${FMAP}/fldhgt.bin"                # floodplain elevation profile (height above 'elevtn') [m]
-
+if [ $corrupt = 4 ] || [ $corrupt = 5 ];then
+     CFLDHGT="${FMAP}/fldhgt_corrupt.bin"   # floodplain elevation profile [m] (corrupted)
+fi
 #** channel parameter
 ###CRIVWTH=${FMAP}/rivwth.bin"              # channel width [m] (empirical power-low)
 CRIVWTH="${FMAP}/rivwth_gwdlr.bin"          # channel width [m] (GWD-LR + filled with empirical)
+if [ $corrupt = 2 ] || [ $corrupt = 5 ];then
+     CRIVWTH="${FMAP}/rivwth_corrupt.bin"   # channel width [m] (Corrupted rivwth)
+fi
 CRIVHGT="${FMAP}/rivhgt.bin"                # channel depth [m] (empirical power-low)
 if [ $cal = "yes" ];then
-  CRIVHGT="${FMAP}/rivhgt_Xudong.bin"         # channel depth [m] (Xudong et al 2021)
+  CRIVHGT="${FMAP}/rivhgt_Xudong.bin"       # channel depth [m] (Xudong et al,. 2022)
 elif [ $cal = "corrupt" ];then
-  CRIVHGT="${FMAP}/rivhgt_corrupt.bin"         # channel depth [m] (Corrupted rivhgt)
+  CRIVHGT="${FMAP}/rivhgt_corrupt.bin"      # channel depth [m] (Corrupted rivhgt)
+fi
+if [ $corrupt = 1 ] || [ $corrupt = 5 ];then
+     CRIVHGT="${FMAP}/rivhgt_corrupt.bin"   # channel depth [m] (Corrupted rivhgt)
 fi
 CRIVMAN="${FMAP}/rivman.bin"                # manning coefficient river (The one in flood plain is a global parameter; set $PMANFLD below.)
+if [ $corrupt = 3 ] || [ $corrupt = 5 ];then
+     CRIVMAN="${FMAP}/rivman_corrupt.bin"   # manning coefficient river (Corrupted rivman)
+fi
 #if [ $looptype = "true" ] ; then
 #    CRIVMAN="${INBASE}/assim_out/rivman/rivmanTRUE.bin"
 #    #CRIVMAN="${FMAP}/rivmanTRUE.bin"
