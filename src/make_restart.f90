@@ -5,7 +5,9 @@ character(len=128)              :: fname,buf,camadir,expdir,mapname
 !-map variables
 real                            :: gsize,west, north, east, south ! map boundries
 integer                         :: latpx,lonpx,nflp    ! pixel size, calculated
-real,allocatable                :: rivsto(:,:),fldsto(:,:) ! put to restart file
+! real,allocatable                :: rivsto(:,:),fldsto(:,:) ! put to restart file
+real,allocatable                :: rivsto(:,:),fldsto(:,:),damsto(:,:) ! Modified by Youjiang, put to restart file
+
 real,allocatable                :: elevtn(:,:)
 
 real,allocatable                :: rivlen(:,:),rivwth(:,:),rivsto_max(:,:),rivhgt(:,:)
@@ -24,6 +26,7 @@ real,allocatable                :: fldfrac(:,:)
 
 character(len=1)                :: loopchar
 integer                         :: ens_num,k
+integer                         :: cor ! for parameter corruption
 
 real,allocatable                :: xa(:,:),rivdph(:,:),flddph(:,:)
 
@@ -31,8 +34,9 @@ real                            :: hgt,pre,Across
 
 ! how the restart file is made
 !   rivsto,fldsto => recalculation
-!   rivout,fldout => average of ensembles (extracted from restart file)
-!   rivdpt,fldsto => average of ensembles (extracted from restart file)
+!   damsto ==> copy from CaMa_out
+!   rivout,fldout => average of ensembles (extracted from restart file) ## not used
+!   rivdpt,fldsto => average of ensembles (extracted from restart file) ## not used
 
 call getarg(1,buf)
 read(buf,*) yyyymmdd
@@ -62,7 +66,8 @@ call getarg(9,buf)
 read(buf,"(A)") expdir
 
 call getarg(10,buf)
-read(buf,"(A)") cal
+read(buf,*) cor ! for identifying the corruption 0: none, 1: rivhgt, 2: rivwth 
+                ! 3:rivman 4: fldhgt, 5: rivhgt, rivwth, rivman, and fldhgt
 
 !==
 fname=trim(camadir)//"/map/"//trim(mapname)//"/params.txt"
@@ -102,6 +107,7 @@ close(34)
 ! read CaMa-Flood parametes
 allocate(rivlen(lonpx,latpx),rivwth(lonpx,latpx),rivhgt(lonpx,latpx),fldhgt(lonpx,latpx,nflp))
 allocate(elevtn(lonpx,latpx),nextX(lonpx,latpx),nextY(lonpx,latpx),nextdst(lonpx,latpx),grid_area(lonpx,latpx))
+
 fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivlen.bin"
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
@@ -114,6 +120,9 @@ end if
 close(34)
 
 fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivwth_gwdlr.bin"
+if (cor==2 .OR. cor==5) then
+    fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivwth_corrupt.bin"
+end if
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) rivwth
@@ -130,13 +139,17 @@ close(34)
 !      fname=trim(adjustl(camadir))//"map/"//trim(mapname)//"/rivhgt.bin"
 !    end if
 fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivhgt.bin"
-if (trim(cal)=="yes") then
-    fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivhgt_Xudong.bin"
-elseif (trim(cal)=="corrupt") then
+if (cor==1 .OR. cor==5) then
     fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivhgt_corrupt.bin"
-else
-    fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivhgt.bin"
 end if
+! ! !not needed for virtual experiments
+! ! if (trim(cal)=="yes") then
+! !     fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivhgt_Xudong.bin"
+! ! elseif (trim(cal)=="corrupt") then
+! !     fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivhgt_corrupt.bin"
+! ! else
+! !     fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivhgt.bin"
+! ! end if
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) rivhgt
@@ -148,6 +161,9 @@ end if
 close(34)
 
 fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/fldhgt.bin"
+if (cor==4 .OR. cor==5) then
+    fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/fldhgt_corrupt.bin"
+end if
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx*10,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) fldhgt
@@ -213,7 +229,11 @@ close(34)
 ! =======================================================
 ! allocate
 allocate(rivsto_max(lonpx,latpx),oceanmask(lonpx,latpx),fldstage(lonpx,latpx))
-allocate(fldfrac(lonpx,latpx),rivdph(lonpx,latpx),rivsto(lonpx,latpx),flddph(lonpx,latpx),fldsto(lonpx,latpx))
+! allocate(fldfrac(lonpx,latpx),rivdph(lonpx,latpx),rivsto(lonpx,latpx),flddph(lonpx,latpx),fldsto(lonpx,latpx))
+! Modified by Youjiang Shen
+allocate(fldfrac(lonpx,latpx),rivdph(lonpx,latpx),rivsto(lonpx,latpx),damsto(lonpx,latpx),flddph(lonpx,latpx),fldsto(lonpx,latpx))
+
+
 ! calc river storage max
 rivsto_max = rivlen*rivwth*rivhgt
 
@@ -339,6 +359,22 @@ do i=1,lonpx
 end do
 
 ! =================================================
+! Needed for CaMa-Flood v4.1 without reservoir assimilation --> may change in future
+! need to open CaMa_out restrat file to copy damsto
+! open restart file at CaMa_out 
+! "./CaMa_out/"+yyyy+mm+dd+"A"+numch+"/restart"+n_yyyy+n_mm+n_dd+".bin"
+fname=trim(adjustl(expdir))//"/CaMa_out/"//yyyymmdd//loopchar//num_name//"/restart"//onedayaft//".bin"
+print*, "CaMa_out", fname
+open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+if(ios==0)then
+    print* , "read damsto"
+    read(34,rec=3) damsto  ! added by Youjiang. 
+else
+    print*, "no file", fname
+end if
+close(34)
+
+! =================================================
 ! save and store output & restart file
 
 ! make restart file
@@ -348,6 +384,7 @@ open(35,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status=
 if(ios==0)then
     write(35,rec=1) rivsto
     write(35,rec=2) fldsto
+    write(35,rec=3) damsto ! for CaMa-Flood v4.1
 end if
 close(35)
 write(82,*) "done restart file at:",fname
@@ -355,5 +392,5 @@ close(82)
 !deallocate
 deallocate(xa,rivlen,rivwth,rivhgt,fldhgt)
 deallocate(elevtn,nextX,nextY,nextdst,grid_area)
-deallocate(rivdph,rivsto,flddph,fldsto)
+deallocate(rivdph,rivsto,flddph,fldsto,damsto)
 end program make_restart

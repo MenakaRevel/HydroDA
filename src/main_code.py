@@ -624,7 +624,7 @@ def make_restart(inputlist):
 
     # calculate other variables from water storage
     exp_dir="./" #pm.DA_dir()+"/out/"+pm.experiment()
-    os.system(pm.DA_dir()+"/src/make_restart "+yyyy+mm+dd+" "+yyyy_b+mm_b+dd_b+" "+yyyy_n+mm_n+dd_n+" "+loop+" "+pm.CaMa_dir()+" "+pm.mapname()+" "+str(pm.ens_mem())+" "+numch+" "+exp_dir+" "+pm.calibrate())
+    os.system(pm.DA_dir()+"/src/make_restart "+yyyy+mm+dd+" "+yyyy_b+mm_b+dd_b+" "+yyyy_n+mm_n+dd_n+" "+loop+" "+pm.CaMa_dir()+" "+pm.mapname()+" "+str(pm.ens_mem())+" "+numch+" "+exp_dir+" "+pm.corrupt())
 
     print ("finish restarting",numch)
 ###########################
