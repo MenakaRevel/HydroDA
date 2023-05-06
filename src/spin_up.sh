@@ -42,6 +42,10 @@ EXP_DIR=$7
 mapname=$8
 
 cal=$9
+
+corrupt=${10}
+
+opt=${11}
 #================================================
 echo $CAMADIR
 echo $EXP_DIR

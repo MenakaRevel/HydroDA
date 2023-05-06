@@ -240,9 +240,11 @@ def spinup_loop(inputlist):
     mapname=pm.mapname()
     cal=pm.calibrate()
     corrupt=pm.corrupt()
+    option=pm.option()
     print  ("%s for %03d"%(loop,int(ens_num)))
     os.system("source "+pm.DA_dir()+"/src/spin_up.sh "+str(yyyy)+" "+str(loop)+" "+ens_num+" "
-    +dir2+" "+str(cpunums)+" "+str(run_name)+" "+str(exp_dir)+" "+str(mapname)+" "+str(cal)+" "+str(corrupt))
+    +dir2+" "+str(cpunums)+" "+str(run_name)+" "+str(exp_dir)+" "+str(mapname)+" "+str(cal)
+    +" "+str(corrupt)+" "+str(option))
     return 0
 ###########################
 def one_day_sim(inputlist):
@@ -274,10 +276,11 @@ def one_day_sim(inputlist):
     mapname=pm.mapname()
     cal=pm.calibrate()
     corrupt=pm.corrupt()
+    option=pm.option()
     DA_dir=pm.DA_dir()
     os.system("source "+pm.DA_dir()+"/src/oneday_sim.sh "+yyyy+" "+mm+" "+dd+" "+ens_num+" "+dir2
     +" "+looptype+" "+str(cpunums)+" "+str(run_name)+" "+str(exp_dir)+" "+str(mapname)+" "+str(cal)
-    +" "+str(corrupt)+" "+DA_dir)
+    +" "+str(corrupt)+" "+str(option)+" "+DA_dir)
 
     return 0
 ########################### # modified to run paralle @Menaka 

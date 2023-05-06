@@ -47,7 +47,11 @@ mapname=${10}
 
 cal=${11}
 
-DA_dir=${12}
+opt=${12}
+
+corrupt=${13}
+
+DA_dir=${14}
 
 # echo "looptype" $looptype
 #=================================================
@@ -110,9 +114,14 @@ LADPSTP=".TRUE."                            # .TRUE. for adaptive time step
 LFPLAIN=".TRUE."                            # .TRUE. to activate floodplain storage
 LKINE=".FALSE."                             # .TRUE. to use kinematic wave equation
 LFLDOUT=".TRUE."                            # .TRUE. to activate floodplain discharge
-LPTHOUT=".TRUE."                            # .TRUE. to activate bifurcation flow, mainly for delta simulation
-LDAMOUT=".TRUE."                           # .TRUE. to activate reservoir operation (under development)
-
+LPTHOUT=".FALSE."                            # .TRUE. to activate bifurcation flow, mainly for delta simulation
+if [ $opt = "bif" ] || [ $opt = "all" ];then
+     LPTHOUT=".TRUE."                       # .TRUE. to activate bifurcation flow, mainly for delta simulation
+fi
+LDAMOUT=".FALSE."                           # .TRUE. to activate reservoir operation (under development)
+if [ $opt = "dam" ] || [ $opt = "all" ];then
+     LDAMOUT=".FALSE."                      # .TRUE. to activate reservoir operation (under development)
+fi
 CDAMFILE="${PWDD}/sample_data/damparam_amz_6min_8dams.csv"  # this is new for reservoir operation scheme
 
 #============================
