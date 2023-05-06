@@ -74,7 +74,7 @@ cd $HydroDAout
 # 4. Observation data [e.g., HydroWeb(HWEB), CGLS] 
 # 5. Number for identifying the experiment [e.g., 001]: 0XX - regional, 1XX - global
 #====================================================================
-EXP="DIR_WSE_ISIMIP3a_SWOT_006" # for SWOTH08 
+EXP="DIR_WSE_ISIMIP3a_SWOT_002" # for SWOTH08 
 
 # mkdir -p $HydroDA"/out/"$EXP
 mkdir -p $HydroDAout"/out/"$EXP

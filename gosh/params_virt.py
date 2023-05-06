@@ -170,7 +170,7 @@ def endtime():
 # **************************************************************
 # 4. Spinup options
 def spinup_mode():
-    return 0
+    return 3
     # 0: do spinup simulation for both (corrupted and true) simulation
     # 1: do spin up only at corrupted simulation
     # 2: do spin up only at true simulation
@@ -307,7 +307,8 @@ def CaMa_dir():
     # return "/cluster/data6/menaka/CaMa-Flood_v396a_20200514"
     #return "/cluster/data6/menaka/CaMa-Flood_v396_20191225"
     #return "/cluster/data6/menaka/CaMa-Flood_v395b_20191030"
-    return "/cluster/data6/menaka/CaMa-Flood_v4"
+    # return "/cluster/data6/menaka/CaMa-Flood_v4"
+    return "/cluster/data6/menaka/CaMa-Flood_v410"
     # directory of CaMa-Flood
     # indicate the directory of ./map or ./src and other folders
 
@@ -316,7 +317,7 @@ def calibrate():
     return "no"
 
 def corrupt():
-    return 5
+    return 1
     # define the experiment with or without corrupted parameters
     # 0 : no parameter corrupted
     # 1 : with corrupted rivhgt
@@ -324,6 +325,13 @@ def corrupt():
     # 3 : with corrupted rivman
     # 4 : with corrupted fldhgt
     # 5 : with corrupted rivhgt, rivwth, rivman, and fldhgt
+
+def option():
+    # return "all" # for bifurcation and dam on
+    return "bif" # for bifurcation on
+    # return "dam" # for dam on
+    # return "levee" # for levee on
+    # for CaMa-Flood options
 
 def MKLdir():
     return "/opt/intel/compilers_and_libraries_2016.3.170/mac/mkl"
@@ -340,7 +348,6 @@ def output_er():
 
 # **************************************************************
 # 7. observations settings
-
 def obs_name():
     # return "HydroWeb"
     return "SWOT"
