@@ -290,7 +290,7 @@ def copy_corrupted_sfcelv(inputlist):
     fname="./CaMa_out/"+yyyy+mm+dd+"C"+numch+"/sfcelv"+yyyy+".bin"
     os.system("cp "+fname+" ./assim_out/ens_xa/open/"+yyyy+mm+dd+"_"+numch+"_xa.bin")
     return 0
-########################### # modified not calculate restart again/ no chage in WSE in corrupted @Menaka
+########################### # modified not to calculate restart again/ no chage in WSE in corrupted @Menaka
 def copy_corrupted_restart(inputlist):
     yyyy = inputlist[0]
     mm   = inputlist[1]
@@ -302,8 +302,11 @@ def copy_corrupted_restart(inputlist):
     n_dd='%02d' % (nxt_day.day)
     numch='%03d'%num
     fname="./CaMa_out/"+yyyy+mm+dd+"C"+numch+"/restart"+n_yyyy+n_mm+n_dd+".bin"
-    #os.system("cp "+fname+" ./CaMa_in/restart/open/restart"+n_yyyy+n_mm+n_dd+"C"+numch+".bin")
-    copy_stoonly(fname,"./CaMa_in/restart/open/restart"+n_yyyy+n_mm+n_dd+"C"+numch+".bin")
+    os.system("cp "+fname+" ./CaMa_in/restart/open/restart"+n_yyyy+n_mm+n_dd+"C"+numch+".bin") ## CaMa-Flood v4.1
+    ## @ Menaka
+    # New restart file change the number of dimensions with the option such as dam, levee, etc..
+    # if turn the dam on, change to reshape(3,-1) otherwise, reshape(2,-1) @ Youjiang
+    # copy_stoonly(fname,"./CaMa_in/restart/open/restart"+n_yyyy+n_mm+n_dd+"C"+numch+".bin")
     print ("copy restart",n_yyyy,n_mm,n_dd,"C"+numch)
     return 0
 ###########################

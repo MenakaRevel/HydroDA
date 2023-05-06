@@ -47,9 +47,7 @@ mapname=${10}
 
 cal=${11}
 
-corrupt=${12}
-
-DA_dir=${13}
+DA_dir=${12}
 
 # echo "looptype" $looptype
 #=================================================
@@ -75,6 +73,8 @@ fi
 
 #*** 0a. Set CaMa-Flood base directory
 BASE=$CAMADIR                         #   CaMa-Flood directory
+PWDD=${BASE}/etc/reservoir_operation
+
 OUTBASE="$EXP_DIR/CaMa_out"    		   #   base for output => CaMa_out
 INBASE="../../CaMa_in"                #   base for input => CaMa_in
 
@@ -82,6 +82,7 @@ INBASE="../../CaMa_in"                #   base for input => CaMa_in
 
 #*** 0b. Set dynamic library if needed
 export IFORTLIB="/opt/intel/lib:/opt/intel/mkl/lib"
+export HDF5LIB="/opt/local/hdf5-1.10.5/lib"
 export DYLD_LIBRARY_PATH="${IFORTLIB}:${DYLD_LIBRARY_PATH}"
 
 #*** 0c. OpenMP thread number
@@ -110,8 +111,9 @@ LFPLAIN=".TRUE."                            # .TRUE. to activate floodplain stor
 LKINE=".FALSE."                             # .TRUE. to use kinematic wave equation
 LFLDOUT=".TRUE."                            # .TRUE. to activate floodplain discharge
 LPTHOUT=".TRUE."                            # .TRUE. to activate bifurcation flow, mainly for delta simulation
-LDAMOUT=".FALSE."                           # .TRUE. to activate reservoir operation (under development)
+LDAMOUT=".TRUE."                           # .TRUE. to activate reservoir operation (under development)
 
+CDAMFILE="${PWDD}/sample_data/damparam_amz_6min_8dams.csv"  # this is new for reservoir operation scheme
 
 #============================
 #*** 1c. simulation time
@@ -143,6 +145,7 @@ LSTOONLY=".TRUE."                          # .TRUE. for storage only restart (fo
 CRESTDIR="./"                               # output restart file directory
 CVNREST="restart"                           # output restart file prefix
 LRESTCDF=".FALSE."                          # .TRUE. to use netCDF restart file
+LRESTDBL=".FALSE."                           # .TRUE. for binary restart double precision, This is new !!
 IFRQ_RST="0"                                # output restat frequency.
                                             # [0]: only at last time, [1,2,3,...,24] hourly restart, [30]: monthly restart
 
@@ -252,28 +255,17 @@ CELEVTN="${FMAP}/elevtn.bin"                # channel top elevation [m]
 CNXTDST="${FMAP}/nxtdst.bin"                # downstream distance   [m]
 CRIVLEN="${FMAP}/rivlen.bin"                # channel length        [m]
 CFLDHGT="${FMAP}/fldhgt.bin"                # floodplain elevation profile (height above 'elevtn') [m]
-if [ $corrupt = 4 ] || [ $corrupt = 5 ];then
-     CFLDHGT="${FMAP}/fldhgt_corrupt.bin"   # floodplain elevation profile [m] (corrupted)
-fi
+
 #** channel parameter
 ###CRIVWTH=${FMAP}/rivwth.bin"              # channel width [m] (empirical power-low)
 CRIVWTH="${FMAP}/rivwth_gwdlr.bin"          # channel width [m] (GWD-LR + filled with empirical)
-if [ $corrupt = 2 ] || [ $corrupt = 5 ];then
-     CRIVWTH="${FMAP}/rivwth_corrupt.bin"   # channel width [m] (Corrupted rivwth)
-fi
 CRIVHGT="${FMAP}/rivhgt.bin"                # channel depth [m] (empirical power-low)
 if [ $cal = "yes" ];then
-  CRIVHGT="${FMAP}/rivhgt_Xudong.bin"       # channel depth [m] (Xudong et al,. 2022)
+  CRIVHGT="${FMAP}/rivhgt_Xudong.bin"         # channel depth [m] (Xudong et al 2021)
 elif [ $cal = "corrupt" ];then
-  CRIVHGT="${FMAP}/rivhgt_corrupt.bin"      # channel depth [m] (Corrupted rivhgt simple)
-fi
-if [ $corrupt = 1 ] || [ $corrupt = 5 ];then
-     CRIVHGT="${FMAP}/rivhgt_corrupt.bin"   # channel depth [m] (Corrupted rivhgt)
+  CRIVHGT="${FMAP}/rivhgt_corrupt.bin"         # channel depth [m] (Corrupted rivhgt)
 fi
 CRIVMAN="${FMAP}/rivman.bin"                # manning coefficient river (The one in flood plain is a global parameter; set $PMANFLD below.)
-if [ $corrupt = 3 ] || [ $corrupt = 5 ];then
-     CRIVMAN="${FMAP}/rivman_corrupt.bin"   # manning coefficient river (Corrupted rivman)
-fi
 #if [ $looptype = "true" ] ; then
 #    CRIVMAN="${INBASE}/assim_out/rivman/rivmanTRUE.bin"
 #    #CRIVMAN="${FMAP}/rivmanTRUE.bin"
@@ -324,10 +316,13 @@ IFRQ_OUT=24                                 # output frequency: [1,2,3,...,24] h
 
 LOUTCDF=".FALSE."                           # .TRUE. netCDF output, .FALSE. plain binary output
 COUTDIR="./"                                # output directory 
+CVARSOUT="rivout,rivsto,sfcelv,outflw,storge,fldout,fldsto,daminf,damsto,flddph,fldare" # list output variable (comma separated)
+# CVARSOUT="rivout,rivsto,rivdph,rivvel,fldout,fldsto,flddph,fldfrc,fldare,sfcelv,outflw,storge,pthflw,pthout,maxsto,maxflw,maxdph" # list output variable (comma separated)
 #CVARSOUT="outflw,storge,fldfrc,maxdph,flddph" # list output variable (comma separated)
-#CVARSOUT="rivout,rivsto,rivdph,rivvel,fldout,fldsto,flddph,fldfrc,fldare,sfcelv,outflw,storge,pthflw,pthout,maxsto,maxflw,maxdph" # list output variable (comma separated)
-#CVARSOUT="rivout,rivsto,rivdph,fldout,flddph,fldfrc,fldare,sfcelv,outflw,storge,maxsto,maxflw,maxdph" # list output variable (comma separated)
-CVARSOUT="rivout,rivsto,fldout,flddph,fldfrc,fldare,sfcelv,outflw,storge,maxsto,maxflw,maxdph" # list output variable (comma separated)
+#CVARSOUT="rivout,rivsto,rivdph,rivvel,fldout,fldsto,flddph,fldfrc,fldare,sfcelv,outflw,storge,pthflw,pthout,maxsto,maxflw,maxdph,damsto,daminf" # list output variable (comma separated)    # dam variables are added!!!!
+#CVARSOUT="flddph,outflw,daminf,damsto,rivdph" # list output variable (comma separated)    # dam variables are added!!!!
+
+
 COUTTAG=""  # see (3) set each year         #   output tag $(COUTDIR)/$(VARNAME)$(OUTTAG).bin
 
 ##### Model Parameters ################
@@ -396,11 +391,12 @@ ln -sf $PROG $EXE
 CSYEAR=`printf %04d ${SYEAR}`
 COUTTAG=${CSYEAR}                  # output file tag
 
-#CROFCDF="${CROFDIR}/${CROFPRE}${CSYEAR}.nc"  # input netCDF runoff file
-#SYEARIN=$IYR
-#SMONIN=1
-#SDAYIN=1
-#SHOURIN=0
+# CROFCDF="${CROFDIR}/${CROFPRE}${CSYEAR}.nc"  # input netCDF runoff file
+# # CROFCDF="${CROFDIR}/${CROFPRE}${CSYEAR}${CROFSUF}.nc"  # input netCDF runoff file
+# SYEARIN=$IYR
+# SMONIN=1
+# SDAYIN=1
+# SHOURIN=0
 
 #================================================
 # (4) Create NAMELIST for simulation year
@@ -495,6 +491,7 @@ CRESTSTO = "${CRESTSTO}"               ! restart file
 CRESTDIR = "${CRESTDIR}"               ! restart directory
 CVNREST  = "${CVNREST}"                ! restart variable name
 LRESTCDF = ${LRESTCDF}                 ! * true for netCDF restart file
+LRESTDBL = ${LRESTDBL}                 ! * true for double precision binary restart  !! This is new
 IFRQ_RST = ${IFRQ_RST}                 ! restart write frequency (1-24: hour, 0:end of run)
 /
 EOF
@@ -548,6 +545,13 @@ LOUTVEC  = .FALSE                      ! TRUE FOR VECTORIAL OUTPUT, FALSE FOR NX
 LOUTCDF  = ${LOUTCDF}                  ! * true for netcdf outptu false for binary
 NDLEVEL  = 0                           ! * NETCDF DEFLATION LEVEL 
 IFRQ_OUT = ${IFRQ_OUT}                 ! output data write frequency (hour)
+/
+EOF
+
+#*** Opt. Reservoir Operation
+cat >> ${NMLIST} << EOF
+&NDAMOUT
+CDAMFILE = "${CDAMFILE}"               ! Reservoir Parameter File
 /
 EOF
 
