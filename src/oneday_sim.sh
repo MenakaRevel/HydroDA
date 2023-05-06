@@ -265,7 +265,7 @@ CRIVHGT="${FMAP}/rivhgt.bin"                # channel depth [m] (empirical power
 if [ $cal = "yes" ];then
   CRIVHGT="${FMAP}/rivhgt_Xudong.bin"       # channel depth [m] (Xudong et al,. 2022)
 elif [ $cal = "corrupt" ];then
-  CRIVHGT="${FMAP}/rivhgt_corrupt.bin"      # channel depth [m] (Corrupted rivhgt)
+  CRIVHGT="${FMAP}/rivhgt_corrupt.bin"      # channel depth [m] (Corrupted rivhgt simple)
 fi
 if [ $corrupt = 1 ] || [ $corrupt = 5 ];then
      CRIVHGT="${FMAP}/rivhgt_corrupt.bin"   # channel depth [m] (Corrupted rivhgt)

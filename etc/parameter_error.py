@@ -80,6 +80,9 @@ def corrupt_flddph(mapname,CaMa_dir="/cluster/data6/menaka/CaMa-Flood_v4"):
     flp[1:] = np.maximum(flp[1:], flp[:-1])
     flp[0]  = np.maximum(flp[0], 0.0)
 
+    # Convert to float32
+    flp=np.float32(flp)
+
     # Save the corrupted floodplain map
     flp.tofile(CaMa_dir+"/map/"+mapname+"/fldhgt_corrupt.bin")
     print ("save ----> "+CaMa_dir+"/map/"+mapname+"/fldhgt_corrupt.bin")
@@ -103,6 +106,9 @@ def corrupt_rivhgt(mapname,CaMa_dir="/cluster/data6/menaka/CaMa-Flood_v4"):
     # Add the error to the river depth
     dph = dph + err_wd(1.0,1.12,N=1) # 39% error
 
+    # Convert to float32
+    dph=np.float32(dph)
+
     # Save the corrupted floodplain map
     dph.tofile(CaMa_dir+"/map/"+mapname+"/rivhgt_corrupt.bin")
     print ("save ----> "+CaMa_dir+"/map/"+mapname+"/rivhgt_corrupt.bin")
@@ -121,13 +127,16 @@ def corrupt_rivwth(mapname,CaMa_dir="/cluster/data6/menaka/CaMa-Flood_v4"):
     gsize  = float(filter(None, re.split(" ",lines[3]))[0])
 
     # Load the original floodplain map
-    dph = np.fromfile(CaMa_dir+"/map/"+mapname+"/rivwth.bin",np.float32).reshape(ny,nx)
+    wth = np.fromfile(CaMa_dir+"/map/"+mapname+"/rivwth.bin",np.float32).reshape(ny,nx)
 
     # Add the error to the river depth
-    dph = dph + err_wd(1.0,1.22,N=1) # 39% error
+    wth = wth + err_wd(1.0,1.22,N=1) # 39% error
+
+    # Convert to float32
+    wth=np.float32(wth)
 
     # Save the corrupted floodplain map
-    dph.tofile(CaMa_dir+"/map/"+mapname+"/rivwth_corrupt.bin")
+    wth.tofile(CaMa_dir+"/map/"+mapname+"/rivwth_corrupt.bin")
     print ("save ----> "+CaMa_dir+"/map/"+mapname+"/rivwth_corrupt.bin")
     return 0
 #====================================================================================
@@ -144,18 +153,21 @@ def corrupt_rivman(mapname,CaMa_dir="/cluster/data6/menaka/CaMa-Flood_v4"):
     gsize  = float(filter(None, re.split(" ",lines[3]))[0])
 
     # Load the original floodplain map
-    dph = np.fromfile(CaMa_dir+"/map/"+mapname+"/rivman.bin",np.float32).reshape(ny,nx)
+    man = np.fromfile(CaMa_dir+"/map/"+mapname+"/rivman.bin",np.float32).reshape(ny,nx)
 
     # Add the error to the river depth
-    dph = dph + err_n(1.0,1.69,N=1) # 39% error
+    man = man + err_n(1.0,1.69,N=1) # 39% error
+
+    # Convert to float32
+    man=np.float32(man)
 
     # Save the corrupted floodplain map
-    dph.tofile(CaMa_dir+"/map/"+mapname+"/rivman_corrupt.bin")
+    man.tofile(CaMa_dir+"/map/"+mapname+"/rivman_corrupt.bin")
     print ("save ----> "+CaMa_dir+"/map/"+mapname+"/rivman_corrupt.bin")
     return 0
 #====================================================================================
 if __name__=="__main__":
-    # corrupt_flddph("glb_15min") # Corrupt the global 15min resolution floodplain map
-    # corrupt_rivhgt("glb_15min") # Corrupt the global 15min resolution river depth map
-    # corrupt_rivwth("glb_15min") # Corrupt the global 15min resolution river width map
+    corrupt_flddph("glb_15min") # Corrupt the global 15min resolution floodplain map
+    corrupt_rivhgt("glb_15min") # Corrupt the global 15min resolution river depth map
+    corrupt_rivwth("glb_15min") # Corrupt the global 15min resolution river width map
     corrupt_rivman("glb_15min") # Corrupt the global 15min resolution river Manning's n map

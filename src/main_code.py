@@ -239,9 +239,10 @@ def spinup_loop(inputlist):
     exp_dir="./" #pm.DA_dir()+"/out/"+pm.experiment()
     mapname=pm.mapname()
     cal=pm.calibrate()
+    corrupt=pm.corrupt()
     print  ("%s for %03d"%(loop,int(ens_num)))
     os.system("source "+pm.DA_dir()+"/src/spin_up.sh "+str(yyyy)+" "+str(loop)+" "+ens_num+" "
-    +dir2+" "+str(cpunums)+" "+str(run_name)+" "+str(exp_dir)+" "+str(mapname)+" "+str(cal))
+    +dir2+" "+str(cpunums)+" "+str(run_name)+" "+str(exp_dir)+" "+str(mapname)+" "+str(cal)+" "+str(corrupt))
     return 0
 ###########################
 def one_day_sim(inputlist):
@@ -303,7 +304,7 @@ def copy_corrupted_restart(inputlist):
     fname="./CaMa_out/"+yyyy+mm+dd+"C"+numch+"/restart"+n_yyyy+n_mm+n_dd+".bin"
     #os.system("cp "+fname+" ./CaMa_in/restart/open/restart"+n_yyyy+n_mm+n_dd+"C"+numch+".bin")
     copy_stoonly(fname,"./CaMa_in/restart/open/restart"+n_yyyy+n_mm+n_dd+"C"+numch+".bin")
-    print "copy restart",n_yyyy,n_mm,n_dd,"C"+numch
+    print ("copy restart",n_yyyy,n_mm,n_dd,"C"+numch)
     return 0
 ###########################
 def copy_stoonly(iname,oname): # for CaMa_Flood v395b

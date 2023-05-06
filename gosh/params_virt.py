@@ -104,15 +104,15 @@ def patch_name():
     # return "amz_06min_S14FD_60"
     # return "amz_06min_S14FD_40"
     # return "amz_06min_S14FD_20"
-    # return "glb_15min_S14FD_60"
-    return "glb_15min_S14FD_60_dam"
+    return "glb_15min_S14FD_60"
+    # return "glb_15min_S14FD_60_dam"
 
 def patch_id():
     # return "0.80"
-    # return "0.60"
+    return "0.60"
     # return "0.40"
     # return "0.20"
-    return "0.60-dam"
+    # return "0.60-dam"
 
 def thersold():
     # return 0.80
@@ -135,7 +135,7 @@ def rho():
 
 def sigma_b():
     return 0.0400000
-    # bacground variance of inflation for adaptive inflation Myoshi et al (2011)
+    # background variance of inflation for adaptive inflation Myoshi et al (2011)
 
 def ens_mem(mode=mode()):
     return 20
@@ -156,7 +156,7 @@ def ens_mem(mode=mode()):
     # number of ensemble members
 
 # **************************************************************
-# 3. Experiment timimngs 
+# 3. Experiment timings 
 def timestep():
     return 86400 # outer timestep in seconds
 
@@ -164,7 +164,7 @@ def starttime():
     return (2001,1,1) # start date: [year,month,date]
 
 def endtime():
-    return (2011,1,1) # end date: [year,month,date]
+    return (2002,1,1) # end date: [year,month,date]
                       # *note: this date is not included
 
 # **************************************************************
@@ -175,6 +175,7 @@ def spinup_mode():
     # 1: do spin up only at corrupted simulation
     # 2: do spin up only at true simulation
     # 3: no spinup simulation at all
+    # 4: copy restart file from previous data
     ### if initial restart file is ready, spinup simulation is no need
 
 def spinup_end_year():
@@ -315,7 +316,7 @@ def calibrate():
     return "no"
 
 def corrupt():
-    return 0
+    return 5
     # define the experiment with or without corrupted parameters
     # 0 : no parameter corrupted
     # 1 : with corrupted rivhgt
@@ -353,7 +354,7 @@ def obs_dir():
     # return "/cluster/data6/menaka/dev_CaMa-Flood_v4/CaMa-Flood_v4/out/test-dev_HanazakiDam"
     return "/cluster/data7/menaka/HydroDA/obs/SWOTH08"
 
-def obs_list():
+def obs_list(): # not used in current version
     return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_amz.txt"
 
 def stat_name(cal=calibrate()):

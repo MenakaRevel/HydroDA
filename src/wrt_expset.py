@@ -61,6 +61,22 @@ def calibration(cal):
     else:
         return "not calibrated (Yamazaki et al,. 2011)"
 ###########################
+def corruption(corrupt):
+    if corrupt==0:
+        return "not corrupted"
+    elif corrupt==1:
+        return "rivhgt corrupted"
+    elif corrupt==2:
+        return "rivwth corrupted"
+    elif corrupt==3:
+        return "rivman corrupted"
+    elif corrupt==4:
+        return "fldhgt corrupted"
+    elif corrupt==5:
+        return "all parameters corrupted"
+    else:
+        return "not corrupted"
+###########################
 def stat_name(conflag,cal):
     if conflag == 1:
         meanname="None"
@@ -90,8 +106,9 @@ def write_text():
         # Time domain for analysis
         f.write("# Start Date: %04d-%02d-%02d\n"%(pm.starttime()))
         f.write("# End Date: %04d-%02d-%02d\n"%(pm.endtime()))
-        # Calibration
+        # Calibration/Corruption
         f.write("# Model Calibration: "+calibration(pm.calibrate())+"\n")
+        f.write("# Parameter Corruption: "+corruption(pm.corrupt())+"\n")
         # Assimilation Settings
         f.write("# Assimilation Mode: "+assimlation_mode(pm.conflag())+"\n")
         f.write("# Assimilation Domain: \n")

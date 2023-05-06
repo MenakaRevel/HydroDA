@@ -23,7 +23,7 @@ from read_CMF import read_discharge, read_discharge_multi
 #===============================================================================
 # Experiment name
 #===============================================================================
-experiment="NOM_WSE_ERA5_CGLS_003"
+experiment="DIR_WSE_ISIMIP3a_SWOT_006" #"NOM_WSE_ERA5_CGLS_003"
 #===============================================================================
 sys.path.append('../etc/')
 #assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
@@ -193,8 +193,8 @@ nx     = int(filter(None, re.split(" ",lines[0]))[0])
 ny     = int(filter(None, re.split(" ",lines[1]))[0])
 gsize  = float(filter(None, re.split(" ",lines[3]))[0])
 #----
-syear,smonth,sdate=pm.starttime()
-eyear,emonth,edate=pm.endtime()
+syear,smonth,sdate=2001,1,1 #pm.starttime()
+eyear,emonth,edate=2002,1,1 #pm.endtime()
 #month=1
 #date=1
 start_dt=datetime.date(syear,smonth,sdate)
@@ -210,7 +210,7 @@ nbdays=int(last)
 #else:
 #    last=365
 
-ncpus=10
+ncpus=20
 #last=89
 N=int(last)
 print ("days: ",N)
@@ -226,14 +226,14 @@ river=[]
 # rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZON","MEKONG","IRRAWADDY","VOLGA", "NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
 # rivernames  = ["AMAZON"]
 # rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZON","IRRAWADDY","VOLGA","NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
-# rivernames  = ["AMAZON", "MISSISSIPPI","MEKONG", "VOLGA"]
+rivernames  = ["AMAZON", "MISSISSIPPI","MEKONG", "VOLGA", "COLORADO","MISSOURI"]
 #rivernames  = ["AMAZON"]
 # rivernames  = ["COLORADO"]
 # rivernames  = ["CHURCHILL"]
-rivernames = ["SAINT LAWRENCE","OHIO","CONNECTICUT","MISSOURI","MISSISSIPPI","COLORADO","CHURCHILL"]
+# rivernames = ["SAINT LAWRENCE","OHIO","CONNECTICUT","MISSOURI","MISSISSIPPI","COLORADO","CHURCHILL"]
 # rivernames = grdc.grdc_river_name_v396()
 for rivername in rivernames:
-  grdc_id,station_loc,x_list,y_list = grdc.get_grdc_loc_v396(rivername)
+  grdc_id,station_loc,x_list,y_list = grdc.get_grdc_loc_v396(rivername,fname=pm.CaMa_dir() + "/map/"+pm.mapname()+"/grdc_loc.txt")
   print (rivername, grdc_id,station_loc)
   river.append([rivername]*len(station_loc))
   staid.append(grdc_id)
@@ -307,7 +307,7 @@ def read_data(inputlist):
     asmfile=np.fromfile(fname,np.float32).reshape([ny,nx])
     #-------------
     for point in np.arange(pnum):
-        ix1,iy1,ix2,iy2=grdc.get_grdc_station_v396(pname[point])
+        ix1,iy1,ix2,iy2=grdc.get_grdc_station_v396(pname[point],fname=pm.CaMa_dir() + "/map/"+pm.mapname()+"/grdc_loc.txt")
         if ix2 == -9999 or iy2 == -9999:
             tmp_opn[dt,num,point]=opnfile[iy1,ix1]
             tmp_asm[dt,num,point]=asmfile[iy1,ix1]

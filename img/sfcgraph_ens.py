@@ -17,6 +17,10 @@ from numpy import ma
 import re
 import math
 
+# import CaMa-Flood variable reading using fortran
+sys.path.append('../etc/')
+from read_CMF import read_sfcelv, read_sfcelv_multi
+
 # os.system("ln -sf ../gosh/params.py params.py")
 #sys.path.append('../assim_out/')
 
