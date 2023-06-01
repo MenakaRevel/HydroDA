@@ -104,15 +104,15 @@ def patch_name():
     # return "amz_06min_S14FD_60"
     # return "amz_06min_S14FD_40"
     # return "amz_06min_S14FD_20"
-    return "glb_15min_S14FD_60"
-    # return "glb_15min_S14FD_60_dam"
+    # return "glb_15min_S14FD_60"
+    return "glb_15min_S14FD_60_dam"
 
 def patch_id():
     # return "0.80"
-    return "0.60"
+    # return "0.60"
     # return "0.40"
     # return "0.20"
-    # return "0.60-dam"
+    return "0.60-dam"
 
 def thersold():
     # return 0.80
@@ -248,7 +248,7 @@ def distopen(num=1):
     # 0.75 for original Data Assimilation simulation (25% reduced)
     # 1.25 for 25% increased simulation
     # 1.00 for simulation using 1 year before runoff
-    # *note: also editing and and re-compile of control_inp at CaMa-Flood is nessessary
+    # *note: also editing and and re-compile of control_inp at CaMa-Flood is necessary
 
 def diststd(num=1):
     # return 0.25
@@ -274,7 +274,7 @@ def err_expansion():
 # #     #define the experiment with or without rivman error
 # #     # 0 : with out manning error
 # #     # 1 : with manning error: Manning's n depend on river width
-# #     # 2 : with manning error: Manning's n depend spatial covarience
+# #     # 2 : with manning error: Manning's n depend spatial covariance
 # #     # 3 : with manning error: Manning's n randomly distributed subbasin
 # #     # 4 : with manning error: Manning's n randomly distributed
 # #     # 5 : with manning error: Manning's n depend on rivseq
@@ -301,7 +301,8 @@ def true_run(num):
 # 6. CaMa-Flood settings
 def CaMa_ver():
     # return "CaMa-Flood version 3.9.6"
-    return "CaMa-Flood version 4.0.0"
+    # return "CaMa-Flood version 4.0.0"
+    return "CaMa-Flood version 4.1.0"
 
 def CaMa_dir():
     # return "/cluster/data6/menaka/CaMa-Flood_v396a_20200514"
@@ -316,8 +317,8 @@ def calibrate():
     # return "yes"
     return "no"
 
-def corrupt():
-    return 1
+def corrupt(): ### not needed
+    return 0
     # define the experiment with or without corrupted parameters
     # 0 : no parameter corrupted
     # 1 : with corrupted rivhgt
@@ -332,6 +333,13 @@ def option():
     # return "dam" # for dam on
     # return "levee" # for levee on
     # for CaMa-Flood options
+
+def varout():
+    return "outflw"
+    # return "rivout, outflw, fldout, fldhgt" 
+    # names of variables to be copied from CaMa-Flood to assim_out
+    # *note: give names with comma and space between each name
+    # *note: names should be similar to the names in CaMa-Flood output
 
 def MKLdir():
     return "/opt/intel/compilers_and_libraries_2016.3.170/mac/mkl"
@@ -352,14 +360,20 @@ def obs_name():
     # return "HydroWeb"
     return "SWOT"
 
-def HydroWeb_dir():
+def HydroWeb_dir(): ## not used in current version
     return "/cluster/data6/menaka/HydroWeb"
 
 def obs_dir():
     # return "/cluster/data6/menaka/HydroWeb"
     # return "/cluster/data6/menaka/ensemble_org/CaMa_out/E2O003"
     # return "/cluster/data6/menaka/dev_CaMa-Flood_v4/CaMa-Flood_v4/out/test-dev_HanazakiDam"
-    return "/cluster/data7/menaka/HydroDA/obs/SWOTH08"
+    # return "/cluster/data7/menaka/HydroDA/obs/SWOTH08"
+    # return "/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_org"
+    # return "/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_rivhgt"
+    # return "/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_rivwth"
+    # return "/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_rivman"
+    # return "/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_fldhgt"
+    return "/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_all_005"
 
 def obs_list(): # not used in current version
     return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_amz.txt"
@@ -431,7 +445,7 @@ def slack_notification():
 # **************************************************************
 # 8. parallel run settings
 def para_nums():
-    return 20
+    return 10
     # setting number of parallels to run CaMa-Flood Model
     # default is 6, but may change depending on your system
 

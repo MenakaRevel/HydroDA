@@ -209,6 +209,7 @@ def swot_data(yyyy,mm,dd):
 	it=(target_dt-start_dt).days
 	for ix in np.arange(nx):
 		for iy in np.arange(ny):
+			# print (obs[iy,ix])
 			if obs[iy,ix] == 1.0:
 				wse=orgfile[it,iy,ix] + err_rand(obs_err,ix,iy)
 				# print (ix,iy,wse[0])
@@ -460,12 +461,12 @@ def prepare_obs(dir0="./"):
 ############# parameters ###########
 ####################################
 def starttime():
-    return 2015,1,1
+    return 2001,1,1
 ####################################
 def endtime():
-    return 2021,1,1
+    return 2001,12,31
 ####################################
-def obs_list():
+def obs_list(): ## only for real observations
     # return "../dat/HydroWeb_alloc_amz_06min_QC0_simulation.txt"
 	# return "../dat/HydroWeb_alloc_amz_06min_2002-2020.txt"
 	# return "../dat/HydroWeb_alloc_glb_15min.txt"
@@ -474,7 +475,7 @@ def obs_list():
 	# return "../dat/CGLS_alloc_conus_06min_DIR.txt"
 	return "../dat/CGLS_alloc_conus_06min_org.txt"
 ####################################
-def HydroWeb_list():
+def HydroWeb_list(): ### not used 
     # return "../dat/HydroWeb_alloc_amz_06min_QC0_simulation.txt"
 	# return "../dat/HydroWeb_alloc_amz_06min_2002-2020.txt"
 	# return "../dat/HydroWeb_alloc_conus_06min_org.txt"
@@ -484,19 +485,25 @@ def HydroWeb_list():
 ####################################
 def obs_name():
     # return "HydroWeb"
-	# return "SWOT"
-	return "CGLS"
+	return "SWOT"
+	# return "CGLS"
 ####################################
 def obs_dir():
     # return "/cluster/data7/menaka/HydroDA/obs/HydroWeb"
     # return "/cluster/data6/menaka/HydroWeb"
-	return "/work/a06/menaka/CGLS"
+	# return "/work/a06/menaka/CGLS"
     # return "/cluster/data6/menaka/ensemble_org/CaMa_out/E2O003"
 	# return "/work/a04/julien/CaMa-Flood_v4/out/coupled-model2"
+	# return "/cluster/data6/menaka/CaMa-H08/out/obs_org"
+	# return "/cluster/data6/menaka/CaMa-H08/out/obs_rivhgt"
+	# return "/cluster/data6/menaka/CaMa-H08/out/obs_rivwth"
+	# return "/cluster/data6/menaka/CaMa-H08/out/obs_rivman"
+	# return "/cluster/data6/menaka/CaMa-H08/out/obs_fldhgt"
+	return "/cluster/data6/menaka/CaMa-H08/out/obs_corr_all_011"
 ####################################
 def dam_list():
-	# return "../dat/dam_glb_15min.txt"
-	return "../dat/dam_conus_06min.txt"
+	return "../dat/dam_glb_15min.txt"
+	# return "../dat/dam_conus_06min.txt"
 ####################################
 def CaMa_dir():
 	return "/cluster/data6/menaka/CaMa-Flood_v4"
@@ -505,8 +512,8 @@ def CaMa_dir():
 ####################################
 def mapname():
     # return "amz_06min"
-    # return "glb_15min"
-	return "conus_06min"
+    return "glb_15min"
+	# return "conus_06min"
     # related CaMa-Flood map directory
     # [e.g. : glb_15min, glb_06min, Mkg_06min, etc.]
     # Check 
@@ -521,10 +528,14 @@ def map_dimension():
     gsize  = float(filter(None, re.split(" ",lines[3]))[0])
     return nx,ny,gsize
 ####################################
-def out_dir():
-	return "/cluster/data7/menaka/HydroDA/obs/HydroWeb"
+def out_dir(): ### not used --> give as direct input @L536
+	# return "/cluster/data7/menaka/HydroDA/obs/HydroWeb"
 	# return "/cluster/data7/menaka/HydroDA/obs/HydroWebAll"
 	# return "/cluster/data7/menaka/HydroDA/obs/SWOTH08"
+	# return "/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_org"
+	# return "/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_rivhgt"
+	# return "/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_fldhgt"
+	return "/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_all"
 ####################################
 if __name__ == "__main__":
 	print ("prepare observations")
@@ -532,6 +543,11 @@ if __name__ == "__main__":
 	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/HydroWeb_glb_15min")
 	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/HydroWeb_conus_06min")
 	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/HydroWeb_conus_06min_DIR")
-	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/SWOTH08") # for SWOTH08
+	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_org") # for SWOTH08 no corruption
+	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_rivhgt") # for SWOTH08 rivhgt corrupt
+	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_rivwth") # for SWOTH08 rivwth corrupt
+	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_rivman") # for SWOTH08 rivman corrupt
+	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_fldhgt") # for SWOTH08 fldhgt corrupt
+	prepare_obs("/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_all_011") # for SWOTH08 all parameters corruption
 	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/CGLS_conus_06min_DIR") # CGLS for CONUS for DIR
-	prepare_obs("/cluster/data7/menaka/HydroDA/obs/CGLS_conus_06min") # CGLS for CONUS
+	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/CGLS_conus_06min") # CGLS for CONUS

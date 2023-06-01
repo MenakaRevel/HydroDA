@@ -774,7 +774,7 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         write(78,*) "******************",lon_cent,lat_cent," *******************"
         write(78,*) "=========================================================="
         !=========
-        print*, "******************",lon_cent,lat_cent,"*******************"
+        ! print*, "******************",lon_cent,lat_cent,"*******************"
         write(78,*) "size",countnum
         write(78,*) "local obs",sum((local_obs/=0)*(-1))
 
@@ -1091,12 +1091,12 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
             !==added to fix large errors== 2022/04/10
             !==stablize the data assimilation process==
             if (global_xa(lon_cent,lat_cent,num) < (elevtn(lon_cent,lat_cent) - rivhgt(lon_cent,lat_cent)) ) then
-                print*, "water surface elevation is too small.....",global_xa(lon_cent,lat_cent,num),"<",(elevtn(lon_cent,lat_cent) - rivhgt(lon_cent,lat_cent))
+                ! print*, "water surface elevation is too small.....",global_xa(lon_cent,lat_cent,num),"<",(elevtn(lon_cent,lat_cent) - rivhgt(lon_cent,lat_cent))
                 write(78,*) "water surface elevation is too small: ",global_xa(lon_cent,lat_cent,num),"<",(elevtn(lon_cent,lat_cent) - rivhgt(lon_cent,lat_cent))
                 global_xa(lon_cent,lat_cent,num) = elevtn(lon_cent,lat_cent) - rivhgt(lon_cent,lat_cent) !globalx(lon_cent,lat_cent,num)
             end if
             if (global_xa(lon_cent,lat_cent,num) > (elevtn(lon_cent,lat_cent) + fldhgt(lon_cent,lat_cent,10)) ) then
-                print*, "water surface elevation is too large.....",global_xa(lon_cent,lat_cent,num),">",(elevtn(lon_cent,lat_cent) + fldhgt(lon_cent,lat_cent,10))
+                ! print*, "water surface elevation is too large.....",global_xa(lon_cent,lat_cent,num),">",(elevtn(lon_cent,lat_cent) + fldhgt(lon_cent,lat_cent,10))
                 write(78,*) "water surface elevation is too large: ",global_xa(lon_cent,lat_cent,num),">",(elevtn(lon_cent,lat_cent) + fldhgt(lon_cent,lat_cent,10))
                 global_xa(lon_cent,lat_cent,num) = elevtn(lon_cent,lat_cent) + fldhgt(lon_cent,lat_cent,10) !globalx(lon_cent,lat_cent,num)
             end if

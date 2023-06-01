@@ -367,6 +367,20 @@ def corrupt():
     # 3 : with corrupted rivman
     # 4 : with corrupted fldhgt
     # 5 : with corrupted rivhgt, rivwth, rivman, and fldhgt
+
+def option():
+    # return "all" # for bifurcation and dam on
+    return "bif" # for bifurcation on
+    # return "dam" # for dam on
+    # return "levee" # for levee on
+    # for CaMa-Flood options
+
+def varout():
+    return "outflw"
+    # return "rivout, outflw, fldout, fldhgt" 
+    # names of variables to be copied from CaMa-Flood to assim_out
+    # *note: give names with comma and space between each name
+    # *note: names should be similar to the names in CaMa-Flood output
     
 def MKLdir():
     return "/opt/intel/compilers_and_libraries_2016.3.170/mac/mkl"
@@ -388,10 +402,10 @@ def obs_name():
     # return "SWOT"
     return "CGLS"
 
-def HydroWeb_dir():
+def HydroWeb_dir(): # needed for this version of HydroDA
     return "/cluster/data6/menaka/HydroWeb"
 
-def obs_dir(): # needed for this version of HydroDA
+def obs_dir(): 
     # return "/cluster/data7/menaka/HydroDA/obs/HydroWeb_conus_06min_DIR"
     return "/cluster/data7/menaka/HydroDA/obs/CGLS_conus_06min_DIR"
     # return "/cluster/data7/menaka/HydroDA/obs/CGLS_conus_06min"

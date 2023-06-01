@@ -50,7 +50,7 @@ def get_hydroweb(mapname="glb_15min",fname="/cluster/data6/menaka/HydroWeb/Hydro
         egm_d.append(EGM96-EGM08)
     return river,pname,xlist,ylist,egm_d
 ##################################
-def get_hydroweb_loc(rivername,mapname="glb_15min",fname="../dat/HydroWeb_alloc_glb_15min_QCrmse.txt"):
+def get_hydroweb_loc(rivername,mapname="glb_15min",fname="../dat/HydroWeb_alloc_glb_15min.txt"):
     # directory
     # fname="/cluster/data6/menaka/HydroWeb/HydroWeb_alloc_"+mapname+".txt"
     # fname="../dat/HydroWeb_alloc_"+mapname+"_QC.txt"

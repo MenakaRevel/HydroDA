@@ -43,9 +43,9 @@ mapname=$8
 
 cal=$9
 
-corrupt=${10}
+# corrupt=${10}
 
-opt=${11}
+opt=${10}
 #================================================
 echo $CAMADIR
 echo $EXP_DIR
@@ -107,8 +107,14 @@ LADPSTP=".TRUE."                            # .TRUE. for adaptive time step
 LFPLAIN=".TRUE."                            # .TRUE. to activate floodplain storage
 LKINE=".FALSE."                             # .TRUE. to use kinematic wave equation
 LFLDOUT=".TRUE."                            # .TRUE. to activate floodplain discharge
-LPTHOUT=".TRUE."                            # .TRUE. to activate bifurcation flow, mainly for delta simulation
-LDAMOUT=".TRUE."                           # .TRUE. to activate reservoir operation (under development)
+LPTHOUT=".FALSE."                            # .TRUE. to activate bifurcation flow, mainly for delta simulation
+if [ $opt = "bif" ] || [ $opt = "all" ];then
+     LPTHOUT=".TRUE."                       # .TRUE. to activate bifurcation flow, mainly for delta simulation
+fi
+LDAMOUT=".FALSE."                           # .TRUE. to activate reservoir operation (under development)
+if [ $opt = "dam" ] || [ $opt = "all" ];then
+     LDAMOUT=".FALSE."                      # .TRUE. to activate reservoir operation (under development)
+fiAMOUT=".TRUE."                           # .TRUE. to activate reservoir operation (under development)
 
 CDAMFILE="${PWDD}/sample_data/damparam_amz_6min_8dams.csv"  # this is new for reservoir operation scheme
 
@@ -244,28 +250,28 @@ CELEVTN="${FMAP}/elevtn.bin"                # channel top elevation [m]
 CNXTDST="${FMAP}/nxtdst.bin"                # downstream distance   [m]
 CRIVLEN="${FMAP}/rivlen.bin"                # channel length        [m]
 CFLDHGT="${FMAP}/fldhgt.bin"                # floodplain elevation profile (height above 'elevtn') [m]
-if [ $corrupt = 4 ] || [ $corrupt = 5 ];then
-     CFLDHGT="${FMAP}/fldhgt_corrupt.bin"   # floodplain elevation profile [m] (corrupted)
-fi
+# if [ $corrupt = 4 ] || [ $corrupt = 5 ];then
+#      CFLDHGT="${FMAP}/fldhgt_corrupt.bin"   # floodplain elevation profile [m] (corrupted)
+# fi
 #** channel parameter
 ###CRIVWTH=${FMAP}/rivwth.bin"              # channel width [m] (empirical power-low)
 CRIVWTH="${FMAP}/rivwth_gwdlr.bin"          # channel width [m] (GWD-LR + filled with empirical)
-if [ $corrupt = 2 ] || [ $corrupt = 5 ];then
-     CRIVWTH="${FMAP}/rivwth_corrupt.bin"   # channel width [m] (Corrupted rivwth)
-fi
+# if [ $corrupt = 2 ] || [ $corrupt = 5 ];then
+#      CRIVWTH="${FMAP}/rivwth_corrupt.bin"   # channel width [m] (Corrupted rivwth)
+# fi
 CRIVHGT="${FMAP}/rivhgt.bin"                # channel depth [m] (empirical power-low)
 if [ $cal = "yes" ];then
   CRIVHGT="${FMAP}/rivhgt_Xudong.bin"       # channel depth [m] (Xudong et al,. 2022)
 elif [ $cal = "corrupt" ];then
   CRIVHGT="${FMAP}/rivhgt_corrupt.bin"      # channel depth [m] (Corrupted rivhgt simple)
 fi
-if [ $corrupt = 1 ] || [ $corrupt = 5 ];then
-     CRIVHGT="${FMAP}/rivhgt_corrupt.bin"   # channel depth [m] (Corrupted rivhgt)
-fi
+# if [ $corrupt = 1 ] || [ $corrupt = 5 ];then
+#      CRIVHGT="${FMAP}/rivhgt_corrupt.bin"   # channel depth [m] (Corrupted rivhgt)
+# fi
 CRIVMAN="${FMAP}/rivman.bin"                # manning coefficient river (The one in flood plain is a global parameter; set $PMANFLD below.)
-if [ $corrupt = 3 ] || [ $corrupt = 5 ];then
-     CRIVMAN="${FMAP}/rivman_corrupt.bin"   # manning coefficient river (Corrupted rivman)
-fi
+# if [ $corrupt = 3 ] || [ $corrupt = 5 ];then
+#      CRIVMAN="${FMAP}/rivman_corrupt.bin"   # manning coefficient river (Corrupted rivman)
+# fi
 echo $CRIVMAN
 
 #** bifurcation channel info

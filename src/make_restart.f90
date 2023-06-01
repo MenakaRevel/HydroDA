@@ -27,6 +27,7 @@ real,allocatable                :: fldfrac(:,:)
 character(len=1)                :: loopchar
 integer                         :: ens_num,k
 integer                         :: cor ! for parameter corruption
+character(len=3)                :: opt ! for CaMa-Flood option
 
 real,allocatable                :: xa(:,:),rivdph(:,:),flddph(:,:)
 
@@ -65,10 +66,12 @@ read(buf,*) num_name
 call getarg(9,buf)
 read(buf,"(A)") expdir
 
-call getarg(10,buf)
-read(buf,*) cor ! for identifying the corruption 0: none, 1: rivhgt, 2: rivwth 
-                ! 3:rivman 4: fldhgt, 5: rivhgt, rivwth, rivman, and fldhgt
+! call getarg(10,buf) ! not needed
+! read(buf,*) cor ! for identifying the corruption 0: none, 1: rivhgt, 2: rivwth 
+!                 ! 3:rivman 4: fldhgt, 5: rivhgt, rivwth, rivman, and fldhgt
 
+call getarg(10,buf)
+read(buf,"(A)") opt
 !==
 fname=trim(camadir)//"/map/"//trim(mapname)//"/params.txt"
 open(11,file=fname,form='formatted')
@@ -120,9 +123,9 @@ end if
 close(34)
 
 fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivwth_gwdlr.bin"
-if (cor==2 .OR. cor==5) then
-    fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivwth_corrupt.bin"
-end if
+! if (cor==2 .OR. cor==5) then
+!     fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivwth_corrupt.bin"
+! end if
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) rivwth
@@ -139,9 +142,9 @@ close(34)
 !      fname=trim(adjustl(camadir))//"map/"//trim(mapname)//"/rivhgt.bin"
 !    end if
 fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivhgt.bin"
-if (cor==1 .OR. cor==5) then
-    fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivhgt_corrupt.bin"
-end if
+! if (cor==1 .OR. cor==5) then
+!     fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivhgt_corrupt.bin"
+! end if
 ! ! !not needed for virtual experiments
 ! ! if (trim(cal)=="yes") then
 ! !     fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/rivhgt_Xudong.bin"
@@ -161,9 +164,9 @@ end if
 close(34)
 
 fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/fldhgt.bin"
-if (cor==4 .OR. cor==5) then
-    fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/fldhgt_corrupt.bin"
-end if
+! if (cor==4 .OR. cor==5) then
+!     fname=trim(adjustl(camadir))//"/map/"//trim(mapname)//"/fldhgt_corrupt.bin"
+! end if
 open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx*10,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) fldhgt
@@ -360,36 +363,40 @@ end do
 
 ! =================================================
 ! Needed for CaMa-Flood v4.1 without reservoir assimilation --> may change in future
-! need to open CaMa_out restrat file to copy damsto
-! open restart file at CaMa_out 
-! "./CaMa_out/"+yyyy+mm+dd+"A"+numch+"/restart"+n_yyyy+n_mm+n_dd+".bin"
-fname=trim(adjustl(expdir))//"/CaMa_out/"//yyyymmdd//loopchar//num_name//"/restart"//onedayaft//".bin"
-print*, "CaMa_out", fname
-open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
-if(ios==0)then
-    print* , "read damsto"
-    read(34,rec=3) damsto  ! added by Youjiang. 
-else
-    print*, "no file", fname
+if (opt == "all" .OR. opt == "dam") then
+    ! need to open CaMa_out restrat file to copy damsto
+    ! open restart file at CaMa_out 
+    print*, "make_restart.f90: open damsto"
+    fname=trim(adjustl(expdir))//"/CaMa_out/"//yyyymmdd//loopchar//num_name//"/restart"//onedayaft//".bin"
+    print*, "CaMa_out", fname
+    open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+    if(ios==0)then
+        print* , "read damsto", fname
+        read(34,rec=3) damsto  ! added by Youjiang. 
+    else
+        print*, "no file", fname
+    end if
+    close(34)
 end if
-close(34)
 
 ! =================================================
 ! save and store output & restart file
-
 ! make restart file
-! rivsto,fldsto,rivout,fldout,rivdpt_pre,fldsto_pre
+! rivsto,fldsto,damsto, ... , ---> for CaMa-Flood V4.1.0
 fname=trim(adjustl(expdir))//"/CaMa_in/restart/"//trim(adjustl(loop))//"/restart"//onedayaft//loopchar//num_name//".bin"
 open(35,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="replace",iostat=ios)
 if(ios==0)then
     write(35,rec=1) rivsto
     write(35,rec=2) fldsto
-    write(35,rec=3) damsto ! for CaMa-Flood v4.1
+    if (opt == "all" .OR. opt == "dam") then
+        write(35,rec=3) damsto ! for CaMa-Flood v4.1
+    end if
 end if
 close(35)
 write(82,*) "done restart file at:",fname
+print*, "---> restart ", fname
 close(82)
-!deallocate
+! deallocate
 deallocate(xa,rivlen,rivwth,rivhgt,fldhgt)
 deallocate(elevtn,nextX,nextY,nextdst,grid_area)
 deallocate(rivdph,rivsto,flddph,fldsto,damsto)

@@ -23,16 +23,13 @@ from read_CMF import read_discharge, read_discharge_multi
 #===============================================================================
 # Experiment name
 #===============================================================================
-experiment="DIR_WSE_ISIMIP3a_SWOT_006" #"NOM_WSE_ERA5_CGLS_003"
+experiment="DIR_WSE_ISIMIP3a_SWOT_051" #"NOM_WSE_ERA5_CGLS_003"
 #===============================================================================
-sys.path.append('../etc/')
-#assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
-#assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
-# assim_out=pm.DA_dir()+"/out/"+experiment
 # assim_out="../out/"+experiment
 assim_out="/cluster/data7/menaka/HydroDA/out/"+experiment
 print (assim_out)
-
+#===============================================================================
+# HydroDA related functions
 sys.path.append(assim_out)
 import params as pm
 import read_grdc as grdc
@@ -226,7 +223,7 @@ river=[]
 # rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZON","MEKONG","IRRAWADDY","VOLGA", "NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
 # rivernames  = ["AMAZON"]
 # rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZON","IRRAWADDY","VOLGA","NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
-rivernames  = ["AMAZON", "MISSISSIPPI","MEKONG", "VOLGA", "COLORADO","MISSOURI"]
+rivernames  = ["AMAZON", "MISSISSIPPI","MEKONG", "VOLGA", "COLORADO","MISSOURI","NIGER"]
 #rivernames  = ["AMAZON"]
 # rivernames  = ["COLORADO"]
 # rivernames  = ["CHURCHILL"]
@@ -321,6 +318,7 @@ opn = np.ctypeslib.as_array(shared_array_opn)
 asm = np.ctypeslib.as_array(shared_array_asm)
 p.terminate()
 
+#-----------------------------------
 # res = map(read_data, inputlist)
 # opn = np.ctypeslib.as_array(shared_array_opn)
 # asm = np.ctypeslib.as_array(shared_array_asm)
@@ -447,11 +445,16 @@ def make_fig(point):
 #        plt.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color=colors["assimilated"],linewidth=0.3,alpha=0.5)
 #
 #    plt.ylim(ymin=0)
-    fig, ax1 = plt.subplots()
     if exptype=="virtual":
         # org=read_dis()
         ix1,iy1,ix2,iy2=grdc.get_grdc_station_v396(pname[point])
-        indir = "/work/a04/julien/CaMa-Flood_v4/out/coupled-model2"
+        # indir = "/work/a04/julien/CaMa-Flood_v4/out/coupled-model2"
+        # indir = "/cluster/data6/menaka/CaMa-H08/out/obs_org"
+        # indir = "/cluster/data6/menaka/CaMa-H08/out/obs_rivhgt"
+        # indir = "/cluster/data6/menaka/CaMa-H08/out/obs_rivwth"
+        indir = "/cluster/data6/menaka/CaMa-H08/out/obs_rivman"
+        # indir = "/cluster/data6/menaka/CaMa-H08/out/obs_fldhgt"
+        # indir = "/cluster/data6/menaka/CaMa-H08/out/obs_corr_all"
         # indir = pm.obs_dir()
         org=read_dis(ix1, iy1, ix2, iy2, syear, eyear, indir)
         # org=grdc.grdc_dis(staid[point],syear,eyear-1)
@@ -459,6 +462,9 @@ def make_fig(point):
     else:
         org=grdc.grdc_dis(staid[point],syear,eyear-1) #,smon=1,emon=1,sday=1,eday=31)
         org=np.array(org)
+    #------------------------
+    # Making Figure
+    fig, ax1 = plt.subplots()
     lines=[ax1.plot(np.arange(start,last),ma.masked_less(org,0.0),label="GRDC",color="#34495e",linewidth=3.0,zorder=101)[0]] #,marker = "o",markevery=swt[point])
 #    ax1.plot(np.arange(start,last),hgt[:,point],label="true",color="gray",linewidth=0.7,linestyle="--",zorder=101)
 #    plt.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7)

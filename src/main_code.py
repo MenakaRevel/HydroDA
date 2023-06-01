@@ -244,7 +244,7 @@ def spinup_loop(inputlist):
     print  ("%s for %03d"%(loop,int(ens_num)))
     os.system("source "+pm.DA_dir()+"/src/spin_up.sh "+str(yyyy)+" "+str(loop)+" "+ens_num+" "
     +dir2+" "+str(cpunums)+" "+str(run_name)+" "+str(exp_dir)+" "+str(mapname)+" "+str(cal)
-    +" "+str(corrupt)+" "+str(option))
+    +" "+str(option)) #+str(corrupt)+" "
     return 0
 ###########################
 def one_day_sim(inputlist):
@@ -280,7 +280,7 @@ def one_day_sim(inputlist):
     DA_dir=pm.DA_dir()
     os.system("source "+pm.DA_dir()+"/src/oneday_sim.sh "+yyyy+" "+mm+" "+dd+" "+ens_num+" "+dir2
     +" "+looptype+" "+str(cpunums)+" "+str(run_name)+" "+str(exp_dir)+" "+str(mapname)+" "+str(cal)
-    +" "+str(corrupt)+" "+str(option)+" "+DA_dir)
+    +" "+str(option)+" "+DA_dir) #+str(corrupt)+" "
 
     return 0
 ########################### # modified to run paralle @Menaka 
@@ -384,12 +384,12 @@ def make_initial_restart(): # updated the name
         outfile_opn=exp_dir+"CaMa_in/restart/open/restart"+yyyy+mm+dd+"C"+numch+".bin"
         outfile_asm=exp_dir+"CaMa_in/restart/assim/restart"+yyyy+mm+dd+"A"+numch+".bin"
         inputlist.append([infile_opn,infile_asm,outfile_opn,outfile_asm])
-        #os.system("cp ./CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin ./CaMa_in/restart/open/restart"+yyyy+mm+dd+"C"+numch+".bin")
-        #os.system("cp ./CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin ./CaMa_in/restart/assim/restart"+yyyy+mm+dd+"A"+numch+".bin")
+        os.system("cp ./CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin ./CaMa_in/restart/open/restart"+yyyy+mm+dd+"C"+numch+".bin")
+        os.system("cp ./CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin ./CaMa_in/restart/assim/restart"+yyyy+mm+dd+"A"+numch+".bin")
         # copy_stoonly(exp_dir+"CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin",exp_dir+"CaMa_in/restart/open/restart"+yyyy+mm+dd+"C"+numch+".bin")
         # copy_stoonly(exp_dir+"CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin",exp_dir+"CaMa_in/restart/assim/restart"+yyyy+mm+dd+"A"+numch+".bin")
-        copy_stoonly(infile_opn,outfile_opn)
-        copy_stoonly(infile_asm,outfile_asm)
+        # copy_stoonly(infile_opn,outfile_opn)
+        # copy_stoonly(infile_asm,outfile_asm)
     return 0
 ###########################
 def make_initial_restart_one(): # updated the name
@@ -522,9 +522,23 @@ def compile_func(): # old used
          os.system("ifort "+pm.DA_dir()+"/src/data_assim_0.f90 -o "+pm.DA_dir()+"/src/data_assim -O3 -assume byterecl -heap-arrays -nogen-interfaces -free -mkl -g -traceback  -lpthread -parallel")
     return 0
 ###########################
-def store_out(yyyy,mm,dd):
+def store_out(yyyy,mm,dd): # update on 2023/05/30
     # program for storing data #
     
+    listCA = ["open","assim"]
+    if pm.run_flag() == 3:
+        listCA = ["assim"]
+    #==========================#
+    for looptype in listCA: # update on 2023/05/30
+        if looptype == "open":
+            CA = "C"
+        else:
+            CA = "A"
+        for num in np.arange(1,pm.ens_mem()+1):
+            numch = '%03d' % num 
+            for var in pm.varout().split(","):
+                shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/"+var+yyyy+".bin","./assim_out/"+var+"/"+looptype+"/"+var+yyyy+mm+dd+"_"+numch+".bin")
+
 #    looptype = "true"
 #    # storing rivout
 #    numch = "000" 
@@ -542,45 +556,38 @@ def store_out(yyyy,mm,dd):
 #    # storing fldarea
 #    shutil.copy("./CaMa_out/"+yyyy+mm+dd+"T"+numch+"/fldare"+yyyy+".bin","assim_out/fldarea/"+looptype+"/fldarea"+yyyy+mm+dd+".bin")
 
-    listCA = ["C","A"]
-    if pm.run_flag() == 3:
-        listCA = ["A"]
-    for CA in listCA: # update on 2023/04/24
-        if CA == "C":
-            looptype = "open"
-        if CA == "A":
-            looptype = "assim"
 
 #        if CA == "C": 
 #        # storing rivout
 #            for num in np.arange(1,pm.ens_mem()+1):
 #                numch = '%03d' % num 
 #                shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/rivdph"+yyyy+".bin","assim_out/rivdph/"+looptype+"/rivdph"+yyyy+mm+dd+"_"+numch+".bin")
+        
 
-        # storing rivout
-        for num in np.arange(1,pm.ens_mem()+1):
-            numch = '%03d' % num 
-            shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/rivout"+yyyy+".bin","./assim_out/rivout/"+looptype+"/rivout"+yyyy+mm+dd+"_"+numch+".bin")
+#         # storing rivout
+#         for num in np.arange(1,pm.ens_mem()+1):
+#             numch = '%03d' % num 
+#             shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/rivout"+yyyy+".bin","./assim_out/rivout/"+looptype+"/rivout"+yyyy+mm+dd+"_"+numch+".bin")
 
-        # storing outflw
-        for num in np.arange(1,pm.ens_mem()+1):
-            numch = '%03d' % num 
-            shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/outflw"+yyyy+".bin","./assim_out/outflw/"+looptype+"/outflw"+yyyy+mm+dd+"_"+numch+".bin")
+#         # storing outflw
+#         for num in np.arange(1,pm.ens_mem()+1):
+#             numch = '%03d' % num 
+#             shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/outflw"+yyyy+".bin","./assim_out/outflw/"+looptype+"/outflw"+yyyy+mm+dd+"_"+numch+".bin")
 
-#        # storing fldout
-#        for num in np.arange(1,pm.ens_mem()+1):
-#            numch = '%03d' % num 
-#            shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/fldout"+yyyy+".bin","assim_out/fldout/"+looptype+"/fldout"+yyyy+mm+dd+"_"+numch+".bin")
-#
-        # storing flddph
-        for num in np.arange(1,pm.ens_mem()+1):
-            numch = '%03d' % num 
-            shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/flddph"+yyyy+".bin","assim_out/flddph/"+looptype+"/flddph"+yyyy+mm+dd+"_"+numch+".bin")
+# #        # storing fldout
+# #        for num in np.arange(1,pm.ens_mem()+1):
+# #            numch = '%03d' % num 
+# #            shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/fldout"+yyyy+".bin","assim_out/fldout/"+looptype+"/fldout"+yyyy+mm+dd+"_"+numch+".bin")
+# #
+#         # storing flddph
+#         for num in np.arange(1,pm.ens_mem()+1):
+#             numch = '%03d' % num 
+#             shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/flddph"+yyyy+".bin","assim_out/flddph/"+looptype+"/flddph"+yyyy+mm+dd+"_"+numch+".bin")
 
-        # storing fldarea
-        for num in np.arange(1,pm.ens_mem()+1):
-            numch = '%03d' % num 
-            shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/fldare"+yyyy+".bin","assim_out/fldarea/"+looptype+"/fldarea"+yyyy+mm+dd+"_"+numch+".bin")
+#         # storing fldarea
+#         for num in np.arange(1,pm.ens_mem()+1):
+#             numch = '%03d' % num 
+#             shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/fldare"+yyyy+".bin","assim_out/fldarea/"+looptype+"/fldarea"+yyyy+mm+dd+"_"+numch+".bin")
 
     return 0
 ###########################    
@@ -630,7 +637,9 @@ def make_restart(inputlist):
 
     # calculate other variables from water storage
     exp_dir="./" #pm.DA_dir()+"/out/"+pm.experiment()
-    os.system(pm.DA_dir()+"/src/make_restart "+yyyy+mm+dd+" "+yyyy_b+mm_b+dd_b+" "+yyyy_n+mm_n+dd_n+" "+loop+" "+pm.CaMa_dir()+" "+pm.mapname()+" "+str(pm.ens_mem())+" "+numch+" "+exp_dir+" "+pm.corrupt())
+    os.system(pm.DA_dir()+"/src/make_restart "+yyyy+mm+dd+" "+yyyy_b+mm_b+dd_b+" "
+    +yyyy_n+mm_n+dd_n+" "+loop+" "+pm.CaMa_dir()+" "+pm.mapname()+" "+str(pm.ens_mem())+" "
+    +numch+" "+exp_dir+" "+str(pm.option())) #+str(pm.corrupt())+" "
 
     print ("finish restarting",numch)
 ###########################

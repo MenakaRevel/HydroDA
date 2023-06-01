@@ -103,12 +103,14 @@ def write_text():
         f.write("# Experiment Mode: "+"%d"%(pm.mode())+"\n")
         # Runoff data
         f.write("# Runoff Data: "+pm.input(pm.mode())+", "+pm.runoff_dir()+"\n")
+        # Observations
+        f.write("# Observations: "+pm.obs_name()+", "+pm.obs_dir()+"\n")
         # Time domain for analysis
         f.write("# Start Date: %04d-%02d-%02d\n"%(pm.starttime()))
         f.write("# End Date: %04d-%02d-%02d\n"%(pm.endtime()))
         # Calibration/Corruption
         f.write("# Model Calibration: "+calibration(pm.calibrate())+"\n")
-        f.write("# Parameter Corruption: "+corruption(pm.corrupt())+"\n")
+        # f.write("# Parameter Corruption: "+corruption(pm.corrupt())+"\n")
         # Assimilation Settings
         f.write("# Assimilation Mode: "+assimlation_mode(pm.conflag())+"\n")
         f.write("# Assimilation Domain: \n")
@@ -123,6 +125,7 @@ def write_text():
         f.write("# Assimilation Statistics: \n")
         f.write("# \tMean : "+stat_name(pm.conflag(),pm.calibrate())[0]+"\n")
         f.write("# \tStandrad Deviation : "+stat_name(pm.conflag(),pm.calibrate())[1]+"\n")
+        f.write("# Created at : "+str(datetime.datetime.now()))
     return 0
 ###########################
 if __name__=="__main__":
