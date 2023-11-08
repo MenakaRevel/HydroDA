@@ -23,13 +23,12 @@ from read_CMF import read_sfcelv, read_sfcelv_multi
 #===============================================================================
 # Experiment name
 #===============================================================================
-experiment="DIR_WSE_ISIMIP3a_SWOT_004"
+experiment="NOM_WSE_VICBC_CGLS_012" #"DIR_WSE_ISIMIP3a_SWOT_004"
 #===============================================================================
-#assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
-#assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
-# assim_out=pm.DA_dir()+"/out/"+experiment
+# Experiment folder
 # assim_out="../out/"+experiment
-assim_out="/cluster/data7/menaka/HydroDA/out/"+experiment
+# assim_out="/cluster/data7/menaka/HydroDA/out/"+experiment
+assim_out="/cluster/data8/menaka/HydroDA/out/"+experiment
 print (assim_out)
 #===============================================================================
 # HydroDA related functions
@@ -37,6 +36,7 @@ sys.path.append(assim_out)
 import params as pm
 import read_grdc as grdc
 import read_hydroweb as hweb
+import read_cgls as cgls
 import cal_stat as stat
 
 conflag=pm.conflag()
@@ -125,8 +125,8 @@ nx     = int(filter(None, re.split(" ",lines[0]))[0])
 ny     = int(filter(None, re.split(" ",lines[1]))[0])
 gsize  = float(filter(None, re.split(" ",lines[3]))[0])
 #---
-syear,smonth,sdate=pm.starttime()#2004#1991 #2003,1,1 #
-eyear,emonth,edate=pm.endtime() #2005,1,1 #2004,1,1 #2010,1,1 #
+syear,smonth,sdate=2016,1,1 #pm.starttime()#2004#1991 #2003,1,1 #
+eyear,emonth,edate=2019,1,1 #pm.endtime() #2005,1,1 #2004,1,1 #2010,1,1 #
 #month=1
 #date=1
 start_dt=datetime.date(syear,smonth,sdate)
@@ -215,17 +215,23 @@ EGM08=[]
 EGM96=[]
 #--
 #rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZONAS","MEKONG","IRRAWADDY","VOLGA", "NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
-rivernames  = ["MISSISSIPPI","AMAZONAS","NIGER","MEKONG","IRRAWADDY","VOLGA","MISSOURI"]
+# rivernames  = ["MISSISSIPPI","AMAZONAS","NIGER","MEKONG","IRRAWADDY","VOLGA","MISSOURI"]
+# rivernames  = ["MISSISSIPPI"]
+rivernames  = ["Mississippi"] # CGLS
 for rivername in rivernames:
   #station_loc,x_list,y_list = grdc.get_grdc_loc(rivername,"b")
-  station_loc,x_list,y_list,egm08,egm96 =hweb.get_hydroweb_loc(rivername,pm.mapname())#,fname=pm.obs_list())
-  #print rivername, station_loc
+  if pm.obs_name()=="HydroWeb":
+    station_loc,x_list,y_list,egm08,egm96 =hweb.get_hydroweb_loc(rivername,pm.mapname())#,fname=pm.obs_list())
+  elif pm.obs_name()=="CGLS":
+    station_loc,x_list,y_list,egm08,egm96 =cgls.get_cgls_loc(rivername,pm.mapname())
+#   print rivername, station_loc
   river.append([rivername]*len(station_loc))
   pname.append(station_loc)
   xlist.append(x_list)
   ylist.append(y_list)
   EGM08.append(egm08)
   EGM96.append(egm96)
+
 #--
 river=([flatten for inner in river for flatten in inner])
 pname=([flatten for inner in pname for flatten in inner])
@@ -478,17 +484,6 @@ def make_fig(point):
     if obstype=="SWOT":
         exptype="virtual"
         labels=["SWOT","simulated","assimilated"]
-    else:
-        exptype="real"
-        labels=["HydroWeb","simulated","assimilated"]
-    
-#    print org[:,point]
-#    print "----------------"
-#    print np.mean(asm[:,:,point],axis=1)
-#    for i in np.arange(start,last):
-#        print opn[i,:,point]
-#        print asm[i,:,point]
-    if exptype=="virtual":
         ix=xlist[point]
         iy=ylist[point]
         swtd=swt[:,point]
@@ -503,10 +498,52 @@ def make_fig(point):
         org=read_wse(ix, iy, syear, eyear, indir)[np.where(swt[:,point] ==1)]
         # time=np.arange(start,last)
         time=np.where(swt[:,point] == 1)[0]
-        # print (time, swt[:,point])
-    else:
+        figname=pname[point][2::]
+    elif obstype=="HydroWeb": 
+        exptype="real"
+        labels=["HydroWeb","simulated","assimilated"]
         time,org=hweb.HydroWeb_WSE(pname[point],syear,eyear)
         org=np.array(org)+np.array(EGM08[point])-np.array(EGM96[point])
+        figname=pname[point][2::]
+    elif obstype=="CGLS": 
+        exptype="real"
+        labels=["CGLS","simulated","assimilated"]
+        time,org=cgls.cgls_WSE(pname[point],syear,eyear)
+        org=np.array(org)+np.array(EGM08[point])-np.array(EGM96[point])
+        figname=river[point]+"_"+"%06d"%(int(re.split("_",pname[point])[4])) 
+    else:
+        exptype="real"
+        labels=["HydroWeb","simulated","assimilated"]
+        time,org=hweb.HydroWeb_WSE(pname[point],syear,eyear)
+        org=np.array(org)+np.array(EGM08[point])-np.array(EGM96[point])
+        figname=pname[point][2::]
+    
+#    print org[:,point]
+#    print "----------------"
+#    print np.mean(asm[:,:,point],axis=1)
+#    for i in np.arange(start,last):
+#        print opn[i,:,point]
+#        print asm[i,:,point]
+    # # if exptype=="virtual":
+    # if obstype=="SWOT":
+    #     ix=xlist[point]
+    #     iy=ylist[point]
+    #     swtd=swt[:,point]
+    #     # indir = "/work/a04/julien/CaMa-Flood_v4/out/coupled-model2"
+    #     # indir = "/cluster/data6/menaka/CaMa-H08/out/obs_org"
+    #     # indir = "/cluster/data6/menaka/CaMa-H08/out/obs_rivhgt"
+    #     # indir = "/cluster/data6/menaka/CaMa-H08/out/obs_rivwth"
+    #     indir = "/cluster/data6/menaka/CaMa-H08/out/obs_rivman"
+    #     # indir = "/cluster/data6/menaka/CaMa-H08/out/obs_fldhgt"
+    #     # indir = "/cluster/data6/menaka/CaMa-H08/out/obs_corr_all"
+    #     # indir = pm.obs_dir()
+    #     org=read_wse(ix, iy, syear, eyear, indir)[np.where(swt[:,point] ==1)]
+    #     # time=np.arange(start,last)
+    #     time=np.where(swt[:,point] == 1)[0]
+    #     # print (time, swt[:,point])
+    # else:
+    #     time,org=hweb.HydroWeb_WSE(pname[point],syear,eyear)
+    #     org=np.array(org)+np.array(EGM08[point])-np.array(EGM96[point])
 
     fig, ax1 = plt.subplots()
     #ax1.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7,zorder=101,marker = "o",markevery=swt[point])
@@ -621,10 +658,12 @@ def make_fig(point):
 #    ax2.set_ylim(ymin=0.,ymax=1.)
     plt.legend(lines,labels,ncol=1,loc='upper right') #, bbox_to_anchor=(1.0, 1.0),transform=ax1.transAxes)
 #    fig.legend(lines,labels,ncol=1,loc='lower left', bbox_to_anchor=(1.0, 1.0))
-    print ('--> save',river[point],re.split("_",pname[point])[2]+"_"+re.split("_",pname[point])[3]) #,ylist[point],xlist[point],mean_obs[ylist[point],xlist[point]],std_obs[ylist[point],xlist[point]]
+    # print ('--> save',river[point],re.split("_",pname[point])[2]+"_"+re.split("_",pname[point])[3]) #,ylist[point],xlist[point],mean_obs[ylist[point],xlist[point]],std_obs[ylist[point],xlist[point]]
+    print ('--> save',river[point],figname) #,ylist[point],xlist[point],mean_obs[ylist[point],xlist[point]],std_obs[ylist[point],xlist[point]]
     # print (asm[:,num,point])
     #plt.savefig(assim_out+"/figures/sfcelv/"+river[point]+"_"+re.split("_",pname[point])[2]+"_"+re.split("_",pname[point])[3]+".png",dpi=300)
-    plt.savefig(assim_out+"/figures/sfcelv/"+pname[point][2::]+".png",dpi=300)
+    # plt.savefig(assim_out+"/figures/sfcelv/"+pname[point][2::]+".png",dpi=300)
+    plt.savefig(assim_out+"/figures/sfcelv/"+figname+".png",dpi=300)
     return 0
 #
 para_flag=1

@@ -21,7 +21,7 @@ def mode():
     return 5
     # parameter to change assimilation mode
     # runoff ensembles will change accordingly.
-    # 1: Earth2Obs, 2: ERA20CM, 3: VIC_BC, 4: biased (ECMWF/ELSE_KIM2009/E2O/ERA20CM), 5: ERA5
+    # 1: Earth2Obs, 2: ERA20CM, 3: VIC_BC_old, 4: biased (ECMWF/ELSE_KIM2009/E2O/ERA20CM), 5: ERA5, 6: VIC_BC
 
 def conflag():
     return 3
@@ -119,6 +119,16 @@ def patch_name():
     # return "conus_06min_VIC_BC_60_dam" # empirical local patch dam
     return "conus_06min_ERA5_60" # empirical local patch no dam
     # return "conus_06min_ERA5_60_dam" # empirical local patch dam
+    # return "conus_06min_ERA5_80_dam" # empirical local patch dam
+    # return "conus_06min_ERA5_80" # empirical local patch no dam (0.80)
+    # return "conus_06min_ERA5_40" # empirical local patch no dam (0.40)
+    # return "conus_06min_ERA5_20" # empirical local patch no dam (0.20)
+    # return "conus_06min_ERA5_1000KM_dam" # distance-based local patch dam
+    # return "conus_06min_ERA5_50KM" # distance-based local patch 
+    # return "conus_06min_ERA5_100KM" # distance-based local patch 
+    # return "conus_06min_ERA5_500KM" # distance-based local patch 
+    # return "conus_06min_ERA5_1000KM" # distance-based local patch 
+
 
 def patch_id():
     # return "0.95MS"
@@ -132,6 +142,11 @@ def patch_id():
     # return "0.40"
     # return "0.20"
     # return "0.60-dam"
+    # return "0.60-dam"
+    # return "50KM"
+    # return "100KM"
+    # return "500KM"
+    # return "1000KM"
 
 def thersold():
     # return 0.95
@@ -142,6 +157,10 @@ def thersold():
     # return 0.40
     # return 0.20
     # threshold to define the local patch
+    # return 50.0
+    # return 100.0
+    # return 500.0
+    # return 1000.0
 
 def initial_infl():
     return 1.08
@@ -160,7 +179,7 @@ def sigma_b():
     # background variance of inflation for adaptive inflation Myoshi et al (2011)
 
 def ens_mem(mode=mode()):
-    return 20
+    return 50
     # if mode == 1:
     #     # return 21
     #     return 49
@@ -212,10 +231,12 @@ def spinup_end_date():
 def runoff_dir():
     # return "/cluster/data6/menaka/ensemble_simulations/CaMa_in/E2O"
     return "/work/a06/menaka/ensemble_simulations/CaMa_in/ERA5"
+    # return "/work/a06/menaka/ensemble_simulations/CaMa_in/VIC_BC"
     # return "/cluster/data7/menaka/ensemble_simulations/CaMa_in/ECMWF000" # original runoff
     # return "/cluster/data7/menaka/ensemble_simulations/CaMa_in/ECMWF050" # biased runoff
 
 def runname(num=mode()):
+    # return "VIC_BC"
     return "ERA5"
     # if num == 1:
     #     return "E2O"
@@ -237,6 +258,7 @@ def runname(num=mode()):
     #     return "ERA5"
 
 def input(num=mode()):
+    # return "VIC_BC"
     return "ERA5"
     # if num==1:
     #     return "E2O"
@@ -341,15 +363,17 @@ def true_run(num): # not needed for this version of HydroDA
 # 6. CaMa-Flood settings
 def CaMa_ver():
     # return "CaMa-Flood version 3.9.6"
-    return "CaMa-Flood version 4.0.0"
+    # return "CaMa-Flood version 4.0.0"
     # return "CaMa-Flood version 4.07"
+    return "CaMa-Flood version 4.1.0"
 
 def CaMa_dir():
     # return "/cluster/data6/menaka/CaMa-Flood_v396a_20200514"
     #return "/cluster/data6/menaka/CaMa-Flood_v396_20191225"
     #return "/cluster/data6/menaka/CaMa-Flood_v395b_20191030"
-    return "/cluster/data6/menaka/CaMa-Flood_v4"
+    # return "/cluster/data6/menaka/CaMa-Flood_v4"
     # return "/cluster/data7/menaka/CaMa-Flood_v407"
+    return "/cluster/data6/menaka/CaMa-Flood_v410"
     # directory of CaMa-Flood
     # indicate the directory of ./map or ./src and other folders
 
@@ -407,8 +431,8 @@ def HydroWeb_dir(): # needed for this version of HydroDA
 
 def obs_dir(): 
     # return "/cluster/data7/menaka/HydroDA/obs/HydroWeb_conus_06min_DIR"
-    return "/cluster/data7/menaka/HydroDA/obs/CGLS_conus_06min_DIR"
-    # return "/cluster/data7/menaka/HydroDA/obs/CGLS_conus_06min"
+    # return "/cluster/data7/menaka/HydroDA/obs/CGLS_conus_06min_DIR"
+    return "/cluster/data7/menaka/HydroDA/obs/CGLS_conus_06min"
     # return "/cluster/data7/menaka/HydroDA/obs/HydroWeb_conus_06min"
     # return "/cluster/data7/menaka/HydroDA/obs/HydroWeb_glb_15min"
     # return "/cluster/data7/menaka/HydroDA/obs/HydroWeb"
@@ -417,8 +441,8 @@ def obs_dir():
 
 def obs_list():
     # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_DIR.txt"
-    return DA_dir()+"/dat/CGLS_alloc_"+mapname()+"_DIR.txt"
-    # return DA_dir()+"/dat/CGLS_alloc_"+mapname()+"_org.txt"
+    # return DA_dir()+"/dat/CGLS_alloc_"+mapname()+"_DIR.txt"
+    return DA_dir()+"/dat/CGLS_alloc_"+mapname()+"_org.txt"
     # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_org.txt"
     # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_amz.txt"
     # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_QC.txt"
@@ -428,7 +452,9 @@ def obs_list():
     # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_QC0_simulation.txt"
 
 def stat_name(cal=calibrate()):
-    return "sfcelv_20_ERA5_conus_06min_2000-2020" # for conus_06min
+    # return "sfcelv_50_VIC_BC_conus_06min_2000-2019" # for conus_06min VIC_BC [50 ensembles]
+    return "sfcelv_50_ERA5_conus_06min_2000-2020" # for conus_06min [50 ensembles]
+    # return "sfcelv_20_ERA5_conus_06min_2000-2020" # for conus_06min [20 ensembles]
     # return "sfcelv_49_ECMWF_amz_06min_2000-2014" # original statistic
     # return "sfcelv_bias_ECMWF_amz_06min_2000-2014" # biased runoff statistic
     # return "sfcelv_corrupt_ECMWF_amz_06min_2000-2014" #  corrupted bathymetry statistic
@@ -521,7 +547,7 @@ def slack_notification():
 # **************************************************************
 # 8. parallel run settings
 def para_nums():
-    return 20
+    return 40
     # setting number of parallels to run CaMa-Flood Model
     # default is 6, but may change depending on your system
 

@@ -26,10 +26,6 @@ import math
 import sys
 import json
 
-# #external python codes
-# dir_param="../gosh"
-# sys.path.append(dir_param)
-# import params as pm
 ###########################
 def mk_dir(sdir):
     try:
@@ -47,119 +43,6 @@ def slink(src,dst):
     else:
       raise
 #########################
-# HydroWeb
-#########################
-def get_HydroWeb():
-	#=============
-	lname=[]
-	xlist=[]
-	ylist=[]
-	leledf=[]
-	lEGM08=[]
-	lEGM96=[]
-	satellite=[]
-	# fname=pm.DA_dir()+"/dat/HydroWeb_alloc_"+pm.mapname()+".txt"
-	# fname=pm.DA_dir()+"/dat/HydroWeb_alloc_"+pm.mapname()+"_new.txt"
-	# fname=pm.DA_dir()+"/dat/HydroWeb_alloc_"+pm.mapname()+"_amz.txt"
-	# fname=obs_list()
-	fname=HydroWeb_list()
-	#=========================
-	with open(fname,"r") as f:
-		lines=f.readlines()
-	for line in lines[1::]:
-		line    = re.split(" ",line)
-		line    = list(filter(None, line))
-		#print line
-		num     = line[0]
-		station = line[1]
-		riv     = re.split("_",station)[1]
-		lon     = float(line[2])
-		lat     = float(line[3])
-		ix      = int(line[4])
-		iy      = int(line[5])
-		eledif  = float(line[7])
-		EGM08   = float(line[8])
-		EGM96   = float(line[9])
-		sat     = line[10].split()[0]
-		# print (riv,station,sat)
-		#------
-		lname.append(station)
-		xlist.append(ix)
-		ylist.append(iy)
-		leledf.append(eledif)
-		lEGM08.append(EGM08)
-		lEGM96.append(EGM96)
-		satellite.append(sat)
-	return lname, xlist, ylist, leledf, lEGM08, lEGM96, satellite
-#########################
-def read_HydroWeb(yyyy,mm,dd,name,EGM08,EGM96,eledf=0.0):
-	target_dt=datetime.date(int(yyyy),int(mm),int(dd))
-	HydroWeb_dir="/cluster/data6/menaka/HydroWeb"
-	#print name
-	lwse=[]
-	wseo=-9999.0
-	#--read HydroWeb data
-	iname=HydroWeb_dir+"/data/hydroprd_"+name+".txt"
-	# print (iname)
-	with open(iname,"r") as f_hyd:
-		l_hyd=f_hyd.readlines()
-	for ll_hyd in l_hyd[33::]:
-		ll_hyd = re.split(" ",ll_hyd)
-		ll_hyd = list(filter(None, ll_hyd))
-		date = ll_hyd[0]
-		date = re.split("-",date)
-		year = int(date[0])
-		mon  = int(date[1])
-		day  = int(date[2])
-		wse  = float(ll_hyd[2]) + EGM08 - EGM96 + eledf
-		lwse.append(wse)
-		now  = datetime.date(year,mon,day)
-		# print (yyyy, mm, dd)
-		# print ("data:", year,mon,day,wse)
-		if now == target_dt:
-			wseo=wse
-	if wseo==-9999.0:
-		mean_wse=-9999.0
-		std_wse=-9999.0
-	else:
-		mean_wse=np.mean(np.array(lwse))
-		std_wse=np.std(np.array(lwse))
-	# print (yyyy, mm, dd, wseo, mean_wse, std_wse)
-	return wseo, mean_wse, std_wse
-#########################
-def HydroWeb_data(yyyy,mm,dd):
-	lname =[]
-	xlist =[]
-	ylist =[]
-	l_wse =[]
-	m_wse =[]
-	s_wse =[]
-	l_sat =[]
-	lstan, xcods, ycods, leledif, lEGM08, lEGM96, satellite = get_HydroWeb()
-	pnum=len(lstan)
-	# print (pnum)
-	for point in np.arange(pnum):
-		# # == read relevant observation data ==
-		# if pm.obs_name() == "HydroWeb":
-		# 	# == for HydroWeb data ==
-		wseo, mean_wse, std_wse = read_HydroWeb(yyyy,mm,dd,lstan[point],lEGM08[point],lEGM96[point])#,leledif[point])
-		# else:
-		# 	wseo, mean_wse, std_wse = read_HydroWeb(yyyy,mm,dd,lname[point],lEGM08[point],lEGM96[point],leledif[point])
-		# print (point, wseo)
-		if wseo == -9999.0:
-			continue
-		# print (point, wseo)
-		iix=xcods[point]
-		iiy=ycods[point]
-		sat=satellite[point]
-		#====================
-		xlist.append(iix)
-		ylist.append(iiy)
-		l_wse.append(wseo)
-		m_wse.append(mean_wse)
-		s_wse.append(std_wse)
-		l_sat.append(sat)
-	return xlist, ylist, l_wse, m_wse, s_wse, l_sat
 ####################################
 # SWOT
 #########################
@@ -233,11 +116,13 @@ def swot_data(yyyy,mm,dd):
 				l_sat.append("SWOT")
 	return xlist, ylist, l_wse, m_wse, s_wse, l_sat
 ####################################
-def calc_stat_SWOT(syear,eyear):
+def calc_stat_SWOT(syear,eyear,obs_dir):
 	"""calculate statistics of SWOT data"""
 	nx,ny,gsize = map_dimension()
 	ny_swot = min(ny,640)
-	obs=np.zeros([get_days(syear, eyear),ny,nx],np.float32)
+	# obs=np.zeros([get_days(syear, eyear),ny,nx],np.float32)
+	SWOTOBS=np.zeros([get_days(syear, eyear),ny,nx],np.float32)
+	indays=0
 	for year in np.arange(syear,eyear+1):
 		nt = 366 if calendar.isleap(year) else 365
 		#-----------------------
@@ -245,9 +130,11 @@ def calc_stat_SWOT(syear,eyear):
 		target_dt=datetime.date(year,12,31)
 		it=(target_dt-start_dt).days
 		#-----------------------
-		odir=obs_dir()
+		odir=obs_dir
 		fname=odir+"/sfcelv"+str(year)+".bin"
-		orgfile=np.fromfile(fname,np.float32).reshape([nt,ny,nx])
+		SWOTOBS[indays:indays+get_days(syear,year),:,:]=np.fromfile(fname,np.float32).reshape([nt,ny,nx])
+		print (indays,get_days(syear,year))
+		indays=indays+get_days(syear,year)
 		# obs_err=SWOT_observation_error()
 		#-----------------------
 		for day in np.arange(nt):
@@ -258,16 +145,21 @@ def calc_stat_SWOT(syear,eyear):
 			#-----------------------
 			random.seed(day)
 			obs_err=SWOT_observation_error(day)
-			obs[day,:,:]=obs_SWOT(yyyy,mm,dd)+err_rand_array(obs_err,day)
+			# print (day, obs_SWOT(yyyy,mm,dd)[100,100]),err_rand_array(obs_err,day)[100,100]
+			# obs[day,:,:]=obs_SWOT(yyyy,mm,dd)
+			SWOTOBS[day,:,:]=SWOTOBS[day,:,:]+err_rand_array(obs_err,day)
+			obs=obs_SWOT(yyyy,mm,dd)
+			SWOTOBS[day,:,:]=ma.masked_where(obs!=1.0,SWOTOBS[day,:,:]).filled(-9999.0)
+			# print (day, SWOTOBS[day,100,100])
 	#-----------------------
-	SWOTOBS=ma.masked_where(obs!=1.0,orgfile).filled(-9999.0)
+	# SWOTOBS=ma.masked_where(obs!=1.0,orgfile).filled(-9999.0)
 	# calculate statistics
 	#-----------------------
 	# mean
 	mean=np.mean(ma.masked_equal(SWOTOBS,-9999.0),axis=0)
 	std=np.std(ma.masked_equal(SWOTOBS,-9999.0),axis=0)
 	#-----------------------
-	return mean,std
+	return SWOTOBS,mean,std
 ####################################
 def obs_SWOT(yyyy,mm,dd):
 	"""get SWOT observation days"""
@@ -341,133 +233,27 @@ def err_rand(obs_err,ix,iy,seed):
 	return rand
 #########################
 def err_rand_array(obs_err,seed):
-	"""make random values to add to true values"""
-	# nx,ny,gsize = pm.map_dimension()
-	# fname=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out/obs/obs_err.bin"
-	# obs_err=np.fromfile(fname,np.float32).reshape(ny,nx)
-	# obs_err=obs_err*((obs_err<=0.25)*1.0) + 0.25*((obs_err>0.25)*1.0)
-	ny,nx=obs_err.shape
-	obs_err1=np.zeros((ny,nx),np.float32)
-	obs_err1 = [[(random.seed(seed+iy*nx+ix), np.random.normal(0.0, obs_err[iy, ix], 1))[1] for ix in range(nx)] for iy in range(ny)]
-	obs_err1 = np.array(obs_err1).reshape(ny,nx)
+    """make random values to add to true values"""
+    # nx,ny,gsize = pm.map_dimension()
+    # fname=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out/obs/obs_err.bin"
+    # obs_err=np.fromfile(fname,np.float32).reshape(ny,nx)
+    # obs_err=obs_err*((obs_err<=0.25)*1.0) + 0.25*((obs_err>0.25)*1.0)
+    ny,nx=obs_err.shape
+    # obs_err1=np.zeros((ny,nx),np.float32)
+    # obs_err1 = [[(random.seed(seed+iy*nx+ix), np.random.normal(0.0, obs_err[iy, ix], 1))[1] for ix in range(nx)] for iy in range(ny)]
+    # obs_err1 = np.array(obs_err1).reshape(ny,nx)
+
+    # Generate random seeds for each element in the array
+    # np.random.seed(seed + np.arange(ny)[:, np.newaxis] * nx + np.arange(nx))
+    # Generate random values using vectorized operations
+    obs_err1 = np.random.normal(0.0, obs_err, (ny, nx))
 	# for iy in range(ny):
 	# 	for ix in range(nx):
 	# 		seed=seed+iy*nx+ix
 	# 		random.seed(seed)
 	# 		rand = np.random.normal(0.0,obs_err[iy,ix],1)
 	# 		obs_err1[iy,ix]=rand
-	return obs_err1
-#########################
-# CGLS
-#########################
-def get_CGLS():
-	#=============
-	lname=[]
-	xlist=[]
-	ylist=[]
-	leledf=[]
-	lEGM08=[]
-	lEGM96=[]
-	satellite=[]
-	# fname=pm.DA_dir()+"/dat/HydroWeb_alloc_"+pm.mapname()+".txt"
-	# fname=pm.DA_dir()+"/dat/HydroWeb_alloc_"+pm.mapname()+"_new.txt"
-	# fname=pm.DA_dir()+"/dat/HydroWeb_alloc_"+pm.mapname()+"_amz.txt"
-	fname=obs_list()
-	# fname=HydroWeb_list()
-	#=========================
-	with open(fname,"r") as f:
-		lines=f.readlines()
-	for line in lines[1::]:
-		line    = re.split(" ",line)
-		line    = list(filter(None, line))
-		#print line
-		num     = line[0]
-		station = line[1]
-		riv     = re.split("_",station)[1]
-		lon     = float(line[2])
-		lat     = float(line[3])
-		ix      = int(line[4])
-		iy      = int(line[5])
-		eledif  = float(line[7])
-		EGM08   = float(line[8])
-		EGM96   = float(line[9])
-		sat     = line[10].split()[0]
-		# print (riv,station,sat)
-		#------
-		lname.append(station)
-		xlist.append(ix)
-		ylist.append(iy)
-		leledf.append(eledif)
-		lEGM08.append(EGM08)
-		lEGM96.append(EGM96)
-		satellite.append(sat)
-	return lname, xlist, ylist, leledf, lEGM08, lEGM96, satellite
-#########################
-def read_CGLS(yyyy,mm,dd,name,EGM08,EGM96,eledf=0.0):
-	target_dt=datetime.date(int(yyyy),int(mm),int(dd))
-	CGLS_dir="/work/a06/menaka/CGLS"
-	#print name
-	lwse=[]
-	wseo=-9999.0
-	#--read HydroWeb data
-	iname=CGLS_dir+"/data/river/"+name+".json"
-	with open(iname) as f:
-		alldata    = json.load(f)
-		cgls_data  = alldata["data"]
-    #----------------------------
-	for line in range(len(cgls_data)):
-		date    = cgls_data[line]["datetime"]
-		date    = re.split(" ",date)[0]
-		date    = re.split("/",date)
-		year    = int(date[0])
-		mon     = int(date[1])
-		day     = int(date[2])
-		wse     = cgls_data[line]["water_surface_height_above_reference_datum"] + EGM08 - EGM96 + eledf
-		lwse.append(wse)
-		now     = datetime.date(year,mon,day)
-		if now == target_dt:
-			wseo=wse
-	if wseo==-9999.0:
-		mean_wse=-9999.0
-		std_wse=-9999.0
-	else:
-		mean_wse=np.mean(np.array(lwse))
-		std_wse=np.std(np.array(lwse))	
-	return wseo, mean_wse, std_wse
-#########################	
-def CGLS_data(yyyy,mm,dd):
-	lname =[]
-	xlist =[]
-	ylist =[]
-	l_wse =[]
-	m_wse =[]
-	s_wse =[]
-	l_sat =[]
-	lstan, xcods, ycods, leledif, lEGM08, lEGM96, satellite = get_HydroWeb()
-	pnum=len(lstan)
-	# print (pnum)
-	for point in np.arange(pnum):
-		# # == read relevant observation data ==
-		# if pm.obs_name() == "HydroWeb":
-		# 	# == for HydroWeb data ==
-		wseo, mean_wse, std_wse = read_CGLS(yyyy,mm,dd,lstan[point],lEGM08[point],lEGM96[point])#,leledif[point])
-		# else:
-		# 	wseo, mean_wse, std_wse = read_HydroWeb(yyyy,mm,dd,lname[point],lEGM08[point],lEGM96[point],leledif[point])
-		# print (point, wseo)
-		if wseo == -9999.0:
-			continue
-		# print (point, wseo)
-		iix=xcods[point]
-		iiy=ycods[point]
-		sat=satellite[point]
-		#====================
-		xlist.append(iix)
-		ylist.append(iiy)
-		l_wse.append(wseo)
-		m_wse.append(mean_wse)
-		s_wse.append(std_wse)
-		l_sat.append(sat)
-	return xlist, ylist, l_wse, m_wse, s_wse, l_sat
+    return obs_err1
 #########################
 def get_days(syear, eyear):
     start_date = datetime.date(syear, 1, 1)
@@ -493,63 +279,67 @@ def dam_loc():
 	return damloc
 #########################
 def write_txt(inputlist):
-	yyyy=inputlist[0]
-	mm=inputlist[1]
-	dd=inputlist[2]
-	dir0=inputlist[3]
-	print ("write text file: ",yyyy,mm,dd)
-	target_dt=datetime.date(int(yyyy),int(mm),int(dd))
-	txtfile=dir0+"/"+yyyy+mm+dd+".txt"
-	if obs_name() == "HydroWeb":
-		xlist, ylist, l_wse, m_wse, s_wse, l_sat = HydroWeb_data(yyyy,mm,dd)
-	if obs_name() == "SWOT":
-		xlist, ylist, l_wse, m_wse, s_wse, l_sat = swot_data(yyyy,mm,dd) 
-	if obs_name() == "CGLS":
-		xlist, ylist, l_wse, m_wse, s_wse, l_sat = CGLS_data(yyyy,mm,dd)
-	#--------------
-	pnum=len(xlist)
-	# print ('xlist:',pnum, "l_wse:",len(l_wse))
-	with open(txtfile,"w") as txtf:
-		for point in np.arange(pnum):
-			iix=xlist[point]
-			iiy=ylist[point]
-			wseo=l_wse[point]
-			mean_wse=m_wse[point]
-			std_wse=s_wse[point]
-			sat=l_sat[point]
-			line="%04d	%04d	%10.4f	%10.4f	%10.4f	%s\n"%(iix,iiy,wseo,mean_wse,std_wse,sat)
-			txtf.write(line)
-			print (line)
-	return 0
+    xlist, ylist, l_wse, m_wse, s_wse, l_sat = inputlist
+    print ("write text file: ",yyyy,mm,dd)
+    target_dt=datetime.date(int(yyyy),int(mm),int(dd))
+    txtfile=dir0+"/"+yyyy+mm+dd+".txt"
+    # if obs_name() == "HydroWeb":
+    # 	xlist, ylist, l_wse, m_wse, s_wse, l_sat = HydroWeb_data(yyyy,mm,dd)
+    # if obs_name() == "SWOT":
+    # 	xlist, ylist, l_wse, m_wse, s_wse, l_sat = swot_data(yyyy,mm,dd) 
+    # if obs_name() == "CGLS":
+    # 	xlist, ylist, l_wse, m_wse, s_wse, l_sat = CGLS_data(yyyy,mm,dd)
+    #--------------
+    pnum=len(xlist)
+    # print ('xlist:',pnum, "l_wse:",len(l_wse))
+    with open(txtfile,"w") as txtf:
+        for point in np.arange(pnum):
+            iix=xlist[point]
+            iiy=ylist[point]
+            wseo=l_wse[point]
+            mean_wse=m_wse[point]
+            std_wse=s_wse[point]
+            sat=l_sat[point]
+            line="%04d	%04d	%10.4f	%10.4f	%10.4f	%s\n"%(iix,iiy,wseo,mean_wse,std_wse,sat)
+            txtf.write(line)
+            print (line)
+    return 0
 #########################
-def prepare_obs(dir0="./"):
+def prepare_obs(inputlist):
 	"""
 	Prepare observations as textfile
 	"""
+	indir=inputlist[0]
+	outdir=inputlist[1]
 	# making dir
-	mk_dir(dir0)
+	mk_dir(outdir)
 	#=========================
+	nx,ny,gsize = map_dimension()
 	syear,smon,sday=starttime()
-	eyear,emon,eday=2001,1,1 #endtime()
+	eyear,emon,eday=endtime()
 	start_dt=datetime.date(syear,smon,sday)
 	end_dt=datetime.date(eyear,emon,eday)
 	start=0
 	last=(end_dt-start_dt).days + 1
-	# print (start,last)
-	#-------
-	inputlist=[]
+	#--
+	print ("Calculation of statistics of observations")
+	SWOTobs,SWOTmean,SWOTstd=calc_stat_SWOT(syear,eyear,indir)
+	#--------------
 	for day in np.arange(start,last):
 		target_dt=start_dt+datetime.timedelta(days=day)
 		yyyy='%04d' % (target_dt.year)
 		mm='%02d' % (target_dt.month)
 		dd='%02d' % (target_dt.day)
-		# print (yyyy,mm,dd) #,obs_dir
-		inputlist.append([yyyy,mm,dd,dir0])
-	# write text files parallel
-	# p=Pool(20)
-	# p.map(write_txt,inputlist)
-	# p.terminate()
-	map(write_txt,inputlist)
+		txtfile=outdir+"/"+yyyy+mm+dd+".txt"
+		print ("write text file: ",yyyy,mm,dd)
+		with open(txtfile,"w") as txtf:
+			for ix in np.arange(nx):
+				for iy in np.arange(ny):
+					# print (ix,iy,SWOTobs[day,iy,ix],SWOTmean[iy,ix],SWOTstd[iy,ix])
+					if SWOTobs[day,iy,ix] != -9999.0:
+						line="%04d	%04d	%10.4f	%10.4f	%10.4f	%s\n"%(ix,iy,SWOTobs[day,iy,ix],SWOTmean[iy,ix],SWOTstd[iy,ix],"SWOT")
+						txtf.write(line)
+						print (line)
 	return 0
 ####################################
 ############# parameters ###########
@@ -631,17 +421,28 @@ def out_dir(): ### not used --> give as direct input @L536
 	# return "/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_fldhgt"
 	return "/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_all"
 ####################################
-if __name__ == "__main__":
-	print ("prepare observations")
-	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/HydroWeb")
-	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/HydroWeb_glb_15min")
-	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/HydroWeb_conus_06min")
-	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/HydroWeb_conus_06min_DIR")
-	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_org") # for SWOTH08 no corruption
-	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_rivhgt") # for SWOTH08 rivhgt corrupt
-	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_rivwth") # for SWOTH08 rivwth corrupt
-	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_rivman") # for SWOTH08 rivman corrupt
-	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_fldhgt") # for SWOTH08 fldhgt corrupt
-	prepare_obs("/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_all_001") # for SWOTH08 all parameters corruption
-	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/CGLS_conus_06min_DIR") # CGLS for CONUS for DIR
-	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/CGLS_conus_06min") # CGLS for CONUS
+#########################
+if __name__=="__main__":
+	if len(sys.argv) > 1:
+		ncpus=int(sys.argv[1])
+	else:
+		ncpus=20
+	indir0="/cluster/data6/menaka/CaMa-H08/out"
+	outdir0="/cluster/data7/menaka/HydroDA/obs"
+	inputlist=[]
+	#--------------
+	for exp in range(1,20+1):
+		indir=indir0+"/obs_corr_all_%03d"%(exp)
+		outdir=outdir0+"/SWOT_CaMaH08_all_%03d"%(exp)
+		inputlist.append([indir,outdir])
+	#--------------
+	#prepare SWOT observations parallel
+	p=Pool(ncpus)
+	p.map(prepare_obs,inputlist)
+	p.terminate()
+    
+    # indir=indir0+"/obs_corr_all_001"
+    # outdir=outdir0+"/SWOT_CaMaH08_all_001"
+    # prepare_obs([indir,outdir])
+	# print ("Calculation of statistics")
+	# SWOTobs,SWOTmean,SWOTstd=calc_stat_SWOT(2001,2001)

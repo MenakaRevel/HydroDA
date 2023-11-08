@@ -16,6 +16,8 @@ from multiprocessing import sharedctypes
 from numpy import ma
 import re
 import math
+import warnings
+warnings.filterwarnings("ignore")
 
 # import CaMa-Flood variable reading using fortran
 sys.path.append('../etc/')
@@ -23,10 +25,11 @@ from read_CMF import read_discharge, read_discharge_multi
 #===============================================================================
 # Experiment name
 #===============================================================================
-experiment="DIR_WSE_ISIMIP3a_SWOT_051" #"NOM_WSE_ERA5_CGLS_003"
+experiment="NOM_WSE_VICBC_CGLS_012" #"NOM_WSE_ERA5_CGLS_062" 
 #===============================================================================
 # assim_out="../out/"+experiment
-assim_out="/cluster/data7/menaka/HydroDA/out/"+experiment
+# assim_out="/cluster/data7/menaka/HydroDA/out/"+experiment
+assim_out="/cluster/data8/menaka/HydroDA/out/"+experiment
 print (assim_out)
 #===============================================================================
 # HydroDA related functions
@@ -190,8 +193,8 @@ nx     = int(filter(None, re.split(" ",lines[0]))[0])
 ny     = int(filter(None, re.split(" ",lines[1]))[0])
 gsize  = float(filter(None, re.split(" ",lines[3]))[0])
 #----
-syear,smonth,sdate=2001,1,1 #pm.starttime()
-eyear,emonth,edate=2002,1,1 #pm.endtime()
+syear,smonth,sdate=2016,1,1 #pm.starttime()
+eyear,emonth,edate=2019,1,1 #2020,1,1 #pm.endtime()
 #month=1
 #date=1
 start_dt=datetime.date(syear,smonth,sdate)
@@ -223,11 +226,11 @@ river=[]
 # rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZON","MEKONG","IRRAWADDY","VOLGA", "NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
 # rivernames  = ["AMAZON"]
 # rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZON","IRRAWADDY","VOLGA","NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
-rivernames  = ["AMAZON", "MISSISSIPPI","MEKONG", "VOLGA", "COLORADO","MISSOURI","NIGER"]
+# rivernames  = ["AMAZON", "MISSISSIPPI","MEKONG", "VOLGA", "COLORADO","MISSOURI","NIGER"]
 #rivernames  = ["AMAZON"]
 # rivernames  = ["COLORADO"]
 # rivernames  = ["CHURCHILL"]
-# rivernames = ["SAINT LAWRENCE","OHIO","CONNECTICUT","MISSOURI","MISSISSIPPI","COLORADO","CHURCHILL"]
+rivernames = ["SAINT LAWRENCE","OHIO","CONNECTICUT","MISSOURI","MISSISSIPPI","COLORADO","CHURCHILL"]
 # rivernames = grdc.grdc_river_name_v396()
 for rivername in rivernames:
   grdc_id,station_loc,x_list,y_list = grdc.get_grdc_loc_v396(rivername,fname=pm.CaMa_dir() + "/map/"+pm.mapname()+"/grdc_loc.txt")
@@ -460,7 +463,10 @@ def make_fig(point):
         # org=grdc.grdc_dis(staid[point],syear,eyear-1)
         org=np.array(org)
     else:
-        org=grdc.grdc_dis(staid[point],syear,eyear-1) #,smon=1,emon=1,sday=1,eday=31)
+        if nbdays > 365:
+            org=grdc.grdc_dis(staid[point],syear,eyear-1) #,smon=1,emon=1,sday=1,eday=31) smonth,sdate
+        else:
+            org=grdc.grdc_dis(staid[point],syear,eyear,smon=smonth,emon=emonth,sday=sdate,eday=edate-1)
         org=np.array(org)
     #------------------------
     # Making Figure
@@ -642,7 +648,7 @@ def make_fig(point):
 
 
 
-
+# print (last)
 para_flag=1
 # para_flag=0
 #--

@@ -26,8 +26,8 @@
 ################################################################################################
 
 ### SET "mool PBS" @ IIS U-Tokyo
-#PBS -q F20
-#PBS -l select=1:ncpus=20:mem=100gb
+#PBS -q F40
+#PBS -l select=1:ncpus=40:mem=100gb
 #PBS -j oe
 #PBS -m ea
 #PBS -M menaka@rainbow.iis.u-tokyo.ac.jp
@@ -45,15 +45,18 @@ which python
 
 # get number of cpus
 #export NCPUS=`cat ${PBS_NODEFILE} | wc -l`
-NCPUS=20
+NCPUS=40
 
 # OMP Settings
 export OMP_NUM_THREADS=$NCPUS
 
 # go to working dirctory
 HydroDA="/cluster/data6/menaka/HydroDA"
-HydroDAout="/cluster/data7/menaka/HydroDA"
+# HydroDAout="/cluster/data7/menaka/HydroDA"
+HydroDAout="/cluster/data8/menaka/HydroDA"
 # HydroDAout="/work/a06/menaka/HydroDA"
+
+copyDAout="/cluster/data8/menaka/HydroDA"
 
 #----------
 # cd $HydroDA
@@ -82,9 +85,10 @@ cd $HydroDAout
 # EXP="NOM_WSE_E2O_HWEB_101" # for glb_15min
 # EXP="NOM_WSE_E2O_HWEB_201" # for conus 
 # EXP="DIR_WSE_E2O_HWEB_201" # for conus
-# EXP="DIR_WSE_ERA5_CGLS_004" # for ERA5 conus CGLS
-EXP="NOM_WSE_ERA5_CGLS_003" # for ERA5 conus CGLS NOM
-# EXP="ANO_WSE_ERA5_CGLS_001" # for ERA5 conus CGLS ANO
+# EXP="DIR_WSE_ERA5_CGLS_007" # for ERA5 conus CGLS
+EXP="NOM_WSE_ERA5_CGLS_072" # for ERA5 conus CGLS NOM
+# EXP="NOM_WSE_VICBC_CGLS_022"
+# EXP="ANO_WSE_ERA5_CGLS_004" # for ERA5 conus CGLS ANO
 
 # EXP="DIR_WSE_ISIMIP3a_SWOT_001" # for SWOTH08 
 
@@ -127,13 +131,13 @@ cp -r $HydroDA/src/wrt_expset.py    ./wrt_expset.py
 mkdir -p ./CaMa_out
 cd ./CaMa_out
 rm -r ./20151231C0*
-ln -sf $HydroDAout/out/DIR_WSE_ERA5_CGLS_001/CaMa_out/20151231C0* .
+ln -sf $copyDAout/out/NOM_WSE_ERA5_CGLS_062/CaMa_out/20151231C0* .
 cd ..
 # copy outflw open loop from previous simulation ## for run_flag=3
 mkdir -p ./assim_out/outflw/
 cd ./assim_out/outflw/
 rm -r ./open
-ln -sf $HydroDAout/out/DIR_WSE_ERA5_CGLS_001/assim_out/outflw/open .
+ln -sf $copyDAout/out/NOM_WSE_ERA5_CGLS_062/assim_out/outflw/open .
 cd ../..
 
 # run the main code using virtual environment

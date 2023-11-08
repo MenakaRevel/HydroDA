@@ -124,7 +124,10 @@ def write_text():
         f.write("# \tInflation Method : "+inflation_para(pm.rho())+"\n")
         f.write("# Assimilation Statistics: \n")
         f.write("# \tMean : "+stat_name(pm.conflag(),pm.calibrate())[0]+"\n")
-        f.write("# \tStandrad Deviation : "+stat_name(pm.conflag(),pm.calibrate())[1]+"\n")
+        f.write("# \tStandard Deviation : "+stat_name(pm.conflag(),pm.calibrate())[1]+"\n")
+        f.write("# Observation: \n")
+        f.write("# \tProduct Name : "+pm.obs_name()+"\n")
+        f.write("# \tDirectory : "+pm.obs_dir()+"\n")
         f.write("# Created at : "+str(datetime.datetime.now()))
     return 0
 ###########################

@@ -113,8 +113,8 @@ if [ $opt = "bif" ] || [ $opt = "all" ];then
 fi
 LDAMOUT=".FALSE."                           # .TRUE. to activate reservoir operation (under development)
 if [ $opt = "dam" ] || [ $opt = "all" ];then
-     LDAMOUT=".FALSE."                      # .TRUE. to activate reservoir operation (under development)
-fiAMOUT=".TRUE."                           # .TRUE. to activate reservoir operation (under development)
+     LDAMOUT=".TRUE."                      # .TRUE. to activate reservoir operation (under development)
+fi
 
 CDAMFILE="${PWDD}/sample_data/damparam_amz_6min_8dams.csv"  # this is new for reservoir operation scheme
 
@@ -156,6 +156,8 @@ elif [ $runname = "ECMWF050" ];then
 elif [ $runname = "ERA20CM" ];then
      DROFUNIT="1000"   # [mm/day->m/s]      # runoff unit conversion
 elif [ $runname = "ELSE_KIM2009" ];then
+     DROFUNIT="86400000"   # [mm/day->m/s]  # runoff unit conversion
+elif [ $runname = "VIC_BC_old" ];then
      DROFUNIT="86400000"   # [mm/day->m/s]  # runoff unit conversion
 elif [ $runname = "VIC_BC" ];then
      DROFUNIT="86400000"   # [mm/day->m/s]  # runoff unit conversion
@@ -216,23 +218,26 @@ CINPMAT="${FMAP}/inpmat_test-1deg.bin"        # runoff input matrix for interpor
 #CDIMINFO="${FMAP}/diminfo_test-15min.txt"    # dimention information file
 #CINPMAT=${FMAP}/inpmat_test-15min.bin        # runoff input matrix for interporlation
 if [ $runname = "E2O" ];then
-    CDIMINFO="${FMAP}/diminfo-15min.txt" # dimention information file
-    CINPMAT="${FMAP}/inpmat-15min.bin"   # runoff input matrix for interporlation
+     CDIMINFO="${FMAP}/diminfo-15min.txt" # dimention information file
+     CINPMAT="${FMAP}/inpmat-15min.bin"   # runoff input matrix for interporlation
 elif [ $runname = "ECMWF000" ];then
-    CDIMINFO="${FMAP}/diminfo-15min.txt" # dimention information file
-    CINPMAT="${FMAP}/inpmat-15min.bin"   # runoff input matrix for interporlation
+     CDIMINFO="${FMAP}/diminfo-15min.txt" # dimention information file
+     CINPMAT="${FMAP}/inpmat-15min.bin"   # runoff input matrix for interporlation
 elif [ $runname = "ECMWF050" ];then
-    CDIMINFO="${FMAP}/diminfo-15min.txt" # dimention information file
-    CINPMAT="${FMAP}/inpmat-15min.bin"   # runoff input matrix for interporlation
+     CDIMINFO="${FMAP}/diminfo-15min.txt" # dimention information file
+     CINPMAT="${FMAP}/inpmat-15min.bin"   # runoff input matrix for interporlation
 elif [ $runname = "ERA20CM" ];then
-	  CDIMINFO="${FMAP}/diminfo-1deg.txt"  # dimention information file
-    CINPMAT="${FMAP}/inpmat-1deg.bin"    # runoff input matrix for interporlation
+	CDIMINFO="${FMAP}/diminfo-1deg.txt"  # dimention information file
+     CINPMAT="${FMAP}/inpmat-1deg.bin"    # runoff input matrix for interporlation
 elif [ $runname = "ELSE_KIM2009" ];then
-    CDIMINFO="${FMAP}/diminfo_test-1deg.txt"  # dimention information file
-    CINPMAT="${FMAP}/inpmat_test-1deg.bin"    # runoff input matrix for interporlation
+     CDIMINFO="${FMAP}/diminfo_test-1deg.txt"  # dimention information file
+     CINPMAT="${FMAP}/inpmat_test-1deg.bin"    # runoff input matrix for interporlation
+elif [ $runname = "VIC_BC_old" ] ; then
+     CDIMINFO="${FMAP}/diminfo-15min.txt"  # dimention information file
+     CINPMAT="${FMAP}/inpmat-15min.bin"      # runoff input matrix for interporlation
 elif [ $runname = "VIC_BC" ] ; then
-	  CDIMINFO="${FMAP}/diminfo-15min.txt"  # dimention information file
-    CINPMAT="${FMAP}/inpmat-15min.bin"      # runoff input matrix for interporlation
+     CDIMINFO="${FMAP}/diminfo-05min.txt"  # dimention information file
+     CINPMAT="${FMAP}/inpmat-05min.bin"      # runoff input matrix for interporlation
 elif [ $runname = "isimip3a" ] ; then
      CDIMINFO="${FMAP}/diminfo-30min.txt"  # dimention information file
      CINPMAT="${FMAP}/inpmat-30min.bin"      # runoff input matrix for interporlation

@@ -24,7 +24,7 @@ def mode():
     # 1: Earth2Obs, 2: ERA20CM, 3: VIC_BC, 4: -25% biased (ELSE_KIM2009/E2O/ERA20CM) 5:isimip3a
 
 def conflag():
-    return 1
+    return 2
     # conversation flag for observation conversations 
     #  1 - Directly values 
     #  2 - Anomalies
@@ -364,6 +364,9 @@ def HydroWeb_dir(): ## not used in current version
     return "/cluster/data6/menaka/HydroWeb"
 
 def obs_dir():
+    with open("./obsdir.txt","r") as f:
+        line=f.readline()
+    return line.split("\n")[0]
     # return "/cluster/data6/menaka/HydroWeb"
     # return "/cluster/data6/menaka/ensemble_org/CaMa_out/E2O003"
     # return "/cluster/data6/menaka/dev_CaMa-Flood_v4/CaMa-Flood_v4/out/test-dev_HanazakiDam"
@@ -373,13 +376,16 @@ def obs_dir():
     # return "/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_rivwth"
     # return "/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_rivman"
     # return "/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_fldhgt"
-    return "/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_all_008"
+    # return "/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_all_008"
 
 def obs_list(): # not used in current version
     return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_amz.txt"
 
 def stat_name(cal=calibrate()):
-    return "sfcelv_49_E2O_amz_06min_2000-2014"
+    return "sfcelv_20_isimip3a_glb_15min_2001-2001"
+    # return "sfcelv_49_E2O_amz_06min_2000-2014"
+
+    
     # if cal=="yes":
     #     return "cal_sfcelv_49_E2O_amz_06min_2000-2014" # for lon-term statistic simulation calibrated
     #     # return "cal_sfcelv_49_E2O_amz_06min_2009-2014" # for lon-term statistic simulation calibrated
