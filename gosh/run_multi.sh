@@ -26,8 +26,8 @@
 ################################################################################################
 
 ### SET "mool PBS" @ IIS U-Tokyo
-#PBS -q F40S
-#PBS -l select=1:ncpus=40:mem=100gb
+#PBS -q E20
+#PBS -l select=1:ncpus=20:mem=100gb
 #PBS -j oe
 #PBS -m ea
 #PBS -M menaka@rainbow.iis.u-tokyo.ac.jp
@@ -45,7 +45,7 @@ which python
 
 # get number of cpus
 #export NCPUS=`cat ${PBS_NODEFILE} | wc -l`
-NCPUS=40
+NCPUS=20
 
 # OMP Settings
 export OMP_NUM_THREADS=$NCPUS
@@ -76,12 +76,12 @@ cd $HydroDAout
 # 4. Observation data [e.g., HydroWeb(HWEB), CGLS] 
 # 5. Number for identifying the experiment [e.g., 001]: 0XX - regional, 1XX - global
 #====================================================================
-for expnum in `seq 19 20`; # 2023/7/10 @9:00 E20
+for expnum in `seq 1 20`; # 2023/7/10 @9:00 E20
 do
     num1=$(($expnum + 50))
     num1=$(printf "%03g" $num1)
 
-    EXP="ANO_WSE_ISIMIP3a_SWOT_$num1" # for SWOTH08 
+    EXP="NOM_WSE_ISIMIP3a_SWOT_$num1" # for SWOTH08 
     # name refernce
     # 1 - no parameter error
     # 2 - rivght error
@@ -91,9 +91,52 @@ do
     # 6 - all paremeter error
     # from 51-70 - 20 multiple true experiments
 
-    echo $EXP, `pwd`
+    echo $EXP
 
+    mkdir -p $HydroDAout"/out/"$EXP
+
+    # go to working directory
     cd $HydroDAout"/out/"$EXP
+
+    echo `pwd`
+    
+    # write experiment name
+    echo $EXP > "./exp.txt"
+
+    # write NCPUS 
+    echo $NCPUS > $"./ncpus.txt"
+
+    # write observation directiory
+    exp_char=$(printf "%03g" $expnum)
+    echo "/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_all_$exp_char" > $"./obsdir.txt"
+    echo "/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_all_$exp_char"
+
+    # copy params.py
+    # cp -r $HydroDA/gosh/params_real.py     ./params.py # for real experiment
+    cp -r $HydroDA/gosh/params_mult.py     ./params.py # for virtual experiment
+
+    cp -r $HydroDA/src/run.py           ./run.py
+    cp -r $HydroDA/src/main_code.py     ./main_code.py
+    cp -r $HydroDA/src/prep_init.py     ./prep_init.py
+    cp -r $HydroDA/src/prep_runoff.py   ./prep_runoff.py
+    cp -r $HydroDA/src/prep_obs.py      ./prep_obs.py
+    cp -r $HydroDA/src/wrt_expset.py    ./wrt_expset.py
+
+    # copy spinup from previous simulation ## for spinup_flag=3
+    mkdir -p ./CaMa_out
+    cd ./CaMa_out
+    rm -r ./20001231C0*
+    # ln -sf $HydroDAout/out/DIR_WSE_ISIMIP3a_SWOT_001/CaMa_out/20001231C0* .
+    ln -sf /cluster/data8/menaka/HydroDA/out/ANO_WSE_ISIMIP3a_SWOT_001/CaMa_out/20001231C0* .
+    cd ..
+    # copy outflw open loop from previous simulation ## for run_flag=3
+    mkdir -p ./assim_out/outflw/
+    cd ./assim_out/outflw/
+    rm -r ./open
+    # ln -sf $HydroDAout/out/DIR_WSE_ISIMIP3a_SWOT_001/assim_out/outflw/open .
+    # ln -sf /work/a06/menaka/HydroDA/out/DIR_WSE_ISIMIP3a_SWOT_055/assim_out/outflw/open .
+    ln -sf /cluster/data8/menaka/HydroDA/out/ANO_WSE_ISIMIP3a_SWOT_001/assim_out/outflw/open .
+    cd ../..
 
     # run the main code using virtual environment
     # run main code

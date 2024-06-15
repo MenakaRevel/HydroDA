@@ -114,15 +114,18 @@ LADPSTP=".TRUE."                            # .TRUE. for adaptive time step
 LFPLAIN=".TRUE."                            # .TRUE. to activate floodplain storage
 LKINE=".FALSE."                             # .TRUE. to use kinematic wave equation
 LFLDOUT=".TRUE."                            # .TRUE. to activate floodplain discharge
-LPTHOUT=".FALSE."                            # .TRUE. to activate bifurcation flow, mainly for delta simulation
+LPTHOUT=".FALSE."                           # .TRUE. to activate bifurcation flow, mainly for delta simulation
+LDAMOUT=".FALSE."                           # .TRUE. to activate reservoir operation (under development)
+LDAMYBY=".FALSE."                           # .TRUE. to use Year-By-Year dam activation scheme. .False. for All-reservoirs-in scheme
+LiVnorm=".FALSE."                           # .TRUE. to use Noemal Volume as initial reservoir storage. False for zero-additional storage.
 if [ $opt = "bif" ] || [ $opt = "all" ];then
      LPTHOUT=".TRUE."                       # .TRUE. to activate bifurcation flow, mainly for delta simulation
 fi
-LDAMOUT=".FALSE."                           # .TRUE. to activate reservoir operation (under development)
+# LDAMOUT=".FALSE."                           # .TRUE. to activate reservoir operation (under development)
 if [ $opt = "dam" ] || [ $opt = "all" ];then
-     LDAMOUT=".FALSE."                      # .TRUE. to activate reservoir operation (under development)
+     LDAMOUT=".TRUE."                       # .TRUE. to activate reservoir operation (under development)
 fi
-CDAMFILE="${PWDD}/sample_data/damparam_amz_6min_8dams.csv"  # this is new for reservoir operation scheme
+# CDAMFILE="${PWDD}/sample_data/damparam_amz_6min_8dams.csv"  # this is new for reservoir operation scheme
 
 #============================
 #*** 1c. simulation time
@@ -138,7 +141,8 @@ NSP=0                                        # spinup repeat time
 
 #* input restart file
 LRESTART=".TRUE." # see (3) set each year   # TRUE. to use restart initial condition
-#CRESTSTO="" # see (3) set each year         # input restart FIle
+#CRESTSTO=""      # see (3) set each year   # input restart FIle
+# restart file is definied dynamicall
 if [ $looptype = "true" ];then
 	CRESTSTO=$INBASE"/restart/true/restart"$ar_year$ar_month$ar_date"T000.bin" #restart file name
 elif [ $looptype = "open" ];then
@@ -154,34 +158,129 @@ LSTOONLY=".TRUE."                          # .TRUE. for storage only restart (fo
 CRESTDIR="./"                               # output restart file directory
 CVNREST="restart"                           # output restart file prefix
 LRESTCDF=".FALSE."                          # .TRUE. to use netCDF restart file
-LRESTDBL=".FALSE."                           # .TRUE. for binary restart double precision, This is new !!
+LRESTDBL=".FALSE."                          # .TRUE. for binary restart double precision, This is new !!
 IFRQ_RST="0"                                # output restat frequency.
                                             # [0]: only at last time, [1,2,3,...,24] hourly restart, [30]: monthly restart
 
+#============================
+#*** 1e. river map & topography
+FMAP="${BASE}/map/${mapname}"                # map directory
+
+# Dam Parameter File
+CDAMFILE="${FMAP}/dam_param.csv"             # dam parameter list
+
+#----- for plain binary map input
+#** basic topography
+LMAPCDF=".FALSE."                            # .TRUE. for netCDF map
+CNEXTXY="${FMAP}/nextxy.bin"                 # downstream xy (river network map)
+CGRAREA="${FMAP}/ctmare.bin"                 # unit-catchment area   [m2]
+CELEVTN="${FMAP}/elevtn.bin"                 # channel top elevation [m]
+CNXTDST="${FMAP}/nxtdst.bin"                 # downstream distance   [m]
+CRIVLEN="${FMAP}/rivlen.bin"                 # channel length        [m]
+CFLDHGT="${FMAP}/fldhgt.bin"                 # floodplain elevation profile (height above 'elevtn') [m]
+# if [ $corrupt = 4 ] || [ $corrupt = 5 ];then
+#      CFLDHGT="${FMAP}/fldhgt_corrupt.bin"   # floodplain elevation profile [m] (corrupted)
+# fi
+#** channel parameter
+###CRIVWTH=${FMAP}/rivwth.bin"                # channel width [m] (empirical power-low)
+CRIVWTH="${FMAP}/rivwth_gwdlr.bin"            # channel width [m] (GWD-LR + filled with empirical)
+# if [ $corrupt = 2 ] || [ $corrupt = 5 ];then
+#      CRIVWTH="${FMAP}/rivwth_corrupt.bin"   # channel width [m] (Corrupted rivwth)
+# fi
+CRIVHGT="${FMAP}/rivhgt.bin"                  # channel depth [m] (empirical power-low)
+if [ $cal = "yes" ];then
+  CRIVHGT="${FMAP}/rivhgt_Xudong.bin"         # channel depth [m] (Xudong et al,. 2022)
+elif [ $cal = "corrupt" ];then
+  CRIVHGT="${FMAP}/rivhgt_corrupt.bin"        # channel depth [m] (Corrupted rivhgt simple)
+fi
+# if [ $corrupt = 1 ] || [ $corrupt = 5 ];then
+#      CRIVHGT="${FMAP}/rivhgt_corrupt.bin"   # channel depth [m] (Corrupted rivhgt)
+# fi
+CRIVMAN="${FMAP}/rivman.bin"                  # manning coefficient river (The one in flood plain is a global parameter; set $PMANFLD below.)
+# if [ $corrupt = 3 ] || [ $corrupt = 5 ];then
+#      CRIVMAN="${FMAP}/rivman_corrupt.bin"   # manning coefficient river (Corrupted rivman)
+# fi
+#if [ $looptype = "true" ] ; then
+#    CRIVMAN="${INBASE}/assim_out/rivman/rivmanTRUE.bin"
+#    #CRIVMAN="${FMAP}/rivmanTRUE.bin"
+#else
+#    CRIVMAN="${INBASE}/assim_out/rivman/rivmanCORR.bin"
+#    #CRIVMAN="${FMAP}/rivmanCORR.bin"
+#fi
+# echo $CRIVMAN
+
+#** bifurcation channel info
+CPTHOUT="${FMAP}/bifprm.txt"                  #   bifurcation channel list
+
 
 #============================
-#*** 1e. forcing setting
-IFRQ_INP="24"                               # input forcing frequency: [1,2,3,...,24] hour
-DROFUNIT="86400000"        # [mm/day->m/s]  # runoff unit conversion
-if [ $runname = "E2O" ];then
-     DROFUNIT="86400000"   # [mm/day->m/s]  # runoff unit conversion
-elif [ $runname = "ECMWF000" ];then
-     DROFUNIT="86400000"   # [mm/day->m/s]  # runoff unit conversion
-elif [ $runname = "ECMWF050" ];then
-     DROFUNIT="86400000"   # [mm/day->m/s]  # runoff unit conversion
-elif [ $runname = "ERA20CM" ];then
-     DROFUNIT="1000"       # [mm/day->m/s]  # runoff unit conversion
-elif [ $runname = "ELSE_KIM2009" ];then
-     DROFUNIT="86400000"   # [mm/day->m/s]  # runoff unit conversion
-elif [ $runname = "VIC_BC_old" ];then
-     DROFUNIT="86400000"   # [mm/day->m/s]  # runoff unit conversion
-elif [ $runname = "VIC_BC" ];then
-     DROFUNIT="86400000"   # [mm/day->m/s]  # runoff unit conversion
-elif [ $runname = "isimip3a" ];then
-     DROFUNIT="1000"       # [mm/day->m/s]  # runoff unit conversion
-elif [ $runname = "ERA5" ];then
-     DROFUNIT="86400"      # [m/day->m/s]   # runoff unit conversion
-fi
+#*** 1f. forcing setting
+CDIMINFO="${FMAP}/diminfo_test-1deg.txt"      # dimention information file
+CINPMAT="${FMAP}/inpmat_test-1deg.bin"        # runoff input matrix for interporlation
+#CDIMINFO="${FMAP}/diminfo_test-15min_nc.txt" # dimention information file
+#CINPMAT=${FMAP}/inpmat_test-15min_nc.bin     # runoff input matrix for interporlation
+#CDIMINFO="${FMAP}/diminfo_test-15min.txt"    # dimention information file
+#CINPMAT=${FMAP}/inpmat_test-15min.bin        # runoff input matrix for interporlation
+IFRQ_INP="24"                                 # input forcing frequency: [1,2,3,...,24] hour
+DROFUNIT="86400000"        # [mm/day->m/s]    # runoff unit conversion
+# runoff weigth matrix depend on runoff data
+if [ $runname = "E2O" ] ; then
+     CDIMINFO="${FMAP}/diminfo-15min.txt"     # dimention information file
+     CINPMAT="${FMAP}/inpmat-15min.bin"       # runoff input matrix for interporlation
+     DROFUNIT="86400000"    # [mm/day->m/s]   # runoff unit conversion
+elif [ $runname = "ECMWF000" ];then 
+    CDIMINFO="${FMAP}/diminfo-15min.txt"      # dimention information file
+    CINPMAT="${FMAP}/inpmat-15min.bin"        # runoff input matrix for interporlation
+     DROFUNIT="86400000"   # [mm/day->m/s]    # runoff unit conversion
+elif [ $runname = "ECMWF050" ] ; then 
+     CDIMINFO="${FMAP}/diminfo-15min.txt"     # dimention information file
+     CINPMAT="${FMAP}/inpmat-15min.bin"       # runoff input matrix for interporlation
+     DROFUNIT="86400000"   # [mm/day->m/s]    # runoff unit conversion
+elif [ $runname = "ERA20CM" ] ; then 
+     CDIMINFO="${FMAP}/diminfo-1deg.txt"      # dimention information file
+     CINPMAT="${FMAP}/inpmat-1deg.bin"        # runoff input matrix for interporlation
+     DROFUNIT="1000"       # [mm/day->m/s]    # runoff unit conversion
+elif [ $runname = "ELSE_KIM2009" ] ; then 
+     CDIMINFO="${FMAP}/diminfo-1deg.txt"      # dimention information file
+     CINPMAT="${FMAP}/inpmat-1deg.bin"        # runoff input matrix for interporlation
+     DROFUNIT="86400000"   # [mm/day->m/s]    # runoff unit conversion
+elif [ $runname = "VIC_BC_old" ] ; then 
+     CDIMINFO="${FMAP}/diminfo-15min.txt"     # dimention information file
+     CINPMAT="${FMAP}/inpmat-15min.bin"       # runoff input matrix for interporlation
+     DROFUNIT="86400000"   # [mm/day->m/s]    # runoff unit conversion
+elif [ $runname = "VIC_BC" ] ; then 
+     CDIMINFO="${FMAP}/diminfo-05min.txt"     # dimention information file
+     CINPMAT="${FMAP}/inpmat-05min.bin"       # runoff input matrix for interporlation
+     DROFUNIT="86400000"   # [mm/day->m/s]    # runoff unit conversion
+elif [ $runname = "isimip3a" ] ; then 
+     CDIMINFO="${FMAP}/diminfo-30min.txt"     # dimention information file
+     CINPMAT="${FMAP}/inpmat-30min.bin"       # runoff input matrix for interporlation
+     DROFUNIT="1000"       # [mm/day->m/s]    # runoff unit conversion
+elif [ ${runname} = "ERA5" ] ; then 
+     CDIMINFO="${FMAP}/diminfo-06min.txt"     # dimention information file
+     CINPMAT="${FMAP}/inpmat-06min.bin"       # runoff input matrix for interporlation
+     DROFUNIT="86400"      # [m/day->m/s]     # runoff unit conversion
+fi 
+
+# # if [ $runname = "E2O" ];then
+# #      DROFUNIT="86400000"   # [mm/day->m/s]  # runoff unit conversion
+# # elif [ $runname = "ECMWF000" ];then
+# #      DROFUNIT="86400000"   # [mm/day->m/s]  # runoff unit conversion
+# # elif [ $runname = "ECMWF050" ];then
+# #      DROFUNIT="86400000"   # [mm/day->m/s]  # runoff unit conversion
+# # elif [ $runname = "ERA20CM" ];then
+# #      DROFUNIT="1000"       # [mm/day->m/s]  # runoff unit conversion
+# # elif [ $runname = "ELSE_KIM2009" ];then
+# #      DROFUNIT="86400000"   # [mm/day->m/s]  # runoff unit conversion
+# # elif [ $runname = "VIC_BC_old" ];then
+# #      DROFUNIT="86400000"   # [mm/day->m/s]  # runoff unit conversion
+# # elif [ $runname = "VIC_BC" ];then
+# #      DROFUNIT="86400000"   # [mm/day->m/s]  # runoff unit conversion
+# # elif [ $runname = "isimip3a" ];then
+# #      DROFUNIT="1000"       # [mm/day->m/s]  # runoff unit conversion
+# # elif [ $runname = "ERA5" ];then
+# #      DROFUNIT="86400"      # [m/day->m/s]   # runoff unit conversion
+# # fi
 
 #----- for plain binary runoff forcing
 LINPCDF=".FALSE."                           # true for netCDF runoff
@@ -222,86 +321,6 @@ LROSPLIT=".FALSE."                          # .TRUE. for sub-surface runoff
 ###SHOURIN=""     # see (3) set each year
 
 
-#============================
-#*** 1f. river map & topography
-FMAP="${BASE}/map/${mapname}"                # map directory
-CDIMINFO="${FMAP}/diminfo_test-1deg.txt"    # dimention information file
-CINPMAT="${FMAP}/inpmat_test-1deg.bin"        # runoff input matrix for interporlation
-#CDIMINFO="${FMAP}/diminfo_test-15min_nc.txt" # dimention information file
-#CINPMAT=${FMAP}/inpmat_test-15min_nc.bin     # runoff input matrix for interporlation
-#CDIMINFO="${FMAP}/diminfo_test-15min.txt" # dimention information file
-#CINPMAT=${FMAP}/inpmat_test-15min.bin     # runoff input matrix for interporlation
-if [ $runname = "E2O" ] ; then
-     CDIMINFO="${FMAP}/diminfo-15min.txt" # dimention information file
-     CINPMAT="${FMAP}/inpmat-15min.bin"     # runoff input matrix for interporlation
-elif [ $runname = "ECMWF000" ];then
-    CDIMINFO="${FMAP}/diminfo-15min.txt" # dimention information file
-    CINPMAT="${FMAP}/inpmat-15min.bin"   # runoff input matrix for interporlation
-elif [ $runname = "ECMWF050" ] ; then
-     CDIMINFO="${FMAP}/diminfo-15min.txt" # dimention information file
-     CINPMAT="${FMAP}/inpmat-15min.bin"     # runoff input matrix for interporlation
-elif [ $runname = "ERA20CM" ] ; then
-     CDIMINFO="${FMAP}/diminfo-1deg.txt"  # dimention information file
-     CINPMAT="${FMAP}/inpmat-1deg.bin"      # runoff input matrix for interporlation
-elif [ $runname = "ELSE_KIM2009" ] ; then
-     CDIMINFO="${FMAP}/diminfo-1deg.txt"  # dimention information file
-     CINPMAT="${FMAP}/inpmat-1deg.bin"      # runoff input matrix for interporlation
-elif [ $runname = "VIC_BC_old" ] ; then
-     CDIMINFO="${FMAP}/diminfo-15min.txt"  # dimention information file
-     CINPMAT="${FMAP}/inpmat-15min.bin"      # runoff input matrix for interporlation
-elif [ $runname = "VIC_BC" ] ; then
-     CDIMINFO="${FMAP}/diminfo-05min.txt"  # dimention information file
-     CINPMAT="${FMAP}/inpmat-05min.bin"      # runoff input matrix for interporlation
-elif [ $runname = "isimip3a" ] ; then
-     CDIMINFO="${FMAP}/diminfo-30min.txt"  # dimention information file
-     CINPMAT="${FMAP}/inpmat-30min.bin"      # runoff input matrix for interporlation
-elif [ ${runname} = "ERA5" ] ; then
-     CDIMINFO="${FMAP}/diminfo-06min.txt"  # dimention information file
-     CINPMAT="${FMAP}/inpmat-06min.bin"      # runoff input matrix for interporlation
-fi
-
-#----- for plain binary map input
-#** basic topography
-LMAPCDF=".FALSE."                           # .TRUE. for netCDF map
-CNEXTXY="${FMAP}/nextxy.bin"                # downstream xy (river network map)
-CGRAREA="${FMAP}/ctmare.bin"                # unit-catchment area   [m2]
-CELEVTN="${FMAP}/elevtn.bin"                # channel top elevation [m]
-CNXTDST="${FMAP}/nxtdst.bin"                # downstream distance   [m]
-CRIVLEN="${FMAP}/rivlen.bin"                # channel length        [m]
-CFLDHGT="${FMAP}/fldhgt.bin"                # floodplain elevation profile (height above 'elevtn') [m]
-# if [ $corrupt = 4 ] || [ $corrupt = 5 ];then
-#      CFLDHGT="${FMAP}/fldhgt_corrupt.bin"   # floodplain elevation profile [m] (corrupted)
-# fi
-#** channel parameter
-###CRIVWTH=${FMAP}/rivwth.bin"              # channel width [m] (empirical power-low)
-CRIVWTH="${FMAP}/rivwth_gwdlr.bin"          # channel width [m] (GWD-LR + filled with empirical)
-# if [ $corrupt = 2 ] || [ $corrupt = 5 ];then
-#      CRIVWTH="${FMAP}/rivwth_corrupt.bin"   # channel width [m] (Corrupted rivwth)
-# fi
-CRIVHGT="${FMAP}/rivhgt.bin"                # channel depth [m] (empirical power-low)
-if [ $cal = "yes" ];then
-  CRIVHGT="${FMAP}/rivhgt_Xudong.bin"       # channel depth [m] (Xudong et al,. 2022)
-elif [ $cal = "corrupt" ];then
-  CRIVHGT="${FMAP}/rivhgt_corrupt.bin"      # channel depth [m] (Corrupted rivhgt simple)
-fi
-# if [ $corrupt = 1 ] || [ $corrupt = 5 ];then
-#      CRIVHGT="${FMAP}/rivhgt_corrupt.bin"   # channel depth [m] (Corrupted rivhgt)
-# fi
-CRIVMAN="${FMAP}/rivman.bin"                # manning coefficient river (The one in flood plain is a global parameter; set $PMANFLD below.)
-# if [ $corrupt = 3 ] || [ $corrupt = 5 ];then
-#      CRIVMAN="${FMAP}/rivman_corrupt.bin"   # manning coefficient river (Corrupted rivman)
-# fi
-#if [ $looptype = "true" ] ; then
-#    CRIVMAN="${INBASE}/assim_out/rivman/rivmanTRUE.bin"
-#    #CRIVMAN="${FMAP}/rivmanTRUE.bin"
-#else
-#    CRIVMAN="${INBASE}/assim_out/rivman/rivmanCORR.bin"
-#    #CRIVMAN="${FMAP}/rivmanCORR.bin"
-#fi
-# echo $CRIVMAN
-
-#** bifurcation channel info
-CPTHOUT="${FMAP}/bifprm.txt"                #   bifurcation channel list
 
 ###** groundwater delay (not available in plain binary runoff/map)
 LGDWDLY=".FALSE."                           # .TRUE. to actuvate groundwater delay
@@ -433,23 +452,9 @@ rm -f ${NMLIST}
 cat >> ${NMLIST} << EOF
 &NRUNVER
 LADPSTP  = ${LADPSTP}                  ! true: use adaptive time step
-LFPLAIN  = ${LFPLAIN}                  ! true: consider floodplain (false: only river channel)
-LKINE    = ${LKINE}                    ! true: use kinematic wave
-LFLDOUT  = ${LFLDOUT}                  ! true: floodplain flow (high-water channel flow) active
 LPTHOUT  = ${LPTHOUT}                  ! true: activate bifurcation scheme
 LDAMOUT  = ${LDAMOUT}                  ! true: activate dam operation (under development)
-LROSPLIT = ${LROSPLIT}                 ! true: input if surface (Qs) and sub-surface (Qsb) runoff
-LGDWDLY  = ${LGDWDLY}                  ! true: Activate ground water reservoir and delay
-LSLPMIX  = .FALSE.                     ! true: activate mixed kinematic and local inertia based on slope
-LMEANSL  = ${LMEANSL}                  ! true: boundary condition for mean sea level
-LSEALEV  = ${LSEALEV}                  ! true: boundary condition for variable sea level
 LRESTART = ${LRESTART}                 ! true: initial condition from restart file
-LSTOONLY = ${LSTOONLY}                 ! true: storage only restart (mainly for data assimilation)
-LOUTPUT  = ${LOUTPUT}                  ! true: use standard output (to file)
-LGRIDMAP = .TRUE.                      ! true: for standard XY gridded 2D map
-LLEAPYR  = .TRUE.                      ! true: neglect leap year (Feb29 skipped)
-LMAPEND  = .FALSE.                     ! true: for map data endian conversion
-LBITSAFE = .FALSE.                     ! true: for Bit Identical simulation (avoid OSM ATOMIC)
 /
 &NDIMTIME
 CDIMINFO = "${CDIMINFO}"               ! text file for dimention information
@@ -459,17 +464,8 @@ IFRQ_INP = ${IFRQ_INP}                 ! input forcing update frequency (hour)
 &NPARAM
 PMANRIV  = ${PMANRIV}                  ! manning coefficient river
 PMANFLD  = ${PMANFLD}                  ! manning coefficient floodplain
-PGRV     = 9.8D0                       ! gravity accerelation
 PDSTMTH  = ${PDSTMTH}                  ! downstream distance at river mouth [m]
 PCADP    = ${PCADP}                    ! CFL coefficient
-PMINSLP  = 1.D-5                       ! minimum slope (kinematic wave)
-IMIS     = -9999                       ! missing value for integer
-RMIS     = 1.E20                       ! missing value for real*4
-DMIS     = 1.E20                       ! missing value for real*8
-CSUFBIN  = '.bin'                      ! file suffix for plain binary 2D map
-CSUFVEC  = '.vec'                      ! file suffix for plain binary 1D vector
-CSUFPTH  = '.pth'                      ! file suffix for plain binary bifurcation channel
-CSUFCDF  = '.nc'                       ! file suffix for netCDF
 /
 EOF
 
@@ -527,15 +523,11 @@ cat >> ${NMLIST} << EOF
 &NFORCE
 LINPCDF  = ${LINPCDF}                  ! true for netCDF runoff
 LINTERP  = ${LINTERP}                  ! true for runoff interpolation using input matrix
-LINPEND  = .FALSE.                     ! true for runoff endian conversion
 CINPMAT  = "${CINPMAT}"                ! input matrix file name
 DROFUNIT = ${DROFUNIT}                 ! runoff unit conversion
 CROFDIR  = "${CROFDIR}"                ! runoff             input directory
 CROFPRE  = "${CROFPRE}"                ! runoff             input prefix
 CROFSUF  = "${CROFSUF}"                ! runoff             input suffix
-CSUBDIR  = "${CSUBDIR}"                ! sub-surface runoff input directory
-CSUBPRE  = "${CSUBPRE}"                ! sub-surface runoff input prefix
-CSUBSUF  = "${CSUBSUF}"                ! sub-surface runoff input suffix
 /
 EOF
 
@@ -544,13 +536,10 @@ cat >> ${NMLIST} << EOF
 &NFORCE
 LINPCDF  = ${LINPCDF}                  ! true for netCDF runoff
 LINTERP  = ${LINTERP}                  ! true for runoff interpolation using input matrix
-LINPEND  = .FALSE.                     ! true for runoff endian conversion
-LITRPCDF = ${LINTERPCDF}               ! * true for netCDF input matrix
 CINPMAT  = "${CINPMAT}"                ! input matrix file name
 DROFUNIT = ${DROFUNIT}                 ! runoff unit conversion
 CROFCDF  = "${CROFCDF}"                ! * netCDF input runoff file name
 CVNROF   = "${CVNROF}"                 ! * netCDF input runoff variable name
-CVNSUB   = "${CVNSUB}"                 ! * netCDF input runoff variable name
 SYEARIN  = ${SYEARIN}                  ! * netCDF input start year
 SMONIN   = ${SMONIN}                   ! * netCDF input start year
 SDAYIN   = ${SDAYIN}                   ! * netCDF input start year
@@ -566,7 +555,7 @@ cat >> ${NMLIST} << EOF
 COUTDIR  = "${COUTDIR}"                ! OUTPUT DIRECTORY
 CVARSOUT = "${CVARSOUT}"               ! Comma-separated list of output variables to save 
 COUTTAG  = "${COUTTAG}"                ! Output Tag Name for each experiment
-LOUTVEC  = .FALSE                      ! TRUE FOR VECTORIAL OUTPUT, FALSE FOR NX,NY OUTPUT
+LOUTVEC  = .FALSE.                     ! TRUE FOR VECTORIAL OUTPUT, FALSE FOR NX,NY OUTPUT
 LOUTCDF  = ${LOUTCDF}                  ! * true for netcdf outptu false for binary
 NDLEVEL  = 0                           ! * NETCDF DEFLATION LEVEL 
 IFRQ_OUT = ${IFRQ_OUT}                 ! output data write frequency (hour)
@@ -577,8 +566,13 @@ EOF
 cat >> ${NMLIST} << EOF
 &NDAMOUT
 CDAMFILE = "${CDAMFILE}"               ! Reservoir Parameter File
+LDAMTXT  = .TRUE.                      ! True for text-based reservoir data output
+LDAMH22  = .FALSE.                     ! True to use Hanazaki 2022 dam scheme. (False for Yamazaki&Funato scheme)
+LDAMYBY  = ${LDAMYBY}                  ! .TRUE. to use Year-By-Year dam activation scheme. .False. for All-reservoirs-in scheme
+LiVnorm  = ${LiVnorm}                  ! .TRUE. to use Normal Volume as initial reservoir storage. False for zero-additional storage.
 /
 EOF
+
 
 #### 6. sea level (optional) 
 #cat >> ${NMLIST} << EOF

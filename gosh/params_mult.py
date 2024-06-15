@@ -24,7 +24,7 @@ def mode():
     # 1: Earth2Obs, 2: ERA20CM, 3: VIC_BC, 4: -25% biased (ELSE_KIM2009/E2O/ERA20CM) 5:isimip3a
 
 def conflag():
-    return 2
+    return 3
     # conversation flag for observation conversations 
     #  1 - Directly values 
     #  2 - Anomalies
@@ -170,7 +170,7 @@ def endtime():
 # **************************************************************
 # 4. Spinup options
 def spinup_mode():
-    return 3
+    return 0
     # 0: do spinup simulation for both (corrupted and true) simulation
     # 1: do spin up only at corrupted simulation
     # 2: do spin up only at true simulation
@@ -282,7 +282,7 @@ def err_expansion():
 # #     # 7 : with manning error: Manning's n depend on
 
 def run_flag():
-    return 3
+    return 0
     # 0 run all simulations
     # 1 run only corrupted and assimilated simulations # 0 and 1 are similar, 0 is recommended
     # 2 run only true and assimilated simulations # 2 and 3 are similar --> no true simulation, 3 is recommended
@@ -451,7 +451,7 @@ def slack_notification():
 # **************************************************************
 # 8. parallel run settings
 def para_nums():
-    return 10
+    return 20
     # setting number of parallels to run CaMa-Flood Model
     # default is 6, but may change depending on your system
 

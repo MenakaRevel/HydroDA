@@ -116,8 +116,9 @@ def patch_name():
     # return "amz_06min_S14FD_40"
     # return "amz_06min_S14FD_20"
     # return "glb_15min_S14FD_60"
+    return "conus_06min_ERA5_60_CaMadam" # empirical local patch CaMa-Flood dam
     # return "conus_06min_VIC_BC_60_dam" # empirical local patch dam
-    return "conus_06min_ERA5_60" # empirical local patch no dam
+    # return "conus_06min_ERA5_60" # empirical local patch no dam
     # return "conus_06min_ERA5_60_dam" # empirical local patch dam
     # return "conus_06min_ERA5_80_dam" # empirical local patch dam
     # return "conus_06min_ERA5_80" # empirical local patch no dam (0.80)
@@ -343,7 +344,7 @@ def err_expansion():
 # #     # 7 : with manning error: Manning's n depend on
 
 def run_flag():
-    return 3
+    return 0
     # 0 run all simulations
     # 1 run only corrupted and assimilated simulations
     # 2 run only true and assimilated simulations
@@ -365,7 +366,8 @@ def CaMa_ver():
     # return "CaMa-Flood version 3.9.6"
     # return "CaMa-Flood version 4.0.0"
     # return "CaMa-Flood version 4.07"
-    return "CaMa-Flood version 4.1.0"
+    # return "CaMa-Flood version 4.1.0"
+    return "CaMa-Flood version 4.2.0"
 
 def CaMa_dir():
     # return "/cluster/data6/menaka/CaMa-Flood_v396a_20200514"
@@ -400,7 +402,7 @@ def option():
     # for CaMa-Flood options
 
 def varout():
-    return "outflw"
+    return "outflw, sfcelv"
     # return "rivout, outflw, fldout, fldhgt" 
     # names of variables to be copied from CaMa-Flood to assim_out
     # *note: give names with comma and space between each name
