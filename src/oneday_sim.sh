@@ -607,6 +607,7 @@ RYR=`printf %04d ${EYEAR}`
 RMO=`printf %02d ${EMON}`
 RDA=`printf %02d ${EDAY}`
 cp restart${RYR}${RMO}${RDA}00.bin restart${RYR}${RMO}${RDA}.bin
+cp restart${RYR}${RMO}${RDA}00.bin.pth restart${RYR}${RMO}${RDA}.bin.pth # for CaMa-Flood v4.2
 
 ###################
 # going back to original directory
