@@ -24,7 +24,7 @@ def mode():
     # 1: Earth2Obs, 2: ERA20CM, 3: VIC_BC_old, 4: biased (ECMWF/ELSE_KIM2009/E2O/ERA20CM), 5: ERA5, 6: VIC_BC
 
 def conflag():
-    return 3
+    return 2
     # flag for observation conversations 
     #  1 - Directly values 
     #  2 - Anomalies
@@ -375,7 +375,8 @@ def CaMa_dir():
     #return "/cluster/data6/menaka/CaMa-Flood_v395b_20191030"
     # return "/cluster/data6/menaka/CaMa-Flood_v4"
     # return "/cluster/data7/menaka/CaMa-Flood_v407"
-    return "/cluster/data6/menaka/CaMa-Flood_v410"
+    # return "/cluster/data6/menaka/CaMa-Flood_v410"
+    return "/cluster/data6/menaka/CaMa-Flood_v420"
     # directory of CaMa-Flood
     # indicate the directory of ./map or ./src and other folders
 
