@@ -545,7 +545,7 @@ def store_out(yyyy,mm,dd): # update on 2023/05/30
         for num in np.arange(1,pm.ens_mem()+1):
             numch = '%03d' % num 
             for var in pm.varout().split(","):
-                shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/"+var.strip()+yyyy+".bin","./assim_out/"+var.strip()+"/"+looptype+"/"+var+yyyy+mm+dd+"_"+numch+".bin")
+                shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/"+var.strip()+yyyy+".bin","./assim_out/"+var.strip()+"/"+looptype+"/"+var.strip()+yyyy+mm+dd+"_"+numch+".bin")
 
 #    looptype = "true"
 #    # storing rivout

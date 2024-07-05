@@ -455,6 +455,7 @@ LADPSTP  = ${LADPSTP}                  ! true: use adaptive time step
 LPTHOUT  = ${LPTHOUT}                  ! true: activate bifurcation scheme
 LDAMOUT  = ${LDAMOUT}                  ! true: activate dam operation (under development)
 LRESTART = ${LRESTART}                 ! true: initial condition from restart file
+LSTOONLY = ${LSTOONLY}                 ! true: storage only restart (mainly for data assimilation)
 /
 &NDIMTIME
 CDIMINFO = "${CDIMINFO}"               ! text file for dimention information

@@ -116,9 +116,9 @@ def patch_name():
     # return "amz_06min_S14FD_40"
     # return "amz_06min_S14FD_20"
     # return "glb_15min_S14FD_60"
-    return "conus_06min_ERA5_60_CaMadam" # empirical local patch CaMa-Flood dam
+    # return "conus_06min_ERA5_60_CaMadam" # empirical local patch CaMa-Flood dam
     # return "conus_06min_VIC_BC_60_dam" # empirical local patch dam
-    # return "conus_06min_ERA5_60" # empirical local patch no dam
+    return "conus_06min_ERA5_60" # empirical local patch no dam
     # return "conus_06min_ERA5_60_dam" # empirical local patch dam
     # return "conus_06min_ERA5_80_dam" # empirical local patch dam
     # return "conus_06min_ERA5_80" # empirical local patch no dam (0.80)
@@ -204,7 +204,7 @@ def starttime():
     return (2016,1,1) # start date: [year,month,date]
 
 def endtime():
-    return (2021,1,1) # end date: [year,month,date]
+    return (2021,1,1) # end date: [year,month,date] 
                       # *note: this date is not included
 
 # **************************************************************
@@ -396,14 +396,14 @@ def corrupt():
     # 5 : with corrupted rivhgt, rivwth, rivman, and fldhgt
 
 def option():
-    # return "all" # for bifurcation and dam on
-    return "bif" # for bifurcation on
+    return "all" # for bifurcation and dam on
+    # return "bif" # for bifurcation on
     # return "dam" # for dam on
     # return "levee" # for levee on
     # for CaMa-Flood options
 
 def varout():
-    return "outflw, sfcelv"
+    return "outflw"
     # return "rivout, outflw, fldout, fldhgt" 
     # names of variables to be copied from CaMa-Flood to assim_out
     # *note: give names with comma and space between each name
@@ -456,7 +456,8 @@ def obs_list():
 
 def stat_name(cal=calibrate()):
     # return "sfcelv_50_VIC_BC_conus_06min_2000-2019" # for conus_06min VIC_BC [50 ensembles]
-    return "sfcelv_50_ERA5_conus_06min_2000-2020" # for conus_06min [50 ensembles]
+    # return "sfcelv_50_ERA5_conus_06min_2000-2020" # for conus_06min [50 ensembles]
+    return "sfcelv_dam_50_ERA5_conus_06min_2000-2020" # for conus_06min with dam simulation [50 ensembles]
     # return "sfcelv_20_ERA5_conus_06min_2000-2020" # for conus_06min [20 ensembles]
     # return "sfcelv_49_ECMWF_amz_06min_2000-2014" # original statistic
     # return "sfcelv_bias_ECMWF_amz_06min_2000-2014" # biased runoff statistic
