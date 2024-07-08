@@ -27,6 +27,18 @@ subroutine read_observation(yyyymmdd,obstype,nx,ny,obs,obs_err,mean_obs,std_obs)
 ! dis - discharge
 ! wsa - water surface area
 !=======================================================================
+! get HX - simulations in obervational space with ensembles
+! input 
+!  yyyymmdd  - year month day in YYYYMMDD char format
+!  obstype   - observation type wse, dis, wsa
+!  nx        - x dimension of map 
+!  ny        - y dimension of map
+! output 
+!  obs       - array of observation values
+!  obs_err   - array of observation errors
+!  mean_obs  - array of temporal mean of observations
+!  std_obs   - array of temporal standard deviation of observations
+!=======================================================================
 implicit none
 !-in
 character(len=8),intent(in)         :: yyyymmdd

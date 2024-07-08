@@ -90,7 +90,7 @@ end do
 return
 end subroutine get_ensemble_diff
 !************************************************************************************
-subroutine get_HX(globalvar,local_obs,xlist,ylist,Hobs,nx,ny,nvar,nobs,ne,countnum,HX)
+subroutine get_HX(globalvar,local_obs,xlist,ylist,Hobs,nx,ny,nvar,nobs,ne,countnum,HXb)
 !=======================================================================
 ! get HX - simulations in obervational space with ensembles
 ! input  
@@ -99,32 +99,32 @@ subroutine get_HX(globalvar,local_obs,xlist,ylist,Hobs,nx,ny,nvar,nobs,ne,countn
 !   xlist     - list of x corrdinates
 !   ylist     - list of y corrdinates
 !   Hobs      - convert observation to only observation space: Hobs[nobs,countnum]
-!   nx        - x dimension of global map
-!   ny        - y dimension of global map
+!   nx        - x dimension of map
+!   ny        - y dimension of map
 !   nvar      - number of variables
 !   nobs      - total numer of observations: sum(wse,dis,wsa)
 !   ne        - number of ensembles
 !   countnum  - number pixel in the local patch
 ! output
-!   HX        - simulations in obervational space: HX[nobs,ne]
+!   HXb       - simulations in obervational space: HX[nobs,ne]
 !=======================================================================
 !--in
 integer,intent(in)                             :: nx,ny,numvar,nobs,ne
 real,intent(in)                                :: xlist(countnum),ylist(countnum),local_obs(nvar*countnum)
 real,intent(in)                                :: globalvar(nx,ny,nvar,ne),Hobs(nobs,countnum)
 !--out
-real,intent(out)                               :: HX(nobs,ne)
+real,intent(out)                               :: HXb(nobs,ne)
 !--
 integer                                        :: i,i_m,j_m,var
 ! real                                           :: Xt
-HX=0
+HXb=0
 j=1
 do var=1, numvar
     do i=1, countnum
         i_m=xlist(i)
         j_m=ylist(i)
         if (local_obs(j) == 1.0) then
-            HX(j,:)=globalvar(i_m,j_m,var,:)
+            HXb(j,:)=globalvar(i_m,j_m,var,:)
         end if
     end do
 end do

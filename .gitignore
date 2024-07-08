@@ -39,6 +39,8 @@ calc_stat
 HydroDA*.o*
 HydroDA.o*
 */sfcelv_mean.o*
+etc/prep_obs.o*
+*.o*
 
 #figures
 *.png
@@ -65,3 +67,5 @@ HydroDA.o*
 
 # unnessary f90
 src/data_assim_old.f90
+src/oneday_sim_org.sh
+src/spin_up_org.sh

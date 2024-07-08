@@ -31,7 +31,7 @@ integer(kind=4)                 :: lon_cent,lat_cent,patch_size,patch_side,i,j,k
 integer(kind=4)                 :: patch_start,patch_end,countnumber,targetpixel
 !integer*4                       :: S_lon_cent,S_lat_cent
 integer,allocatable             :: local_obs(:),iwork(:),ifail(:),H(:,:)!,localx(:,:,:)
-real,allocatable                :: xf_m(:),xf(:,:),globalx(:,:,:),xa(:,:)!,H(:,:)!xa_m(:),,localx_line(:)
+real,allocatable                :: xf_m(:),xf(:,:),globalx(:,:,:),xa(:,:),globalhxb(:,:,:,:)!,H(:,:)!xa_m(:),,localx_line(:)
 real,allocatable                :: meanglobalx(:,:,:),stdglobalx(:,:,:),meanglobaltrue(:,:),stdglobaltrue(:,:)
 integer                         :: ens_num,num,ios,ovs,info,info2,errflg,m
 character(len=3)                :: numch
@@ -442,12 +442,12 @@ fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/std_sfcelv.bin"
 ! update stdglobalture
 !stdglobaltrue=(sum(stdglobalx(:,:,:),dim=3)/real(ens_num))
 
-! read WSE from all model
+! read water storage - prognostic variable from all model
 allocate(globalx(lonpx,latpx,ens_num))
 globalx=0
 do num=1,ens_num
     write(numch,'(i3.3)') num
-    fname=trim(adjustl(expdir))//"/CaMa_out/"//yyyymmdd//"A"//numch//"/sfcelv"//yyyymmdd(1:4)//".bin"
+    fname=trim(adjustl(expdir))//"/CaMa_out/"//yyyymmdd//"A"//numch//"/storge"//yyyymmdd(1:4)//".bin" ! storage (??) | restart
     ! fname=trim(adjustl(expdir))//"/CaMa_out/"//yyyymmdd//"C"//numch//"/sfcelv"//yyyymmdd(1:4)//".bin"
     !print *, fname
     open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
@@ -460,6 +460,40 @@ do num=1,ens_num
     end if
     close(34)
 end do
+
+!=======================================================================
+! read CMF variables
+!=======================================================================
+! nvar = 1 ==> sfcelv
+! nvar = 2 ==> sfcelv, outflw
+! nvar = 1 ==> sfcelv, outflw, fldara
+allocate(globalhxb(lonpx,latpx,nvars,ens_num)) ! *** need to add
+globalx=0
+do nvar=1, nvars
+    do num=1,ens_num
+        write(numch,'(i3.3)') num
+        ! open CaMa-Flood variables
+        if (nvar==1) then
+            fname=trim(adjustl(expdir))//"/CaMa_out/"//yyyymmdd//"A"//numch//"/sfcelv"//yyyymmdd(1:4)//".bin"
+        elseif (nvar==1) then
+            fname=trim(adjustl(expdir))//"/CaMa_out/"//yyyymmdd//"A"//numch//"/outflw"//yyyymmdd(1:4)//".bin"
+        else
+            fname=trim(adjustl(expdir))//"/CaMa_out/"//yyyymmdd//"A"//numch//"/fldara"//yyyymmdd(1:4)//".bin"
+        end if
+        ! fname=trim(adjustl(expdir))//"/CaMa_out/"//yyyymmdd//"C"//numch//"/sfcelv"//yyyymmdd(1:4)//".bin"
+        !print *, fname
+        open(34,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="old",iostat=ios)
+        if(ios==0)then
+            read(34,rec=1) globalx(:,:,nvar,num)
+        else
+            write(*,*) "no x :", fname
+            write(82,*) "no x at:", fname
+            write(78,*) "no x at:", fname
+        end if
+        close(34)
+    end do
+end do
+
 
 ! update globalx
 !globalx=globalx-meanglobalx
@@ -609,6 +643,9 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         ! open emperical local patch
         write(llon,'(i4.4)') lon_cent
         write(llat,'(i4.4)') lat_cent
+!*************************************************************************************
+! mod_patch ==> read_elp
+!*************************************************************************************
         !============================
         ! read emperical local patch 
         !============================
@@ -636,6 +673,9 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         ! ! !write(*,23) xlist,ylist,wgt
         ! ! close(34)
         !--
+!*************************************************************************************
+! mod_patch ==> assign_local_patch
+!*************************************************************************************
         !============================
         ! assign local patch 
         !============================
@@ -676,6 +716,9 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         !print*, patch_start,patch_end
         !print*,"^^^^^^^^^^^^^^^^^"
         !print*, lon_cent,lat_cent
+!*************************************************************************************
+! mod_obser ==> read_local_obs
+!*************************************************************************************
         !====================================================
         ! read local observations
         !====================================================
@@ -732,21 +775,51 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         ! !     !end if
         ! ! end do
         !---
-        local_obs=0
+        ! ! local_obs=0
 
-        ! satellite observation 
+        ! observation 
         local_obs=(local_sat/=-9999.0)*(-1) ! .true.=1 or .false.=0
-        write(72,*) lon_cent,lat_cent,lat,lon,local_obs
-        write(79,*) "satellite observations",lon_cent,lat_cent,lat,lon,local_obs
+        ! calculate the number of observations
+        if(sum(local_obs)==0)then
+            !xa=xf
+            errflg=1
+            !write(*,*) "error",errflg
+            ! write(82,*) lat,lon,"error",errflg
+            goto 9999
+        end if
+
+        !------------------------------------------------------------------------------------------------
+        ! ========= reach here only when there is at least one observation inside the local patch =======
+        !------------------------------------------------------------------------------------------------
+        
+        
+        write(78,*) "=========================================================="
+        !write(78,*) "******************",lat,lon,"*******************"
+        write(78,*) "******************",lon_cent,lat_cent," *******************"
+        write(78,*) "=========================================================="
+        !=========
+        write(*,*) "******************",lon_cent,lat_cent,"*******************"
+        write(78,*) "size",countnum
+        write(78,*) "local obs",sum((local_obs/=0)*(-1))
+
+
+
+        ! ! write(72,*) lon_cent,lat_cent,lat,lon,local_obs
+        ! ! write(79,*) "satellite observations",lon_cent,lat_cent,lat,lon,local_obs
 
         ! make xf =====================================
         !write(*,*) "make xf"
+!*************************************************************************************
+! mod_varxf ==> local_xf
+!*************************************************************************************
         !====================================================
         ! read local prognostic variable
         !====================================================
         allocate(xf(countnum,ens_num))!localx(countnum,countnum,ens_num),
         xf=0
+        ! get the local xf matrix for local patch
         call local_xf(globalx,xlist,ylist,countnum,patch_start,patch_end,lonpx,latpx,ens_num,xf)
+
         ! ! xf=0
         ! ! !print*,"L538: read model forcasts"
         ! ! j=1
@@ -777,26 +850,18 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         ! variables
         deallocate(local_sat,lag,xlist,ylist,wgt)
 
-        errflg=0
-        ! calculate the number of observations
-        if(sum(local_obs)==0)then
-            !xa=xf
-            errflg=1
-            !write(*,*) "error",errflg
-            write(82,*) lat,lon,"error",errflg
-            goto 9999
-        end if
-        !------------------------------------------------------------------------------------------------
-        ! ========= reach here only when there is at least one observation inside the local patch =======
-        !------------------------------------------------------------------------------------------------
-        write(78,*) "=========================================================="
-        !write(78,*) "******************",lat,lon,"*******************"
-        write(78,*) "******************",lon_cent,lat_cent," *******************"
-        write(78,*) "=========================================================="
-        !=========
-        write(*,*) "******************",lon_cent,lat_cent,"*******************"
-        write(78,*) "size",countnum
-        write(78,*) "local obs",sum((local_obs/=0)*(-1))
+        
+        ! ! do assimilaion from here
+        ! errflg=0
+        ! ! calculate the number of observations
+        ! if(sum(local_obs)==0)then
+        !     !xa=xf
+        !     errflg=1
+        !     !write(*,*) "error",errflg
+        !     write(82,*) lat,lon,"error",errflg
+        !     goto 9999
+        ! end if
+
 
         ! inflation parameter
         if (rho_fixed==-1.0) then
@@ -860,6 +925,15 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         write(79,*) "================================================"
         write(79,*) lon_cent,lat_cent !lat,lon
         write(79,*) "wt:", matmul(H,local_wgt)
+
+        ! read observations xt variable
+        call read_local_obs(xlist,ylist,conflag,obs,obs_err,mean_obs,std_obs,countnum,patch_start,patch_end,nx,ny,nvar,local_sat,xt,local_err,vobs)
+
+        call get_Hobs(local_sat,countnum,nvar,vobs,nobs,Hobs)
+        !===============================================================
+        ! do data assimilation here
+        !===============================================================
+        call letkf_core(ne,nobs,HEf,Rdiag,Rwgt,Yo,HXb,parm_infl,min_infl,infl_flg,T,errflg)
 
         ! make R (NEW: add weigtage) ============================
         ! added observation localization
@@ -1085,6 +1159,7 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         write(*,*)"rho",rho,rho_min
         if (rho<rho_min) rho=rho_min
         write(73,*) lon_cent,lat_cent,"rho",rho,"rho_min",rho_min
+        
         !---
         parm_infl(lon_cent,lat_cent)=rho
         !write(*,*) target_pixel,shape(xa), xa(target_pixel,num)

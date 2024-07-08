@@ -46,9 +46,9 @@ data_assim.f90
  |- mod_patch.f90
  |- mod_varxf.f90
 
-1. mod_letkf.f90 - module for calculation analysis using LETKF (model independet code uses intel mkl library)
+1. mod_letkf.f90 - module for calculation analysis using LETKF (model independent code uses intel mkl library)
 2. mod_obser.f90 - module for procedures on observation (reading observation, observation error etc.)
-3. mod_patch.f90 - module for importing emperical local patches or other conventional local patches. (Emperical local patches: https://github.com/MenakaRevel/Empirical_LocalPatch.git)
+3. mod_patch.f90 - module for importing empirical local patches or other conventional local patches. (Empirical local patches: https://github.com/MenakaRevel/Empirical_LocalPatch.git)
 4. mod_varxf.f90 - module for getting CaMa-Flood variables
 +++++
 x. data_assim.f90 - main program for data assimilation (uses mod_letkf, mod_obser, and mod_patch)
