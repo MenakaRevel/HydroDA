@@ -305,9 +305,11 @@ def copy_corrupted_restart(inputlist):
     print "copy restart",n_yyyy,n_mm,n_dd,"C"+numch
     return 0
 ###########################
-def copy_stoonly(iname,oname): # for CaMa_Flood v395b
-    org=np.fromfile(iname,np.float32).reshape(6,-1)
-    org[0:2].tofile(oname)
+def copy_stoonly(iname,oname): # for CaMa_Flood v420
+    nx,ny, _ = pm.map_dimension() # read map dimension
+    # print ('copy_stoonly',nx, ny, oname)
+    org=np.fromfile(iname,np.float32).reshape(-1,ny,nx)
+    org.tofile(oname) #[0:2]
     return 0
 ###########################
 def assim_at_fort(yyyy,mm,dd,day): #previous --> used
@@ -380,6 +382,8 @@ def make_initial_restart(): # updated the name
         #os.system("cp ./CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin ./CaMa_in/restart/assim/restart"+yyyy+mm+dd+"A"+numch+".bin")
         # copy_stoonly(exp_dir+"CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin",exp_dir+"CaMa_in/restart/open/restart"+yyyy+mm+dd+"C"+numch+".bin")
         # copy_stoonly(exp_dir+"CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin",exp_dir+"CaMa_in/restart/assim/restart"+yyyy+mm+dd+"A"+numch+".bin")
+        # print ('copy restart .....',infile_opn,outfile_opn)
+        #### ******need to edit here********** ==> just copying is enough no need copy_stoonly
         copy_stoonly(infile_opn,outfile_opn)
         copy_stoonly(infile_asm,outfile_asm)
     return 0

@@ -195,7 +195,7 @@ def endtime():
 # **************************************************************
 # 4. Spinup options
 def spinup_mode():
-    return 0
+    return 3
     # 0: do spin up simulation for both (corrupted and true) simulation
     # 1: do spin up only at corrupted simulation
     # 2: do spin up only at true simulation
