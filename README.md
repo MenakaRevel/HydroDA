@@ -13,11 +13,11 @@
 
    out : output folder
 
-   inp : folder containg input runoff forcing
+   inp : folder contains input runoff forcing
 
-   dat : folder containg river realted data
+   dat : folder contains river related data
 
-   img : folder containing codes for preapring images
+   img : folder containing codes for preparing images
 
    etc : folder containing code for miscellaneous 
    
@@ -43,4 +43,7 @@ Reference:
 1. Revel, M., Yamazaki, D., & Kanae, S. (2018). Model Based Observation Localization Weighting Function for Amazon Mainstream. Journal of Japan Society of Civil Engineers, Ser. B1 (Hydraulic Engineering), 74(5), I_157-I_162. https://doi.org/10.2208/jscejhe.74.5_I_157
 2. Revel, M., Ikeshima, D., Yamazaki, D., & Kanae, S. (2019). A Physically Based Empirical Localization Method for Assimilating Synthetic SWOT Observations of a Continental-Scale River: A Case Study in the Congo Basin,Water, 11(4), 829. https://doi.org/10.3390/w11040829
 3. Revel, M., Ikeshima, D., Yamazaki, D., & Kanae, S. (2020). A framework for estimating global‐scale river discharge by assimilating satellite altimetry. Water Resources Research, 1–34. https://doi.org/10.1029/2020wr027876
-4. Yamazaki, D., Kanae, S., Kim, H., & Oki, T. (2011). A physically based description of floodplain inundation dynamics in a global river routing model. Water Resources Research, 47(4), 1–21. https://doi.org/10.1029/2010WR009726
+4. Revel, M., Zhou, X., Yamazaki, D., & Kanae, S. (2023). Assimilation of transformed water 
+surface elevation to improve river discharge estimation in a continental-scale river. 
+Hydrology and Earth System Sciences, 27(3), 647–671. https://doi.org/10.5194/hess-27-647-2023
+5. Yamazaki, D., Kanae, S., Kim, H., & Oki, T. (2011). A physically based description of floodplain inundation dynamics in a global river routing model. Water Resources Research, 47(4), 1–21. https://doi.org/10.1029/2010WR009726

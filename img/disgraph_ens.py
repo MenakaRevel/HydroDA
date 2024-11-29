@@ -22,6 +22,7 @@ warnings.filterwarnings("ignore")
 # import CaMa-Flood variable reading using fortran
 sys.path.append('../etc/')
 from read_CMF import read_discharge, read_discharge_multi
+<<<<<<< HEAD
 
 #sys.path.append('../assim_out/')
 # Link the params.py in the experiment dir
@@ -93,27 +94,19 @@ experiment="NOM_WSE_ERA5_SWOT_001"
 # assim_out=pm.DA_dir()+"/out/"+experiment
 # assim_out="../out/"+experiment
 assim_out="/cluster/data6/menaka/HydroDA/out/"+experiment
+=======
+#===============================================================================
+# Experiment name
+#===============================================================================
+experiment="NOM_WSE_VICBC_CGLS_012" #"NOM_WSE_ERA5_CGLS_062" 
+#===============================================================================
+# assim_out="../out/"+experiment
+# assim_out="/cluster/data7/menaka/HydroDA/out/"+experiment
+assim_out="/cluster/data8/menaka/HydroDA/out/"+experiment
+>>>>>>> dev_virtual
 print (assim_out)
-#assim_out="assim_out_E2O_wmc"
-#assim_out="assim_out_E2O_womc_0"
-#assim_out="assim_out_ECMWF_womc_baised_0"
-#assim_out="assim_out_ECMWF_womc_baised"
-#assim_out="assim_out_ECMWF_womc_baised_if"
-#assim_out="assim_out_ECMWF_womc_baised_0.90"
-#assim_out="assim_out_ECMWF_womc_baised_0.80"
-#assim_out="assim_out_ECMWF_womc_baised_0.75"
-#assim_out="assim_out_ECMWF_womc_baised_0.20"
-#assim_out="assim_out_ECMWF_womc_baised_0.50"
-#assim_out="assim_out_ECMWF_womc_baised_if_fixed1.08"
-#assim_out="assim_out_ECMWF_womc_baised_if_fixed1.10"
-#assim_out="assim_out_ECMWF_womc_baised_if_adaptive"
-#assim_out="assim_out"
-#assim_out="assim_out_biased_womc"
-#assim_out="assim_out_biased_wmc"
-#os.system("mkdir ../assim_out/img")
-#os.system("mkdir ../assim_out/img/disgraph")
-
-# os.system("ln -sf "+assim_out+"/params.py params.py")
+#===============================================================================
+# HydroDA related functions
 sys.path.append(assim_out)
 import params as pm
 import read_grdc as grdc
@@ -249,7 +242,7 @@ def read_dis_multi(ix1, iy1, ix2, iy2, syear, eyear, indir):
     dis = np.zeros( (len(ix1), nbdays), 'f')
     dis_max = np.zeros( (len(ix1), nbyears), 'f')
     for year in range(syear, eyear+1):
-        print year
+        print (year)
         s_days = int( (datetime.date(year , 1,1) - datetime.date(syear, 1, 1)). days)
         e_days = int( (datetime.date(year+1, 1, 1) - datetime.date(syear, 1, 1)). days)
         
@@ -274,8 +267,8 @@ nx     = int(filter(None, re.split(" ",lines[0]))[0])
 ny     = int(filter(None, re.split(" ",lines[1]))[0])
 gsize  = float(filter(None, re.split(" ",lines[3]))[0])
 #----
-syear,smonth,sdate=pm.starttime()#2003,1,1 #pm.starttime()#2004#1991 # 2009,1,1 #
-eyear,emonth,edate=pm.endtime() #2004,1,1 #2005,1,1 # 2004,1,1 # 2010,1,1 # 2012,1,1 # 2011,1,1 #
+syear,smonth,sdate=2016,1,1 #pm.starttime()
+eyear,emonth,edate=2019,1,1 #2020,1,1 #pm.endtime()
 #month=1
 #date=1
 start_dt=datetime.date(syear,smonth,sdate)
@@ -291,7 +284,7 @@ nbdays=int(last)
 #else:
 #    last=365
 
-ncpus=10
+ncpus=20
 #last=89
 N=int(last)
 print ("days: ",N)
@@ -307,7 +300,7 @@ river=[]
 # rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZON","MEKONG","IRRAWADDY","VOLGA", "NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
 # rivernames  = ["AMAZON"]
 # rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZON","IRRAWADDY","VOLGA","NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
-# rivernames  = ["AMAZON", "MISSISSIPPI","MEKONG", "VOLGA"]
+# rivernames  = ["AMAZON", "MISSISSIPPI","MEKONG", "VOLGA", "COLORADO","MISSOURI","NIGER"]
 #rivernames  = ["AMAZON"]
 # rivernames  = ["COLORADO"]
 # rivernames  = ["CHURCHILL"]
@@ -315,7 +308,7 @@ river=[]
 # rivernames = grdc.grdc_river_name_v396()
 rivernames = ['MACKENZIE']
 for rivername in rivernames:
-  grdc_id,station_loc,x_list,y_list = grdc.get_grdc_loc_v396(rivername)
+  grdc_id,station_loc,x_list,y_list = grdc.get_grdc_loc_v396(rivername,fname=pm.CaMa_dir() + "/map/"+pm.mapname()+"/grdc_loc.txt")
   print (rivername, grdc_id,station_loc)
   river.append([rivername]*len(station_loc))
   staid.append(grdc_id)
@@ -389,7 +382,7 @@ def read_data(inputlist):
     asmfile=np.fromfile(fname,np.float32).reshape([ny,nx])
     #-------------
     for point in np.arange(pnum):
-        ix1,iy1,ix2,iy2=grdc.get_grdc_station_v396(pname[point])
+        ix1,iy1,ix2,iy2=grdc.get_grdc_station_v396(pname[point],fname=pm.CaMa_dir() + "/map/"+pm.mapname()+"/grdc_loc.txt")
         if ix2 == -9999 or iy2 == -9999:
             tmp_opn[dt,num,point]=opnfile[iy1,ix1]
             tmp_asm[dt,num,point]=asmfile[iy1,ix1]
@@ -403,6 +396,7 @@ opn = np.ctypeslib.as_array(shared_array_opn)
 asm = np.ctypeslib.as_array(shared_array_asm)
 p.terminate()
 
+#-----------------------------------
 # res = map(read_data, inputlist)
 # opn = np.ctypeslib.as_array(shared_array_opn)
 # asm = np.ctypeslib.as_array(shared_array_asm)
@@ -529,11 +523,16 @@ def make_fig(point):
 #        plt.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color=colors["assimilated"],linewidth=0.3,alpha=0.5)
 #
 #    plt.ylim(ymin=0)
-    fig, ax1 = plt.subplots()
     if exptype=="virtual":
         # org=read_dis()
         ix1,iy1,ix2,iy2=grdc.get_grdc_station_v396(pname[point])
-        indir = "/work/a04/julien/CaMa-Flood_v4/out/coupled-model2"
+        # indir = "/work/a04/julien/CaMa-Flood_v4/out/coupled-model2"
+        # indir = "/cluster/data6/menaka/CaMa-H08/out/obs_org"
+        # indir = "/cluster/data6/menaka/CaMa-H08/out/obs_rivhgt"
+        # indir = "/cluster/data6/menaka/CaMa-H08/out/obs_rivwth"
+        indir = "/cluster/data6/menaka/CaMa-H08/out/obs_rivman"
+        # indir = "/cluster/data6/menaka/CaMa-H08/out/obs_fldhgt"
+        # indir = "/cluster/data6/menaka/CaMa-H08/out/obs_corr_all"
         # indir = pm.obs_dir()
         org=read_dis(ix1, iy1, ix2, iy2, syear, eyear, indir)
         # org=grdc.grdc_dis(staid[point],syear,eyear-1)
@@ -568,9 +567,9 @@ def make_fig(point):
     #xxlist=np.linspace(0,N,(eyear-syear)+1)
     #xlab=np.arange(syear,eyear+1,1)
     #xxlab=[calendar.month_name[i][:3] for i in range(1,13)]
-    if eyear-syear > 8:
+    if eyear-syear > 5:
         dtt=2
-        dt=int(math.ceil(((eyear-syear)+1)/5.0))
+        dt=int(math.ceil(((eyear-syear)+1)/2.0))
     elif eyear-syear > 10:
         dtt=5
         dt=int(math.ceil(((eyear-syear)+1)/5.0))
@@ -695,6 +694,7 @@ def make_fig(point):
 #    ax2.set_xlim(xmin=0,xmax=last+1)
 #    print swt[point]
     plt.legend(lines,labels,ncol=1,loc='upper right') #, bbox_to_anchor=(1.0, 1.0),transform=ax1.transAxes)
+<<<<<<< HEAD
     if '/' in pname[point]:
         station_loc_list=pname[point].split("/")
     else:
@@ -706,6 +706,12 @@ def make_fig(point):
     station_name=station_loc_list
         # station_name="-".join(station_loc_list) 
     
+=======
+    station_loc_list=pname[point].split("/")
+    print (station_loc_list)
+    station_name="".join(station_loc_list[0].split())
+    # station_name="-".join(station_loc_list) 
+>>>>>>> dev_virtual
     print ('--- saving figure',river[point]+"-"+station_name+".png")
     plt.savefig(assim_out+"/figures/disgraph/"+river[point]+"-"+station_name+".png",dpi=500)
     return 0
@@ -729,9 +735,15 @@ def make_fig(point):
 
 
 
+<<<<<<< HEAD
 
 # para_flag=1
 para_flag=0
+=======
+# print (last)
+para_flag=1
+# para_flag=0
+>>>>>>> dev_virtual
 #--
 if para_flag==1:
     p=Pool(ncpus)

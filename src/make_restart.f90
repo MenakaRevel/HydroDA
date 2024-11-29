@@ -6,7 +6,11 @@ character(len=128)              :: fname,buf,camadir,expdir,mapname
 real                            :: gsize,west, north, east, south ! map boundries
 integer                         :: latpx,lonpx,nflp    ! pixel size, calculated
 ! real,allocatable                :: rivsto(:,:),fldsto(:,:) ! put to restart file
+<<<<<<< HEAD
 real,allocatable                :: rivsto(:,:),fldsto(:,:),damsto(:,:),levsto(:,:) ! Modified by Youjiang, put to restart file *** levsto added for restart file with dimensions (4,ny,nx)
+=======
+real,allocatable                :: rivsto(:,:),fldsto(:,:),damsto(:,:) ! Modified by Youjiang, put to restart file
+>>>>>>> dev_virtual
 
 real,allocatable                :: elevtn(:,:)
 
@@ -235,7 +239,11 @@ close(34)
 allocate(rivsto_max(lonpx,latpx),oceanmask(lonpx,latpx),fldstage(lonpx,latpx))
 ! allocate(fldfrac(lonpx,latpx),rivdph(lonpx,latpx),rivsto(lonpx,latpx),flddph(lonpx,latpx),fldsto(lonpx,latpx))
 ! Modified by Youjiang Shen
+<<<<<<< HEAD
 allocate(fldfrac(lonpx,latpx),rivdph(lonpx,latpx),rivsto(lonpx,latpx),damsto(lonpx,latpx),levsto(lonpx,latpx),flddph(lonpx,latpx),fldsto(lonpx,latpx))
+=======
+allocate(fldfrac(lonpx,latpx),rivdph(lonpx,latpx),rivsto(lonpx,latpx),damsto(lonpx,latpx),flddph(lonpx,latpx),fldsto(lonpx,latpx))
+>>>>>>> dev_virtual
 
 
 ! calc river storage max

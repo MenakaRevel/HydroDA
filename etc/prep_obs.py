@@ -169,21 +169,22 @@ def vswot_data(yyyy,mm,dd):
 	# prepare sythetic observations using
 	# pre-simulated data
 	# river width thershold
-	rivwdth_thr=50.0 #m
+	obs=obs_SWOT(yyyy,mm,dd)
+	# rivwdth_thr=50.0 #m
 	nx,ny,gsize = map_dimension()
-	ny_swot = min(ny,640)
-	day=SWOT_day(yyyy,mm,dd)
-	SWOTDD="%02d"%(day)
-	fname="../sat/mesh_day"+SWOTDD+".bin" # for glb_15min
-	mesh_in=np.fromfile(fname,np.float32).reshape([ny_swot,nx])
-	mesh=(mesh_in>=10)*(mesh_in<=60)
-	meshP=mesh-1000*(mesh<0.1)
-	SWOTmesh=np.zeros([ny,nx],np.float32)
-	SWOTmesh[40:680,:]=meshP
-	fname=CaMa_dir()+"/map/"+mapname()+"/rivwth_gwdlr.bin"
-	rivwth=np.fromfile(fname,np.float32).reshape(ny,nx)
-	damloc=dam_loc()
-	obs=(SWOTmesh>=1.0)*(rivwth>=rivwdth_thr)*(damloc>0.0)*1.0
+	# ny_swot = min(ny,640)
+	# day=SWOT_day(yyyy,mm,dd)
+	# SWOTDD="%02d"%(day)
+	# fname="../sat/mesh_day"+SWOTDD+".bin" # for glb_15min
+	# mesh_in=np.fromfile(fname,np.float32).reshape([ny_swot,nx])
+	# mesh=(mesh_in>=10)*(mesh_in<=60)
+	# meshP=mesh-1000*(mesh<0.1)
+	# SWOTmesh=np.zeros([ny,nx],np.float32)
+	# SWOTmesh[40:680,:]=meshP
+	# fname=CaMa_dir()+"/map/"+mapname()+"/rivwth_gwdlr.bin"
+	# rivwth=np.fromfile(fname,np.float32).reshape(ny,nx)
+	# damloc=dam_loc()
+	# obs=(SWOTmesh>=1.0)*(rivwth>=rivwdth_thr)*(damloc>0.0)*1.0
 	lname =[]
 	xlist =[]
 	ylist =[]
@@ -199,28 +200,96 @@ def vswot_data(yyyy,mm,dd):
 	year=int(yyyy)
 	mon=int(mm)
 	day=int(dd)
-	if calendar.isleap(year):
-		nt=366
-	else:
-		nt=365
+	nt = 366 if calendar.isleap(year) else 365
+	# if calendar.isleap(year):
+	# 	nt=366
+	# else:
+	# 	nt=365
 	orgfile=np.fromfile(fname,np.float32).reshape([nt,ny,nx])
-	obs_err=SWOT_observation_error()
+	#===================================
+	date = datetime.date(year, mon, day)
+	day_of_year = date.timetuple().tm_yday
+	seed=int(day_of_year)
+	obs_err=SWOT_observation_error(seed)
 	#-----------------------
 	start_dt=datetime.date(year,1,1)
 	target_dt=datetime.date(year,mon,day)
 	it=(target_dt-start_dt).days
+	#-----------------------
+	# calculate mean and std of wse
+	syear,smon,sday=starttime()
+	eyear,emon,eday=endtime()
+	SWOTmean,SWOTstd=calc_stat_SWOT(syear,eyear)
 	for ix in np.arange(nx):
 		for iy in np.arange(ny):
+			# print (obs[iy,ix])
 			if obs[iy,ix] == 1.0:
-				wse=orgfile[it,iy,ix] + err_rand(obs_err,ix,iy)
+				random.seed(seed)
+				wse=orgfile[it,iy,ix] + err_rand(obs_err,ix,iy,seed)
 				# print (ix,iy,wse[0])
 				l_wse.append(wse[0])
 				xlist.append(ix+1)
 				ylist.append(iy+1)
-				m_wse.append(-9999.0)
-				s_wse.append(-9999.0)
+				m_wse.append(SWOTmean[iy,ix])
+				s_wse.append(SWOTstd[iy,ix])
 				l_sat.append("SWOT")
 	return xlist, ylist, l_wse, m_wse, s_wse, l_sat
+####################################
+def calc_stat_SWOT(syear,eyear):
+	"""calculate statistics of SWOT data"""
+	nx,ny,gsize = map_dimension()
+	ny_swot = min(ny,640)
+	obs=np.zeros([get_days(syear, eyear),ny,nx],np.float32)
+	for year in np.arange(syear,eyear+1):
+		nt = 366 if calendar.isleap(year) else 365
+		#-----------------------
+		start_dt=datetime.date(year,1,1)
+		target_dt=datetime.date(year,12,31)
+		it=(target_dt-start_dt).days
+		#-----------------------
+		odir=obs_dir()
+		fname=odir+"/sfcelv"+str(year)+".bin"
+		orgfile=np.fromfile(fname,np.float32).reshape([nt,ny,nx])
+		# obs_err=SWOT_observation_error()
+		#-----------------------
+		for day in np.arange(nt):
+			target_dt=start_dt+datetime.timedelta(days=day)
+			yyyy="%04d"%(target_dt.year)
+			mm="%02d"%(target_dt.month)
+			dd="%02d"%(target_dt.day)
+			#-----------------------
+			random.seed(day)
+			obs_err=SWOT_observation_error(day)
+			obs[day,:,:]=obs_SWOT(yyyy,mm,dd)+err_rand_array(obs_err,day)
+	#-----------------------
+	SWOTOBS=ma.masked_where(obs!=1.0,orgfile).filled(-9999.0)
+	# calculate statistics
+	#-----------------------
+	# mean
+	mean=np.mean(ma.masked_equal(SWOTOBS,-9999.0),axis=0)
+	std=np.std(ma.masked_equal(SWOTOBS,-9999.0),axis=0)
+	#-----------------------
+	return mean,std
+####################################
+def obs_SWOT(yyyy,mm,dd):
+	"""get SWOT observation days"""
+	# river width thershold
+	rivwdth_thr=50.0 #m
+	nx,ny,gsize = map_dimension()
+	ny_swot = min(ny,640)
+	day=SWOT_day(yyyy,mm,dd)
+	SWOTDD="%02d"%(day)
+	fname="../sat/mesh_day"+SWOTDD+".bin" # for glb_15min
+	mesh_in=np.fromfile(fname,np.float32).reshape([ny_swot,nx])
+	mesh=(mesh_in>=10)*(mesh_in<=60)
+	meshP=mesh-1000*(mesh<0.1)
+	SWOTmesh=np.zeros([ny,nx],np.float32)
+	SWOTmesh[40:680,:]=meshP
+	fname=CaMa_dir()+"/map/"+mapname()+"/rivwth_gwdlr.bin"
+	rivwth=np.fromfile(fname,np.float32).reshape(ny,nx)
+	damloc=dam_loc()
+	obs=(SWOTmesh>=1.0)*(rivwth>=rivwdth_thr)*(damloc>0.0)*1.0
+	return obs
 ####################################
 def SWOT_day(yyyy,mm,dd):
 	st_year,st_month,st_date=starttime()
@@ -230,7 +299,7 @@ def SWOT_day(yyyy,mm,dd):
 	days=days.days
 	return days%21+1
 #########################
-def SWOT_observation_error():
+def SWOT_observation_error(seed):
 	"""observation error of WSE depending on the L*W of each pixel
 	used sigma*(1/l)*(1/w) l=k*L, w=q*W  Rodrigaz et al 2017:
 	According to CaMa k=0.25, q=0.85"""
@@ -239,6 +308,7 @@ def SWOT_observation_error():
 	# 	obs_err=np.fromfile(fname,np.float32).reshape(ny,nx)
 	# 	return 0
 	# else:
+	random.seed(seed)
 	nx,ny,gsize = map_dimension()
 	k=1.00 # assume nearest part to the unit catchment
 	q=1.00 # used 1.0 -> river width variability is 30%
@@ -262,13 +332,33 @@ def SWOT_observation_error():
 	# obs_err.tofile(fname)
 	return obs_err
 #########################
-# SWOT ==> **Only for Mackenzie SWOT River
+def err_rand(obs_err,ix,iy,seed):
+	"""make random values to add to true values"""
+	# nx,ny,gsize = pm.map_dimension()
+	# fname=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out/obs/obs_err.bin"
+	# obs_err=np.fromfile(fname,np.float32).reshape(ny,nx)
+	# obs_err=obs_err*((obs_err<=0.25)*1.0) + 0.25*((obs_err>0.25)*1.0)
+	random.seed(seed)
+	rand = np.random.normal(0.0,obs_err[iy,ix],1)
+	return rand
 #########################
-# def SWOT_data(yyyy,mm,dd):
-# 	# read SWOT data from url
-# 	# use pandas, requests
-# 	# 
-
+def err_rand_array(obs_err,seed):
+	"""make random values to add to true values"""
+	# nx,ny,gsize = pm.map_dimension()
+	# fname=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out/obs/obs_err.bin"
+	# obs_err=np.fromfile(fname,np.float32).reshape(ny,nx)
+	# obs_err=obs_err*((obs_err<=0.25)*1.0) + 0.25*((obs_err>0.25)*1.0)
+	ny,nx=obs_err.shape
+	obs_err1=np.zeros((ny,nx),np.float32)
+	obs_err1 = [[(random.seed(seed+iy*nx+ix), np.random.normal(0.0, obs_err[iy, ix], 1))[1] for ix in range(nx)] for iy in range(ny)]
+	obs_err1 = np.array(obs_err1).reshape(ny,nx)
+	# for iy in range(ny):
+	# 	for ix in range(nx):
+	# 		seed=seed+iy*nx+ix
+	# 		random.seed(seed)
+	# 		rand = np.random.normal(0.0,obs_err[iy,ix],1)
+	# 		obs_err1[iy,ix]=rand
+	return obs_err1
 #########################
 # CGLS
 #########################
@@ -381,14 +471,11 @@ def CGLS_data(yyyy,mm,dd):
 		l_sat.append(sat)
 	return xlist, ylist, l_wse, m_wse, s_wse, l_sat
 #########################
-def err_rand(obs_err,ix,iy):
-	"""make random values to add to true values"""
-	# nx,ny,gsize = pm.map_dimension()
-	# fname=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out/obs/obs_err.bin"
-	# obs_err=np.fromfile(fname,np.float32).reshape(ny,nx)
-	# obs_err=obs_err*((obs_err<=0.25)*1.0) + 0.25*((obs_err>0.25)*1.0)
-	rand = np.random.normal(0.0,obs_err[iy,ix],1)
-	return rand
+def get_days(syear, eyear):
+    start_date = datetime.date(syear, 1, 1)
+    end_date = datetime.date(eyear, 12, 31)
+    delta = (end_date - start_date).days + 1
+    return delta
 #########################
 def dam_loc():
 	"Prepare dam location"
@@ -447,7 +534,7 @@ def prepare_obs(dir0="./"):
 	mk_dir(dir0)
 	#=========================
 	syear,smon,sday=starttime()
-	eyear,emon,eday=endtime()
+	eyear,emon,eday=2001,1,1 #endtime()
 	start_dt=datetime.date(syear,smon,sday)
 	end_dt=datetime.date(eyear,emon,eday)
 	start=0
@@ -463,10 +550,10 @@ def prepare_obs(dir0="./"):
 		# print (yyyy,mm,dd) #,obs_dir
 		inputlist.append([yyyy,mm,dd,dir0])
 	# write text files parallel
-	p=Pool(20)
-	p.map(write_txt,inputlist)
-	p.terminate()
-	# map(write_txt,inputlist)
+	# p=Pool(20)
+	# p.map(write_txt,inputlist)
+	# p.terminate()
+	map(write_txt,inputlist)
 	return 0
 ####################################
 ############# parameters ###########
@@ -477,7 +564,7 @@ def starttime():
 def endtime():
     return 2024,11,30
 ####################################
-def obs_list():
+def obs_list(): ## only for real observations
     # return "../dat/HydroWeb_alloc_amz_06min_QC0_simulation.txt"
 	# return "../dat/HydroWeb_alloc_amz_06min_2002-2020.txt"
 	# return "../dat/HydroWeb_alloc_glb_15min.txt"
@@ -486,7 +573,7 @@ def obs_list():
 	# return "../dat/CGLS_alloc_conus_06min_DIR.txt"
 	return "../dat/CGLS_alloc_conus_06min_org.txt"
 ####################################
-def HydroWeb_list():
+def HydroWeb_list(): ### not used 
     # return "../dat/HydroWeb_alloc_amz_06min_QC0_simulation.txt"
 	# return "../dat/HydroWeb_alloc_amz_06min_2002-2020.txt"
 	# return "../dat/HydroWeb_alloc_conus_06min_org.txt"
@@ -503,13 +590,19 @@ def obs_name():
 def obs_dir():
     # return "/cluster/data7/menaka/HydroDA/obs/HydroWeb"
     # return "/cluster/data6/menaka/HydroWeb"
-	return "/work/a06/menaka/CGLS"
+	# return "/work/a06/menaka/CGLS"
     # return "/cluster/data6/menaka/ensemble_org/CaMa_out/E2O003"
 	# return "/work/a04/julien/CaMa-Flood_v4/out/coupled-model2"
+	# return "/cluster/data6/menaka/CaMa-H08/out/obs_org"
+	# return "/cluster/data6/menaka/CaMa-H08/out/obs_rivhgt"
+	# return "/cluster/data6/menaka/CaMa-H08/out/obs_rivwth"
+	# return "/cluster/data6/menaka/CaMa-H08/out/obs_rivman"
+	# return "/cluster/data6/menaka/CaMa-H08/out/obs_fldhgt"
+	return "/cluster/data6/menaka/CaMa-H08/out/obs_corr_all_001"
 ####################################
 def dam_list():
-	# return "../dat/dam_glb_15min.txt"
-	return "../dat/dam_conus_06min.txt"
+	return "../dat/dam_glb_15min.txt"
+	# return "../dat/dam_conus_06min.txt"
 ####################################
 def CaMa_dir():
 	return "/cluster/data6/menaka/CaMa-Flood_v4"
@@ -518,8 +611,8 @@ def CaMa_dir():
 ####################################
 def mapname():
     # return "amz_06min"
-    # return "glb_15min"
-	return "conus_06min"
+    return "glb_15min"
+	# return "conus_06min"
     # related CaMa-Flood map directory
     # [e.g. : glb_15min, glb_06min, Mkg_06min, etc.]
     # Check 
@@ -534,10 +627,14 @@ def map_dimension():
     gsize  = float(filter(None, re.split(" ",lines[3]))[0])
     return nx,ny,gsize
 ####################################
-def out_dir():
-	return "/cluster/data7/menaka/HydroDA/obs/HydroWeb"
+def out_dir(): ### not used --> give as direct input @L536
+	# return "/cluster/data7/menaka/HydroDA/obs/HydroWeb"
 	# return "/cluster/data7/menaka/HydroDA/obs/HydroWebAll"
 	# return "/cluster/data7/menaka/HydroDA/obs/SWOTH08"
+	# return "/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_org"
+	# return "/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_rivhgt"
+	# return "/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_fldhgt"
+	return "/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_all"
 ####################################
 if __name__ == "__main__":
 	print ("prepare observations")
@@ -545,6 +642,11 @@ if __name__ == "__main__":
 	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/HydroWeb_glb_15min")
 	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/HydroWeb_conus_06min")
 	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/HydroWeb_conus_06min_DIR")
-	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/SWOTH08") # for SWOTH08
+	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_org") # for SWOTH08 no corruption
+	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_rivhgt") # for SWOTH08 rivhgt corrupt
+	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_rivwth") # for SWOTH08 rivwth corrupt
+	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_rivman") # for SWOTH08 rivman corrupt
+	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_fldhgt") # for SWOTH08 fldhgt corrupt
+	prepare_obs("/cluster/data7/menaka/HydroDA/obs/SWOT_CaMaH08_all_001") # for SWOTH08 all parameters corruption
 	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/CGLS_conus_06min_DIR") # CGLS for CONUS for DIR
-	prepare_obs("/cluster/data7/menaka/HydroDA/obs/CGLS_conus_06min") # CGLS for CONUS
+	# prepare_obs("/cluster/data7/menaka/HydroDA/obs/CGLS_conus_06min") # CGLS for CONUS

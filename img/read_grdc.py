@@ -198,7 +198,7 @@ def get_loc_v394(gid):
   
   return ix,iy
 #--
-def get_grdc_loc_v396(name,fname=pm.CaMa_dir() + "/map/"+pm.mapname()+"/grdc_loc.txt"):
+def get_grdc_loc_v396(name,fname="/cluster/data6/menaka/CaMa-Flood_v4/map/glb_15min/grdc_loc.txt"):
   #--ask the river name and a or b
   #  all locations
   #grdc = pm.CaMa_dir() + "/map/glb_15min/grdc_loc.txt"
@@ -292,7 +292,7 @@ def grdc_river_name_v396(fname=pm.CaMa_dir() + "/map/"+pm.mapname()+"/grdc_loc.t
 
   return rivername
 #--
-def get_grdc_station_v396(name,fname=pm.CaMa_dir() + "/map/"+pm.mapname()+"/grdc_loc.txt"):
+def get_grdc_station_v396(name,fname="/cluster/data6/menaka/CaMa-Flood_v4/map/glb_15min/grdc_loc.txt"):
   #--ask the river name and a or b
   #  all locations
   #grdc = pm.CaMa_dir() + "/map/glb_15min/grdc_loc.txt"

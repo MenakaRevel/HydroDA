@@ -1,7 +1,7 @@
 #!/opt/local/bin/python
 # -*- coding: utf-8 -*-
 
-#libralies
+#libraries
 import os
 import itertools
 import numpy as np
@@ -53,7 +53,8 @@ def slink(src,dst):
 ###########################
 def initial(): #used
     # program for initialization
-
+    
+    print ("initializing....")
     # creating output folders
     mkdir("CaMa_out")
     mkdir("CaMa_in")
@@ -76,28 +77,39 @@ def initial(): #used
     mkdir("assim_out/nonassim/assim")
 
     mkdir("assim_out/rest_true")
-    mkdir("assim_out/rivout")
-    mkdir("assim_out/rivout/open")
-    mkdir("assim_out/rivout/assim")
-    mkdir("assim_out/rivout/true")
-    mkdir("assim_out/outflw")
-    mkdir("assim_out/outflw/open")
-    mkdir("assim_out/outflw/assim")
-    mkdir("assim_out/outflw/true")
-    mkdir("assim_out/fldout")
-    mkdir("assim_out/fldout/open")
-    mkdir("assim_out/fldout/assim")
-    mkdir("assim_out/fldout/true")
-    mkdir("assim_out/flddph")
-    mkdir("assim_out/flddph/open")
-    mkdir("assim_out/flddph/assim")
-    mkdir("assim_out/flddph/true")
-    mkdir("err_out")
-    mkdir("assim_out/fldarea/")
-    mkdir("assim_out/fldarea/open")
-    mkdir("assim_out/fldarea/assim")
-    mkdir("assim_out/fldarea/true")
+
+    for var in pm.varout().split(","):
+        mkdir("assim_out/"+var)
+        if pm.run_flag() == 0 or pm.run_flag() == 1:
+            print ("mkdir assim_out/"+var+"/open")
+            mkdir("assim_out/"+var+"/open")
+        print ("mkdir assim_out/"+var+"/assim")
+        mkdir("assim_out/"+var+"/assim")
+
+    # mkdir("assim_out/rivout")
+    # mkdir("assim_out/rivout/open")
+    # mkdir("assim_out/rivout/assim")
+    # mkdir("assim_out/rivout/true")
+    # mkdir("assim_out/outflw")
+    # mkdir("assim_out/outflw/open")
+    # mkdir("assim_out/outflw/assim")
+    # mkdir("assim_out/outflw/true")
+    # mkdir("assim_out/fldout")
+    # mkdir("assim_out/fldout/open")
+    # mkdir("assim_out/fldout/assim")
+    # mkdir("assim_out/fldout/true")
+    # mkdir("assim_out/flddph")
+    # mkdir("assim_out/flddph/open")
+    # mkdir("assim_out/flddph/assim")
+    # mkdir("assim_out/flddph/true")
+    # mkdir("assim_out/fldarea/")
+    # mkdir("assim_out/fldarea/open")
+    # mkdir("assim_out/fldarea/assim")
+    # mkdir("assim_out/fldarea/true")
     
+    # error output folder
+    mkdir("err_out")
+
     # inflation parameter
     mkdir("inflation")
 

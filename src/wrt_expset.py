@@ -61,6 +61,22 @@ def calibration(cal):
     else:
         return "not calibrated (Yamazaki et al,. 2011)"
 ###########################
+def corruption(corrupt):
+    if corrupt==0:
+        return "not corrupted"
+    elif corrupt==1:
+        return "rivhgt corrupted"
+    elif corrupt==2:
+        return "rivwth corrupted"
+    elif corrupt==3:
+        return "rivman corrupted"
+    elif corrupt==4:
+        return "fldhgt corrupted"
+    elif corrupt==5:
+        return "all parameters corrupted"
+    else:
+        return "not corrupted"
+###########################
 def stat_name(conflag,cal):
     if conflag == 1:
         meanname="None"
@@ -87,11 +103,14 @@ def write_text():
         f.write("# Experiment Mode: "+"%d"%(pm.mode())+"\n")
         # Runoff data
         f.write("# Runoff Data: "+pm.input(pm.mode())+", "+pm.runoff_dir()+"\n")
+        # Observations
+        f.write("# Observations: "+pm.obs_name()+", "+pm.obs_dir()+"\n")
         # Time domain for analysis
         f.write("# Start Date: %04d-%02d-%02d\n"%(pm.starttime()))
         f.write("# End Date: %04d-%02d-%02d\n"%(pm.endtime()))
-        # Calibration
+        # Calibration/Corruption
         f.write("# Model Calibration: "+calibration(pm.calibrate())+"\n")
+        # f.write("# Parameter Corruption: "+corruption(pm.corrupt())+"\n")
         # Assimilation Settings
         f.write("# Assimilation Mode: "+assimlation_mode(pm.conflag())+"\n")
         f.write("# Assimilation Domain: \n")
@@ -105,7 +124,11 @@ def write_text():
         f.write("# \tInflation Method : "+inflation_para(pm.rho())+"\n")
         f.write("# Assimilation Statistics: \n")
         f.write("# \tMean : "+stat_name(pm.conflag(),pm.calibrate())[0]+"\n")
-        f.write("# \tStandrad Deviation : "+stat_name(pm.conflag(),pm.calibrate())[1]+"\n")
+        f.write("# \tStandard Deviation : "+stat_name(pm.conflag(),pm.calibrate())[1]+"\n")
+        f.write("# Observation: \n")
+        f.write("# \tProduct Name : "+pm.obs_name()+"\n")
+        f.write("# \tDirectory : "+pm.obs_dir()+"\n")
+        f.write("# Created at : "+str(datetime.datetime.now()))
     return 0
 ###########################
 if __name__=="__main__":

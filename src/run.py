@@ -57,7 +57,7 @@ try:
   print ("make intial inflation")
   init.make_initial_infl()
 
-  # preapre the mean and std for anomaly/normalized assimilation
+  # prepare the mean and std for anomaly/normalized assimilation
   print ("save statistics")
   init.save_statistic()
 
