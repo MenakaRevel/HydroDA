@@ -63,3 +63,7 @@ HydroDA.o*
 
 # VS code 
 */.vscode
+
+# some old files
+./src/oneday_sim_org.sh
+./src/spin_up_org.sh

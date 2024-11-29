@@ -24,7 +24,7 @@ def mode():
     # 1: Earth2Obs, 2: ERA20CM, 3: VIC_BC, 4: biased (ECMWF/ELSE_KIM2009/E2O/ERA20CM), 5: ERA5
 
 def conflag():
-    return 1
+    return 3
     # flag for observation conversations 
     #  1 - Directly values 
     #  2 - Anomalies
@@ -34,7 +34,8 @@ def conflag():
 def mapname():
     # return "amz_06min"
     # return "glb_15min"
-    return "conus_06min"
+    # return "conus_06min"
+    return "Mackenzie_06min"
     # related CaMa-Flood map directory
     # [e.g., : glb_15min, glb_06min, Mkg_06min, etc.]
     # Check 
@@ -59,21 +60,24 @@ def experiment():
 # **************************************************************
 # 2. Data assimilation related definitions
 def assimS():
-    return 20
+    return 50  # Mackenzie River
+    # return 20
     # return -20
     # return -90
     # data Assimilation's Region (South Edge at latitude)
     # *note: should be larger or equal to -80
 
 def assimN():
-    return 55
+    return 70  # Mackenzie River
+    # return 55
     # return 5
     # return 90
     # data Assimilation's Region (North Edge at latitude)
     # *note: should be smaller or equal to 80
 
 def assimW():
-    return -130
+    return -140  # Mackenzie River
+    # return -130
     # return -80
     # return -180
     #return -68.25 # use this for disabling west side of the Amazon basin's observation
@@ -81,7 +85,8 @@ def assimW():
     # *note: should be larger or equal to -170
 
 def assimE():
-    return -60
+    return -100  # Mackenzie River
+    # return -60
     # return -45
     # return 180
     # data Assimilation's Region (East Edge at latitude)
@@ -116,7 +121,9 @@ def patch_name():
     # return "amz_06min_S14FD_40"
     # return "amz_06min_S14FD_20"
     # return "glb_15min_S14FD_60"
-    return "conus_06min_VIC_BC_60_dam" # correlation-based dam
+    # return "conus_06min_VIC_BC_60_dam" # correlation-based dam
+    return "Mackenzie_06min_ERA5_60_CaMadam"
+
 
 def patch_id():
     # return "0.95MS"
@@ -126,10 +133,10 @@ def patch_id():
     # return "0.60MS"
     # return "0.90"
     # return "0.80"
-    # return "0.60"
+    return "0.60"
     # return "0.40"
     # return "0.20"
-    return "0.60-dam"
+    # return "0.60-dam"
 
 def thersold():
     # return 0.95
@@ -158,7 +165,7 @@ def sigma_b():
     # background variance of inflation for adaptive inflation Myoshi et al (2011)
 
 def ens_mem(mode=mode()):
-    return 20
+    return 50
     # if mode == 1:
     #     # return 21
     #     return 49
@@ -179,16 +186,16 @@ def timestep():
     return 86400 # outer timestep in seconds
 
 def starttime():
-    return (2018,1,1) # start date: [year,month,date]
+    return (2024,1,1) # start date: [year,month,date]
 
 def endtime():
-    return (2019,1,1) # end date: [year,month,date]
+    return (2024,11,1) # end date: [year,month,date]
                       # *note: this date is not included
 
 # **************************************************************
 # 4. Spinup options
 def spinup_mode():
-    return 3
+    return 0
     # 0: do spin up simulation for both (corrupted and true) simulation
     # 1: do spin up only at corrupted simulation
     # 2: do spin up only at true simulation
@@ -197,7 +204,7 @@ def spinup_mode():
     ### if initial restart file is ready, spin up simulation is no need
 
 def spinup_end_year():
-    return 2017
+    return 2023
 
 def spinup_end_month():
     return 12
@@ -337,14 +344,16 @@ def true_run(num):
 # 6. CaMa-Flood settings
 def CaMa_ver():
     # return "CaMa-Flood version 3.9.6"
-    return "CaMa-Flood version 4.0.0"
+    # return "CaMa-Flood version 4.0.0"
+    return "CaMa-Flood version 4.2.0"
     # return "CaMa-Flood version 4.07"
 
 def CaMa_dir():
     # return "/cluster/data6/menaka/CaMa-Flood_v396a_20200514"
     #return "/cluster/data6/menaka/CaMa-Flood_v396_20191225"
     #return "/cluster/data6/menaka/CaMa-Flood_v395b_20191030"
-    return "/cluster/data6/menaka/CaMa-Flood_v4"
+    # return "/cluster/data6/menaka/CaMa-Flood_v4"
+    return "/cluster/data6/menaka/CaMa-Flood_v420"
     # return "/cluster/data7/menaka/CaMa-Flood_v407"
     # directory of CaMa-Flood
     # indicate the directory of ./map or ./src and other folders
@@ -371,15 +380,16 @@ def output_er():
 # 7. observations settings
 def obs_name():
     # return "HydroWeb"
-    # return "SWOT"
-    return "CGLS"
+    return "SWOT"
+    # return "CGLS"
 
 def HydroWeb_dir():
     return "/cluster/data6/menaka/HydroWeb"
 
 def obs_dir():
     # return "/cluster/data7/menaka/HydroDA/obs/HydroWeb_conus_06min_DIR"
-    return "/cluster/data7/menaka/HydroDA/obs/CGLS_conus_06min_DIR"
+    # return "/cluster/data7/menaka/HydroDA/obs/CGLS_conus_06min_DIR"
+    return "/cluster/data7/menaka/HydroDA/obs/SWOT_Mackenzie_06min"
     # return "/cluster/data7/menaka/HydroDA/obs/HydroWeb_conus_06min"
     # return "/cluster/data7/menaka/HydroDA/obs/HydroWeb_glb_15min"
     # return "/cluster/data7/menaka/HydroDA/obs/HydroWeb"
@@ -388,7 +398,7 @@ def obs_dir():
 
 def obs_list():
     # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_DIR.txt"
-    return DA_dir()+"/dat/CGLS_alloc_"+mapname()+"_DIR.txt"
+    # return DA_dir()+"/dat/CGLS_alloc_"+mapname()+"_DIR.txt"
     # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_org.txt"
     # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_amz.txt"
     # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_QC.txt"
@@ -396,13 +406,15 @@ def obs_list():
     # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_QC0.txt"
     # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_QCrmse.txt"
     # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_QC0_simulation.txt"
+    return DA_dir()+"/dat/SWOT_alloc_"+mapname()+".txt"
 
 def stat_name(cal=calibrate()):
-    return "sfcelv_49_ECMWF_amz_06min_2000-2014" # original statistic
+    # return "sfcelv_49_ECMWF_amz_06min_2000-2014" # original statistic
     # return "sfcelv_bias_ECMWF_amz_06min_2000-2014" # biased runoff statistic
     # return "sfcelv_corrupt_ECMWF_amz_06min_2000-2014" #  courrpted bathymetry statistic
     # return "sfcelv_bias_corrupt_ECMWF_amz_06min_2000-2014" # biased courrpted bathymetry statistic
     # return "sfcelv_49_E2O_glb_15min_2002-2014"
+    return "sfcelv_50_ERA5_Mackenzie_06min_2023-2024"
 
     # if cal=="yes":
     #     # return "cal_sfcelv_49_E2O_amz_06min_2009-2014" # for long-term statistic simulation calibrated

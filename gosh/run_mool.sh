@@ -49,7 +49,7 @@ export OMP_NUM_THREADS=$NCPUS
 
 # go to working dirctory
 HydroDA="/cluster/data6/menaka/HydroDA"
-HydroDAout="/cluster/data7/menaka/HydroDA"
+HydroDAout="/cluster/data6/menaka/HydroDA"
 # HydroDAout="/work/a06/menaka/HydroDA"
 
 #----------
@@ -85,7 +85,8 @@ cd $HydroDAout
 # EXP="DIR_WSE_E2O_SWOT_003" # for SWOTH08
 # EXP="NOM_WSE_E2O_HWEB_201" # for conus 
 # EXP="DIR_WSE_E2O_HWEB_201" # for conus
-EXP="DIR_WSE_ERA5_CGLS_001" # for ERA5 conus CGLS
+# EXP="DIR_WSE_ERA5_CGLS_001" # for ERA5 conus CGLS
+EXP="NOM_WSE_ERA5_SWOT_001" # for ERA5 Mackenzie SWOT
 
 # mkdir -p $HydroDA"/out/"$EXP
 mkdir -p $HydroDAout"/out/"$EXP

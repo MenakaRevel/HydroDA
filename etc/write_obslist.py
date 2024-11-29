@@ -43,27 +43,19 @@ def slope(ix,iy,nextxy,uparea,elevtn,nxtdst,rivseq):
         slp2=0.0
     return slp1,slp2
 #===================
-syear=2002
-<<<<<<< HEAD
-eyear=2014
+syear=2023
+eyear=2024
 #===================
 # CaMa_dir="/cluster/data6/menaka/CaMa-Flood_v396a_20200514"
 # CaMa_dir="/cluster/data6/menaka/CaMa-Flood_v4"
-CaMa_dir="/cluster/data7/menaka/CaMa-Flood_v407"
-map="glb_15min"
-=======
-eyear=2020
-#===================
-# CaMa_dir="/cluster/data6/menaka/CaMa-Flood_v396a_20200514"
-CaMa_dir="/cluster/data6/menaka/CaMa-Flood_v4"
+CaMa_dir="/cluster/data6/menaka/CaMa-Flood_v420"
 # map="glb_15min"
->>>>>>> dev_virtual
 # map="glb_06min"
 # map="amz_06min"
+map="Mackenzie_06min"
 fname=CaMa_dir+"/map/"+map+"/params.txt"
-f=open(fname,"r")
-lines=f.readlines()
-f.close()
+with open(fname,"r") as f:
+    lines=f.readlines()
 #-------
 nx     = int(filter(None, re.split(" ",lines[0]))[0])
 ny     = int(filter(None, re.split(" ",lines[1]))[0])
@@ -104,14 +96,16 @@ dy=5
 # write
 #---------------------
 # rivername0="AMAZONAS" #"CONGO" #
-rivername0="ALL" #"CONGO" #
+rivername0="MKZ" #"ALL" #"CONGO" #
 stream0=["AMAZONAS","SOLIMOES"] # "CONGO" #
+dataname="SWOT"
 #---------------------
 # fname="HydroWeb_alloc_"+map+".txt"
 # fname="/cluster/data6/menaka/Altimetry/out/altimetry_"+map+"_20210826.txt"
 # fname="/cluster/data6/menaka/Altimetry/out/altimetry_"+map+"_20210826.txt"
 # fname="/cluster/data6/menaka/AltiMaP/out/altimetry_"+map+"_20210920.txt"
-fname="/cluster/data6/menaka/AltiMaP/out/altimetry_"+map+"_20220725.txt"
+# fname="/cluster/data6/menaka/AltiMaP/out/altimetry_"+map+"_20220725.txt"
+fname="/cluster/data6/menaka/AltiMaP/out/biased_removed_altimetry_Mackenzie_06min_20241128.txt"
 with open(fname,"r") as f:
 	lines=f.readlines()
 #===============================================
@@ -148,13 +142,11 @@ for item in rmse[1::]:
 # writef="/cluster/data6/menaka/HydroDA/dat/HydroWeb_alloc_"+map+"_QC1.txt"
 # writef="/cluster/data6/menaka/HydroDA/dat/HydroWeb_alloc_"+map+"_QC0.txt"
 # writef="/cluster/data6/menaka/HydroDA/dat/HydroWeb_alloc_"+map+"_QCrmse.txt"
-<<<<<<< HEAD
-writef="/cluster/data6/menaka/HydroDA/dat/HydroWeb_alloc_"+map+".txt"
-=======
-writef="/cluster/data6/menaka/HydroDA/dat/HydroWeb_alloc_"+map+"_2002-2020.txt"
->>>>>>> dev_virtual
+# writef="/cluster/data6/menaka/HydroDA/dat/HydroWeb_alloc_"+map+".txt"
+# writef="/cluster/data6/menaka/HydroDA/dat/HydroWeb_alloc_"+map+"_2002-2020.txt"
+writef="/cluster/data6/menaka/HydroDA/dat/SWOT_alloc_"+map+"_2023-2024.txt"
 with open(writef, "w") as wf:
-    header = "%13s%62s%8s%8s%8s%8s%12s%12s%12s%12s%17s\n"%("ID","station","lon","lat","ix","iy","elevation","ele_diff","EGM08","EGM96","satellite")
+    header = "%15s%62s%8s%8s%8s%8s%12s%12s%12s%12s%17s\n"%("ID","station","lon","lat","ix","iy","elevation","ele_diff","EGM08","EGM96","satellite")
     wf.write(header)
     for line in lines[1::]:
         line    = re.split(" ",line)
@@ -162,9 +154,14 @@ with open(writef, "w") as wf:
         #print line
         num     = int(line[0])
         station = line[1]
-        line2   = re.split("_",station)
-        riv     = line2[1]
-        stream  = line2[2]
+        if '_' in station:
+            line2   = list(re.split("_",station))
+            riv     = line2[1]
+            stream  = line2[2]
+        else:
+            line2   = ['River', 'River', 'River']
+            riv     = 'River'
+            stream  = 'River'
         lon     = float(line[3])
         lat     = float(line[4])
         ix      = int(line[5])
@@ -189,20 +186,23 @@ with open(writef, "w") as wf:
         ################
         # data available years
         ################
-        org=hweb.HydroWeb_continous_WSE(station,syear=syear,eyear=eyear)
+        if dataname == 'HydroWeb':
+            org=hweb.HydroWeb_continous_WSE(station,syear=syear,eyear=eyear)
+        if dataname == 'SWOT':
+            org=[1.0,1.0]
         if np.sum((org!=-9999.0)*1.0) == 0.0:
             print ("no data available for ",syear,"-",eyear)
             continue
 
         ################
-        # condtion for elevation differnce
+        # condition for elevation difference
         ################
         if abs(ele_dif) > elev_thr:
-            print ("elevation differnce is too large: ", ele_dif)
+            print ("elevation difference is too large: ", ele_dif)
             continue
 
         ################
-        # condtion for mainstream
+        # condition for mainstream
         ################
         if uparea[iy-1,ix-1] < area_thr:
             print ("smaller river: ",station, uparea[iy-1,ix-1])
@@ -234,9 +234,9 @@ with open(writef, "w") as wf:
         # condition for higher rmse observations
         ################
         if station in rmse_stations:
-            print ("hihger RMSE virtual station: ( >",rmse_thr,"m)", station)
+            print ("higher RMSE virtual station: ( >",rmse_thr,"m)", station)
             continue
 
-        linew="%013d%62s%8.2f%8.2f%8d%8d%12.2f%12.2f%12.2f%12.2f%17s\n"%(num,station,lon,lat,ix,iy,ele,ele_dif,EGM08,EGM96,sat)
+        linew="%015d%62s%8.2f%8.2f%8d%8d%12.2f%12.2f%12.2f%12.2f%17s\n"%(num,station,lon,lat,ix,iy,ele,ele_dif,EGM08,EGM96,sat)
         # print (linew)
         wf.write(linew)

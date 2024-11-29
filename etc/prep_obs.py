@@ -25,6 +25,8 @@ import calendar
 import math
 import sys
 import json
+import pandas as pd
+import geopandas
 
 # #external python codes
 # dir_param="../gosh"
@@ -161,9 +163,9 @@ def HydroWeb_data(yyyy,mm,dd):
 		l_sat.append(sat)
 	return xlist, ylist, l_wse, m_wse, s_wse, l_sat
 ####################################
-# SWOT
+# virtual SWOT
 #########################
-def swot_data(yyyy,mm,dd):
+def vswot_data(yyyy,mm,dd):
 	# prepare sythetic observations using
 	# pre-simulated data
 	# river width thershold
@@ -260,6 +262,14 @@ def SWOT_observation_error():
 	# obs_err.tofile(fname)
 	return obs_err
 #########################
+# SWOT ==> **Only for Mackenzie SWOT River
+#########################
+# def SWOT_data(yyyy,mm,dd):
+# 	# read SWOT data from url
+# 	# use pandas, requests
+# 	# 
+
+#########################
 # CGLS
 #########################
 def get_CGLS():
@@ -345,7 +355,7 @@ def CGLS_data(yyyy,mm,dd):
 	m_wse =[]
 	s_wse =[]
 	l_sat =[]
-	lstan, xcods, ycods, leledif, lEGM08, lEGM96, satellite = get_HydroWeb()
+	lstan, xcods, ycods, leledif, lEGM08, lEGM96, satellite = get_HydroWeb() #get_CGLS()
 	pnum=len(lstan)
 	# print (pnum)
 	for point in np.arange(pnum):
@@ -407,10 +417,12 @@ def write_txt(inputlist):
 	txtfile=dir0+"/"+yyyy+mm+dd+".txt"
 	if obs_name() == "HydroWeb":
 		xlist, ylist, l_wse, m_wse, s_wse, l_sat = HydroWeb_data(yyyy,mm,dd)
-	if obs_name() == "SWOT":
-		xlist, ylist, l_wse, m_wse, s_wse, l_sat = swot_data(yyyy,mm,dd) 
+	if obs_name() == "vSWOT":
+		xlist, ylist, l_wse, m_wse, s_wse, l_sat = vswot_data(yyyy,mm,dd) 
 	if obs_name() == "CGLS":
 		xlist, ylist, l_wse, m_wse, s_wse, l_sat = CGLS_data(yyyy,mm,dd)
+	if obs_name() == "SWOT":
+		xlist, ylist, l_wse, m_wse, s_wse, l_sat = swot_data(yyyy,mm,dd) 
 	#--------------
 	pnum=len(xlist)
 	# print ('xlist:',pnum, "l_wse:",len(l_wse))
@@ -460,10 +472,10 @@ def prepare_obs(dir0="./"):
 ############# parameters ###########
 ####################################
 def starttime():
-    return 2015,1,1
+    return 2023,12,1
 ####################################
 def endtime():
-    return 2021,1,1
+    return 2024,11,30
 ####################################
 def obs_list():
     # return "../dat/HydroWeb_alloc_amz_06min_QC0_simulation.txt"
@@ -484,8 +496,9 @@ def HydroWeb_list():
 ####################################
 def obs_name():
     # return "HydroWeb"
-	# return "SWOT"
-	return "CGLS"
+	# return "vSWOT"
+	# return "CGLS"
+	return "SWOT"
 ####################################
 def obs_dir():
     # return "/cluster/data7/menaka/HydroDA/obs/HydroWeb"
