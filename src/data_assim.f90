@@ -10,7 +10,7 @@ program data_assim
 ! 2. Revel, M., Ikeshima, D., Yamazaki, D., & Kanae, S. (2019). A Physically Based Empirical 
 ! Localization Method for Assimilating Synthetic SWOT Observations of a Continental-Scale River: 
 ! A Case Study in the Congo Basin,Water, 11(4), 829. https://doi.org/10.3390/w11040829
-! Revel, M., Zhou, X., Yamazaki, D., & Kanae, S. (2023). Assimilation of transformed water 
+! 3. Revel, M., Zhou, X., Yamazaki, D., & Kanae, S. (2023). Assimilation of transformed water 
 ! surface elevation to improve river discharge estimation in a continental-scale river. 
 ! Hydrology and Earth System Sciences, 27(3), 647–671. https://doi.org/10.5194/hess-27-647-2023
 ! ====================================================================================
@@ -774,7 +774,7 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         write(78,*) "******************",lon_cent,lat_cent," *******************"
         write(78,*) "=========================================================="
         !=========
-        print*, "******************",lon_cent,lat_cent,"*******************"
+        ! print*, "******************",lon_cent,lat_cent,"*******************"
         write(78,*) "size",countnum
         write(78,*) "local obs",sum((local_obs/=0)*(-1))
 
@@ -1091,12 +1091,12 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
             !==added to fix large errors== 2022/04/10
             !==stablize the data assimilation process==
             if (global_xa(lon_cent,lat_cent,num) < (elevtn(lon_cent,lat_cent) - rivhgt(lon_cent,lat_cent)) ) then
-                print*, "water surface elevation is too small.....",global_xa(lon_cent,lat_cent,num),"<",(elevtn(lon_cent,lat_cent) - rivhgt(lon_cent,lat_cent))
+                ! print*, "water surface elevation is too small.....",global_xa(lon_cent,lat_cent,num),"<",(elevtn(lon_cent,lat_cent) - rivhgt(lon_cent,lat_cent))
                 write(78,*) "water surface elevation is too small: ",global_xa(lon_cent,lat_cent,num),"<",(elevtn(lon_cent,lat_cent) - rivhgt(lon_cent,lat_cent))
                 global_xa(lon_cent,lat_cent,num) = elevtn(lon_cent,lat_cent) - rivhgt(lon_cent,lat_cent) !globalx(lon_cent,lat_cent,num)
             end if
             if (global_xa(lon_cent,lat_cent,num) > (elevtn(lon_cent,lat_cent) + fldhgt(lon_cent,lat_cent,10)) ) then
-                print*, "water surface elevation is too large.....",global_xa(lon_cent,lat_cent,num),">",(elevtn(lon_cent,lat_cent) + fldhgt(lon_cent,lat_cent,10))
+                ! print*, "water surface elevation is too large.....",global_xa(lon_cent,lat_cent,num),">",(elevtn(lon_cent,lat_cent) + fldhgt(lon_cent,lat_cent,10))
                 write(78,*) "water surface elevation is too large: ",global_xa(lon_cent,lat_cent,num),">",(elevtn(lon_cent,lat_cent) + fldhgt(lon_cent,lat_cent,10))
                 global_xa(lon_cent,lat_cent,num) = elevtn(lon_cent,lat_cent) + fldhgt(lon_cent,lat_cent,10) !globalx(lon_cent,lat_cent,num)
             end if

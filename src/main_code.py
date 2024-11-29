@@ -239,9 +239,12 @@ def spinup_loop(inputlist):
     exp_dir="./" #pm.DA_dir()+"/out/"+pm.experiment()
     mapname=pm.mapname()
     cal=pm.calibrate()
+    corrupt=pm.corrupt()
+    option=pm.option()
     print  ("%s for %03d"%(loop,int(ens_num)))
     os.system("source "+pm.DA_dir()+"/src/spin_up.sh "+str(yyyy)+" "+str(loop)+" "+ens_num+" "
-    +dir2+" "+str(cpunums)+" "+str(run_name)+" "+str(exp_dir)+" "+str(mapname)+" "+str(cal))
+    +dir2+" "+str(cpunums)+" "+str(run_name)+" "+str(exp_dir)+" "+str(mapname)+" "+str(cal)
+    +" "+str(option)) #+str(corrupt)+" "
     return 0
 ###########################
 def one_day_sim(inputlist):
@@ -260,22 +263,24 @@ def one_day_sim(inputlist):
     bef_mm='%02d' %bef_dt.month
     bef_dd='%02d' %bef_dt.day
 
-    # print ("oneday loop for",yyyy,mm,dd,ens_num,looptype)
+    print ("oneday loop for",yyyy,mm,dd,ens_num,looptype)
     dir2=pm.CaMa_dir()
     #if looptype=="true":
     #    distopen="1.0"
     #else:
     #    distopen=str(pm.distopen())
 
-    # print (yyyy+" "+mm+" "+dd+" "+ens_num+" "+dir2+" "+looptype)
+    print (yyyy+" "+mm+" "+dd+" "+ens_num+" "+dir2+" "+looptype)
     cpunums = pm.cpu_nums()
     exp_dir="./" #pm.DA_dir()+"/out/"+pm.experiment()
     mapname=pm.mapname()
     cal=pm.calibrate()
+    corrupt=pm.corrupt()
+    option=pm.option()
     DA_dir=pm.DA_dir()
     os.system("source "+pm.DA_dir()+"/src/oneday_sim.sh "+yyyy+" "+mm+" "+dd+" "+ens_num+" "+dir2
     +" "+looptype+" "+str(cpunums)+" "+str(run_name)+" "+str(exp_dir)+" "+str(mapname)+" "+str(cal)
-    +" "+DA_dir)
+    +" "+str(option)+" "+DA_dir) #+str(corrupt)+" "
 
     return 0
 ########################### # modified to run paralle @Menaka 
@@ -288,7 +293,7 @@ def copy_corrupted_sfcelv(inputlist):
     fname="./CaMa_out/"+yyyy+mm+dd+"C"+numch+"/sfcelv"+yyyy+".bin"
     os.system("cp "+fname+" ./assim_out/ens_xa/open/"+yyyy+mm+dd+"_"+numch+"_xa.bin")
     return 0
-########################### # modified not calculate restart again/ no chage in WSE in corrupted @Menaka
+########################### # modified not to calculate restart again/ no chage in WSE in corrupted @Menaka
 def copy_corrupted_restart(inputlist):
     yyyy = inputlist[0]
     mm   = inputlist[1]
@@ -300,16 +305,21 @@ def copy_corrupted_restart(inputlist):
     n_dd='%02d' % (nxt_day.day)
     numch='%03d'%num
     fname="./CaMa_out/"+yyyy+mm+dd+"C"+numch+"/restart"+n_yyyy+n_mm+n_dd+".bin"
-    #os.system("cp "+fname+" ./CaMa_in/restart/open/restart"+n_yyyy+n_mm+n_dd+"C"+numch+".bin")
-    copy_stoonly(fname,"./CaMa_in/restart/open/restart"+n_yyyy+n_mm+n_dd+"C"+numch+".bin")
-    print "copy restart",n_yyyy,n_mm,n_dd,"C"+numch
+    os.system("cp "+fname+" ./CaMa_in/restart/open/restart"+n_yyyy+n_mm+n_dd+"C"+numch+".bin") ## CaMa-Flood v4.1
+    ## @ Menaka
+    # New restart file change the number of dimensions with the option such as dam, levee, etc..
+    # if turn the dam on, change to reshape(3,-1) otherwise, reshape(2,-1) @ Youjiang
+    # for restart.bin.pth CaMa-Flood v4.2
+    fname="./CaMa_out/"+yyyy+mm+dd+"C"+numch+"/restart"+n_yyyy+n_mm+n_dd+".bin.pth"
+    os.system("cp "+fname+" ./CaMa_in/restart/open/restart"+n_yyyy+n_mm+n_dd+"C"+numch+".bin.pth") 
+    ## CaMa-Flood v4.1
+    # copy_stoonly(fname,"./CaMa_in/restart/open/restart"+n_yyyy+n_mm+n_dd+"C"+numch+".bin")
+    print ("copy restart",n_yyyy,n_mm,n_dd,"C"+numch)
     return 0
 ###########################
-def copy_stoonly(iname,oname): # for CaMa_Flood v420
-    nx,ny, _ = pm.map_dimension() # read map dimension
-    # print ('copy_stoonly',nx, ny, oname)
-    org=np.fromfile(iname,np.float32).reshape(-1,ny,nx)
-    org.tofile(oname) #[0:2]
+def copy_stoonly(iname,oname): # for CaMa_Flood v395b
+    org=np.fromfile(iname,np.float32).reshape(6,-1)
+    org[0:2].tofile(oname)
     return 0
 ###########################
 def assim_at_fort(yyyy,mm,dd,day): #previous --> used
@@ -373,19 +383,21 @@ def make_initial_restart(): # updated the name
         #     outfile_opn=exp_dir+"CaMa_in/restart/open/restart"+yyyy+mm+dd+"C"+numch+".bin"
         #     outfile_asm=exp_dir+"CaMa_in/restart/assim/restart"+yyyy+mm+dd+"A"+numch+".bin"
         # else:
-        infile_opn =exp_dir+"CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin"
-        infile_asm =exp_dir+"CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin"
-        outfile_opn=exp_dir+"CaMa_in/restart/open/restart"+yyyy+mm+dd+"C"+numch+".bin"
-        outfile_asm=exp_dir+"CaMa_in/restart/assim/restart"+yyyy+mm+dd+"A"+numch+".bin"
-        inputlist.append([infile_opn,infile_asm,outfile_opn,outfile_asm])
-        #os.system("cp ./CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin ./CaMa_in/restart/open/restart"+yyyy+mm+dd+"C"+numch+".bin")
-        #os.system("cp ./CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin ./CaMa_in/restart/assim/restart"+yyyy+mm+dd+"A"+numch+".bin")
+        # infile_opn =exp_dir+"CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin"
+        # infile_asm =exp_dir+"CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin"
+        # outfile_opn=exp_dir+"CaMa_in/restart/open/restart"+yyyy+mm+dd+"C"+numch+".bin"
+        # outfile_asm=exp_dir+"CaMa_in/restart/assim/restart"+yyyy+mm+dd+"A"+numch+".bin"
+        # inputlist.append([infile_opn,infile_asm,outfile_opn,outfile_asm])
+        os.system("cp ./CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin ./CaMa_in/restart/open/restart"+yyyy+mm+dd+"C"+numch+".bin")
+        os.system("cp ./CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin ./CaMa_in/restart/assim/restart"+yyyy+mm+dd+"A"+numch+".bin")
+        # copy restart.bin.pth CaMa-Flood v4.2 [for bifurication flow]
+        os.system("cp ./CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin.pth ./CaMa_in/restart/open/restart"+yyyy+mm+dd+"C"+numch+".bin.pth")
+        os.system("cp ./CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin.pth ./CaMa_in/restart/assim/restart"+yyyy+mm+dd+"A"+numch+".bin.pth")
+        
         # copy_stoonly(exp_dir+"CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin",exp_dir+"CaMa_in/restart/open/restart"+yyyy+mm+dd+"C"+numch+".bin")
         # copy_stoonly(exp_dir+"CaMa_out/"+spinup_open+"/restart"+yyyy+mm+dd+".bin",exp_dir+"CaMa_in/restart/assim/restart"+yyyy+mm+dd+"A"+numch+".bin")
-        # print ('copy restart .....',infile_opn,outfile_opn)
-        #### ******need to edit here********** ==> just copying is enough no need copy_stoonly
-        copy_stoonly(infile_opn,outfile_opn)
-        copy_stoonly(infile_asm,outfile_asm)
+        # copy_stoonly(infile_opn,outfile_opn)
+        # copy_stoonly(infile_asm,outfile_asm)
     return 0
 ###########################
 def make_initial_restart_one(): # updated the name
@@ -496,7 +508,7 @@ def initial(): #used
 
     return 0
 ###########################
-def compile_func(): #used
+def compile_func(): # old used
     # program for compiling
     # activate ifort
     #os.system("source /opt/intel/parallel_studio_xe_2017/psxevars.sh intel64")
@@ -518,9 +530,23 @@ def compile_func(): #used
          os.system("ifort "+pm.DA_dir()+"/src/data_assim_0.f90 -o "+pm.DA_dir()+"/src/data_assim -O3 -assume byterecl -heap-arrays -nogen-interfaces -free -mkl -g -traceback  -lpthread -parallel")
     return 0
 ###########################
-def store_out(yyyy,mm,dd):
+def store_out(yyyy,mm,dd): # update on 2023/05/30
     # program for storing data #
     
+    listCA = ["open","assim"]
+    if pm.run_flag() == 3:
+        listCA = ["assim"]
+    #==========================#
+    for looptype in listCA: # update on 2023/05/30
+        if looptype == "open":
+            CA = "C"
+        else:
+            CA = "A"
+        for num in np.arange(1,pm.ens_mem()+1):
+            numch = '%03d' % num 
+            for var in pm.varout().split(","):
+                shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/"+var.strip()+yyyy+".bin","./assim_out/"+var.strip()+"/"+looptype+"/"+var.strip()+yyyy+mm+dd+"_"+numch+".bin")
+
 #    looptype = "true"
 #    # storing rivout
 #    numch = "000" 
@@ -539,42 +565,37 @@ def store_out(yyyy,mm,dd):
 #    shutil.copy("./CaMa_out/"+yyyy+mm+dd+"T"+numch+"/fldare"+yyyy+".bin","assim_out/fldarea/"+looptype+"/fldarea"+yyyy+mm+dd+".bin")
 
 
-    for CA in ["C","A"]:
-        if CA == "C":
-            looptype = "open"
-        if CA == "A":
-            looptype = "assim"
-
 #        if CA == "C": 
 #        # storing rivout
 #            for num in np.arange(1,pm.ens_mem()+1):
 #                numch = '%03d' % num 
 #                shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/rivdph"+yyyy+".bin","assim_out/rivdph/"+looptype+"/rivdph"+yyyy+mm+dd+"_"+numch+".bin")
+        
 
-        # storing rivout
-        for num in np.arange(1,pm.ens_mem()+1):
-            numch = '%03d' % num 
-            shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/rivout"+yyyy+".bin","./assim_out/rivout/"+looptype+"/rivout"+yyyy+mm+dd+"_"+numch+".bin")
+#         # storing rivout
+#         for num in np.arange(1,pm.ens_mem()+1):
+#             numch = '%03d' % num 
+#             shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/rivout"+yyyy+".bin","./assim_out/rivout/"+looptype+"/rivout"+yyyy+mm+dd+"_"+numch+".bin")
 
-        # storing outflw
-        for num in np.arange(1,pm.ens_mem()+1):
-            numch = '%03d' % num 
-            shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/outflw"+yyyy+".bin","./assim_out/outflw/"+looptype+"/outflw"+yyyy+mm+dd+"_"+numch+".bin")
+#         # storing outflw
+#         for num in np.arange(1,pm.ens_mem()+1):
+#             numch = '%03d' % num 
+#             shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/outflw"+yyyy+".bin","./assim_out/outflw/"+looptype+"/outflw"+yyyy+mm+dd+"_"+numch+".bin")
 
-#        # storing fldout
-#        for num in np.arange(1,pm.ens_mem()+1):
-#            numch = '%03d' % num 
-#            shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/fldout"+yyyy+".bin","assim_out/fldout/"+looptype+"/fldout"+yyyy+mm+dd+"_"+numch+".bin")
-#
-        # storing flddph
-        for num in np.arange(1,pm.ens_mem()+1):
-            numch = '%03d' % num 
-            shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/flddph"+yyyy+".bin","assim_out/flddph/"+looptype+"/flddph"+yyyy+mm+dd+"_"+numch+".bin")
+# #        # storing fldout
+# #        for num in np.arange(1,pm.ens_mem()+1):
+# #            numch = '%03d' % num 
+# #            shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/fldout"+yyyy+".bin","assim_out/fldout/"+looptype+"/fldout"+yyyy+mm+dd+"_"+numch+".bin")
+# #
+#         # storing flddph
+#         for num in np.arange(1,pm.ens_mem()+1):
+#             numch = '%03d' % num 
+#             shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/flddph"+yyyy+".bin","assim_out/flddph/"+looptype+"/flddph"+yyyy+mm+dd+"_"+numch+".bin")
 
-        # storing fldarea
-        for num in np.arange(1,pm.ens_mem()+1):
-            numch = '%03d' % num 
-            shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/fldare"+yyyy+".bin","assim_out/fldarea/"+looptype+"/fldarea"+yyyy+mm+dd+"_"+numch+".bin")
+#         # storing fldarea
+#         for num in np.arange(1,pm.ens_mem()+1):
+#             numch = '%03d' % num 
+#             shutil.copy("./CaMa_out/"+yyyy+mm+dd+CA+numch+"/fldare"+yyyy+".bin","assim_out/fldarea/"+looptype+"/fldarea"+yyyy+mm+dd+"_"+numch+".bin")
 
     return 0
 ###########################    
@@ -603,9 +624,8 @@ def make_restart(inputlist):
 
     # built in hold
     print ("finish assimilating")
-    # print ("built in hold")
-    # print ("press enter")
-    print ("modifiying the restart file ........")
+    print ("built in hold")
+    print ("press enter")
 
     # get the date of one day before
     bef_y=calc_odb(yyyy,mm,dd,"year")
@@ -625,7 +645,15 @@ def make_restart(inputlist):
 
     # calculate other variables from water storage
     exp_dir="./" #pm.DA_dir()+"/out/"+pm.experiment()
-    os.system(pm.DA_dir()+"/src/make_restart "+yyyy+mm+dd+" "+yyyy_b+mm_b+dd_b+" "+yyyy_n+mm_n+dd_n+" "+loop+" "+pm.CaMa_dir()+" "+pm.mapname()+" "+str(pm.ens_mem())+" "+numch+" "+exp_dir+" "+pm.calibrate())
+    os.system(pm.DA_dir()+"/src/make_restart "+yyyy+mm+dd+" "+yyyy_b+mm_b+dd_b+" "
+    +yyyy_n+mm_n+dd_n+" "+loop+" "+pm.CaMa_dir()+" "+pm.mapname()+" "+str(pm.ens_mem())+" "
+    +numch+" "+exp_dir+" "+str(pm.option())) #+str(pm.corrupt())+" "
+
+    # for restart.bin.pth CaMa-Flood v4.2
+    # edited on 2024/06/15
+    fname="./CaMa_out/"+yyyy+mm+dd+"A"+numch+"/restart"+yyyy_n+mm_n+dd_n+".bin.pth"
+    os.system("cp "+fname+" ./CaMa_in/restart/open/restart"+yyyy_n+mm_n+dd_n+"A"+numch+".bin.pth") 
+    
 
     print ("finish restarting",numch)
 ###########################
