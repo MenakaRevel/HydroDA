@@ -260,14 +260,14 @@ def one_day_sim(inputlist):
     bef_mm='%02d' %bef_dt.month
     bef_dd='%02d' %bef_dt.day
 
-    print ("oneday loop for",yyyy,mm,dd,ens_num,looptype)
+    # print ("oneday loop for",yyyy,mm,dd,ens_num,looptype)
     dir2=pm.CaMa_dir()
     #if looptype=="true":
     #    distopen="1.0"
     #else:
     #    distopen=str(pm.distopen())
 
-    print (yyyy+" "+mm+" "+dd+" "+ens_num+" "+dir2+" "+looptype)
+    # print (yyyy+" "+mm+" "+dd+" "+ens_num+" "+dir2+" "+looptype)
     cpunums = pm.cpu_nums()
     exp_dir="./" #pm.DA_dir()+"/out/"+pm.experiment()
     mapname=pm.mapname()

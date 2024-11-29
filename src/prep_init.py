@@ -257,7 +257,7 @@ def save_statistic():
 def copy_stat(inputlist):
     iname = inputlist[0]
     oname = inputlist[1]
-    print ("cp "+iname+" "+oname)
+    # print ("cp "+iname+" "+oname)
     os.system("cp "+iname+" "+oname)
     return 0
 ###########################

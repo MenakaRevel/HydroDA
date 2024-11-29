@@ -16,6 +16,8 @@ from multiprocessing import sharedctypes
 from numpy import ma
 import re
 import math
+import warnings
+warnings.filterwarnings("ignore")
 
 # import CaMa-Flood variable reading using fortran
 sys.path.append('../etc/')
@@ -80,7 +82,8 @@ from read_CMF import read_discharge, read_discharge_multi
 # experiment="NOM_WSE_E2O_HWEB_101"
 # experiment="NOM_WSE_E2O_HWEB_201"
 # experiment="DIR_WSE_E2O_HWEB_201"
-experiment="DIR_WSE_ERA5_CGLS_001"
+# experiment="DIR_WSE_ERA5_CGLS_001"
+experiment="NOM_WSE_ERA5_SWOT_001"
 #=======
 # experiment="DIR_WSE_E2O_SWOT_001"
 # >>>>>>> dev_virtual
@@ -89,7 +92,7 @@ experiment="DIR_WSE_ERA5_CGLS_001"
 #assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
 # assim_out=pm.DA_dir()+"/out/"+experiment
 # assim_out="../out/"+experiment
-assim_out="/cluster/data7/menaka/HydroDA/out/"+experiment
+assim_out="/cluster/data6/menaka/HydroDA/out/"+experiment
 print (assim_out)
 #assim_out="assim_out_E2O_wmc"
 #assim_out="assim_out_E2O_womc_0"
@@ -308,8 +311,9 @@ river=[]
 #rivernames  = ["AMAZON"]
 # rivernames  = ["COLORADO"]
 # rivernames  = ["CHURCHILL"]
-rivernames = ["SAINT LAWRENCE","OHIO","CONNECTICUT","MISSOURI","MISSISSIPPI","COLORADO","CHURCHILL"]
+# rivernames = ["SAINT LAWRENCE","OHIO","CONNECTICUT","MISSOURI","MISSISSIPPI","COLORADO","CHURCHILL"]
 # rivernames = grdc.grdc_river_name_v396()
+rivernames = ['MACKENZIE']
 for rivername in rivernames:
   grdc_id,station_loc,x_list,y_list = grdc.get_grdc_loc_v396(rivername)
   print (rivername, grdc_id,station_loc)
@@ -506,7 +510,7 @@ def make_fig(point):
     plt.close()
     #labels=["GRDC","corrupted","assimilated"]
     obstype=pm.obs_name()
-    if obstype=="SWOT":
+    if obstype=="vSWOT":
         exptype="virtual"
         labels=["true","simulated","assimilated"]
     else:
@@ -535,12 +539,16 @@ def make_fig(point):
         # org=grdc.grdc_dis(staid[point],syear,eyear-1)
         org=np.array(org)
     else:
-        org=grdc.grdc_dis(staid[point],syear,eyear-1) #,smon=1,emon=1,sday=1,eday=31)
+        org=grdc.grdc_dis(staid[point],syear,eyear,smon=smonth,emon=emonth,sday=sdate,eday=edate-1) #eyear,emonth,edate
         org=np.array(org)
+    print (org)
+    print (np.mean(ma.masked_less(asm[:,:,point],0.0),axis=1))
     lines=[ax1.plot(np.arange(start,last),ma.masked_less(org,0.0),label="GRDC",color="#34495e",linewidth=3.0,zorder=101)[0]] #,marker = "o",markevery=swt[point])
 #    ax1.plot(np.arange(start,last),hgt[:,point],label="true",color="gray",linewidth=0.7,linestyle="--",zorder=101)
 #    plt.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7)
     for num in np.arange(0,pm.ens_mem()):
+        print ('asm',asm[:,num,point])
+        print ('opn',opn[:,num,point])
         ax1.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.1,alpha=0.1,zorder=102)
         ax1.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.1,alpha=0.1,zorder=103)
 #        plt.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.3,alpha=0.5)
@@ -687,9 +695,17 @@ def make_fig(point):
 #    ax2.set_xlim(xmin=0,xmax=last+1)
 #    print swt[point]
     plt.legend(lines,labels,ncol=1,loc='upper right') #, bbox_to_anchor=(1.0, 1.0),transform=ax1.transAxes)
-    station_loc_list=pname[point].split("/")
+    if '/' in pname[point]:
+        station_loc_list=pname[point].split("/")
+    else:
+        station_loc_list=pname[point]
+    print (station_loc_list)
+    # if ' ' in station_loc_list:
     station_loc_list="".join(station_loc_list.split())
-    station_name="-".join(station_loc_list) 
+    print (station_loc_list)
+    station_name=station_loc_list
+        # station_name="-".join(station_loc_list) 
+    
     print ('--- saving figure',river[point]+"-"+station_name+".png")
     plt.savefig(assim_out+"/figures/disgraph/"+river[point]+"-"+station_name+".png",dpi=500)
     return 0
@@ -714,8 +730,8 @@ def make_fig(point):
 
 
 
-para_flag=1
-# para_flag=0
+# para_flag=1
+para_flag=0
 #--
 if para_flag==1:
     p=Pool(ncpus)
