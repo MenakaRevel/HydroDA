@@ -603,8 +603,9 @@ def make_restart(inputlist):
 
     # built in hold
     print ("finish assimilating")
-    print ("built in hold")
-    print ("press enter")
+    # print ("built in hold")
+    # print ("press enter")
+    print ("modifiying the restart file ........")
 
     # get the date of one day before
     bef_y=calc_odb(yyyy,mm,dd,"year")
