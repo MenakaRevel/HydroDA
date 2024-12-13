@@ -649,6 +649,8 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         !============================
         ! read emperical local patch 
         !============================
+        ! open fname and read xlist, ylist, and wgt 
+        !------------------------------------------
         fname=trim(adjustl(patchdir))//"/"//trim(patchname)//"/patch"//trim(llon)//trim(llat)//".txt"
         call read_elp(fname,countnumber,xlist,ylist,wgt)
         !write(*,*) fname
@@ -679,6 +681,7 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         !============================
         ! assign local patch 
         !============================
+        ! prepare local patch start and end **usefull for zero local patch**
         call assign_local_patch(countnumber,targetpixel,patch_size,patch_start,patch_end,target_pixel,countnum)
         ! ! if (patch_size == 0) then ! for zero local patch ***Only target pixel is used
         ! !     patch_start=targetpixel
@@ -701,7 +704,7 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         allocate(local_lag(countnum))
         allocate(local_wgt(countnum))
         allocate(local_obs(countnum))
-
+        ! observations
         allocate(xt(countnum))
         !print*, countnum,lon_cent,lat_cent
         !print*,shape(local_lag)
@@ -722,6 +725,8 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         !====================================================
         ! read local observations
         !====================================================
+        ! open observations in xlist, ylist and add it to xt
+        !----------------------------------------------------
         call read_local_obs(xlist,ylist,conflag,obs,obs_err,mean_obs,std_obs,countnum,patch_start,patch_end,lonpx,latpx,local_sat,xt,local_err)
         ! ! j=1
         ! ! do i=patch_start,patch_end
@@ -817,7 +822,9 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         !====================================================
         allocate(xf(countnum,ens_num))!localx(countnum,countnum,ens_num),
         xf=0
+        !----------------------------------------------------
         ! get the local xf matrix for local patch
+        !----------------------------------------------------
         call local_xf(globalx,xlist,ylist,countnum,patch_start,patch_end,lonpx,latpx,ens_num,xf)
 
         ! ! xf=0
@@ -846,6 +853,7 @@ do lon_cent = int((assimW-west)*(1.0/gsize)+1),int((assimE-west)*(1.0/gsize)),1
         ! ! j=j+1
         ! ! end do
 
+        !-----------------------------------------------------------------
         ! deallocate variables of making observation and dimension related
         ! variables
         deallocate(local_sat,lag,xlist,ylist,wgt)
