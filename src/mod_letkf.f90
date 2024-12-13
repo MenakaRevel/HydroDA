@@ -90,7 +90,7 @@ dep=Yo-HXb
 ! R inverse
 Rinv=0.
 do i=1,nobs
-    Rinv(i,i)=(Rdiag(i)/(Rwgt(i)+1e-20))**(-1.)
+    Rinv(i,i)=(Rdiag(i)/(Rwgt(i)+1e-20))**(-1.0)
 end do
 
 

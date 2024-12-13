@@ -441,8 +441,9 @@ fname=trim(adjustl(expdir))//"/assim_out/mean_sfcelv/std_sfcelv.bin"
 
 ! update stdglobalture
 !stdglobaltrue=(sum(stdglobalx(:,:,:),dim=3)/real(ens_num))
-
+!*************************************************************************************
 ! read water storage - prognostic variable from all model
+!*************************************************************************************
 allocate(globalx(lonpx,latpx,ens_num))
 globalx=0
 do num=1,ens_num
@@ -461,12 +462,14 @@ do num=1,ens_num
     close(34)
 end do
 
+!*************************************************************************************
 !=======================================================================
 ! read CMF variables
 !=======================================================================
 ! nvar = 1 ==> sfcelv
 ! nvar = 2 ==> sfcelv, outflw
 ! nvar = 1 ==> sfcelv, outflw, fldara
+!*************************************************************************************
 allocate(globalhxb(lonpx,latpx,nvars,ens_num)) ! *** need to add
 globalx=0
 do nvar=1, nvars
@@ -475,7 +478,7 @@ do nvar=1, nvars
         ! open CaMa-Flood variables
         if (nvar==1) then
             fname=trim(adjustl(expdir))//"/CaMa_out/"//yyyymmdd//"A"//numch//"/sfcelv"//yyyymmdd(1:4)//".bin"
-        elseif (nvar==1) then
+        elseif (nvar==2) then
             fname=trim(adjustl(expdir))//"/CaMa_out/"//yyyymmdd//"A"//numch//"/outflw"//yyyymmdd(1:4)//".bin"
         else
             fname=trim(adjustl(expdir))//"/CaMa_out/"//yyyymmdd//"A"//numch//"/fldara"//yyyymmdd(1:4)//".bin"
