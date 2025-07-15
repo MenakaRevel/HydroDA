@@ -47,10 +47,10 @@ cal=$9
 
 opt=${10}
 #================================================
-echo $CAMADIR
-echo $EXP_DIR
-echo $ens_num " at spinup.sh"
-echo $ens_num
+# echo $CAMADIR
+# echo $EXP_DIR
+# echo $ens_num " at spinup.sh"
+# echo $ens_num
 orgDIR=`pwd`
 # years,months,dates in arranged digit
 ar_year=$yyyy
@@ -75,7 +75,7 @@ PWDD=${BASE}/etc/reservoir_operation
 OUTBASE="${EXP_DIR}CaMa_out"					  #   base for output => CaMa_out
 INBASE="../../CaMa_in"                       #   base for input => CaMa_in
 
-echo $BASE
+# echo $BASE
 
 #*** 0b. Set dynamic library if needed
 export IFORTLIB="/opt/intel/lib:/opt/intel/mkl/lib"
@@ -182,7 +182,7 @@ CRIVMAN="${FMAP}/rivman.bin"                # manning coefficient river (The one
 # if [ $corrupt = 3 ] || [ $corrupt = 5 ];then
 #      CRIVMAN="${FMAP}/rivman_corrupt.bin"   # manning coefficient river (Corrupted rivman)
 # fi
-echo $CRIVMAN
+# echo $CRIVMAN
 
 #** bifurcation channel info
 CPTHOUT="${FMAP}/bifprm.txt"                #   bifurcation channel list
@@ -249,7 +249,7 @@ elif [ ${runname} = "ERA5" ] ; then
      CINPMAT="${FMAP}/inpmat-06min.bin"       # runoff input matrix for interporlation
      DROFUNIT="86400"      # [m/day->m/s]     # runoff unit conversion
 fi 
-echo $CDIMINFO  $CINPMAT
+# echo $CDIMINFO  $CINPMAT
 
 # IFRQ_INP="24"                               # input forcing frequency: [1,2,3,...,24] hour
 # DROFUNIT="86400000"   # [mm/day->m/s]       # runoff unit conversion
@@ -337,7 +337,8 @@ IFRQ_OUT=24                                 # output frequency: [1,2,3,...,24] h
 
 LOUTCDF=".FALSE."                           # .TRUE. netCDF output, .FALSE. plain binary output
 COUTDIR="./"                                # output directory 
-CVARSOUT="rivout,rivsto,sfcelv,outflw,storge,fldout,fldsto,daminf,damsto,flddph,fldare" # list output variable (comma separated)
+CVARSOUT="sfcelv,outflw"
+# CVARSOUT="rivout,rivsto,sfcelv,outflw,storge,fldout,fldsto,daminf,damsto,flddph,fldare" # list output variable (comma separated)
 # CVARSOUT="rivout,rivsto,rivdph,rivvel,fldout,fldsto,flddph,fldfrc,fldare,sfcelv,outflw,storge,pthflw,pthout,maxsto,maxflw,maxdph" # list output variable (comma separated)
 #CVARSOUT="outflw,storge,fldfrc,maxdph,flddph" # list output variable (comma separated)
 #CVARSOUT="rivout,rivsto,rivdph,rivvel,fldout,fldsto,flddph,fldfrc,fldare,sfcelv,outflw,storge,pthflw,pthout,maxsto,maxflw,maxdph,damsto,daminf" # list output variable (comma separated)    # dam variables are added!!!!

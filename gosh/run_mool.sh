@@ -85,7 +85,8 @@ cd $HydroDAout
 # EXP="NOM_WSE_E2O_HWEB_201" # for conus 
 # EXP="DIR_WSE_E2O_HWEB_201" # for conus
 # EXP="DIR_WSE_ERA5_CGLS_001" # for ERA5 conus CGLS
-EXP="NOM_WSE_ERA5_SWOT_001" # for ERA5 Mackenzie SWOT
+EXP="ANO_WSE_ERA5_SWOT_004" # for ERA5 Mackenzie SWOT
+# EXP="DIR_WSE_ERA5_SWOT_001" # for ERA5 Mackenzie SWOT
 
 # mkdir -p $HydroDA"/out/"$EXP
 mkdir -p $HydroDAout"/out/"$EXP
@@ -121,19 +122,19 @@ cp -r $HydroDA/src/prep_runoff.py   ./prep_runoff.py
 cp -r $HydroDA/src/prep_obs.py      ./prep_obs.py
 cp -r $HydroDA/src/wrt_expset.py    ./wrt_expset.py
 
-## for new experimets
-# copy spinup from previous simulation ## for spinup_flag=3
-mkdir -p ./CaMa_out
-cd ./CaMa_out
-rm -r ./20151231C0*
-ln -sf $copyDAout/out/ANO_WSE_ERA5_CGLS_081/CaMa_out/20151231C0* .
-cd ..
-# copy outflw open loop from previous simulation ## for run_flag=3
-mkdir -p ./assim_out/outflw/
-cd ./assim_out/outflw/
-rm -r ./open
-ln -sf $copyDAout/out/ANO_WSE_ERA5_CGLS_081/assim_out/outflw/open .
-cd ../..
+# # ## for new experimets
+# # # copy spinup from previous simulation ## for spinup_flag=3
+# # mkdir -p ./CaMa_out
+# # cd ./CaMa_out
+# # rm -r ./20151231C0*
+# # ln -sf $copyDAout/out/ANO_WSE_ERA5_CGLS_081/CaMa_out/20151231C0* .
+# # cd ..
+# # # copy outflw open loop from previous simulation ## for run_flag=3
+# # mkdir -p ./assim_out/outflw/
+# # cd ./assim_out/outflw/
+# # rm -r ./open
+# # ln -sf $copyDAout/out/ANO_WSE_ERA5_CGLS_081/assim_out/outflw/open .
+# # cd ../..
 
 # run the main code using virtual environment
 # run main code

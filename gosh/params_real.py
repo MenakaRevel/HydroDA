@@ -14,6 +14,7 @@ def version():
     return "HydroDA version 1.0.0"
     # version for WSE assimilation / observation localization
     # CaMa-Flood v396a used
+    # CaMa-Flood v420 is using now
 
 # **************************************************************
 # 1. experiment type related definitions
@@ -210,7 +211,7 @@ def starttime():
     return (2024,1,1) # start date: [year,month,date]
 
 def endtime():
-    return (2024,1,5) # end date: [year,month,date] 
+    return (2025,1,1) # end date: [year,month,date] 
                       # *note: this date is not included
 
 # **************************************************************
@@ -350,7 +351,7 @@ def err_expansion():
 # #     # 7 : with manning error: Manning's n depend on
 
 def run_flag():
-    return 0
+    return 3
     # 0 run all simulations
     # 1 run only corrupted and assimilated simulations
     # 2 run only true and assimilated simulations
@@ -402,8 +403,8 @@ def corrupt():
     # 5 : with corrupted rivhgt, rivwth, rivman, and fldhgt
 
 def option():
-    return "all" # for bifurcation and dam on
-    # return "bif" # for bifurcation on
+    # return "all" # for bifurcation and dam on
+    return "bif" # for bifurcation on
     # return "dam" # for dam on
     # return "levee" # for levee on
     # for CaMa-Flood options
@@ -460,7 +461,7 @@ def obs_list():
     # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_QC0.txt"
     # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_QCrmse.txt"
     # return DA_dir()+"/dat/HydroWeb_alloc_"+mapname()+"_QC0_simulation.txt"
-    return DA_dir()+"/dat/SWOT_alloc_"+mapname()+".txt"
+    return DA_dir()+"/dat/SWOT_alloc_"+mapname()+"_all.txt"
 
 def stat_name(cal=calibrate()):
     # return "sfcelv_50_VIC_BC_conus_06min_2000-2019" # for conus_06min VIC_BC [50 ensembles]

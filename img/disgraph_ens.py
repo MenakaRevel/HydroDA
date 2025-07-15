@@ -21,95 +21,23 @@ warnings.filterwarnings("ignore")
 
 # import CaMa-Flood variable reading using fortran
 sys.path.append('../etc/')
-from read_CMF import read_discharge, read_discharge_multi
-<<<<<<< HEAD
-
-#sys.path.append('../assim_out/')
-# Link the params.py in the experiment dir
-# os.system("ln -sf ../gosh/params_real.py params.py")
-# import params as pm
-
-#import plot_colors as pc
-#from matplotlib.font_manager import FontProperties
-#fp = FontProperties(fname="jap.ttc",size=15)
-
-# os.system("rm -rf params.py")
-#argvs = sys.argv
-
-# experiment="E2O_HydroWeb23"
-# experiment="VIC_BC_HydroWeb11"
-# experiment="test_wse"
-# experiment="test_virtual"
-# experiment="DIR_WSE_E2O_HWEB_001"
-# experiment="DIR_WSE_E2O_HWEB_002"
-# experiment="DIR_WSE_E2O_HWEB_003"
-# experiment="DIR_WSE_E2O_HWEB_004"
-# experiment="ANO_WSE_E2O_HWEB_001"
-# experiment="ANO_WSE_E2O_HWEB_002"
-# experiment="ANO_WSE_E2O_HWEB_003"
-# experiment="ANO_WSE_E2O_HWEB_004"
-# experiment="NOM_WSE_E2O_HWEB_001"
-# experiment="NOM_WSE_E2O_HWEB_002"
-# experiment="NOM_WSE_E2O_HWEB_003"
-# experiment="NOM_WSE_E2O_HWEB_004"
-# experiment="NOM_WSE_E2O_HWEB_005"
-# experiment="NOM_WSE_E2O_HWEB_006"
-# experiment="NOM_WSE_E2O_HWEB_007"
-# experiment="NOM_WSE_E2O_HWEB_008"
-# experiment="NOM_WSE_E2O_HWEB_009"
-# experiment="NOM_WSE_E2O_HWEB_010"
-# experiment="NOM_WSE_E2O_HWEB_011"
-# experiment="NOM_WSE_E2O_HWEB_012"
-# experiment="NOM_WSE_E2O_HWEB_013"
-
-# <<<<<<< HEAD
-
-
-# experiment="DIR_WSE_ECMWF_HWEB_011"
-# experiment="DIR_WSE_ECMWF_HWEB_012"
-# experiment="DIR_WSE_ECMWF_HWEB_013"
-# experiment="DIR_WSE_ECMWF_HWEB_014"
-
-# experiment="ANO_WSE_ECMWF_HWEB_011"
-# experiment="ANO_WSE_ECMWF_HWEB_012"
-# experiment="ANO_WSE_ECMWF_HWEB_013"
-# experiment="ANO_WSE_ECMWF_HWEB_014"
-
-# experiment="NOM_WSE_ECMWF_HWEB_011"
-# experiment="NOM_WSE_ECMWF_HWEB_012"
-# experiment="NOM_WSE_ECMWF_HWEB_013"
-# experiment="NOM_WSE_ECMWF_HWEB_014"
-
-# experiment="NOM_WSE_E2O_HWEB_101"
-# experiment="NOM_WSE_E2O_HWEB_201"
-# experiment="DIR_WSE_E2O_HWEB_201"
-# experiment="DIR_WSE_ERA5_CGLS_001"
-experiment="NOM_WSE_ERA5_SWOT_001"
-#=======
-# experiment="DIR_WSE_E2O_SWOT_001"
-# >>>>>>> dev_virtual
-
-#assim_out=pm.DA_dir()+"/out/"+pm.experiment()+"/assim_out"
-#assim_out=pm.DA_dir()+"/out/"+experiment+"/assim_out"
-# assim_out=pm.DA_dir()+"/out/"+experiment
-# assim_out="../out/"+experiment
-assim_out="/cluster/data6/menaka/HydroDA/out/"+experiment
-=======
+# from read_CMF import read_discharge, read_discharge_multi
 #===============================================================================
 # Experiment name
 #===============================================================================
-experiment="NOM_WSE_VICBC_CGLS_012" #"NOM_WSE_ERA5_CGLS_062" 
+experiment="ANO_WSE_ERA5_SWOT_004" #"NOM_WSE_ERA5_CGLS_062" 
 #===============================================================================
 # assim_out="../out/"+experiment
+assim_out="/cluster/data6/menaka/HydroDA/out/"+experiment
 # assim_out="/cluster/data7/menaka/HydroDA/out/"+experiment
-assim_out="/cluster/data8/menaka/HydroDA/out/"+experiment
->>>>>>> dev_virtual
+# assim_out="/cluster/data8/menaka/HydroDA/out/"+experiment
 print (assim_out)
 #===============================================================================
 # HydroDA related functions
 sys.path.append(assim_out)
 import params as pm
 import read_grdc as grdc
+import read_hydat as hdat
 import cal_stat as stat
 #========================================
 #====  functions for making figures  ====
@@ -263,12 +191,12 @@ fname=pm.CaMa_dir()+"/map/"+pm.mapname()+"/params.txt"
 with open(fname,"r") as f:
     lines=f.readlines()
 #-------
-nx     = int(filter(None, re.split(" ",lines[0]))[0])
-ny     = int(filter(None, re.split(" ",lines[1]))[0])
-gsize  = float(filter(None, re.split(" ",lines[3]))[0])
+nx     = int(list(filter(None, re.split(" ",lines[0])))[0])
+ny     = int(list(filter(None, re.split(" ",lines[1])))[0])
+gsize  = float(list(filter(None, re.split(" ",lines[3])))[0])
 #----
-syear,smonth,sdate=2016,1,1 #pm.starttime()
-eyear,emonth,edate=2019,1,1 #2020,1,1 #pm.endtime()
+syear,smonth,sdate=pm.starttime() #2016,1,1 #
+eyear,emonth,edate=2024,11,1 #pm.endtime()  #2024,2,1 #2019,1,1 #2020,1,1 # 
 #month=1
 #date=1
 start_dt=datetime.date(syear,smonth,sdate)
@@ -283,6 +211,9 @@ nbdays=int(last)
 #    last=366
 #else:
 #    last=365
+
+# q_data='grdc'
+q_data='hydat'
 
 ncpus=20
 #last=89
@@ -306,15 +237,21 @@ river=[]
 # rivernames  = ["CHURCHILL"]
 # rivernames = ["SAINT LAWRENCE","OHIO","CONNECTICUT","MISSOURI","MISSISSIPPI","COLORADO","CHURCHILL"]
 # rivernames = grdc.grdc_river_name_v396()
+# rivernames = ['LIARD','MACKENZIE','PEACE','SLAVE','ARCTIC RED']
 rivernames = ['MACKENZIE']
 for rivername in rivernames:
-  grdc_id,station_loc,x_list,y_list = grdc.get_grdc_loc_v396(rivername,fname=pm.CaMa_dir() + "/map/"+pm.mapname()+"/grdc_loc.txt")
-  print (rivername, grdc_id,station_loc)
-  river.append([rivername]*len(station_loc))
-  staid.append(grdc_id)
-  pname.append(station_loc)
-  xlist.append(x_list)
-  ylist.append(y_list)
+    if q_data == 'grdc':
+        grdc_id,station_loc,x_list,y_list = grdc.get_grdc_loc_v396(rivername,fname=pm.CaMa_dir() + "/map/"+pm.mapname()+"/grdc_loc.txt")
+    elif q_data == 'hydat':
+        grdc_id,station_loc,x_list,y_list = hdat.get_hydat_loc(rivername)
+    else:
+        grdc_id,station_loc,x_list,y_list = grdc.get_grdc_loc_v396(rivername,fname=pm.CaMa_dir() + "/map/"+pm.mapname()+"/grdc_loc.txt")
+    print (rivername, grdc_id,station_loc)
+    river.append([rivername]*len(station_loc))
+    staid.append(grdc_id)
+    pname.append(station_loc)
+    xlist.append(x_list)
+    ylist.append(y_list)
 #--
 river=([flatten for inner in river for flatten in inner])
 staid=([flatten for inner in staid for flatten in inner])
@@ -343,7 +280,7 @@ shared_array_asm  = sharedctypes.RawArray(asm._type_, asm)
 # for parallel calcualtion
 inputlist=[]
 for day in np.arange(start,last):
-    target_dt=start_dt+datetime.timedelta(days=day)
+    target_dt=start_dt+datetime.timedelta(days=int(day))
     yyyy='%04d' % (target_dt.year)
     mm='%02d' % (target_dt.month)
     dd='%02d' % (target_dt.day)
@@ -372,17 +309,22 @@ def read_data(inputlist):
     dt=(target_dt-start_dt).days
     # corrpted
     fname=assim_out+"/assim_out/outflw/open/outflw"+yyyy+mm+dd+"_"+numch+".bin"
-    print ("---- reading file ->", fname)
+    print ("\t---- reading file ->", fname)
     #fname=assim_out+"/assim_out/rivout/open/rivout"+yyyy+mm+dd+"_"+numch+".bin"
     opnfile=np.fromfile(fname,np.float32).reshape([ny,nx])
     # assimilated
     fname=assim_out+"/assim_out/outflw/assim/outflw"+yyyy+mm+dd+"_"+numch+".bin"
     #fname=assim_out+"/assim_out/rivout/assim/rivout"+yyyy+mm+dd+"_"+numch+".bin"
-    print ("---- reading file ->", fname)
+    print ("\t---- reading file ->", fname)
     asmfile=np.fromfile(fname,np.float32).reshape([ny,nx])
     #-------------
     for point in np.arange(pnum):
-        ix1,iy1,ix2,iy2=grdc.get_grdc_station_v396(pname[point],fname=pm.CaMa_dir() + "/map/"+pm.mapname()+"/grdc_loc.txt")
+        # print ('\t\t',point, q_data, pname[point])
+        if q_data=='grdc':
+            ix1,iy1,ix2,iy2=grdc.get_grdc_station_v396(pname[point],fname=pm.CaMa_dir() + "/map/"+pm.mapname()+"/grdc_loc.txt")
+        elif q_data=='hydat':
+            ix1,iy1,ix2,iy2=hdat.get_hdat_station(pname[point])
+            # print (ix1,iy1,ix2,iy2)
         if ix2 == -9999 or iy2 == -9999:
             tmp_opn[dt,num,point]=opnfile[iy1,ix1]
             tmp_asm[dt,num,point]=asmfile[iy1,ix1]
@@ -523,6 +465,7 @@ def make_fig(point):
 #        plt.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color=colors["assimilated"],linewidth=0.3,alpha=0.5)
 #
 #    plt.ylim(ymin=0)
+    fig, ax1 = plt.subplots()
     if exptype=="virtual":
         # org=read_dis()
         ix1,iy1,ix2,iy2=grdc.get_grdc_station_v396(pname[point])
@@ -538,18 +481,24 @@ def make_fig(point):
         # org=grdc.grdc_dis(staid[point],syear,eyear-1)
         org=np.array(org)
     else:
-        org=grdc.grdc_dis(staid[point],syear,eyear,smon=smonth,emon=emonth,sday=sdate,eday=edate-1) #eyear,emonth,edate
-        org=np.array(org)
-    print (org)
-    print (np.mean(ma.masked_less(asm[:,:,point],0.0),axis=1))
-    lines=[ax1.plot(np.arange(start,last),ma.masked_less(org,0.0),label="GRDC",color="#34495e",linewidth=3.0,zorder=101)[0]] #,marker = "o",markevery=swt[point])
+        if q_data=='grdc':
+            org=grdc.grdc_dis(staid[point],syear,eyear-1,smon=smonth,emon=12,sday=sdate,eday=31) #eyear,emonth,edate
+            org=np.array(org)
+            labels[0]='GRDC'
+        elif q_data=='hydat':
+            org=hdat.hydat_dis(staid[point],2024,2024,emon=10,eday=31) #,syear,eyear-1,smon=smonth,emon=12,sday=sdate,eday=31) #eyear,emonth,edate
+            org=np.array(org)
+            labels[0]='HYDAT'
+    # print (org)
+    # print (np.mean(ma.masked_less(asm[:,:,point],0.0),axis=1))
+    lines=[ax1.plot(np.arange(start,last),ma.masked_less(org,0.0),label=q_data,color="#34495e",linewidth=3.0,zorder=101)[0]] #,marker = "o",markevery=swt[point])
 #    ax1.plot(np.arange(start,last),hgt[:,point],label="true",color="gray",linewidth=0.7,linestyle="--",zorder=101)
 #    plt.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7)
     for num in np.arange(0,pm.ens_mem()):
-        print ('asm',asm[:,num,point])
-        print ('opn',opn[:,num,point])
-        ax1.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.1,alpha=0.1,zorder=102)
-        ax1.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.1,alpha=0.1,zorder=103)
+        # print ('asm',asm[:,num,point])
+        # print ('opn',opn[:,num,point])
+        ax1.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.05,alpha=0.1,zorder=102)
+        ax1.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.05,alpha=0.1,zorder=103)
 #        plt.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.3,alpha=0.5)
 #        plt.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.3,alpha=0.5)
     # draw mean of ensembles
@@ -567,18 +516,28 @@ def make_fig(point):
     #xxlist=np.linspace(0,N,(eyear-syear)+1)
     #xlab=np.arange(syear,eyear+1,1)
     #xxlab=[calendar.month_name[i][:3] for i in range(1,13)]
-    if eyear-syear > 5:
+    if eyear-syear <= 1:
+        dtt=1
+        dt=(emonth-smonth)+1
+        xxlist=np.linspace(0,N,dt,endpoint=True)
+        xxlab=[calendar.month_name[i][:3] for i in range(1,dt+1)]
+    elif eyear-syear > 5:
         dtt=2
         dt=int(math.ceil(((eyear-syear)+1)/2.0))
+        xxlist=np.linspace(0,N,dt,endpoint=True)
+        xxlab=np.arange(syear,eyear+1,dtt)
     elif eyear-syear > 10:
         dtt=5
         dt=int(math.ceil(((eyear-syear)+1)/5.0))
+        xxlist=np.linspace(0,N,dt,endpoint=True)
+        xxlab=np.arange(syear,eyear+1,dtt)
     else:
         dtt=1
         dt=(eyear-syear)+1
-    xxlist=np.linspace(0,N,dt,endpoint=True)
-    #xxlab=[calendar.month_name[i][:3] for i in range(1,13)]
-    xxlab=np.arange(syear,eyear+1,dtt)
+        xxlist=np.linspace(0,N,dt,endpoint=True)
+        xxlab=np.arange(syear,eyear+1,dtt)
+    #
+    
     ax1.set_xticks(xxlist)
     ax1.set_xticklabels(xxlab,fontsize=10)
     # Nash-Sutcllf calcuation
@@ -608,6 +567,7 @@ def make_fig(point):
     # ax1.text(0.02,0.75,corr1,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
     # ax1.text(0.02,0.55,corr2,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
     #
+    '''
     ax1.text(0.02,0.95,Nash1,ha="left",va="center",transform=ax1.transAxes,fontsize=8)
     ax1.text(0.02,0.90,Nash2,ha="left",va="center",transform=ax1.transAxes,fontsize=8)
     ax1.text(0.02,0.80,kgeh1,ha="left",va="center",transform=ax1.transAxes,fontsize=8)
@@ -616,7 +576,7 @@ def make_fig(point):
     ax1.text(0.42,0.90,corr2,ha="left",va="center",transform=ax1.transAxes,fontsize=8)
     ax1.text(0.42,0.80,rmse1,ha="left",va="center",transform=ax1.transAxes,fontsize=8)
     ax1.text(0.42,0.75,rmse2,ha="left",va="center",transform=ax1.transAxes,fontsize=8)
-
+    '''
 #    # twin axis
 #    ax2 = ax1.twinx()
 #    #aiv = stat.AI(asm[:,:,point],opn[:,:,point],org[:,point])
@@ -694,7 +654,6 @@ def make_fig(point):
 #    ax2.set_xlim(xmin=0,xmax=last+1)
 #    print swt[point]
     plt.legend(lines,labels,ncol=1,loc='upper right') #, bbox_to_anchor=(1.0, 1.0),transform=ax1.transAxes)
-<<<<<<< HEAD
     if '/' in pname[point]:
         station_loc_list=pname[point].split("/")
     else:
@@ -706,12 +665,6 @@ def make_fig(point):
     station_name=station_loc_list
         # station_name="-".join(station_loc_list) 
     
-=======
-    station_loc_list=pname[point].split("/")
-    print (station_loc_list)
-    station_name="".join(station_loc_list[0].split())
-    # station_name="-".join(station_loc_list) 
->>>>>>> dev_virtual
     print ('--- saving figure',river[point]+"-"+station_name+".png")
     plt.savefig(assim_out+"/figures/disgraph/"+river[point]+"-"+station_name+".png",dpi=500)
     return 0
@@ -735,15 +688,9 @@ def make_fig(point):
 
 
 
-<<<<<<< HEAD
 
-# para_flag=1
-para_flag=0
-=======
-# print (last)
 para_flag=1
 # para_flag=0
->>>>>>> dev_virtual
 #--
 if para_flag==1:
     p=Pool(ncpus)

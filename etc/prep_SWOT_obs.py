@@ -51,7 +51,8 @@ def obs_list():
 	# return "../dat/HydroWeb_alloc_conus_06min_DIR.txt"
 	# return "../dat/CGLS_alloc_conus_06min_DIR.txt"
 	# return "../dat/CGLS_alloc_conus_06min_org.txt"
-    return "../dat/SWOT_alloc_Mackenzie_06min.txt"
+    # return "../dat/SWOT_alloc_Mackenzie_06min.txt"
+    return "../dat/SWOT_alloc_Mackenzie_06min_all.txt"
 ###########################
 def query_hydrocron(station, ix=-9999, iy=-9999, EGM08=0.0, EGM96=0.0, start_time="2024-01-01T00:00:00Z", end_time="2024-11-01T00:00:00Z"):
     """Query Hydrocron for reach-level time series data.
@@ -83,6 +84,11 @@ def query_hydrocron(station, ix=-9999, iy=-9999, EGM08=0.0, EGM96=0.0, start_tim
         # Remove fill values for missing observations
         df = df.loc[(df["wse"] != -999999999999.0)].reset_index(drop=True)
         df = df.loc[(df['node_q']<=1) & (df['wse_r_u']<1.0), :]
+        # do a outlier removal
+        # Remove outliers from 'wse' column using 1.5 * IQR
+        Q1, Q3 = df["wse"].quantile([0.25, 0.75])
+        IQR = Q3 - Q1
+        df = df[(df["wse"] >= Q1 - 1.5 * IQR) & (df["wse"] <= Q3 + 1.5 * IQR)]
         # Convert time_str to datetime format
         df.time_str = pd.to_datetime(df.time_str)
         # add x and y

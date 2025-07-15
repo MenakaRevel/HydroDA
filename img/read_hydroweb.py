@@ -16,7 +16,7 @@ def hydroweb_river_name(mapname="glb_15min"):
     lines=f.readlines()
     for line in lines[1::]:
         line    = filter(None,re.split(" ",line))
-        print line
+        print (line)
         station = line[1]
         riv     = re.split("_",station)[1]
         river.append(riv)
@@ -36,7 +36,7 @@ def get_hydroweb(mapname="glb_15min",fname="/cluster/data6/menaka/HydroWeb/Hydro
     lines=f.readlines()
     for line in lines[1::]:
         line    = filter(None,re.split(" ",line))
-        print line
+        print (line)
         station = line[1]
         riv     = re.split("_",station)[1]
         ix      = int(line[4])-1

@@ -6,11 +6,7 @@ character(len=128)              :: fname,buf,camadir,expdir,mapname
 real                            :: gsize,west, north, east, south ! map boundries
 integer                         :: latpx,lonpx,nflp    ! pixel size, calculated
 ! real,allocatable                :: rivsto(:,:),fldsto(:,:) ! put to restart file
-<<<<<<< HEAD
 real,allocatable                :: rivsto(:,:),fldsto(:,:),damsto(:,:),levsto(:,:) ! Modified by Youjiang, put to restart file *** levsto added for restart file with dimensions (4,ny,nx)
-=======
-real,allocatable                :: rivsto(:,:),fldsto(:,:),damsto(:,:) ! Modified by Youjiang, put to restart file
->>>>>>> dev_virtual
 
 real,allocatable                :: elevtn(:,:)
 
@@ -239,11 +235,7 @@ close(34)
 allocate(rivsto_max(lonpx,latpx),oceanmask(lonpx,latpx),fldstage(lonpx,latpx))
 ! allocate(fldfrac(lonpx,latpx),rivdph(lonpx,latpx),rivsto(lonpx,latpx),flddph(lonpx,latpx),fldsto(lonpx,latpx))
 ! Modified by Youjiang Shen
-<<<<<<< HEAD
 allocate(fldfrac(lonpx,latpx),rivdph(lonpx,latpx),rivsto(lonpx,latpx),damsto(lonpx,latpx),levsto(lonpx,latpx),flddph(lonpx,latpx),fldsto(lonpx,latpx))
-=======
-allocate(fldfrac(lonpx,latpx),rivdph(lonpx,latpx),rivsto(lonpx,latpx),damsto(lonpx,latpx),flddph(lonpx,latpx),fldsto(lonpx,latpx))
->>>>>>> dev_virtual
 
 
 ! calc river storage max
@@ -382,7 +374,9 @@ if (opt == "all" .OR. opt == "dam") then
     if(ios==0)then
         print* , "read damsto", fname
         read(34,rec=3) damsto  ! added by Youjiang. 
-        read(34,rec=4) levsto  ! added by Menaka@UWaterloo 2024/11/29
+        if (opt == "lev") then
+            read(34,rec=4) levsto  ! added by Menaka@UWaterloo 2024/11/29
+        endif
     else
         print*, "no file", fname
     end if
@@ -400,7 +394,9 @@ if(ios==0)then
     write(35,rec=1) rivsto
     write(35,rec=2) fldsto
     write(35,rec=3) damsto ! for CaMa-Flood v4.20 
-    write(35,rec=4) levsto
+    if (opt == "lev") then
+        write(35,rec=4) levsto
+    endif
 end if
 close(35)
 write(82,*) "done restart file at:",fname

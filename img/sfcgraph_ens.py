@@ -19,16 +19,17 @@ import math
 
 # import CaMa-Flood variable reading using fortran
 sys.path.append('../etc/')
-from read_CMF import read_sfcelv, read_sfcelv_multi
+# from read_CMF import read_sfcelv, read_sfcelv_multi
 #===============================================================================
 # Experiment name
 #===============================================================================
-experiment="NOM_WSE_VICBC_CGLS_012" #"DIR_WSE_ISIMIP3a_SWOT_004"
+experiment="ANO_WSE_ERA5_SWOT_004" #"DIR_WSE_ISIMIP3a_SWOT_004"
 #===============================================================================
 # Experiment folder
 # assim_out="../out/"+experiment
+assim_out="/cluster/data6/menaka/HydroDA/out/"+experiment
 # assim_out="/cluster/data7/menaka/HydroDA/out/"+experiment
-assim_out="/cluster/data8/menaka/HydroDA/out/"+experiment
+# assim_out="/cluster/data8/menaka/HydroDA/out/"+experiment
 print (assim_out)
 #===============================================================================
 # HydroDA related functions
@@ -37,6 +38,7 @@ import params as pm
 import read_grdc as grdc
 import read_hydroweb as hweb
 import read_cgls as cgls
+import read_swot as swot
 import cal_stat as stat
 
 conflag=pm.conflag()
@@ -121,12 +123,12 @@ fname=pm.CaMa_dir()+"/map/"+pm.mapname()+"/params.txt"
 with open(fname,"r") as f:
     lines=f.readlines()
 #-------
-nx     = int(filter(None, re.split(" ",lines[0]))[0])
-ny     = int(filter(None, re.split(" ",lines[1]))[0])
-gsize  = float(filter(None, re.split(" ",lines[3]))[0])
+nx     = int(list(filter(None, re.split(" ",lines[0])))[0])
+ny     = int(list(filter(None, re.split(" ",lines[1])))[0])
+gsize  = float(list(filter(None, re.split(" ",lines[3])))[0])
 #---
-syear,smonth,sdate=2016,1,1 #pm.starttime()#2004#1991 #2003,1,1 #
-eyear,emonth,edate=2019,1,1 #pm.endtime() #2005,1,1 #2004,1,1 #2010,1,1 #
+syear,smonth,sdate=pm.starttime()#2016,1,1 #pm.starttime()#2004#1991 #2003,1,1 #
+eyear,emonth,edate=2024,11,1 #pm.endtime() #2019,1,1 #pm.endtime() #2005,1,1 #2004,1,1 #2010,1,1 #
 #month=1
 #date=1
 start_dt=datetime.date(syear,smonth,sdate)
@@ -217,20 +219,23 @@ EGM96=[]
 #rivernames  = ["LENA","NIGER","CONGO","OB","MISSISSIPPI","MEKONG","AMAZONAS","MEKONG","IRRAWADDY","VOLGA", "NIGER","YUKON","DANUBE"] #,"INDUS"] #["AMAZONAS"]#["CONGO"]#
 # rivernames  = ["MISSISSIPPI","AMAZONAS","NIGER","MEKONG","IRRAWADDY","VOLGA","MISSOURI"]
 # rivernames  = ["MISSISSIPPI"]
-rivernames  = ["Mississippi"] # CGLS
+# rivernames  = ["Mississippi"] # CGLS
+rivernames = ['Mackenzie']
 for rivername in rivernames:
-  #station_loc,x_list,y_list = grdc.get_grdc_loc(rivername,"b")
-  if pm.obs_name()=="HydroWeb":
-    station_loc,x_list,y_list,egm08,egm96 =hweb.get_hydroweb_loc(rivername,pm.mapname())#,fname=pm.obs_list())
-  elif pm.obs_name()=="CGLS":
-    station_loc,x_list,y_list,egm08,egm96 =cgls.get_cgls_loc(rivername,pm.mapname())
-#   print rivername, station_loc
-  river.append([rivername]*len(station_loc))
-  pname.append(station_loc)
-  xlist.append(x_list)
-  ylist.append(y_list)
-  EGM08.append(egm08)
-  EGM96.append(egm96)
+    #station_loc,x_list,y_list = grdc.get_grdc_loc(rivername,"b")
+    if pm.obs_name()=="HydroWeb":
+        station_loc,x_list,y_list,egm08,egm96 =hweb.get_hydroweb_loc(rivername,pm.mapname())#,fname=pm.obs_list())
+    elif pm.obs_name()=="CGLS":
+        station_loc,x_list,y_list,egm08,egm96 =cgls.get_cgls_loc(rivername,pm.mapname())
+    elif pm.obs_name()=="SWOT":
+        station_loc,x_list,y_list,egm08,egm96 =swot.get_swot_loc(rivername,pm.mapname())
+    #   print rivername, station_loc
+    river.append([rivername]*len(station_loc))
+    pname.append(station_loc)
+    xlist.append(x_list)
+    ylist.append(y_list)
+    EGM08.append(egm08)
+    EGM96.append(egm96)
 
 #--
 river=([flatten for inner in river for flatten in inner])
@@ -240,7 +245,7 @@ ylist=([flatten for inner in ylist for flatten in inner])
 EGM08=([flatten for inner in EGM08 for flatten in inner])
 EGM96=([flatten for inner in EGM96 for flatten in inner])
 pnum=len(pname)
-#print len(river),pnum,pname,river
+print (len(river),pnum,pname,river)
 org=[]
 opn=[]
 asm=[]
@@ -254,7 +259,7 @@ shared_array_asm  = sharedctypes.RawArray(asm._type_, asm)
 # for parallel calcualtion
 inputlist=[]
 for day in np.arange(start,last):
-    target_dt=start_dt+datetime.timedelta(days=day)
+    target_dt=start_dt+datetime.timedelta(days=int(day))
     yyyy='%04d' % (target_dt.year)
     mm='%02d' % (target_dt.month)
     dd='%02d' % (target_dt.day)
@@ -304,7 +309,7 @@ opn = np.ctypeslib.as_array(shared_array_opn)
 asm = np.ctypeslib.as_array(shared_array_asm)
 p.terminate()
 #############
-if pm.obs_name() == "SWOT":
+if pm.obs_name() == "vSWOT":
     print ("---> prepare SWOT observations ")
     swt=np.zeros([N,pnum],np.float32)
     # swt=np.ctypeslib.as_ctypes(np.zeros([N,pnum],np.float32))
@@ -481,9 +486,9 @@ def make_fig(point):
     plt.close()
     obstype=pm.obs_name()
     labels=["HydroWeb","corrupted","assimilated"]
-    if obstype=="SWOT":
+    if obstype=="vSWOT":
         exptype="virtual"
-        labels=["SWOT","simulated","assimilated"]
+        labels=["vSWOT","simulated","assimilated"]
         ix=xlist[point]
         iy=ylist[point]
         swtd=swt[:,point]
@@ -510,7 +515,14 @@ def make_fig(point):
         labels=["CGLS","simulated","assimilated"]
         time,org=cgls.cgls_WSE(pname[point],syear,eyear)
         org=np.array(org)+np.array(EGM08[point])-np.array(EGM96[point])
-        figname=river[point]+"_"+"%06d"%(int(re.split("_",pname[point])[4])) 
+        figname=river[point]+"_"+"%06d"%(int(re.split("_",pname[point])[4]))
+    elif obstype=="SWOT": 
+        print ('read '+obstype)
+        exptype="real"
+        labels=["SWOT","simulated","assimilated"]
+        time,org=swot.swot_WSE(str(pname[point]),syear,eyear,smon=1,emon=10,sday=1,eday=31)
+        org=np.array(org)+np.array(EGM08[point])-np.array(EGM96[point])
+        figname=river[point]+"_"+str(pname[point])
     else:
         exptype="real"
         labels=["HydroWeb","simulated","assimilated"]
@@ -561,19 +573,27 @@ def make_fig(point):
     #     data0=(data-mean_obs[ylist[point],xlist[point]])+mean_sfcelv[ylist[point],xlist[point]]
     # elif conflag==3:
     #     data0=((data-mean_obs[ylist[point],xlist[point]])/(std_obs[ylist[point],xlist[point]]+1.0e-20))*std_sfcelv[ylist[point],xlist[point]]+mean_sfcelv[ylist[point],xlist[point]]
-    lines=[ax1.plot(time,data0,label="obs",marker="o",color="#34495e",linewidth=0.0,zorder=101)[0]]
+    print (time, data0)
+    lines=[ax1.plot(time,data0-np.mean(data0),
+    label="obs",marker="o",color="#34495e",linewidth=0.0,zorder=101)[0]]
 #    ax1.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7,zorder=101)
 #    ax1.plot(np.arange(start,last),m_sf[:,point],label="mean sfcelv",color="black",linewidth=0.7,linestyle="--",zorder=107)
 #    plt.plot(np.arange(start,last),org[:,point],label="true",color="black",linewidth=0.7)
 
     for num in np.arange(0,int(pm.ens_mem())):
-        ax1.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="#4dc7ec",linewidth=0.1,alpha=0.3,zorder=102)
-        ax1.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="#ff8021",linewidth=0.5,alpha=0.3,zorder=103)
+        ax1.plot(np.arange(start,last),opn[:,num,point]-np.mean(opn[:,num,point]),
+        label="corrupted",color="#4dc7ec",linewidth=0.05,alpha=0.3,zorder=102)
+        ax1.plot(np.arange(start,last),asm[:,num,point]-np.mean(asm[:,num,point]),
+        label="assimilated",color="#ff8021",linewidth=0.05,alpha=0.3,zorder=103)
 #        ax1.plot(np.arange(start,last),em_sf[:,num,point],label="mean sfcelv",color="blue",linewidth=0.3,linestyle="--",alpha=0.5,zorder=103)
 #        plt.plot(np.arange(start,last),opn[:,num,point],label="corrupted",color="blue",linewidth=0.3,alpha=0.5)
 #        plt.plot(np.arange(start,last),asm[:,num,point],label="assimilated",color="red",linewidth=0.3,alpha=0.5)
-    lines.append(ax1.plot(np.arange(start,last),np.mean(ma.masked_less(opn[:,:,point],0.0),axis=1),label="corrupted",color="#4dc7ec",linewidth=0.8,alpha=0.8,zorder=102)[0])
-    lines.append(ax1.plot(np.arange(start,last),np.mean(ma.masked_less(asm[:,:,point],0.0),axis=1),label="assimilated",color="#ff8021",linewidth=0.8,alpha=0.8,zorder=103)[0])
+    lines.append(ax1.plot(np.arange(start,last),
+    np.mean(ma.masked_less(opn[:,:,point],0.0),axis=1)-np.mean(ma.masked_less(opn[:,:,point],0.0)),
+    label="corrupted",color="#4dc7ec",linewidth=0.8,alpha=0.8,zorder=102)[0])
+    lines.append(ax1.plot(np.arange(start,last),
+    np.mean(ma.masked_less(asm[:,:,point],0.0),axis=1)-np.mean(ma.masked_less(asm[:,:,point],0.0)),
+    label="assimilated",color="#ff8021",linewidth=0.8,alpha=0.8,zorder=103)[0])
 #    ax1.plot(np.arange(start,last),np.mean(em_sf[:,:,point],axis=1),label="mean sfelv",color="blue",linewidth=0.5,linestyle="--",alpha=0.5,zorder=103)
 #    plt.ylim(ymin=)
     # plot rivhgt
@@ -590,7 +610,7 @@ def make_fig(point):
         ax1.hlines(elevtn[iy,ix]-rivhgt_cor[iy,ix],xmin=0,xmax=last+1,linewidth=0.5,color="black",linestyle="--",zorder=104)
 
     # Make the y-axis label, ticks and tick labels match the line color.
-    ax1.set_ylabel('WSE (m)', color='k')
+    ax1.set_ylabel('$\Delta$$WSE$ (m)', color='k')
     #ax1.set_ylim(ymin=0,ymax=250.)
     ax1.set_xlim(xmin=0,xmax=last+1)
     ax1.tick_params('y', colors='k')
@@ -603,11 +623,12 @@ def make_fig(point):
     csch="std (cor): %5.2f"%(np.std(opn[:,:,point]))
     # ax1.text(0.02,0.9,meanch,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
     # ax1.text(0.02,0.8,stdch,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
+    '''
     ax1.text(0.02,0.7,omch,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
     ax1.text(0.02,0.6,osch,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
     ax1.text(0.02,0.5,cmch,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
     ax1.text(0.02,0.4,csch,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
-
+    '''
     # xxlist=np.linspace(15,N-15,int(N/30))
     # xxlab=[calendar.month_name[i][:3] for i in range(1,13)]
     #ax1.set_xticks(xxlist)
@@ -623,15 +644,23 @@ def make_fig(point):
     # outtext="observation mean: %6.2f"%(obs_mean)
     # ax1.text(0.02,0.7,outtext,ha="left",va="center",transform=ax1.transAxes,fontsize=10)
     # xlable in years
-    if eyear-syear > 5:
+    if eyear-syear <= 1:
+        dtt=1
+        dt=(emonth-smonth)+1
+        xxlist=np.linspace(0,N,dt,endpoint=True)
+        xxlab=[calendar.month_name[i][:3] for i in range(1,dt+1)]
+    elif eyear-syear > 5:
         dtt=5
         dt=int(math.ceil(((eyear-syear)+1)/5.0))
+        xxlist=np.linspace(0,N,dt,endpoint=True)
+        xxlab=np.arange(syear,eyear+1,dtt)
     else:
         dtt=1
         dt=(eyear-syear)+1
-    xxlist=np.linspace(0,N,dt,endpoint=True)
+        xxlist=np.linspace(0,N,dt,endpoint=True)
+        xxlab=np.arange(syear,eyear+1,dtt)    
     #xxlab=[calendar.month_name[i][:3] for i in range(1,13)]
-    xxlab=np.arange(syear,eyear+1,dtt)
+
     ax1.set_xticks(xxlist)
     ax1.set_xticklabels(xxlab,fontsize=10)
 

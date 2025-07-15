@@ -59,7 +59,7 @@ DA_dir=${13}
 #ens_num=$(printf '%03d' $(($runens*$manens)))
 # pwd
 # echo ${CAMADIR}
-echo $EXP_DIR
+# echo $EXP_DIR
 # years,months,dates in arranged digit
 ar_year=$in_year
 ar_month=$in_month
@@ -360,7 +360,8 @@ IFRQ_OUT=24                                 # output frequency: [1,2,3,...,24] h
 
 LOUTCDF=".FALSE."                           # .TRUE. netCDF output, .FALSE. plain binary output
 COUTDIR="./"                                # output directory 
-CVARSOUT="rivout,rivsto,sfcelv,outflw,storge,fldout,fldsto,daminf,damsto,flddph,fldare" # list output variable (comma separated)
+CVARSOUT="sfcelv,outflw"
+# CVARSOUT="rivout,rivsto,sfcelv,outflw,storge,fldout,fldsto,daminf,damsto,flddph,fldare" # list output variable (comma separated)
 # CVARSOUT="rivout,rivsto,rivdph,rivvel,fldout,fldsto,flddph,fldfrc,fldare,sfcelv,outflw,storge,pthflw,pthout,maxsto,maxflw,maxdph" # list output variable (comma separated)
 #CVARSOUT="outflw,storge,fldfrc,maxdph,flddph" # list output variable (comma separated)
 #CVARSOUT="rivout,rivsto,rivdph,rivvel,fldout,fldsto,flddph,fldfrc,fldare,sfcelv,outflw,storge,pthflw,pthout,maxsto,maxflw,maxdph,damsto,daminf" # list output variable (comma separated)    # dam variables are added!!!!
