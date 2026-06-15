@@ -610,7 +610,7 @@ write(78,*) "Assimilation of each grid"
 !$omp& ocean,rivwth,rivhgt,obs_mask,patch_size,ens_num, &
 !$omp& patch_nums,nextX,nextY,nextdst,errfix, &
 !$omp& swot_obs,globalx,globaltrue,global_xa,global_null) &
-!$omp& private(lat_cent,lat,lon,llon,llat,fname,fn,ios,weightage, &
+!$omp& private(lat_cent,lat,lon,llon,llat,fname,ios,weightage, &  !fn,
 !$omp& lag,xlist,ylist,wgt,countnum,j,i,i_m,j_m,lag_dist,target_pixel,xt, &
 !$omp& local_ocean,local_river,local_lag,local_wgt,local_sat,local_obs, &
 !$omp& xf,errflg,ovs,H,Ef,xf_m,R,Rdiag,countR,wt,W,VDVT,Pa,Pasqr, &

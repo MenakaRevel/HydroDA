@@ -1,11 +1,106 @@
-## Fortran Compiler
-FC  = ifort
+# #==========================================================
+# # intel fortran
+# #==========================================================
+# ## Fortran Compiler
+# FC  = ifort
 
-# Compiler options
-#FFLAGS = -O3 -warn all -assume byterecl -heap-arrays -nogen-interfaces
-#FFLAGS = -O3 -assume byterecl -heap-arrays -nogen-interfaces -mcmodel=large -fPIC -shared-intel -g -traceback -lpthread -mkl -parallel
-FFLAGS = -O3 -assume byterecl -heap-arrays -nogen-interfaces -mcmodel=large -fPIC -shared-intel -g -traceback -lpthread -mkl=parallel -parallel
+# # Compiler options
+# #FFLAGS = -O3 -warn all -assume byterecl -heap-arrays -nogen-interfaces
+# #FFLAGS = -O3 -assume byterecl -heap-arrays -nogen-interfaces -mcmodel=large -fPIC -shared-intel -g -traceback -lpthread -mkl -parallel
+# FFLAGS = -O3 -assume byterecl -heap-arrays -nogen-interfaces -mcmodel=large -fPIC -shared-intel -g -traceback -lpthread -mkl=parallel -parallel
 
-## include library
-INC = -I/opt/intel/include -I/opt/local/include
-LIB = -L/opt/intel/lib -L/opt/intel/mkl/lib -L/opt/local/lib
+# ## include library
+# INC = -I/opt/intel/include -I/opt/local/include
+# LIB = -L/opt/intel/lib -L/opt/intel/mkl/lib -L/opt/local/lib
+
+# #==========================================================
+# # gfortran
+# #==========================================================
+# ## Fortran Compiler
+# FC  = gfortran
+
+# # Compiler options
+# FFLAGS = -O3 -fno-automatic -fbacktrace -g -fPIC -fcheck=all -finit-real=nan -Wall
+
+# # If using OpenMP
+# # FFLAGS += -fopenmp
+
+# # If large arrays are needed
+# # FFLAGS += -mcmodel=large
+
+# ## include library
+# INC = -I/usr/include -I/usr/local/include
+
+# ## library linking
+# LIB = -L/usr/lib -L/usr/local/lib
+
+
+
+# #==========================================================
+# # Intel Fortran (ifort)
+# #==========================================================
+
+# # Fortran Compiler
+# FC      = ifort
+
+# # Compiler Options
+# FFLAGS  = -O3 \
+#           -assume byterecl \
+#           -heap-arrays \
+#           -nogen-interfaces \
+#           -mcmodel=large \
+#           -fPIC \
+#           -shared-intel \
+#           -g \
+#           -traceback \
+#           -lpthread \
+#           -mkl=parallel \
+#           -parallel
+
+# # Include Directories
+# INC     = -I/opt/intel/include \
+#           -I/opt/local/include
+
+# # Library Directories
+# LIB     = -L/opt/intel/lib \
+#           -L/opt/intel/mkl/lib \
+#           -L/opt/local/lib
+
+
+#==========================================================
+# GNU Fortran (gfortran)
+#==========================================================
+
+# Fortran Compiler
+FC      = gfortran
+
+# Compiler Options
+FFLAGS  = -O3 \
+          -fno-automatic \
+          -fPIC \
+          -fbacktrace \
+          -g \
+          -fcheck=all \
+          -finit-real=nan \
+          -Wall \
+          -fopenmp          # Include this if using OpenMP
+
+# Include Directories
+INC     = -I/usr/include \
+          -I/usr/local/include #\
+        #   -I$(MKLROOT)/include    # Add MKL include if used
+
+# Library Directories and MKL linking
+LIB     = -L/usr/lib \
+          -L/usr/local/lib \
+        #   -L$(MKLROOT)/lib/intel64 \
+        #   -Wl,--start-group \
+        #       -lmkl_intel_lp64 \
+        #       -lmkl_gnu_thread \
+        #       -lmkl_core \
+        #   -Wl,--end-group \
+          -lgomp \
+          -lpthread \
+          -lm \
+          -ldl
+

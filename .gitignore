@@ -63,7 +63,8 @@ etc/prep_obs.o*
 */._Makefile
 
 # VS code 
-*/.vscode
+*/.vscode/
+.vscode/
 
 # unnessary f90
 src/data_assim_old.f90

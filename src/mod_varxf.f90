@@ -109,17 +109,17 @@ subroutine get_HX(globalvar,local_obs,xlist,ylist,Hobs,nx,ny,nvar,nobs,ne,countn
 !   HXb       - simulations in obervational space: HX[nobs,ne]
 !=======================================================================
 !--in
-integer,intent(in)                             :: nx,ny,numvar,nobs,ne
+integer,intent(in)                             :: nx,ny,nvar,nobs,ne,countnum
 real,intent(in)                                :: xlist(countnum),ylist(countnum),local_obs(nvar*countnum)
 real,intent(in)                                :: globalvar(nx,ny,nvar,ne),Hobs(nobs,countnum)
 !--out
 real,intent(out)                               :: HXb(nobs,ne)
 !--
-integer                                        :: i,i_m,j_m,var
+integer                                        :: i,j,i_m,j_m,var
 ! real                                           :: Xt
 HXb=0
 j=1
-do var=1, numvar
+do var=1, nvar
     do i=1, countnum
         i_m=xlist(i)
         j_m=ylist(i)

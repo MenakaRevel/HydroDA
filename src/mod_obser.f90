@@ -211,11 +211,11 @@ implicit none
 integer,intent(in)                    :: countnum,nvar
 integer,intent(in)                    :: vobs(nvar)
 real,intent(in)                       :: local_sat(nvar*countnum)
+integer,intent(in)                    :: nobs
 !--out
-integer,intent(out)                   :: nobs=sum(vobs)
 real,intent(out)                      :: Hobs(nobs,countnum)
 !--
-integer                               :: j
+integer                               :: i,j
 !=======================================================================
 ! create Hobs - convert local patch to observation
 !=======================================================================
