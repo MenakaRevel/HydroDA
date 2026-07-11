@@ -5,7 +5,7 @@ module patch
 ! 
 !====================================================================================
 ! created by Menaka
-! Menaka@IIS 2023
+! Menaka@MSU 2026
 !====================================================================================
 !$ use omp_lib
 use common
@@ -37,7 +37,7 @@ character(len=128),intent(in)      :: fname
 integer,intent(in)                 :: num
 !--out
 integer,intent(out)                :: xlist(num),ylist(num)
-real,intent(out)                   :: wgt(num)
+real(r_size),intent(out)           :: wgt(num)
 !--
 integer                            :: ios
 ! initialize
@@ -63,12 +63,12 @@ subroutine read_wgt(fname,nx,ny,weightage)
 !$ use omp_lib    
 implicit none
 !--in
-character(len=128),intent(in)      :: fname
-integer,intent(in)                 :: nx,ny
+character(len=128),intent(in)              :: fname
+integer,intent(in)                         :: nx,ny
 !--out
-real,dimension(nx,ny),intent(out)  :: weightage
+real(r_size),dimension(nx,ny),intent(out)  :: weightage
 !--
-integer                            :: ios
+integer                                    :: ios
 open(34,file=fname,form="unformatted",access="direct",recl=4*ny*nx,status="old",iostat=ios)
 if(ios==0)then
     read(34,rec=1) weightage
@@ -81,8 +81,8 @@ end subroutine read_wgt
 !************************************************************************************
 function Gauss_wt(lag)
 implicit none
-real                                :: lag,Gauss_wt
-real,parameter                      :: sigma=1000.0 !1000 km 
+real(r_size)                                :: lag,Gauss_wt
+real(r_size),parameter                      :: sigma=1000.0 !1000 km 
 !---
 Gauss_wt=exp(-(lag**2.0/(2.0*sigma**2.0)))  
 !---

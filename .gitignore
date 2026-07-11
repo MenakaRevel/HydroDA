@@ -70,3 +70,5 @@ etc/prep_obs.o*
 src/data_assim_old.f90
 src/oneday_sim_org.sh
 src/spin_up_org.sh
+src/data_assim.f90.backup.f90
+src/matrix.f90

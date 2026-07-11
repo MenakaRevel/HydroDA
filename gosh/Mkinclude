@@ -67,40 +67,93 @@
 #           -L/opt/local/lib
 
 
+# #==========================================================
+# # GNU Fortran (gfortran)
+# #==========================================================
+# 
+# # Fortran Compiler
+# FC      = gfortran
+# 
+# # Compiler Options
+# FFLAGS  = -O3 \
+#           -fno-automatic \
+#           -fPIC \
+#           -fbacktrace \
+#           # -g \
+#           # -fcheck=all \
+#           -finit-real=nan \
+#           -Wall \
+#           -ffree-line-length-none \            
+#           -fopenmp          
+#           # Include this if using OpenMP # allow long lines
+# 
+# # Include Directories
+# INC     = -I/usr/include \
+#           -I/usr/local/include #\
+#         #   -I$(MKLROOT)/include    # Add MKL include if used
+# 
+# # Library Directories and MKL linking
+# LIB     = -L/usr/lib \
+#           -L/usr/local/lib \
+#           -L/lib64 \
+#           -Wl,-rpath,/lib64 \
+#           -l:liblapack.so.3 \
+#           -l:libblas.so.3 \
+#         #   -L$(MKLROOT)/lib/intel64 \
+#         #   -Wl,--start-group \
+#         #       -lmkl_intel_lp64 \
+#         #       -lmkl_gnu_thread \
+#         #       -lmkl_core \
+#         #   -Wl,--end-group \
+#           -lgomp \
+#           -lpthread \
+#           -lm \
+#           -ldl \
+#         #  -llapack -lblas
+
 #==========================================================
 # GNU Fortran (gfortran)
 #==========================================================
 
-# Fortran Compiler
-FC      = gfortran
+FC = gfortran
 
-# Compiler Options
-FFLAGS  = -O3 \
-          -fno-automatic \
-          -fPIC \
-          -fbacktrace \
-          -g \
-          -fcheck=all \
-          -finit-real=nan \
-          -Wall \
-          -fopenmp          # Include this if using OpenMP
+# ----------------------------------------------------------
+# DEBUG — catch errors, no optimisation
+# ----------------------------------------------------------
+FFLAGS_DBG = -O0 \
+             -g \
+             -fno-automatic \
+             -fPIC \
+             -fbacktrace \
+             -fcheck=all \
+             -finit-real=nan \
+             -ffpe-trap=invalid,zero,overflow \
+             -ffree-line-length-none \
+             -Wall \
+             -Wextra \
+             -Wno-unused-dummy-argument \
+             -fopenmp
 
-# Include Directories
-INC     = -I/usr/include \
-          -I/usr/local/include #\
-        #   -I$(MKLROOT)/include    # Add MKL include if used
+# ----------------------------------------------------------
+# PRODUCTION — optimised, minimal checks
+# ----------------------------------------------------------
+FFLAGS = -O3 \
+         -fno-automatic \
+         -fPIC \
+         -fbacktrace \
+         -finit-real=nan \
+         -ffree-line-length-none \
+         -Wall \
+         -fopenmp
 
-# Library Directories and MKL linking
-LIB     = -L/usr/lib \
-          -L/usr/local/lib \
-        #   -L$(MKLROOT)/lib/intel64 \
-        #   -Wl,--start-group \
-        #       -lmkl_intel_lp64 \
-        #       -lmkl_gnu_thread \
-        #       -lmkl_core \
-        #   -Wl,--end-group \
-          -lgomp \
-          -lpthread \
-          -lm \
-          -ldl
+INC = -I/usr/include \
+      -I/usr/local/include
 
+LIB = -L/lib64 \
+      -Wl,-rpath,/lib64 \
+      -l:liblapack.so.3 \
+      -l:libblas.so.3 \
+      -lgomp \
+      -lpthread \
+      -lm \
+      -ldl

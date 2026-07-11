@@ -10,7 +10,7 @@ MODULE common
 !   01/23/2009 Takemasa MIYOSHI  modified for SFMT
 !
 ! Modified by Menaka
-! Menaka@IIS 2023 
+! Menaka@MSU 2026
 !=======================================================================
   IMPLICIT NONE
   PUBLIC

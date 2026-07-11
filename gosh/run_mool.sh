@@ -118,6 +118,42 @@ cp -r $HydroDA/src/prep_runoff.py   ./prep_runoff.py
 cp -r $HydroDA/src/prep_obs.py      ./prep_obs.py
 cp -r $HydroDA/src/wrt_expset.py    ./wrt_expset.py
 
+# 2. Call Python functions to grab the configuration values
+MAPNAME=$(python3 -c "import params; print(params.mapname())")
+PATCH_SIZE=$(python3 -c "import params; print(params.patch_size())")
+ENS_NUM=$(python3 -c "import params; print(params.ens_mem())")
+CAMADIR=$(python3 -c "import params; print(params.CaMa_dir())")
+EXPDIR=$(python3 -c "import params; print(params.experiment())")
+DADIR=$(python3 -c "import params; print(params.DA_dir())")
+PATCHDIR=$(python3 -c "import params; print(params.patch_dir())")
+PATCHNAME=$(python3 -c "import params; print(params.patch_name())")
+HYDROWEBDIR=$(python3 -c "import params; print(params.HydroWeb_dir())")
+RHO_FIXED=$(python3 -c "import params; print(params.rho())")
+SIGMA_B=$(python3 -c "import params; print(params.sigma_b())")
+CONFLAG=$(python3 -c "import params; print(params.conflag())")
+
+# Special Case: Matching the spelling 'thersold' from params.py*******
+THRESHOLD=$(python3 -c "import params; print(params.thersold())")
+
+# 3. Generate the Fortran input.nml file using a Heredoc
+cat << EOF > input.nml
+&config_vars
+  mapname     = "${MAPNAME}",
+  patch_size  = ${PATCH_SIZE},
+  ens_num     = ${ENS_NUM},
+  camadir     = "${CAMADIR}",
+  thresold    = ${THRESHOLD},
+  expdir      = "${EXPDIR}",
+  DAdir       = "${DADIR}",
+  patchdir    = "${PATCHDIR}",
+  patchname   = "${PATCHNAME}",
+  hydrowebdir = "${HYDROWEBDIR}",
+  rho_fixed   = ${RHO_FIXED},
+  sigma_b     = ${SIGMA_B},
+  conflag     = ${CONFLAG},
+  cal         = ${CAL}
+/
+EOF
 
 # run the main code using virtual environment
 # run main code

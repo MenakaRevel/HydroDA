@@ -5,7 +5,7 @@ module obser
 ! 
 !====================================================================================
 ! created by Menaka
-! Menaka@IIS 2023
+! Menaka@MSU 2026
 !====================================================================================
 !$ use omp_lib
 use common
@@ -16,7 +16,7 @@ public
 
 contains
 !************************************************************************************
-subroutine read_observation(yyyymmdd,obstype,nx,ny,obs,obs_err,mean_obs,std_obs)
+subroutine read_observation(yyyymmdd,obstypes,nx,ny,nvar,obs,obs_err,mean_obs,std_obs)
 !=======================================================================
 ! read observations depend on the type
 ! those are written as txt file 
@@ -26,11 +26,13 @@ subroutine read_observation(yyyymmdd,obstype,nx,ny,obs,obs_err,mean_obs,std_obs)
 ! wse - water surface elevation
 ! dis - discharge
 ! wsa - water surface area
+! file contain
+! ix, iy, value, mean, std, obs error, source | (satllite name [Jason, SWOT, etc.] or insitu data name[GRDC, USGS, etc.])
 !=======================================================================
 ! get HX - simulations in obervational space with ensembles
 ! input 
 !  yyyymmdd  - year month day in YYYYMMDD char format
-!  obstype   - observation type wse, dis, wsa
+!  obstypes  - observation type array (wse, dis, wsa)
 !  nx        - x dimension of map 
 !  ny        - y dimension of map
 ! output 
@@ -41,21 +43,22 @@ subroutine read_observation(yyyymmdd,obstype,nx,ny,obs,obs_err,mean_obs,std_obs)
 !=======================================================================
 implicit none
 !-in
-character(len=8),intent(in)         :: yyyymmdd
-character(len=3),intent(in)         :: obstype
-integer,intent(in)                  :: nx,ny
+character(len=8),intent(in)                 :: yyyymmdd
+character(len=3),intent(in)                 :: obstypes(nvar)
+integer,intent(in)                          :: nx,ny,nvar
 !--out
-real,dimension(nx,ny),intent(out)   :: obs,obs_err,mean_obs,std_obs
+real(r_size),dimension(nx,ny),intent(out)   :: obs,obs_err,mean_obs,std_obs
 !--
-integer                             :: ix,iy,ios
-character(len=128)                  :: fname,sat
-real                                :: wse,mean,std,obs_error
+integer                                     :: ix,iy,ios,var
+character(len=128)                          :: fname,source
+real(r_size)                                :: val,mean,std,error!,obs_error
 !--
 obs=-9999.0
 obs_err=-9999.0
 mean_obs=-9999.0
 std_obs=-9999.0
-    fname="./assim_out/obs/"//trim(obstype)//""//trim(yyyymmdd)//".txt"
+do var=1,nvar
+    fname="./assim_out/obs/"//trim(obstypes(var))//"_"//trim(yyyymmdd)//".txt"
     print*, fname
     open(11, file=fname, form='formatted',iostat=ios)
     if (ios /= 0) then 
@@ -63,16 +66,43 @@ std_obs=-9999.0
         goto 1090
     end if
 1000 continue
-    read(11,*,end=1090) ix, iy, wse, mean, std, sat
-    ! print*, yyyymmdd, ix, iy, wse, trim(sat)
-    obs(ix,iy)=wse
-    obs_err(ix,iy)=observation_error_wse(sat)
+    read(11,*,end=1090) ix, iy, val, mean, std, error, source ! errors is predefined in obs file
+    ! print*, yyyymmdd, ix, iy, val, trim(sat)
+    obs(ix,iy)=val
+    obs_err(ix,iy)=error !observation_error_wse(sat)
     mean_obs(ix,iy)=mean
     std_obs(ix,iy)=std
     goto 1000
 1090 continue
+    close(11)
+end do
 return
 end subroutine read_observation
+!************************************************************************************
+subroutine observation_error(var,obs_type,error)
+!=======================================================================
+! read observations errors depend on the var and type(insitu or sat)
+! if satellite it is predefined in observation_error_wse(sat)
+! if insitu need some calculation
+!======================================================================= 
+implicit none
+character(len=3),intent(in)         :: var
+character(len=10),intent(in)        :: obs_type
+
+real(r_size),intent(out)                     :: error
+if (var == 'wse') then
+    if (obs_type == 'satellite') then
+        error = observation_error_wse(obs_type)
+    else
+        error = 0.27
+    end if
+elseif (var == 'dis') then
+    error = 0.27
+else
+    error = 0.27
+end if
+return
+end subroutine observation_error
 !************************************************************************************
 function str2int(str) result(int)
 implicit none
@@ -92,7 +122,7 @@ implicit none
 !---in
 character(len=128),intent(in)           :: sat
 !---out
-real                                    :: obs_error
+real(r_size)                                    :: obs_error
 !==================================================
 ! observation errors are from Breada et al,. (2019)
 ! Brêda, J. P. L. F., Paiva, R. C. D., Bravo, J. M., Passaia, O. A., & Moreira, D. M. (2019). 
@@ -128,14 +158,16 @@ if (trim(sat) == "SENTINEL3B") obs_error=0.30
 if (trim(sat) == "SWOT") obs_error=0.10
 end function observation_error_wse
 !************************************************************************************
-subroutine read_local_obs(xlist,ylist,conflag,obs,obs_err,mean_obs,std_obs,countnum,patch_start,patch_end,nx,ny,nvar,local_sat,xt,local_err,vobs)
+subroutine read_local_obs(xlist,ylist,conflags,obs,obs_err,mean_obs, &
+                          & std_obs,countnum,patch_start,patch_end,nx, &
+                          & ny,nvar,local_sat,xt,local_err,vobs)
 !=======================================================================
 ! get local observations 
 ! convert observations to differnt space
 ! input
 !   xlist       - list of x corrdinates
 !   ylist       - list of y corrdinates
-!   conflag     - conversion flags as list for different variables: conflag[nvar]
+!   conflags    - conversion flags as list for different variables: conflags[nvar]
 !   obs         - global observation: obs[nx,ny,nvar]
 !   obs_err     - global observation error: obs_err[nx,ny,nvar]
 !   mean_obs    - global observation mean: mean_obs[nx,ny,nvar]
@@ -145,7 +177,7 @@ subroutine read_local_obs(xlist,ylist,conflag,obs,obs_err,mean_obs,std_obs,count
 !   patch_end   - patch ending location
 !   nx          - x dimension of global map
 !   ny          - y dimension of global map
-!   nvar        - nuumber of variables
+!   nvar        - number of variables
 ! output
 !   local_sat   - location os satellite observation: local_sat(countnum); 1=observation available, 0=observation not available
 !   xt          - array of observation: xt(countnum); value=observation, -9999.0=no observation
@@ -161,10 +193,11 @@ subroutine read_local_obs(xlist,ylist,conflag,obs,obs_err,mean_obs,std_obs,count
 implicit none
 !--in
 integer,intent(in)                             :: countnum,patch_start,patch_end,nx,ny,nvar
-integer,intent(in)                             :: xlist(countnum),ylist(countnum),conflag(nvar)
-real,intent(in)                                :: obs(nx,ny,nvar),obs_err(nx,ny,nvar),mean_obs(nx,ny,nvar),std_obs(nx,ny,nvar)
+integer,intent(in)                             :: xlist(countnum),ylist(countnum),conflags(nvar)
+real(r_size),intent(in)                        :: obs(nx,ny,nvar),obs_err(nx,ny,nvar),mean_obs(nx,ny,nvar),std_obs(nx,ny,nvar)
 !--out
-real,intent(out)                               :: local_sat(nvar*countnum),xt(nvar*countnum),local_err(nvar*countnum),vobs(nvar)!,Hobs()
+real(r_size),intent(out)                       :: local_sat(nvar*countnum),xt(nvar*countnum),local_err(nvar*countnum)
+integer,intent(out)                            :: vobs(nvar)!,Hobs()
 !--
 integer                                        :: i,j,k,p,i_m,j_m
 ! integer                                        :: vobs(nvar)
@@ -184,16 +217,16 @@ do k=1,nvar
             local_sat(j)=1.0
             p=p+1
             ! convert observations
-            if (conflag(k) == 1) then
+            if (conflags(k) == 1) then
                 xt(j)=obs(i_m,j_m,k)
                 local_err(j)=obs_err(i_m,j_m,k)
-            else if (conflag(k) == 2) then
+            else if (conflags(k) == 2) then
                 xt(j)=obs(i_m,j_m,k)-mean_obs(i_m,j_m,k)
                 local_err(j)=obs_err(i_m,j_m,k)
-            else if (conflag(k) == 3) then
+            else if (conflags(k) == 3) then
                 xt(j)=(obs(i_m,j_m,k)-mean_obs(i_m,j_m,k))/(std_obs(i_m,j_m,k)+1.0e-20)
                 local_err(j)=obs_err(i_m,j_m,k)/(std_obs(i_m,j_m,k)+1.0e-20)
-            else if (conflag(k) == 4) then
+            else if (conflags(k) == 4) then
                 xt(j)=log10(obs(i_m,j_m,k))
                 local_err(j)=sqrt(log10(obs_err(i_m,j_m,k)**2+1))
             end if
@@ -210,10 +243,10 @@ implicit none
 !--in
 integer,intent(in)                    :: countnum,nvar
 integer,intent(in)                    :: vobs(nvar)
-real,intent(in)                       :: local_sat(nvar*countnum)
+real(r_size),intent(in)               :: local_sat(nvar*countnum)
 integer,intent(in)                    :: nobs
 !--out
-real,intent(out)                      :: Hobs(nobs,countnum)
+real(r_size),intent(out)              :: Hobs(nobs,countnum)
 !--
 integer                               :: i,j
 !=======================================================================

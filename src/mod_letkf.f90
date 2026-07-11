@@ -13,11 +13,12 @@ module letkf
 !
 ! Developed based on Takemasa Miyoshi
 !====================================================================================
-! created by Ikeshima & Menaka
-! Menaka@IIS 2023
+! created by Menaka
+! Menaka@MSU 2026
 !====================================================================================
 !$ use omp_lib
 use common
+!use matrix
 
 implicit none
 
@@ -25,7 +26,7 @@ public
 
 contains
 !************************************************************************************
-subroutine letkf_core(ne,nobs,HEf,Rdiag,Rwgt,Yo,HXb,parm_infl,min_infl,infl_flg,T,errflg)
+subroutine letkf_core(ne,nobs,HEf,Rdiag,Rwgt,Yo,HXb,infl,min_infl,infl_flg,T,errflg)
 !=======================================================================
 !  Main Subroutine of LETKF Core
 !   INPUT
@@ -36,11 +37,11 @@ subroutine letkf_core(ne,nobs,HEf,Rdiag,Rwgt,Yo,HXb,parm_infl,min_infl,infl_flg,
 !     Rwgt(nobs)       : localization weighting function
 !     Yo(nobs)         : observations
 !     HXb(nobs)        : simulations in observation space
-!     parm_infl        : covariance inflation parameter
+!     infl             : covariance inflation parameter
 !     minfl            : minimum covariance inflation parameter
 !     infl_flg         : infaltion flag (infl_flg = -1 : adaptive inflation, infl_flg > 1 : fixed inflation)      
 !   OUTPUT
-!     parm_infl        : updated covariance inflation parameter
+!     infl             : updated covariance inflation parameter
 !     T(ne,ne)         : transformation matrix
 !     errflg           : error flag on making trasformation matrix
 !     error flags:
@@ -55,11 +56,11 @@ real(r_size),intent(in)      :: Rdiag(nobs)
 real(r_size),intent(in)      :: Rwgt(nobs)
 real(r_size),intent(in)      :: Yo(nobs)
 real(r_size),intent(in)      :: HXb(nobs)
-real(r_size),intent(inout)   :: parm_infl
+real(r_size),intent(inout)   :: infl
 real(r_size),intent(in)      :: min_infl
 real(r_size),intent(in)      :: infl_flg
 real(r_size),intent(out)     :: T(ne,ne)
-integer(r_size),intent(out)  :: errflg
+integer,intent(out)          :: errflg
 
 real(r_size)                 :: Rinv(nobs,nobs),dep(nobs)
 real(r_size)                 :: UNI(ne,ne),HETRHE(ne,ne),VDVT(ne,ne),la_p(ne),U_p(ne,ne),la(ne),U(ne,ne)
@@ -97,10 +98,10 @@ end do
 !===========================================
 ! covariance inflation parameter
 ! rho=1.0d0
-if (infl_flg == -1.0) then
-    rho=parm_infl
+if (infl_flg == -1.0) then !! -1 for adaptive inflation
+    rho=infl
     ! if (parm_infl > 1.0d0) then
-    if (parm_infl<min_infl) rho=min_infl
+    if (infl<min_infl) rho=min_infl
 else
     rho=infl_flg
 end if
@@ -108,7 +109,11 @@ end if
 !===========================================
 ! calculate VDVT
 UNI=0
-UNI=RESHAPE([(1,(0,i=1,ne),j=1,ne-1),1],[ne,ne])
+! UNI=RESHAPE([(1,(0,i=1,ne),j=1,ne-1),1],[ne,ne])
+UNI = 0.0_r_size
+do i = 1, ne
+    UNI(i, i) = 1.0_r_size
+end do
 HETRHE=matmul(matmul(TRANSPOSE(HEf),Rinv),HEf)
 ! VDVTmax=maxval(abs(HETRHE))
 VDVT=real(ne-1.)*UNI/rho+HETRHE
@@ -126,8 +131,8 @@ allocate(work(lwork),iwork(lwork),ifail(lwork),isuppz(lwork))
 !call ssyevx("V","I","U",ens_num,VDVT,ens_num,-1e20,1e20,1,ens_num,-1.0,m,la_p,U_p,ens_num,work,1000,iwork,ifail,info)
 !call ssyevr("V","A","U",ens_num,VDVT,ens_num,-1e-20,1e20,1,ens_num,2.0*2.3e-38,m,la_p,U_p,ens_num,isuppz,work,1000,iwork,1000,info)
 ! call ssyevr("V","A","U",ens_num,VDVT,ens_num,-1e20,1e20,1,ens_num,-1.0,m,la_p,U_p,ens_num,isuppz,work,1000,iwork,1000,info)
-call ssyevr("V","A","U",ne,VDVT,ne,-1e20,1e20,1,ne,-1.0,m,la_p,U_p,ne,isuppz,work,lwork,iwork,lwork,info)
-
+!call ssyevr("V","A","U",ne,VDVT,ne,-1e20,1e20,1,ne,-1.0,m,la_p,U_p,ne,isuppz,work,lwork,iwork,lwork,info)
+call dsyevr("V","A","U",ne,VDVT,ne,-1e20,1e20,1,ne,-1.0,m,la_p,U_p,ne,isuppz,work,lwork,iwork,lwork,info)
 !===========================================
 ! calculate transforamtion matrix
 if (m<ne) then
@@ -202,7 +207,7 @@ gain=sigma_b**2 / (sigma_o + sigma_b**2)
 rho=rho+ gain* parm(4)
 ! write(*,*)"rho",rho,rho_min
 if (rho<min_infl) rho=min_infl
-parm_infl=rho
+infl=rho
 ! write(73,*) lon_cent,lat_cent,"rho",rho,"rho_min",rho_min
 
 return

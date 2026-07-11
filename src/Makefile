@@ -7,6 +7,7 @@ mod_varxf.o\
 mod_patch.o\
 mod_obser.o\
 mod_letkf.o\
+prase.o\
 common.o
 
 #=========
@@ -27,6 +28,7 @@ mod_varxf.o  : mod_varxf.f90 common.o
 mod_patch.o  : mod_patch.f90 common.o
 mod_obser.o  : mod_obser.f90 common.o
 mod_letkf.o  : mod_letkf.f90 common.o
+prase.o      : prase.f90
 common.o     : common.f90
 
 # commands

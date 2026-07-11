@@ -5,7 +5,7 @@ module varxf
 ! 
 !====================================================================================
 ! created by Menaka
-! Menaka@IIS 2023
+! Menaka@MSU 2026
 !====================================================================================
 !$ use omp_lib
 use common
@@ -24,10 +24,10 @@ implicit none
 !--in
 integer,intent(in)                             :: countnum,patch_start,patch_end,nx,ny,ne !,conflag
 integer,intent(in)                             :: xlist(countnum),ylist(countnum)
-real,intent(in)                                :: globalx(nx,ny,ne)!,meanglobalx(nx,ny,ne),stdglobalx(nx,ny,ne)
+real(r_size),intent(in)                        :: globalx(nx,ny,ne)!,meanglobalx(nx,ny,ne),stdglobalx(nx,ny,ne)
 !--out
 !integer,intent(out)                            :: local_sat(countnum)
-real,intent(out)                               :: xf(countnum,ne) !,local_err(countnum)
+real(r_size),intent(out)                       :: xf(countnum,ne) !,local_err(countnum)
 !--
 integer                                        :: i,j,i_m,j_m,num
 xf=0
@@ -60,9 +60,9 @@ subroutine get_ensemble_mean(x,countnum,ne,Xm)
 !=======================================================================
 !--in
 integer,intent(in)                             :: ne,countnum
-real,intent(in)                                :: X(countnum,ne)
+real(r_size),intent(in)                        :: X(countnum,ne)
 !--out
-real,intent(out)                               :: Xm(countnum)
+real(r_size),intent(out)                       :: Xm(countnum)
 !--
 integer                                        :: i
 !---
@@ -78,9 +78,9 @@ subroutine get_ensemble_diff(X,Xm,countnum,ne,E)
 !=======================================================================
 !--in
 integer,intent(in)                             :: ne,countnum
-real,intent(in)                                :: X(countnum,ne),Xm(countnum)
+real(r_size),intent(in)                        :: X(countnum,ne),Xm(countnum)
 !--out
-real,intent(out)                               :: E(countnum,ne)
+real(r_size),intent(out)                       :: E(countnum,ne)
 !--
 integer                                        :: i
 !---
@@ -110,10 +110,10 @@ subroutine get_HX(globalvar,local_obs,xlist,ylist,Hobs,nx,ny,nvar,nobs,ne,countn
 !=======================================================================
 !--in
 integer,intent(in)                             :: nx,ny,nvar,nobs,ne,countnum
-real,intent(in)                                :: xlist(countnum),ylist(countnum),local_obs(nvar*countnum)
-real,intent(in)                                :: globalvar(nx,ny,nvar,ne),Hobs(nobs,countnum)
+real(r_size),intent(in)                        :: xlist(countnum),ylist(countnum),local_obs(nvar*countnum)
+real(r_size),intent(in)                        :: globalvar(nx,ny,nvar,ne),Hobs(nobs,countnum)
 !--out
-real,intent(out)                               :: HXb(nobs,ne)
+real(r_size),intent(out)                       :: HXb(nobs,ne)
 !--
 integer                                        :: i,j,i_m,j_m,var
 ! real                                           :: Xt
