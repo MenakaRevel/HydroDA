@@ -45,6 +45,7 @@ program data_assim
     real(r_size)                    :: gsize, west, north, east, south ! map boundaries
     integer                         :: ny, nx, nflp              ! pixel size, calculated
     real(r_size), allocatable       :: rivwth(:,:), rivhgt(:,:), rivlen(:,:), nextdst(:,:), lons(:,:), lats(:,:)
+    real(r_size), allocatable       :: rivsto(:,:), fldsto(:,:)
     real(r_size), allocatable       :: elevtn(:,:), fldhgt(:,:,:)
     integer, allocatable            :: nextX(:,:), nextY(:,:), ocean(:,:), countp(:,:), targetp(:,:)
     
@@ -78,7 +79,7 @@ program data_assim
     real(r_size)                    :: thresold       ! weightage thresold
     real(r_size)                    :: errrand, errfix, errexp, VDVTmax
     real(r_size), allocatable       :: global_xa(:,:,:), global_null(:,:) 
-    real(r_size), allocatable       :: globalx(:,:,:), globalhxb(:,:,:,:), ens_xa(:,:,:)
+    real(r_size), allocatable       :: global_xf(:,:,:), globalhxb(:,:,:,:), ens_xa(:,:,:)
     real(r_size), allocatable       :: meanglobalx(:,:,:), stdglobalx(:,:,:), meanglobaltrue(:,:), stdglobaltrue(:,:)
     real(r_size), allocatable       :: xf_m(:), xf(:,:), xa(:,:), globaltrue(:,:), xt(:), R(:,:)
     real(r_size), allocatable       :: Rdiag(:), Rwgt(:), T(:,:)
@@ -373,19 +374,23 @@ program data_assim
     !*************************************************************************************
     ! read water storage - prognostic variable from all model
     !*************************************************************************************
-    allocate(globalx(nx,ny,ens_num))
-    globalx = 0
+    allocate(global_xf(nx,ny,ens_num), rivsto(nx,ny), fldsto(nx,ny))
+    global_xf = 0
     do num = 1, ens_num
         write(numch, '(i3.3)') num
-        fname = trim(adjustl(expdir)) // "/CaMa_out/" // yyyymmdd // "A" // numch // "/storge" // yyyymmdd(1:4) // ".bin" 
+        fname = trim(adjustl(expdir)) // "/CaMa_out/" // yyyymmdd // "A" // numch // "/restart" // nyyyymmdd // ".bin" 
         open(34, file=fname, form="unformatted", access="direct", recl=4*ny*nx, status="old", iostat=ios)
         if(ios == 0) then
-            read(34, rec=1) globalx(:,:,num)
+            read(34, rec=1) rivsto
+            read(34, rec=2) fldsto
         else
             write(*,*) "no x :", fname
             write(82,*) "no x at:", fname
             write(78,*) "no x at:", fname
+            rivsto = 0.0
+            fldsto = 0.0
         end if
+        global_xf(:,:,num) = rivsto + fldsto 
         close(34)
     end do
     
@@ -460,7 +465,7 @@ program data_assim
 !$omp parallel default(none) &
 !$omp shared(assimW, assimE, assimN, assimS, west, east, north, south, gsize, &
 !$omp ocean, rivwth, rivhgt, patch_size, ens_num, patch_nums, &
-!$omp nextX, nextY, nextdst, globalx, globaltrue, global_xa, global_null, &
+!$omp nextX, nextY, nextdst, global_xf, globaltrue, global_xa, global_null, &
 !$omp lats, lons, countp, targetp, patchdir, patchname, conflags, &
 !$omp obs, obs_err, mean_obs, std_obs, nx, ny, parm_infl) &
 !$omp private(lon_cent, lat_cent, lat, lon, llon, llat, fname, ios, weightage, &
@@ -538,7 +543,7 @@ program data_assim
             !====================================================
             allocate(xf(countnum,ens_num))
             xf = 0
-            call local_xf(globalx, xlist, ylist, countnum, patch_start, patch_end, nx, ny, ens_num, xf)
+            call local_xf(global_xf, xlist, ylist, countnum, patch_start, patch_end, nx, ny, ens_num, xf)
             
             call get_Hobs(local_sat, countnum, nvar, vobs, nobs, Hobs)
 
@@ -561,6 +566,21 @@ program data_assim
                 write(78,*) "assimil:", sum(xa(target_pixel,:)) / (ens_num + 1e-20)
             end if
 
+
+            do num=1,ens_num
+                if (conflag == 1) then
+                    global_xa(lon_cent,lat_cent,num) = xa(target_pixel,num)
+                else if (conflag == 2) then
+                    global_xa(lon_cent,lat_cent,num) = xa(target_pixel,num)&
+                                                    & + meanglobalx(lon_cent,lat_cent,num)
+                else if (conflag == 3) then
+                    global_xa(lon_cent,lat_cent,num) = xa(target_pixel,num)*stdglobalx(lon_cent,lat_cent,num)&
+                                                    & + meanglobalx(lon_cent,lat_cent,num)
+                else if (conflag == 4) then
+                    global_xa(lon_cent,lat_cent,num) = 10**xa(target_pixel,num)
+                end if
+            end do
+
 9999        continue
             ! Explicit Deallocations to prevent runtime memory errors on next iteration
             if (allocated(lag)) deallocate(lag)
@@ -579,4 +599,41 @@ program data_assim
 !$omp end do
 !$omp end parallel
 
-end program data_assim
+    !===============================================================
+    ! seperate rivsto and fldsto
+    !===============================================================
+    rivsto_max = rivlen * rivwth * rivhgt
+    do num=1,ens_num
+        write(num_name,'(i3.3)')  num
+        write(numch, '(i3.3)') num
+        rivsto=0.0
+        fldsto=0.0
+        do ix=1,nx
+            do iy=1,ny
+                sto = global_xa(ix,iy,num)
+                if sto <= rivsto_max(ix,iy)
+                    rivsto(ix,iy) = sto
+                    fldsto(ix,iy) = 0.0
+                else: 
+                    rivsto(ix,iy) = rivsto_max(ix,iy)
+                    fldsto(ix,iy) = max(sto - rivsto_max(ix,iy), 0.0)
+                end if
+            end do
+        end do
+
+
+        ! =================================================
+        ! save and store output & restart file
+
+        ! make restart file
+        ! rivsto,fldsto,rivout,fldout,rivdpt_pre,fldsto_pre
+        fname=trim(adjustl(expdir))//"/CaMa_in/restart/"//trim(adjustl(loop))//"/restart"//onedayaft//loopchar//num_name//".bin"
+        open(35,file=fname,form="unformatted",access="direct",recl=4*latpx*lonpx,status="replace",iostat=ios)
+        if(ios==0)then
+            write(35,rec=1) rivsto
+            write(35,rec=2) fldsto
+        end if
+        close(35)
+    end do
+    
+    end program data_assim
